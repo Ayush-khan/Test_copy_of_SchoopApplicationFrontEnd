@@ -412,19 +412,139 @@ function IndividualStudentTab() {
   const navigate = useNavigate();
   const pageSize = 10;
   const maxCharacters = 150;
+  const [roleId, setRoleId] = useState(null);
+  const [regId, setRegId] = useState(null);
 
   const capitalizeFirstLetter = (str) => {
     return str ? str.charAt(0).toUpperCase() + str.slice(1).toLowerCase() : "";
   };
 
   useEffect(() => {
-    fetchClassNames();
-    handleSearch();
+    fetchRoleId();
+    // fetchClassNames();
+    // handleSearch();
   }, []);
 
+  useEffect(() => {
+    if (!roleId) return; // ⛔ wait until roleId is available
+
+    fetchClassNames();
+    handleSearch();
+  }, [roleId]);
+
+  const fetchRoleId = async () => {
+    const token = localStorage.getItem("authToken");
+
+    if (!token) {
+      toast.error("Authentication token not found Please login again");
+      navigate("/");
+      return;
+    }
+
+    try {
+      const response = await axios.get(`${API_URL}/api/sessionData`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const roleId = response?.data?.user?.role_id;
+      console.log("role id", response?.data?.user?.role_id);
+
+      const regId = response?.data?.user?.reg_id;
+      console.log("reg id", response?.data?.user?.reg_id);
+      setRegId(regId);
+
+      if (roleId) {
+        setRoleId(roleId);
+      } else {
+        console.warn("role_id not found in sessionData response");
+      }
+    } catch (error) {
+      console.error("Failed to fetch session data:", error);
+    }
+  };
+
+  // const classOptions = classes.map((cls) => ({
+  //   value: `${cls?.get_class?.name}-${cls.name}`,
+  //   label: `${cls?.get_class?.name} ${cls.name}`,
+  //   class_id: cls.class_id,
+  //   section_id: cls.section_id,
+  // }));
+
+  // const handleClassSelect = (selectedOption) => {
+  //   setNameError("");
+  //   setSelectedClass(selectedOption);
+
+  //   if (selectedOption) {
+  //     setclassIdForManage(selectedOption.class_id);
+  //     setSectionIdForManage(selectedOption.section_id);
+  //   } else {
+  //     setclassIdForManage("");
+  //     setSectionIdForManage("");
+  //   }
+  // };
+
+  // const fetchClassNames = async () => {
+  //   try {
+  //     const token = localStorage.getItem("authToken");
+  //     const response = await axios.get(`${API_URL}/api/get_class_section`, {
+  //       headers: { Authorization: `Bearer ${token}` },
+  //     });
+  //     if (Array.isArray(response.data)) {
+  //       setClasses(response.data);
+  //     } else {
+  //       setError("Unexpected data format");
+  //     }
+  //   } catch (error) {
+  //     console.error("Error fetching class and section names:", error);
+  //     setError("Error fetching class and section names");
+  //   }
+  // };
+
+  const fetchClassNames = async () => {
+    try {
+      const token = localStorage.getItem("authToken");
+
+      // 🔹 If Teacher
+      if (roleId === "T") {
+        const responseForClass = await axios.get(
+          `${API_URL}/api/get_teacherclasseswithclassteacher?teacher_id=${regId}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+
+        const mappedData =
+          responseForClass.data?.data?.map((item) => ({
+            value: `${item.class_id}-${item.section_id}`,
+            label: `${item.classname} ${item.sectionname}`,
+            class_id: item.class_id,
+            section_id: item.section_id,
+          })) || [];
+
+        setClasses(mappedData); // 👈 reuse same state
+      }
+      // 🔹 Admin / Other roles
+      else {
+        const response = await axios.get(`${API_URL}/api/get_class_section`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (Array.isArray(response.data)) {
+          setClasses(response.data);
+        } else {
+          setError("Unexpected data format");
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching class and section names:", error);
+      setError("Error fetching class and section names");
+    }
+  };
   const classOptions = classes.map((cls) => ({
-    value: `${cls?.get_class?.name}-${cls.name}`,
-    label: `${cls?.get_class?.name} ${cls.name}`,
+    value: cls.value || `${cls?.get_class?.name}-${cls.name}`,
+    label: cls.label || `${cls?.get_class?.name} ${cls.name}`,
     class_id: cls.class_id,
     section_id: cls.section_id,
   }));
@@ -442,68 +562,107 @@ function IndividualStudentTab() {
     }
   };
 
-  const fetchClassNames = async () => {
-    try {
-      const token = localStorage.getItem("authToken");
-      const response = await axios.get(`${API_URL}/api/get_class_section`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (Array.isArray(response.data)) {
-        setClasses(response.data);
-      } else {
-        setError("Unexpected data format");
-      }
-    } catch (error) {
-      console.error("Error fetching class and section names:", error);
-      setError("Error fetching class and section names");
-    }
-  };
+  // const handleSearch = async () => {
+  //   if (isSubmitting) return;
+  //   setIsSubmitting(true);
+  //   setSearchTerm("");
+  //   const today = new Date().toISOString().split("T")[0];
+
+  //   try {
+  //     const token = localStorage.getItem("authToken");
+  //     setLoading(true);
+  //     const response = await axios.get(
+  //       `${API_URL}/api/get_absentstudentfortoday`,
+  //       {
+  //         headers: { Authorization: `Bearer ${token}` },
+  //         params: {
+  //           class_id: classIdForManage,
+  //           section_id: sectionIdForManage,
+  //           date: today,
+  //           // date: "2025-11-03",
+  //         },
+  //       }
+  //     );
+  //     if (response?.data?.data.absent_student.length > 0) {
+  //       // Add a unique ID to each student (if missing)
+  //       const studentsWithIds = response.data.data.absent_student.map(
+  //         (s, index) => ({
+  //           ...s,
+  //           student_id: `${s?.student_id}`, // unique id
+  //         })
+  //       );
+
+  //       setSubjects(studentsWithIds);
+  //       setPageCount(Math.ceil(response.data.data.absent_student.length / 10));
+  //       setCountAbsentStudents(response.data.data.count_absent_student);
+  //     }
+  //     // if (response?.data?.data.absent_student.length > 0) {
+  //     //   setSubjects(response.data.data.absent_student);
+  //     //   setPageCount(Math.ceil(response.data.data.absent_student.length / 10));
+  //     //   setCountAbsentStudents(response.data.data.count_absent_student);
+  //     // }
+  //     else {
+  //       setSubjects([]);
+  //       setCountAbsentStudents("");
+  //       toast.error(
+  //         `Hooray! No students are absent today in ${
+  //           selectedClass?.label || ""
+  //         }`
+  //       );
+  //     }
+  //   } catch (error) {
+  //     console.error("Error fetching data:", error);
+  //     toast.error("Error fetching absent students");
+  //   } finally {
+  //     setIsSubmitting(false);
+  //     setLoading(false);
+  //     setSelectedStudents([]);
+  //     setSelectAll(false);
+  //   }
+  // };
 
   const handleSearch = async () => {
     if (isSubmitting) return;
     setIsSubmitting(true);
     setSearchTerm("");
+
     const today = new Date().toISOString().split("T")[0];
 
     try {
       const token = localStorage.getItem("authToken");
       setLoading(true);
-      const response = await axios.get(
-        `${API_URL}/api/get_absentstudentfortoday`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-          params: {
-            class_id: classIdForManage,
-            section_id: sectionIdForManage,
-            date: today,
-            // date: "2025-11-03",
-          },
-        }
-      );
-      if (response?.data?.data.absent_student.length > 0) {
-        // Add a unique ID to each student (if missing)
-        const studentsWithIds = response.data.data.absent_student.map(
-          (s, index) => ({
-            ...s,
-            student_id: `${s?.student_id}`, // unique id
-          })
-        );
+
+      // 🔹 Role-based API URL
+      const apiUrl =
+        roleId === "T"
+          ? `${API_URL}/api/teachers/students/absent/today`
+          : `${API_URL}/api/get_absentstudentfortoday`;
+
+      const response = await axios.get(apiUrl, {
+        headers: { Authorization: `Bearer ${token}` },
+        params: {
+          class_id: classIdForManage,
+          section_id: sectionIdForManage,
+          date: today,
+        },
+      });
+
+      const absentStudents = response?.data?.data?.absent_student || [];
+
+      if (absentStudents.length > 0) {
+        const studentsWithIds = absentStudents.map((s) => ({
+          ...s,
+          student_id: `${s?.student_id}`,
+        }));
 
         setSubjects(studentsWithIds);
-        setPageCount(Math.ceil(response.data.data.absent_student.length / 10));
+        setPageCount(Math.ceil(absentStudents.length / 10));
         setCountAbsentStudents(response.data.data.count_absent_student);
-      }
-      // if (response?.data?.data.absent_student.length > 0) {
-      //   setSubjects(response.data.data.absent_student);
-      //   setPageCount(Math.ceil(response.data.data.absent_student.length / 10));
-      //   setCountAbsentStudents(response.data.data.count_absent_student);
-      // }
-      else {
+      } else {
         setSubjects([]);
         setCountAbsentStudents("");
         toast.error(
-          `Hooray! No students are absent today in ${
-            selectedClass?.label || ""
+          `Hooray! No students are absent today in ${selectedClass?.label || ""
           }`
         );
       }
@@ -608,9 +767,8 @@ function IndividualStudentTab() {
 
   const searchLower = searchTerm.trim().toLowerCase();
   const filteredSections = subjects.filter((student) => {
-    const fullName = `${student.first_name} ${student.mid_name || ""} ${
-      student.last_name
-    }`.toLowerCase();
+    const fullName = `${student.first_name} ${student.mid_name || ""} ${student.last_name
+      }`.toLowerCase();
     const className = student.classname?.toString().toLowerCase() || "";
     const sectionName = student.sectionname?.toString().toLowerCase() || "";
     return (
@@ -646,11 +804,11 @@ function IndividualStudentTab() {
         }
       );
 
-      // 🔹 Handle response
+      // Handle response
       if (response.status === 200 && response.data.success) {
         toast.success(
           response.data.message ||
-            `Message sent successfully to student ID: ${student_id}`
+          `Message sent successfully to student ID: ${student_id}`
         );
         setMessage("");
         setSelectedStudents([]);
@@ -662,7 +820,7 @@ function IndividualStudentTab() {
       console.error("Error sending message:", error);
       toast.error(
         error.response?.data?.message ||
-          "An unexpected error occurred while sending the message."
+        "An unexpected error occurred while sending the message."
       );
     } finally {
       // Reset loading state
@@ -753,15 +911,20 @@ function IndividualStudentTab() {
                                 <th className="px-2 text-center py-2 border border-gray-300 text-sm font-semibold">
                                   Sr.No
                                 </th>
-                                <th className="px-2 text-center py-2 border border-gray-300 text-sm font-semibold">
-                                  <input
-                                    type="checkbox"
-                                    checked={selectAll}
-                                    onChange={handleSelectAll}
-                                    className="cursor-pointer accent-red-600"
-                                  />{" "}
-                                  All
-                                </th>
+                                {roleId !== "T" && (
+                                  <>
+                                    <th className="px-2 text-center py-2 border border-gray-300 text-sm font-semibold">
+                                      <input
+                                        type="checkbox"
+                                        checked={selectAll}
+                                        onChange={handleSelectAll}
+                                        className="cursor-pointer accent-red-600"
+                                      />{" "}
+                                      All
+                                    </th>
+                                  </>
+                                )}
+
                                 <th className="px-2 text-center py-2 border border-gray-300 text-sm font-semibold">
                                   Student Name
                                 </th>
@@ -769,15 +932,19 @@ function IndividualStudentTab() {
                                   Class
                                 </th>
 
-                                <th className="px-2 text-center py-2 border border-gray-300 text-sm font-semibold">
-                                  Messages Count
-                                </th>
-                                <th className="px-2 text-center py-2 border border-gray-300 text-sm font-semibold">
-                                  Last Message Time
-                                </th>
-                                <th className="px-2 text-center py-2 border border-gray-300 text-sm font-semibold">
-                                  Message Sent
-                                </th>
+                                {roleId !== "T" && (
+                                  <>
+                                    <th className="px-2 text-center py-2 border border-gray-300 text-sm font-semibold">
+                                      Messages Count
+                                    </th>
+                                    <th className="px-2 text-center py-2 border border-gray-300 text-sm font-semibold">
+                                      Last Message Time
+                                    </th>
+                                    <th className="px-2 text-center py-2 border border-gray-300 text-sm font-semibold">
+                                      Message Sent
+                                    </th>
+                                  </>
+                                )}
                               </tr>
                             </thead>
 
@@ -786,44 +953,46 @@ function IndividualStudentTab() {
                                 displayedSections.map((student, index) => (
                                   <tr
                                     key={student.student_id}
-                                    className={`${
-                                      index % 2 === 0
+                                    className={`${index % 2 === 0
                                         ? "bg-white"
                                         : "bg-gray-50"
-                                    } hover:bg-red-50 transition-colors duration-150`}
+                                      } hover:bg-red-50 transition-colors duration-150`}
                                   >
                                     {/* Sr.No */}
                                     <td className="text-center px-2 py-2 border border-gray-200 text-sm">
                                       {currentPage * pageSize + index + 1}
                                     </td>
 
-                                    {/* Checkbox */}
-                                    <td className="text-center px-2 py-2 border border-gray-200 text-sm">
-                                      <input
-                                        type="checkbox"
-                                        checked={selectedStudents.includes(
-                                          student.student_id
-                                        )}
-                                        onChange={() =>
-                                          handleCheckboxChange(
-                                            student.student_id
-                                          )
-                                        }
-                                        className="cursor-pointer accent-red-600"
-                                      />
-                                    </td>
+                                    {roleId !== "T" && (
+                                      <>
+                                        {/* Checkbox */}
+                                        <td className="text-center px-2 py-2 border border-gray-200 text-sm">
+                                          <input
+                                            type="checkbox"
+                                            checked={selectedStudents.includes(
+                                              student.student_id
+                                            )}
+                                            onChange={() =>
+                                              handleCheckboxChange(
+                                                student.student_id
+                                              )
+                                            }
+                                            className="cursor-pointer accent-red-600"
+                                          />
+                                        </td>
+                                      </>
+                                    )}
 
                                     {/* Student Name */}
                                     <td className="text-center px-2 py-2 border border-gray-200 text-sm">
                                       {`${capitalizeFirstLetter(
                                         student.first_name
-                                      )} ${
-                                        capitalizeFirstLetter(
-                                          student.mid_name
-                                        ) || ""
-                                      } ${capitalizeFirstLetter(
-                                        student.last_name
-                                      )}`}
+                                      )} ${capitalizeFirstLetter(
+                                        student.mid_name
+                                      ) || ""
+                                        } ${capitalizeFirstLetter(
+                                          student.last_name
+                                        )}`}
                                     </td>
 
                                     {/* Class */}
@@ -832,99 +1001,104 @@ function IndividualStudentTab() {
                                       {student?.sectionname}
                                     </td>
 
-                                    {/* Messages Sent Count */}
-                                    <td className="text-center px-2 py-2 border border-gray-200 text-sm">
-                                      <span
-                                        className={`px-2 py-1 rounded text-xs font-semibold ${
-                                          student.messages_sent_count > 0
-                                            ? "bg-green-100 text-green-800"
-                                            : "bg-gray-100 text-gray-600"
-                                        }`}
-                                      >
-                                        {student.messages_sent_count}
-                                      </span>
-                                    </td>
-
-                                    {/* Last Message Time */}
-                                    <td className="text-center px-2 py-2 border border-gray-200 text-sm text-gray-700">
-                                      {student.last_message_sent_at ? (
-                                        new Date(
-                                          student.last_message_sent_at
-                                        ).toLocaleString("en-IN", {
-                                          day: "2-digit",
-                                          month: "short",
-                                          year: "2-digit",
-                                          hour: "2-digit",
-                                          minute: "2-digit",
-                                        })
-                                      ) : (
-                                        <span className="text-gray-400 italic">
-                                          {/* Not Sent */}
-                                        </span>
-                                      )}
-                                    </td>
-
-                                    {/* ✅ New Message Column */}
-                                    {/* ✅ New Message Column (based on sms_sent_status) */}
-                                    <td className="text-center px-2 py-2 border border-gray-200 text-sm">
-                                      {student.sms_sent_status === "Y" ? (
-                                        // ✅ Message Sent
-                                        <div className="flex flex-col items-center justify-center gap-1 text-green-600">
-                                          <span className="font-semibold text-sm flex items-center gap-1">
-                                            Sent{" "}
-                                            {/* <FaCheck className="text-green-600 text-base" /> */}
+                                    {roleId !== "T" && (
+                                      <>
+                                        {/* Messages Sent Count */}
+                                        <td className="text-center px-2 py-2 border border-gray-200 text-sm">
+                                          <span
+                                            className={`px-2 py-1 rounded text-xs font-semibold ${student.messages_sent_count > 0
+                                                ? "bg-green-100 text-green-800"
+                                                : "bg-gray-100 text-gray-600"
+                                              }`}
+                                          >
+                                            {student.messages_sent_count}
                                           </span>
-                                        </div>
-                                      ) : student.sms_sent_status ===
-                                        "not_try" ? (
-                                        <span className="font-semibold text-sm flex items-center gap-1"></span>
-                                      ) : student.sms_sent_status === "N" ? (
-                                        <button
-                                          disabled={
-                                            sendingSMS[student?.student_id]
-                                          }
-                                          onClick={() =>
-                                            handleSend(student?.webhook_id)
-                                          }
-                                          className={`flex items-center justify-center mx-auto px-3 py-1 gap-1 text-xs md:text-sm font-medium rounded-md transition-all duration-200 ${
-                                            sendingSMS[student?.student_id]
-                                              ? "bg-blue-300 cursor-not-allowed"
-                                              : "bg-blue-500 hover:bg-blue-600 text-white"
-                                          }`}
-                                        >
-                                          {sendingSMS[student?.student_id] ? (
-                                            <>
-                                              <svg
-                                                className="animate-spin h-4 w-4 text-white"
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                fill="none"
-                                                viewBox="0 0 24 24"
-                                              >
-                                                <circle
-                                                  className="opacity-25"
-                                                  cx="12"
-                                                  cy="12"
-                                                  r="10"
-                                                  stroke="currentColor"
-                                                  strokeWidth="4"
-                                                ></circle>
-                                                <path
-                                                  className="opacity-75"
-                                                  fill="currentColor"
-                                                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                                                ></path>
-                                              </svg>
-                                              Sending...
-                                            </>
+                                        </td>
+
+                                        {/* Last Message Time */}
+                                        <td className="text-center px-2 py-2 border border-gray-200 text-sm text-gray-700">
+                                          {student.last_message_sent_at ? (
+                                            new Date(
+                                              student.last_message_sent_at
+                                            ).toLocaleString("en-IN", {
+                                              day: "2-digit",
+                                              month: "short",
+                                              year: "2-digit",
+                                              hour: "2-digit",
+                                              minute: "2-digit",
+                                            })
                                           ) : (
-                                            <>
-                                              Send{" "}
-                                              <IoMdSend className="text-lg" />
-                                            </>
+                                            <span className="text-gray-400 italic">
+                                              {/* Not Sent */}
+                                            </span>
                                           )}
-                                        </button>
-                                      ) : null}
-                                    </td>
+                                        </td>
+
+                                        {/* ✅ New Message Column */}
+                                        {/* ✅ New Message Column (based on sms_sent_status) */}
+                                        <td className="text-center px-2 py-2 border border-gray-200 text-sm">
+                                          {student.sms_sent_status === "Y" ? (
+                                            // ✅ Message Sent
+                                            <div className="flex flex-col items-center justify-center gap-1 text-green-600">
+                                              <span className="font-semibold text-sm flex items-center gap-1">
+                                                Sent{" "}
+                                                {/* <FaCheck className="text-green-600 text-base" /> */}
+                                              </span>
+                                            </div>
+                                          ) : student.sms_sent_status ===
+                                            "not_try" ? (
+                                            <span className="font-semibold text-sm flex items-center gap-1"></span>
+                                          ) : student.sms_sent_status ===
+                                            "N" ? (
+                                            <button
+                                              disabled={
+                                                sendingSMS[student?.student_id]
+                                              }
+                                              onClick={() =>
+                                                handleSend(student?.webhook_id)
+                                              }
+                                              className={`flex items-center justify-center mx-auto px-3 py-1 gap-1 text-xs md:text-sm font-medium rounded-md transition-all duration-200 ${sendingSMS[student?.student_id]
+                                                  ? "bg-blue-300 cursor-not-allowed"
+                                                  : "bg-blue-500 hover:bg-blue-600 text-white"
+                                                }`}
+                                            >
+                                              {sendingSMS[
+                                                student?.student_id
+                                              ] ? (
+                                                <>
+                                                  <svg
+                                                    className="animate-spin h-4 w-4 text-white"
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                    fill="none"
+                                                    viewBox="0 0 24 24"
+                                                  >
+                                                    <circle
+                                                      className="opacity-25"
+                                                      cx="12"
+                                                      cy="12"
+                                                      r="10"
+                                                      stroke="currentColor"
+                                                      strokeWidth="4"
+                                                    ></circle>
+                                                    <path
+                                                      className="opacity-75"
+                                                      fill="currentColor"
+                                                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                                                    ></path>
+                                                  </svg>
+                                                  Sending...
+                                                </>
+                                              ) : (
+                                                <>
+                                                  Send{" "}
+                                                  <IoMdSend className="text-lg" />
+                                                </>
+                                              )}
+                                            </button>
+                                          ) : null}
+                                        </td>
+                                      </>
+                                    )}
                                   </tr>
                                 ))
                               ) : (
@@ -941,66 +1115,69 @@ function IndividualStudentTab() {
                           </table>
                         )}
                       </div>
-                      {loading ? (
-                        <div className="flex justify-center items-center h-64"></div>
-                      ) : (
-                        displayedSections.length > 0 && (
-                          <div className="flex flex-col items-center mt-2">
-                            <div className="w-full md:w-[50%]">
-                              <label className="mb-1 font-normal block text-left">
-                                Dear Parent ,
-                              </label>
+                      {roleId !== "T" && (
+                        <>
+                          {loading ? (
+                            <div className="flex justify-center items-center h-64"></div>
+                          ) : (
+                            displayedSections.length > 0 && (
+                              <div className="flex flex-col items-center mt-2">
+                                <div className="w-full md:w-[50%]">
+                                  <label className="mb-1 font-normal block text-left">
+                                    Dear Parent ,
+                                  </label>
 
-                              <div className="relative w-full">
-                                <textarea
-                                  value={message}
-                                  onChange={(e) => {
-                                    if (
-                                      e.target.value.length <= maxCharacters
-                                    ) {
-                                      setMessage(e.target.value);
-                                    }
-                                  }}
-                                  className="w-full h-28 p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-150 resize-none bg-transparent relative z-10 text-sm  text-black font-normal"
-                                  placeholder="Enter message"
-                                ></textarea>
+                                  <div className="relative w-full">
+                                    <textarea
+                                      value={message}
+                                      onChange={(e) => {
+                                        if (
+                                          e.target.value.length <= maxCharacters
+                                        ) {
+                                          setMessage(e.target.value);
+                                        }
+                                      }}
+                                      className="w-full h-28 p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-150 resize-none bg-transparent relative z-10 text-sm  text-black font-normal"
+                                      placeholder="Enter message"
+                                    ></textarea>
 
-                                {message && (
-                                  <div className="pointer-events-none absolute top-0 left-0 w-full h-full p-3 text-gray-400 whitespace-pre-wrap break-words text-sm  font-normal ">
-                                    {message + "  "}Login to school application
-                                    for details - Evolvu
+                                    {message && (
+                                      <div className="pointer-events-none absolute top-0 left-0 w-full h-full p-3 text-gray-400 whitespace-pre-wrap break-words text-sm  font-normal ">
+                                        {message + "  "}Login to school
+                                        application for details - Evolvu
+                                      </div>
+                                    )}
+
+                                    <div className="absolute bottom-2 right-3 text-xs text-gray-500 pointer-events-none z-20">
+                                      {message.length} / {maxCharacters}
+                                    </div>
                                   </div>
-                                )}
-
-                                <div className="absolute bottom-2 right-3 text-xs text-gray-500 pointer-events-none z-20">
-                                  {message.length} / {maxCharacters}
                                 </div>
                               </div>
-                            </div>
+                            )
+                          )}
+                          <div className="text-center ">
+                            <p className="text-blue-600 font-semibold">
+                              Selected Students:{" "}
+                              <span className="text-pink-600">
+                                {selectedStudents.length}
+                              </span>
+                            </p>
                           </div>
-                        )
+                          <div className="text-right mt-3 mb-2">
+                            <button
+                              onClick={handleSubmit}
+                              disabled={loading}
+                              className={`text-white px-4 py-1 rounded font-bold transition-colors duration-200 ${loading
+                                  ? "bg-blue-400 cursor-not-allowed"
+                                  : "bg-blue-600 hover:bg-blue-700"
+                                }`}
+                            >
+                              {loading ? "Sending..." : "Send Message"}
+                            </button>
+                          </div>
+                        </>
                       )}
-                      <div className="text-center ">
-                        <p className="text-blue-600 font-semibold">
-                          Selected Students:{" "}
-                          <span className="text-pink-600">
-                            {selectedStudents.length}
-                          </span>
-                        </p>
-                      </div>
-                      <div className="text-right mt-3 mb-2">
-                        <button
-                          onClick={handleSubmit}
-                          disabled={loading}
-                          className={`text-white px-4 py-1 rounded font-bold transition-colors duration-200 ${
-                            loading
-                              ? "bg-blue-400 cursor-not-allowed"
-                              : "bg-blue-600 hover:bg-blue-700"
-                          }`}
-                        >
-                          {loading ? "Sending..." : "Send Message"}
-                        </button>
-                      </div>
 
                       {/* Pagination is */}
                       <div className="flex justify-center pt-2 -mb-3">

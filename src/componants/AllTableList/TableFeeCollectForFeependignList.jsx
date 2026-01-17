@@ -10,6 +10,7 @@ const formatAmount = (amount) =>
 
 function TableFeeCollectForFeependignList() {
   const API_URL = import.meta.env.VITE_API_URL;
+  const [dataFetched, setDataFetched] = useState(false);
   const [accounts, setAccounts] = useState([]);
   const [selectedAccount, setSelectedAccount] = useState("");
   const [installments, setInstallments] = useState({});
@@ -21,40 +22,34 @@ function TableFeeCollectForFeependignList() {
   }, []);
 
   const fetchAccounts = async () => {
-    setLoading(true);
     try {
       const token = localStorage.getItem("authToken");
-      if (!token) throw new Error("Missing token");
 
-      const response = await axios.get(`${API_URL}/api/get_bank_accountName`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await axios.get(
+        `${API_URL}/api/get_bank_accountName`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
 
-      if (response.data && Array.isArray(response.data.bankAccountName)) {
-        setAccounts(response.data.bankAccountName);
-      } else {
-        throw new Error("Invalid account data format");
-      }
+      setAccounts(response.data.bankAccountName || []);
     } catch (error) {
       console.error("Error fetching accounts:", error);
-    } finally {
-      setLoading(false);
     }
   };
+
 
   const fetchInstallments = async () => {
     setLoading(true);
     try {
       const token = localStorage.getItem("authToken");
-      if (!token) throw new Error("Missing token");
 
-      const response = await axios.get(`${API_URL}/api/collected_fee_list`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await axios.get(
+        `${API_URL}/api/collected_fee_list`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
 
       if (Array.isArray(response.data)) {
         const grouped = response.data.reduce((acc, curr) => {
@@ -67,20 +62,23 @@ function TableFeeCollectForFeependignList() {
         }, {});
         setInstallments(grouped);
       } else {
-        throw new Error("Invalid installments data format");
+        setInstallments({});
       }
     } catch (error) {
       console.error("Error fetching installments:", error);
+      setInstallments({});
     } finally {
       setLoading(false);
+      setDataFetched(true); // ✅ MOST IMPORTANT
     }
   };
+
 
   const filteredInstallments = selectedAccount
     ? installments[selectedAccount] || []
     : Object.entries(installments).flatMap(([account, data]) =>
-        data.map((installment) => ({ ...installment, account }))
-      );
+      data.map((installment) => ({ ...installment, account }))
+    );
 
   const parseAmount = (amt) => parseFloat(amt.replace(/,/g, "")) || 0;
 
@@ -133,58 +131,68 @@ function TableFeeCollectForFeependignList() {
 
           {/* Table Body */}
           <div className="overflow-y-auto max-h-64">
-            {loading ? (
+            {/* LOADING */}
+            {loading && (
               <div className="w-full h-full flex justify-center items-center py-8">
                 <div className="text-center text-blue-600 text-lg font-semibold">
                   Please wait while data is loading...
                 </div>
               </div>
-            ) : filteredInstallments.length ? (
-              filteredInstallments.map((installment, index) => (
-                <div
-                  key={`${installment.account}-${installment.installment}-${index}`}
-                  className={`grid grid-cols-4 text-sm border-b border-gray-200 ${
-                    index % 2 === 0 ? "bg-white" : "bg-gray-50"
-                  }`}
-                >
-                  <div className="w-full md:w-[50%] px-2 py-2 border-r border-gray-100 text-center text-gray-700">
-                    {index + 1}
-                  </div>
-                  <div className="px-2 py-2 border-r border-gray-100 text-start text-gray-800">
-                    {selectedAccount ? selectedAccount : installment.account}
-                  </div>
-                  <div className="px-2 py-2 border-r border-gray-100 text-center text-gray-800">
-                    {installment.installment}
-                  </div>
-                  <div className="px-2 py-2 text-right text-gray-700">
-                    {formatAmount(parseAmount(installment.amount))}
-                  </div>
-                </div>
-              ))
-            ) : (
+            )}
+
+            {/* NO DATA (only after API finished) */}
+            {!loading && dataFetched && filteredInstallments.length === 0 && (
               <div className="w-full h-full flex justify-center items-center py-8">
                 <div className="text-center text-red-600 text-lg font-semibold">
                   Oops! No data found...
                 </div>
               </div>
             )}
+
+            {/* DATA */}
+            {!loading && filteredInstallments.length > 0 &&
+              filteredInstallments.map((installment, index) => (
+                <div
+                  key={`${installment.account}-${installment.installment}-${index}`}
+                  className={`grid grid-cols-4 text-sm border-b border-gray-200 ${index % 2 === 0 ? "bg-white" : "bg-gray-50"
+                    }`}
+                >
+                  <div className="w-full md:w-[50%] px-2 py-2 border-r border-gray-100 text-center text-gray-700">
+                    {index + 1}
+                  </div>
+
+                  <div className="px-2 py-2 border-r border-gray-100 text-start text-gray-800">
+                    {selectedAccount ? selectedAccount : installment.account}
+                  </div>
+
+                  <div className="px-2 py-2 border-r border-gray-100 text-center text-gray-800">
+                    {installment.installment}
+                  </div>
+
+                  <div className="px-2 py-2 text-center text-gray-700">
+                    {formatAmount(parseAmount(installment.amount))}
+                  </div>
+                </div>
+              ))}
           </div>
 
+
           {/* Total Row */}
-          {filteredInstallments.length > 0 && (
+          {!loading && filteredInstallments.length > 0 && (
             <div className="grid grid-cols-4 bg-yellow-100 border-t border-gray-300 text-sm font-semibold text-gray-800">
               <div className="px-2 py-2 border-r border-gray-300"></div>
               <div className="px-2 py-2 border-r border-gray-300"></div>
               <div className="px-2 py-2 border-r border-gray-300 text-center">
                 Total Amount
               </div>
-              <div className="px-2 py-2 text-right text-blue-600">
+              <div className="px-2 py-2 text-center text-blue-600">
                 {formatAmount(
                   selectedAccount ? totalFilteredAmount : totalOverallAmount
                 )}
               </div>
             </div>
           )}
+
         </div>
       </div>
     </>

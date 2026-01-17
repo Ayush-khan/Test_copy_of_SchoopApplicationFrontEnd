@@ -110,6 +110,85 @@ const LowAttendanceTab = () => {
   const [selectAll, setSelectAll] = useState(false);
   console.log("seletedStudents[]", selectedStudents);
 
+  const [regId, setRegId] = useState(null);
+  const [roleId, setRoleId] = useState(null);
+  const [loadingExams, setLoadingExams] = useState(false);
+  const [studentOptions, setStudentNameWithClassId] = useState([]);
+  const [selectedClassId, setSelectedClassId] = useState("");
+  const [selectedSectionId, setSelectedSectionId] = useState("");
+  const [studentError, setStudentError] = useState("");
+  const [selectedTeacherClass, setSelectedTeacherClass] = useState(null);
+
+  useEffect(() => {
+    const init = async () => {
+      try {
+        setLoading(true);
+
+        // Get session data
+        const token = localStorage.getItem("authToken");
+        if (!token) {
+          toast.error("Authentication token not found. Please login again.");
+          navigate("/");
+          return;
+        }
+
+        const sessionRes = await axios.get(`${API_URL}/api/sessionData`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        const roleId = sessionRes?.data?.user?.role_id;
+        const regId = sessionRes?.data?.user?.reg_id;
+
+        if (!roleId || !regId) {
+          toast.error("Invalid session data received");
+          return;
+        }
+
+        setRoleId(roleId);
+        setRegId(regId);
+
+        setLoadingExams(true);
+
+        const responseForClass = await axios.get(
+          `${API_URL}/api/get_teacherclasseswithclassteacher?teacher_id=${regId}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+
+        const mappedData =
+          responseForClass.data?.data?.map((item) => ({
+            value: `${item.class_id}-${item.section_id}`,
+            classId: item.class_id,
+            sectionId: item.section_id,
+            label: `${item.classname} ${item.sectionname}`,
+          })) || [];
+
+        setStudentNameWithClassId(mappedData);
+
+        setStudentNameWithClassId(mappedData);
+      } catch (error) {
+        console.error("Initialization error:", error);
+        toast.error("Failed to get classes. Please try again.");
+      } finally {
+        setLoadingExams(false);
+        setLoading(false);
+      }
+    };
+
+    init();
+  }, []);
+
+  const handleClassforTeacherSelect = (selectedOption) => {
+    setSelectedTeacherClass(selectedOption);
+
+    // if you need them separately
+    setSelectedClassId(selectedOption.classId);
+    setSelectedSectionId(selectedOption.sectionId);
+
+    setStudentError("");
+  };
+
   // utility: generate percentage options
   // const getInstallmentOptions = () => {
   //   const options = [];
@@ -170,6 +249,66 @@ const LowAttendanceTab = () => {
     }
   };
 
+  // const handleSearch = async () => {
+  //   setNameError("");
+  //   setSearchTerm("");
+  //   setNameErrorForClass("");
+  //   setNameErrorForClassForStudent("");
+  //   setNameErrorForStudent("");
+  //   setErrors({});
+
+  //   let hasError = false;
+  //   if (!selectedClass) {
+  //     setNameErrorForClass("Please select a section.");
+  //     hasError = true;
+  //   }
+
+  //   if (!selectedDate) {
+  //     setNameErrorForStudent("Please select a date.");
+  //     hasError = true;
+  //   }
+
+  //   if (hasError) return;
+
+  //   try {
+  //     setParentInformation(null);
+  //     setSelectedStudentForStudent(null);
+  //     setSelectedStudentForStudent([]);
+  //     setSelectedClassForStudent(null);
+  //     setSelectedClassForStudent([]);
+  //     setSelectedStudents([]);
+  //     setSelectAll(false);
+  //     setLoadingForSearch(true);
+
+  //     const token = localStorage.getItem("authToken");
+
+  //     const response = await axios.get(
+  //       `${API_URL}/api/get_studentslistattendance`,
+  //       {
+  //         headers: { Authorization: `Bearer ${token}` },
+  //         params: {
+  //           department_id: classIdForSearch,
+  //           threshold: selectedInstallment?.value || "%",
+  //           end_date: selectedDate,
+  //         },
+  //       }
+  //     );
+
+  //     console.log("response of the student absent data", response.data);
+
+  //     if (response?.data) {
+  //       setParentInformation(response?.data?.data);
+  //     } else {
+  //       toast.error("No data found for the selected class.");
+  //     }
+  //   } catch (error) {
+  //     console.log("error is", error);
+  //     console.log("error is", error.response);
+  //   } finally {
+  //     setLoadingForSearch(false);
+  //   }
+  // };
+
   const handleSearch = async () => {
     setNameError("");
     setSearchTerm("");
@@ -179,9 +318,17 @@ const LowAttendanceTab = () => {
     setErrors({});
 
     let hasError = false;
-    if (!selectedClass) {
-      setNameErrorForClass("Please select a section.");
-      hasError = true;
+
+    if (roleId === "T") {
+      if (!selectedTeacherClass || !selectedClassId || !selectedSectionId) {
+        setStudentError("Please select a class.");
+        hasError = true;
+      }
+    } else {
+      if (!selectedClass) {
+        setNameErrorForClass("Please select a section.");
+        hasError = true;
+      }
     }
 
     if (!selectedDate) {
@@ -203,28 +350,41 @@ const LowAttendanceTab = () => {
 
       const token = localStorage.getItem("authToken");
 
-      const response = await axios.get(
-        `${API_URL}/api/get_studentslistattendance`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-          params: {
+      // ROLE BASED API & PARAMS
+      const apiUrl =
+        roleId === "T"
+          ? `${API_URL}/api/students/attendance/below-percentage`
+          : `${API_URL}/api/get_studentslistattendance`;
+
+      const params =
+        roleId === "T"
+          ? {
+            class_id: selectedClassId,
+            section_id: selectedSectionId,
+            threshold: selectedInstallment?.value || "%",
+            end_date: selectedDate,
+          }
+          : {
             department_id: classIdForSearch,
             threshold: selectedInstallment?.value || "%",
             end_date: selectedDate,
-          },
-        }
-      );
+          };
+
+      const response = await axios.get(apiUrl, {
+        headers: { Authorization: `Bearer ${token}` },
+        params,
+      });
 
       console.log("response of the student absent data", response.data);
 
       if (response?.data) {
-        setParentInformation(response?.data?.data);
+        setParentInformation(response?.data?.data || []);
       } else {
         toast.error("No data found for the selected class.");
       }
     } catch (error) {
       console.log("error is", error);
-      console.log("error is", error.response);
+      console.log("error response", error?.response);
     } finally {
       setLoadingForSearch(false);
     }
@@ -305,24 +465,22 @@ const LowAttendanceTab = () => {
 
   const filteredParents = parentInformation
     ? parentInformation.filter((student) => {
-        const searchLower = searchTerm.trim().toLowerCase();
+      const searchLower = searchTerm.trim().toLowerCase();
 
-        const fullName = `${student.first_name || ""} ${
-          student.mid_name || ""
+      const fullName = `${student.first_name || ""} ${student.mid_name || ""
         } ${student.last_name || ""}`
-          .toLowerCase()
-          .trim();
+        .toLowerCase()
+        .trim();
 
-        const className = `${student.classname || ""} ${
-          student.sectionname || ""
+      const className = `${student.classname || ""} ${student.sectionname || ""
         }`
-          .toLowerCase()
-          .trim();
+        .toLowerCase()
+        .trim();
 
-        return (
-          fullName.includes(searchLower) || className.includes(searchLower)
-        );
-      })
+      return (
+        fullName.includes(searchLower) || className.includes(searchLower)
+      );
+    })
     : [];
 
   return (
@@ -335,40 +493,81 @@ const LowAttendanceTab = () => {
           <div className="w-full mx-auto ">
             <div className="bg-white shadow-md rounded-lg p-4 border border-gray-300">
               <div className="flex flex-col md:flex-row md:gap-x-6 gap-y-4">
-                <div className="w-full gap-x-14 md:gap-x-6 md:justify-start my-1 md:my-4 flex md:flex-row">
-                  <label
-                    className="text-md mt-1.5 mr-1 md:mr-0"
-                    htmlFor="classSelect"
-                  >
-                    Section<span className="text-red-500">*</span>
-                  </label>
-                  <div className="w-full md:w-[57%]">
-                    <Select
-                      id="classSelect"
-                      value={selectedClass}
-                      onChange={handleClassSelect}
-                      options={classOptions}
-                      placeholder={
-                        loadingClasses ? "Loading section..." : "Select"
-                      }
-                      isSearchable
-                      isClearable
-                      className="text-sm"
-                      styles={{
-                        menu: (provided) => ({
-                          ...provided,
-                          zIndex: 1050, // Set your desired z-index value
-                        }),
-                      }}
-                      isDisabled={loadingClasses}
-                    />
-                    {nameErrorForClass && (
-                      <div className="h-8 relative ml-1 text-danger text-xs">
-                        {nameErrorForClass}
+                {roleId === "T" ? (
+                  <>
+                    <div className="w-full gap-x-14 md:gap-x-6 md:justify-start my-1 md:my-4 flex md:flex-row">
+                      <label
+                        className="text-md mt-1.5 mr-1 md:mr-0"
+                        htmlFor="classTSelect"
+                      >
+                        Class<span className="text-red-500">*</span>
+                      </label>
+                      <div className="w-full md:w-[57%]">
+                        <Select
+                          id="classTSelect"
+                          value={selectedTeacherClass}
+                          onChange={handleClassforTeacherSelect}
+                          options={studentOptions}
+                          placeholder={
+                            loadingExams ? "Loading class..." : "Select"
+                          }
+                          isSearchable
+                          isClearable
+                          className="text-sm"
+                          styles={{
+                            menu: (provided) => ({
+                              ...provided,
+                              zIndex: 1050,
+                            }),
+                          }}
+                          isDisabled={loadingExams}
+                        />
+                        {studentError && (
+                          <div className="h-8 relative ml-1 text-danger text-xs">
+                            {studentError}
+                          </div>
+                        )}
                       </div>
-                    )}
-                  </div>
-                </div>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="w-full gap-x-14 md:gap-x-6 md:justify-start my-1 md:my-4 flex md:flex-row">
+                      <label
+                        className="text-md mt-1.5 mr-1 md:mr-0"
+                        htmlFor="classSelect"
+                      >
+                        Section<span className="text-red-500">*</span>
+                      </label>
+                      <div className="w-full md:w-[57%]">
+                        <Select
+                          id="classSelect"
+                          value={selectedClass}
+                          onChange={handleClassSelect}
+                          options={classOptions}
+                          placeholder={
+                            loadingClasses ? "Loading section..." : "Select"
+                          }
+                          isSearchable
+                          isClearable
+                          className="text-sm"
+                          styles={{
+                            menu: (provided) => ({
+                              ...provided,
+                              zIndex: 1050, // Set your desired z-index value
+                            }),
+                          }}
+                          isDisabled={loadingClasses}
+                        />
+                        {nameErrorForClass && (
+                          <div className="h-8 relative ml-1 text-danger text-xs">
+                            {nameErrorForClass}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </>
+                )}
 
                 <div className="w-full gap-x-14 md:gap-x-6 md:justify-start my-1 md:my-4 flex md:flex-row">
                   <label
@@ -431,9 +630,8 @@ const LowAttendanceTab = () => {
                   type="search"
                   onClick={handleSearch}
                   style={{ backgroundColor: "#2196F3" }}
-                  className={`my-1 md:my-4 btn h-10 w-18 md:w-auto btn-primary text-white font-bold py-1 border-1 border-blue-500 px-4 rounded ${
-                    loadingForSearch ? "opacity-50 cursor-not-allowed" : ""
-                  }`}
+                  className={`my-1 md:my-4 btn h-10 w-18 md:w-auto btn-primary text-white font-bold py-1 border-1 border-blue-500 px-4 rounded ${loadingForSearch ? "opacity-50 cursor-not-allowed" : ""
+                    }`}
                   disabled={loadingForSearch}
                 >
                   {loadingForSearch ? (
@@ -498,9 +696,7 @@ const LowAttendanceTab = () => {
                     <div className="bg-white rounded-lg shadow-xs">
                       {loading ? (
                         <div className="flex justify-center items-center h-64">
-                          {/* <div className="spinner-border text-primary" role="status"> */}
                           <LoaderStyle />
-                          {/* </div> */}
                         </div>
                       ) : (
                         <table className="min-w-full leading-normal table-auto">
@@ -509,15 +705,20 @@ const LowAttendanceTab = () => {
                               <th className="px-2 text-center w-full md:w-[4%] lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                                 Sr. No
                               </th>
-                              <th className="px-2 text-center w-full md:w-[4%]  lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                                <input
-                                  type="checkbox"
-                                  checked={selectAll}
-                                  onChange={handleSelectAll}
-                                  className="cursor-pointer"
-                                />{" "}
-                                All
-                              </th>
+
+                              {roleId !== "T" && (
+                                <>
+                                  <th className="px-2 text-center w-full md:w-[4%]  lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                                    <input
+                                      type="checkbox"
+                                      checked={selectAll}
+                                      onChange={handleSelectAll}
+                                      className="cursor-pointer"
+                                    />{" "}
+                                    All
+                                  </th>
+                                </>
+                              )}
 
                               <th className="px-2 w-full md:w-[20%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                                 Student Name
@@ -535,37 +736,40 @@ const LowAttendanceTab = () => {
                               filteredParents.map((student, index) => (
                                 <tr
                                   key={student.student_id}
-                                  className={`${
-                                    index % 2 === 0 ? "bg-white" : "bg-gray-100"
-                                  } hover:bg-gray-50`}
+                                  className={`${index % 2 === 0 ? "bg-white" : "bg-gray-100"
+                                    } hover:bg-gray-50`}
                                 >
                                   <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
                                     <p className="text-gray-900 whitespace-no-wrap relative top-2">
                                       {index + 1}
                                     </p>
                                   </td>
-                                  <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                                    <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                                      <input
-                                        type="checkbox"
-                                        checked={selectedStudents.includes(
-                                          student.student_id
-                                        )}
-                                        onChange={() =>
-                                          handleCheckboxChange(
-                                            student.student_id
-                                          )
-                                        }
-                                        className="cursor-pointer"
-                                      />
-                                    </p>
-                                  </td>
+
+                                  {roleId !== "T" && (
+                                    <>
+                                      <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                                        <p className="text-gray-900 whitespace-no-wrap relative top-2">
+                                          <input
+                                            type="checkbox"
+                                            checked={selectedStudents.includes(
+                                              student.student_id
+                                            )}
+                                            onChange={() =>
+                                              handleCheckboxChange(
+                                                student.student_id
+                                              )
+                                            }
+                                            className="cursor-pointer"
+                                          />
+                                        </p>
+                                      </td>
+                                    </>
+                                  )}
 
                                   <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
                                     <p className="text-gray-900 whitespace-no-wrap relative top-2">
                                       {toTitleCase(
-                                        `${student.first_name || ""} ${
-                                          student.mid_name || ""
+                                        `${student.first_name || ""} ${student.mid_name || ""
                                         } ${student.last_name || ""}`
                                       )}
                                     </p>
@@ -597,90 +801,95 @@ const LowAttendanceTab = () => {
                       )}
                     </div>
                   </div>{" "}
-                  {loading ? (
-                    <span>{""}</span>
-                  ) : (
-                    filteredParents.length > 0 && (
-                      <div className="flex flex-col items-center mt-2">
-                        <div className="w-full md:w-[50%]">
-                          <label className="mb-1 font-normal block text-left">
-                            Dear Parent ,
-                          </label>
+                  {roleId !== "T" && (
+                    <>
+                      {loading ? (
+                        <span>{""}</span>
+                      ) : (
+                        filteredParents.length > 0 && (
+                          <div className="flex flex-col items-center mt-2">
+                            <div className="w-full md:w-[50%]">
+                              <label className="mb-1 font-normal block text-left">
+                                Dear Parent ,
+                              </label>
 
-                          <div className="relative w-full">
-                            <textarea
-                              value={message}
-                              onChange={(e) => {
-                                if (e.target.value.length <= maxCharacters) {
-                                  setMessage(e.target.value);
-                                }
-                              }}
-                              className="w-full h-28 p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-150 resize-none bg-transparent relative z-10 text-sm  text-black font-normal"
-                              placeholder="Enter message"
-                            ></textarea>
+                              <div className="relative w-full">
+                                <textarea
+                                  value={message}
+                                  onChange={(e) => {
+                                    if (
+                                      e.target.value.length <= maxCharacters
+                                    ) {
+                                      setMessage(e.target.value);
+                                    }
+                                  }}
+                                  className="w-full h-28 p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-150 resize-none bg-transparent relative z-10 text-sm  text-black font-normal"
+                                  placeholder="Enter message"
+                                ></textarea>
 
-                            {message && (
-                              <div className="pointer-events-none absolute top-0 left-0 w-full h-full p-3 text-gray-400 whitespace-pre-wrap break-words text-sm  font-normal ">
-                                {message + "  "}Login to school application for
-                                details - Evolvu
+                                {message && (
+                                  <div className="pointer-events-none absolute top-0 left-0 w-full h-full p-3 text-gray-400 whitespace-pre-wrap break-words text-sm  font-normal ">
+                                    {message + "  "}Login to school application
+                                    for details - Evolvu
+                                  </div>
+                                )}
+
+                                <div className="absolute bottom-2 right-3 text-xs text-gray-500 pointer-events-none z-20">
+                                  {message.length} / {maxCharacters}
+                                </div>
                               </div>
-                            )}
-
-                            <div className="absolute bottom-2 right-3 text-xs text-gray-500 pointer-events-none z-20">
-                              {message.length} / {maxCharacters}
                             </div>
                           </div>
-                        </div>
-                      </div>
-                    )
-                  )}
-                  <div className="text-center">
-                    <p className="text-blue-500 font-semibold mt-1">
-                      Selected Students:{" "}
-                      <h6 className=" inline text-pink-600">
-                        {selectedStudents.length}
-                      </h6>
-                    </p>
-                  </div>
-                  <div className="col-span-3 mb-2  text-right">
-                    <button
-                      type="submit"
-                      onClick={handleSubmit}
-                      style={{ backgroundColor: "#2196F3" }}
-                      className={`text-white font-bold py-1 border-1 border-blue-500 px-4 rounded ${
-                        loading ? "opacity-50 cursor-not-allowed" : ""
-                      }`}
-                      disabled={loading}
-                    >
-                      {loading ? (
-                        <span className="flex items-center">
-                          <svg
-                            className="animate-spin h-4 w-4 mr-2 text-white"
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                          >
-                            <circle
-                              className="opacity-25"
-                              cx="12"
-                              cy="12"
-                              r="10"
-                              stroke="currentColor"
-                              strokeWidth="4"
-                            ></circle>
-                            <path
-                              className="opacity-75"
-                              fill="currentColor"
-                              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                            ></path>
-                          </svg>
-                          Sending...
-                        </span>
-                      ) : (
-                        "Send Message"
+                        )
                       )}
-                    </button>
-                  </div>
+                      <div className="text-center">
+                        <p className="text-blue-500 font-semibold mt-1">
+                          Selected Students:{" "}
+                          <h6 className=" inline text-pink-600">
+                            {selectedStudents.length}
+                          </h6>
+                        </p>
+                      </div>
+                      <div className="col-span-3 mb-2  text-right">
+                        <button
+                          type="submit"
+                          onClick={handleSubmit}
+                          style={{ backgroundColor: "#2196F3" }}
+                          className={`text-white font-bold py-1 border-1 border-blue-500 px-4 rounded ${loading ? "opacity-50 cursor-not-allowed" : ""
+                            }`}
+                          disabled={loading}
+                        >
+                          {loading ? (
+                            <span className="flex items-center">
+                              <svg
+                                className="animate-spin h-4 w-4 mr-2 text-white"
+                                xmlns="http://www.w3.org/2000/svg"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                              >
+                                <circle
+                                  className="opacity-25"
+                                  cx="12"
+                                  cy="12"
+                                  r="10"
+                                  stroke="currentColor"
+                                  strokeWidth="4"
+                                ></circle>
+                                <path
+                                  className="opacity-75"
+                                  fill="currentColor"
+                                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                                ></path>
+                              </svg>
+                              Sending...
+                            </span>
+                          ) : (
+                            "Send Message"
+                          )}
+                        </button>
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
             </div>

@@ -206,6 +206,7 @@ function TodoListandRemainders() {
 
         // Refresh list
         fetchTodoRemainders();
+        fetchTodosAll();
       } else {
         toast.error("Failed to update status");
       }
@@ -277,6 +278,7 @@ function TodoListandRemainders() {
         setTodoMode("view");
         setEditingTodoId(null);
         fetchTodoRemainders();
+        fetchTodosAll();
       } else {
         toast.error("Failed to save todo");
       }
@@ -331,9 +333,11 @@ function TodoListandRemainders() {
         </button> */}
 
         <button
-          className={`${Styles.tab
-            } flex items-center justify-between w-full font-bold p-2 text-sm ${activeTab === "todolist" ? Styles.active : ""
-            } sm:w-1/2`}
+          className={`${
+            Styles.tab
+          } flex items-center justify-between w-full font-bold p-2 text-sm ${
+            activeTab === "todolist" ? Styles.active : ""
+          } sm:w-1/2`}
           onClick={() => {
             handleTabChange("todolist");
             setTodoMode("view");
@@ -344,8 +348,9 @@ function TodoListandRemainders() {
           <div className="flex items-center gap-3 text-sm">
             <span
               title="Add Todo"
-              className={`cursor-pointer ${todoMode === "add" ? "text-green-500" : ""
-                }`}
+              className={`cursor-pointer ${
+                todoMode === "add" ? "text-green-500" : ""
+              }`}
               onClick={(e) => {
                 e.stopPropagation();
                 setTodoMode("add");
@@ -356,8 +361,9 @@ function TodoListandRemainders() {
 
             <span
               title="View Today Todos"
-              className={`cursor-pointer ${todoMode === "view" ? "text-blue-500" : ""
-                }`}
+              className={`cursor-pointer ${
+                todoMode === "view" ? "text-blue-500" : ""
+              }`}
               onClick={(e) => {
                 e.stopPropagation();
                 setTodoMode("view");
@@ -368,8 +374,9 @@ function TodoListandRemainders() {
 
             <span
               title="View All Todos"
-              className={`cursor-pointer ${todoMode === "viewall" ? "text-purple-500" : ""
-                }`}
+              className={`cursor-pointer ${
+                todoMode === "viewall" ? "text-purple-500" : ""
+              }`}
               onClick={(e) => {
                 e.stopPropagation();
                 setTodoMode("viewall");
@@ -381,9 +388,11 @@ function TodoListandRemainders() {
         </button>
 
         <button
-          className={`${Styles.tab
-            } flex items-center justify-center gap-2 w-full font-bold p-2 text-sm ${activeTab === "remainders" ? Styles.active : ""
-            } sm:w-1/2`}
+          className={`${
+            Styles.tab
+          } flex items-center justify-center gap-2 w-full font-bold p-2 text-sm ${
+            activeTab === "remainders" ? Styles.active : ""
+          } sm:w-1/2`}
           onClick={() => handleTabChange("remainders")}
         >
           <span>Reminders</span>
@@ -412,6 +421,7 @@ function TodoListandRemainders() {
                   name="title"
                   value={todoForm.title}
                   onChange={handleChange}
+                  maxLength={100}
                   placeholder="Enter todo title"
                   className="w-full border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-pink-400"
                 />
@@ -441,6 +451,7 @@ function TodoListandRemainders() {
                   name="description"
                   value={todoForm.description}
                   onChange={handleChange}
+                  maxLength={200}
                   rows={3}
                   placeholder="Optional description"
                   className="w-full border border-gray-300 p-2 rounded resize-none focus:outline-none focus:ring-2 focus:ring-pink-400"
@@ -636,8 +647,8 @@ function TodoListandRemainders() {
         {activeTab === "remainders" && (
           <>
             {remainderlist.incomplete_lesson_plan_for_next_week.length > 0 ||
-              remainderlist.notice_for_teacher.length > 0 ||
-              remainderlist.todoForToday.length > 0 ? (
+            remainderlist.notice_for_teacher.length > 0 ||
+            remainderlist.todoForToday.length > 0 ? (
               <div className="space-y-5">
                 {hasTodos && (
                   <div>
@@ -716,211 +727,43 @@ function TodoListandRemainders() {
                 {hasLessonPlans && (
                   <div>
                     <h2 className="text-base font-semibold text-pink-600 mb-3">
-                      📘 Incomplete Lesson Plans
+                      📘 Incomplete Lesson Plans (Next Week)
                     </h2>
 
                     <div className="grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(260px,1fr))]">
-                      {/* {remainderlist.incomplete_lesson_plan_for_next_week.map(
+                      {remainderlist.incomplete_lesson_plan_for_next_week.map(
                         (item, index) => (
                           <div
-                            key={`lesson-${index}`}
+                            key={index}
                             className="bg-white rounded-xl shadow-md p-2 border-l-4 border-pink-400 hover:shadow-lg transition"
                           >
-                            <div className="text-xs font-semibold text-gray-500 mb-1">
-                              📅 {item.week_date}
+                            {/* Pending Classes */}
+                            <div className="text-sm text-gray-700">
+                              <p className="text-sm text-gray-700">
+                                <span className="font-semibold mb-4">
+                                  📚 Pending Classes :
+                                </span>
+                                <br />
+                                {item.pending_classes
+                                  .split(",")
+                                  .map((cls) => cls.trim())
+                                  .join(", ")}
+                              </p>
                             </div>
-
-                            <div className="text-sm font-bold text-gray-800 mb-2">
-                              {item.title}
-                            </div>
-
-                            <p className="text-sm text-gray-600 line-clamp-3">
-                              {item.description || "No description"}
-                            </p>
-                          </div>
-                        )
-                      )} */}
-
-                      {/* working for meenakshi */}
-                      {/* {remainderlist.incomplete_lesson_plan_for_next_week.map(
-                        (cls, cIdx) => (
-                          <div
-                            key={`class-${cIdx}`}
-                            className="bg-white rounded-xl shadow-md p-3 border-l-4 border-pink-400"
-                          >
-                            <div className="text-base font-semibold text-gray-500 mb-1">
-                              📘 Class {cls.class_name} - {cls.section_name}
-                            </div>
-
-                            {cls.subjects.map((sub, sIdx) => (
-                              <div key={`sub-${sIdx}`} className="mt-2">
-                                <h3 className="text-sm font-bold text-pink-600">
-                                  {sub.subject_name}
-                                </h3>
-
-                                {sub.lesson_plans.map((plan, pIdx) => (
-                                  <div
-                                    key={`plan-${pIdx}`}
-                                    className="mt-2 p-2 bg-gray-50 rounded-md"
-                                  >
-                                    <div className="text-sm font-semibold text-gray-500 mb-1">
-                                      📅 {plan.week_date}
-                                    </div>
-
-                                    <div className="text-sm font-bold text-gray-800 mb-1">
-                                      📖 Chapter Name - {plan.chapter_name}
-                                    </div>
-
-                                    <p className="text-sm text-gray-600">
-                                      Status:- {plan.status}
-                                      {plan.Status === "C" ? (
-                                        <span className="text-xs px-2 py-1 rounded-full bg-green-100 text-green-700 font-bold">
-                                          Completed
-                                        </span>
-                                      ) : (
-                                        <span className="text-xs px-2 py-1 rounded-full bg-yellow-100 text-yellow-700 font-bold">
-                                          Incomplete
-                                        </span>
-                                      )}
-                                    </p>
-                                  </div>
-                                ))}
-                              </div>
-                            ))}
-                          </div>
-                        )
-                      )} */}
-
-                      {/* correct work for all */}
-                      {/* {remainderlist.incomplete_lesson_plan_for_next_week.map(
-                        (cls, cIdx) => (
-                          <div
-                            key={`class-${cIdx}`}
-                            className="bg-white rounded-xl shadow-md p-3 border-l-4 border-pink-400"
-                          >
-                            <div className="text-base font-semibold text-gray-500 mb-1">
-                              📘 Class {cls.class_name} - {cls.section_name}
-                            </div>
-
-                            {cls.subjects.map((sub, sIdx) => (
-                              <div key={`sub-${sIdx}`} className="mt-2">
-                                <h3 className="text-sm font-bold text-pink-600">
-                                  {sub.subject_name}
-                                </h3>
-
-                                {sub.lesson_plans &&
-                                sub.lesson_plans.length > 0 ? (
-                                  sub.lesson_plans.map((plan, pIdx) => (
-                                    <div
-                                      key={`plan-${pIdx}`}
-                                      className="mt-2 p-2 bg-gray-50 rounded-md"
+                            {/* <div className="flex flex-wrap gap-2 mt-2">
+                                {item.pending_classes
+                                  .split(",")
+                                  .map((cls, idx) => (
+                                    <span
+                                      key={idx}
+                                      className="text-xs  px-2 py-1  font-medium"
                                     >
-                                      <div className="text-sm font-semibold text-gray-500 mb-1">
-                                        📅 {plan.week_date}
-                                      </div>
-                                      <div className="text-sm font-bold text-gray-800 mb-1">
-                                        📖 Chapter Name - {plan.chapter_name}
-                                      </div>
-                                      <p className="text-sm text-gray-600">
-                                        Status:{" "}
-                                        {plan.status === "C"
-                                          ? "Completed"
-                                          : "Incomplete"}
-                                      </p>
-                                    </div>
-                                  ))
-                                ) : (
-                                  <p className="text-sm text-gray-600 mt-1 italic">
-                                    {" "}
-                                  </p>
-                                )}
-                              </div>
-                            ))}
-                          </div>
-                        )
-                      )} */}
-
-                      {remainderlist.incomplete_lesson_plan_for_next_week.map(
-                        (cls, cIdx) => {
-                          // Collect subjects with empty lesson plans
-                          const emptySubjects = cls.subjects
-                            .filter(
-                              (sub) =>
-                                !sub.lesson_plans ||
-                                sub.lesson_plans.length === 0
-                            )
-                            .map((sub) => sub.subject_name);
-
-                          // Collect subjects with lesson plans
-                          const subjectsWithPlans = cls.subjects.filter(
-                            (sub) =>
-                              sub.lesson_plans && sub.lesson_plans.length > 0
-                          );
-
-                          return (
-                            <div
-                              key={`class-${cIdx}`}
-                              className="bg-white rounded-xl shadow-md p-2 border-l-4 border-pink-400"
-                            >
-                              <div className="text-base font-semibold text-gray-700 mb-2">
-                                🏫 Class {cls.class_name} - {cls.section_name}
-                              </div>
-
-                              {/* Subjects with lesson plans */}
-                              {subjectsWithPlans.map((sub, sIdx) => (
-                                <div key={`sub-${sIdx}`} className="mt-2">
-                                  <h3 className="text-sm font-bold text-pink-600">
-                                    {sub.subject_name}
-                                  </h3>
-
-                                  {sub.lesson_plans.map((plan, pIdx) => (
-                                    <div
-                                      key={`plan-${pIdx}`}
-                                      className="mt-2 p-2 bg-gray-50 rounded-md"
-                                    >
-                                      <div className="text-sm font-semibold text-gray-500 mb-1">
-                                        📅 {plan.week_date}
-                                      </div>
-
-                                      <div className="text-sm font-bold text-gray-800 mb-1">
-                                        📖 Chapter Name - {plan.chapter_name}
-                                      </div>
-
-                                      {/* <p className="text-sm text-gray-600">
-                                        Status:{" "}
-                                        {plan.status === "C"
-                                          ? "Completed"
-                                          : "Incomplete"}
-                                      </p> */}
-                                      <p className="text-sm text-gray-600">
-                                        Status:- {plan.status}
-                                        {plan.Status === "C" ? (
-                                          <span className="text-xs px-2 py-1 rounded-full bg-green-100 text-green-700 font-bold">
-                                            Completed
-                                          </span>
-                                        ) : (
-                                          <span className="text-xs px-2 py-1 rounded-full bg-yellow-100 text-yellow-700 font-bold">
-                                            Incomplete
-                                          </span>
-                                        )}
-                                      </p>
-                                    </div>
+                                      {cls.trim()}
+                                    </span>
                                   ))}
-                                </div>
-                              ))}
-
-                              {/* Subjects without lesson plans */}
-                              {emptySubjects.length > 0 && (
-                                <p className="text-sm text-gray-600 mt-2 ">
-                                  <span className="text-sm font-bold">
-                                    Subjects :{" "}
-                                  </span>
-                                  {emptySubjects.join(", ")}
-                                </p>
-                              )}
-                            </div>
-                          );
-                        }
+                              </div> */}
+                          </div>
+                        )
                       )}
                     </div>
                   </div>
@@ -946,3 +789,210 @@ function TodoListandRemainders() {
 }
 
 export default TodoListandRemainders;
+
+// first lesson plan reminders render
+// {
+//   hasLessonPlans && (
+//     <div>
+//       <h2 className="text-base font-semibold text-pink-600 mb-3">
+//         📘 Incomplete Lesson Plans
+//       </h2>
+
+//       <div className="grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(260px,1fr))]">
+//         {/* {remainderlist.incomplete_lesson_plan_for_next_week.map(
+//                         (item, index) => (
+//                           <div
+//                             key={`lesson-${index}`}
+//                             className="bg-white rounded-xl shadow-md p-2 border-l-4 border-pink-400 hover:shadow-lg transition"
+//                           >
+//                             <div className="text-xs font-semibold text-gray-500 mb-1">
+//                               📅 {item.week_date}
+//                             </div>
+
+//                             <div className="text-sm font-bold text-gray-800 mb-2">
+//                               {item.title}
+//                             </div>
+
+//                             <p className="text-sm text-gray-600 line-clamp-3">
+//                               {item.description || "No description"}
+//                             </p>
+//                           </div>
+//                         )
+//                       )} */}
+
+//         {/* working for meenakshi */}
+//         {/* {remainderlist.incomplete_lesson_plan_for_next_week.map(
+//                         (cls, cIdx) => (
+//                           <div
+//                             key={`class-${cIdx}`}
+//                             className="bg-white rounded-xl shadow-md p-3 border-l-4 border-pink-400"
+//                           >
+//                             <div className="text-base font-semibold text-gray-500 mb-1">
+//                               📘 Class {cls.class_name} - {cls.section_name}
+//                             </div>
+
+//                             {cls.subjects.map((sub, sIdx) => (
+//                               <div key={`sub-${sIdx}`} className="mt-2">
+//                                 <h3 className="text-sm font-bold text-pink-600">
+//                                   {sub.subject_name}
+//                                 </h3>
+
+//                                 {sub.lesson_plans.map((plan, pIdx) => (
+//                                   <div
+//                                     key={`plan-${pIdx}`}
+//                                     className="mt-2 p-2 bg-gray-50 rounded-md"
+//                                   >
+//                                     <div className="text-sm font-semibold text-gray-500 mb-1">
+//                                       📅 {plan.week_date}
+//                                     </div>
+
+//                                     <div className="text-sm font-bold text-gray-800 mb-1">
+//                                       📖 Chapter Name - {plan.chapter_name}
+//                                     </div>
+
+//                                     <p className="text-sm text-gray-600">
+//                                       Status:- {plan.status}
+//                                       {plan.Status === "C" ? (
+//                                         <span className="text-xs px-2 py-1 rounded-full bg-green-100 text-green-700 font-bold">
+//                                           Completed
+//                                         </span>
+//                                       ) : (
+//                                         <span className="text-xs px-2 py-1 rounded-full bg-yellow-100 text-yellow-700 font-bold">
+//                                           Incomplete
+//                                         </span>
+//                                       )}
+//                                     </p>
+//                                   </div>
+//                                 ))}
+//                               </div>
+//                             ))}
+//                           </div>
+//                         )
+//                       )} */}
+
+//         {/* correct work for all */}
+//         {/* {remainderlist.incomplete_lesson_plan_for_next_week.map(
+//                         (cls, cIdx) => (
+//                           <div
+//                             key={`class-${cIdx}`}
+//                             className="bg-white rounded-xl shadow-md p-3 border-l-4 border-pink-400"
+//                           >
+//                             <div className="text-base font-semibold text-gray-500 mb-1">
+//                               📘 Class {cls.class_name} - {cls.section_name}
+//                             </div>
+
+//                             {cls.subjects.map((sub, sIdx) => (
+//                               <div key={`sub-${sIdx}`} className="mt-2">
+//                                 <h3 className="text-sm font-bold text-pink-600">
+//                                   {sub.subject_name}
+//                                 </h3>
+
+//                                 {sub.lesson_plans &&
+//                                 sub.lesson_plans.length > 0 ? (
+//                                   sub.lesson_plans.map((plan, pIdx) => (
+//                                     <div
+//                                       key={`plan-${pIdx}`}
+//                                       className="mt-2 p-2 bg-gray-50 rounded-md"
+//                                     >
+//                                       <div className="text-sm font-semibold text-gray-500 mb-1">
+//                                         📅 {plan.week_date}
+//                                       </div>
+//                                       <div className="text-sm font-bold text-gray-800 mb-1">
+//                                         📖 Chapter Name - {plan.chapter_name}
+//                                       </div>
+//                                       <p className="text-sm text-gray-600">
+//                                         Status:{" "}
+//                                         {plan.status === "C"
+//                                           ? "Completed"
+//                                           : "Incomplete"}
+//                                       </p>
+//                                     </div>
+//                                   ))
+//                                 ) : (
+//                                   <p className="text-sm text-gray-600 mt-1 italic">
+//                                     {" "}
+//                                   </p>
+//                                 )}
+//                               </div>
+//                             ))}
+//                           </div>
+//                         )
+//                       )} */}
+
+//         {remainderlist.incomplete_lesson_plan_for_next_week.map((cls, cIdx) => {
+//           // Collect subjects with empty lesson plans
+//           const emptySubjects = cls.subjects
+//             .filter((sub) => !sub.lesson_plans || sub.lesson_plans.length === 0)
+//             .map((sub) => sub.subject_name);
+
+//           // Collect subjects with lesson plans
+//           const subjectsWithPlans = cls.subjects.filter(
+//             (sub) => sub.lesson_plans && sub.lesson_plans.length > 0
+//           );
+
+//           return (
+//             <div
+//               key={`class-${cIdx}`}
+//               className="bg-white rounded-xl shadow-md p-2 border-l-4 border-pink-400"
+//             >
+//               <div className="text-base font-semibold text-gray-700 mb-2">
+//                 🏫 Class {cls.class_name} - {cls.section_name}
+//               </div>
+
+//               {/* Subjects with lesson plans */}
+//               {subjectsWithPlans.map((sub, sIdx) => (
+//                 <div key={`sub-${sIdx}`} className="mt-2">
+//                   <h3 className="text-sm font-bold text-pink-600">
+//                     {sub.subject_name}
+//                   </h3>
+
+//                   {sub.lesson_plans.map((plan, pIdx) => (
+//                     <div
+//                       key={`plan-${pIdx}`}
+//                       className="mt-2 p-2 bg-gray-50 rounded-md"
+//                     >
+//                       <div className="text-sm font-semibold text-gray-500 mb-1">
+//                         📅 {plan.week_date}
+//                       </div>
+
+//                       <div className="text-sm font-bold text-gray-800 mb-1">
+//                         📖 Chapter Name - {plan.chapter_name}
+//                       </div>
+
+//                       {/* <p className="text-sm text-gray-600">
+//                                         Status:{" "}
+//                                         {plan.status === "C"
+//                                           ? "Completed"
+//                                           : "Incomplete"}
+//                                       </p> */}
+//                       <p className="text-sm text-gray-600">
+//                         Status:- {plan.status}
+//                         {plan.Status === "C" ? (
+//                           <span className="text-xs px-2 py-1 rounded-full bg-green-100 text-green-700 font-bold">
+//                             Completed
+//                           </span>
+//                         ) : (
+//                           <span className="text-xs px-2 py-1 rounded-full bg-yellow-100 text-yellow-700 font-bold">
+//                             Incomplete
+//                           </span>
+//                         )}
+//                       </p>
+//                     </div>
+//                   ))}
+//                 </div>
+//               ))}
+
+//               {/* Subjects without lesson plans */}
+//               {emptySubjects.length > 0 && (
+//                 <p className="text-sm text-gray-600 mt-2 ">
+//                   <span className="text-sm font-bold">Subjects : </span>
+//                   {emptySubjects.join(", ")}
+//                 </p>
+//               )}
+//             </div>
+//           );
+//         })}
+//       </div>
+//     </div>
+//   );
+// }

@@ -47,25 +47,68 @@
 
 // export default Card;
 // Just impleent Loader
+
 import styles from "../../CSS/DashbordCss/Card.module.css";
-import { FaSpinner } from "react-icons/fa";
+import { FaArrowRightLong } from "react-icons/fa6";
+import { FaSpinner } from "react-icons/fa"; // Import a spinner icon
+import { useEffect, useState } from "react";
+import { toast } from "react-toastify";
+import axios from "axios";
 
-const Card = ({
-  title,
-  TotalValue,
-  presentValue,
-  color,
-  icon,
-  roleId,
-  disableLoader,
-}) => {
-  // If disableLoader is true → show empty instead of numbers or loader
-  const forceEmpty = disableLoader;
+const Card = ({ title, TotalValue, presentValue, color, icon, roleId }) => {
+  const API_URL = import.meta.env.VITE_API_URL;
+  console.log("this is presentValue=", presentValue);
+  console.log("this is totalValue=", TotalValue);
 
-  // Original loading logic (ignored when forceEmpty is true)
-  const isLoading = forceEmpty ? false : !(presentValue || TotalValue);
+  const [sortNameCookie, setSortNameCookie] = useState("");
+  console.log("school name", sortNameCookie);
 
-  const shouldShowValues = roleId !== "T";
+  const [regId, setRegId] = useState(null);
+  const [roleIdT, setRoleId] = useState(null);
+
+  useEffect(() => {
+    fetchRoleId();
+  }, []);
+
+  // Show loader only if values are missing and role is NOT T
+  const isLoading = !(presentValue || TotalValue);
+
+  // const shouldShowValues = roleId !== "T";
+
+  const fetchRoleId = async () => {
+    const token = localStorage.getItem("authToken");
+
+    if (!token) {
+      toast.error("Authentication token not found Please login again");
+
+      return;
+    }
+
+    try {
+      const response = await axios.get(`${API_URL}/api/sessionData`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const roleId = response?.data?.user?.role_id;
+      console.log("role id", response?.data?.user?.role_id);
+
+      const regId = response?.data?.user?.reg_id;
+      console.log("reg id", response?.data?.user?.reg_id);
+      setRegId(regId);
+      setSortNameCookie(response?.data?.custom_claims?.short_name);
+      if (roleId) {
+        setRoleId(roleId);
+      } else {
+        console.warn("role_id not found in sessionData response");
+      }
+    } catch (error) {
+      console.error("Failed to fetch session data:", error);
+    }
+  };
+
+  const isSacsM = sortNameCookie === "SACS" && roleIdT === "M";
 
   const renderLoader = () => (
     <FaSpinner className="animate-spin text-blue-500" />
@@ -90,122 +133,38 @@ const Card = ({
       <div
         className={styles["small-desc"]}
         style={{
-          width: "50%",
+          // width: "50%",
+          width: isSacsM ? "70%" : "50%",
           display: "flex",
           justifyContent: "center",
           fontWeight: "500",
         }}
       >
-        {shouldShowValues && (
-          <div
-            className="flex align-item-center justify-between text-sm gap-1 flex-col"
-            style={{ fontSize: "1.3em", minHeight: "40px" }}
-          >
-            {/* ---------- TOP VALUE (presentValue) ---------- */}
-            <div style={{ textAlign: "center" }}>
-              {forceEmpty
-                ? "" // ← blank output
-                : isLoading
-                ? renderLoader() // loader (only if allowed)
-                : presentValue || presentValue === 0
+        {/* {shouldShowValues && ( */}
+        <div
+          className="flex align-item-center justify-between text-sm gap-1 flex-col"
+          style={{ fontSize: "1.3em" }}
+        >
+          <div style={{ textAlign: "center" }}>
+            {isLoading
+              ? renderLoader()
+              : presentValue || presentValue === 0
                 ? presentValue
-                : ""}
-            </div>
-
-            {/* ---------- Divider ---------- */}
-            {!forceEmpty && !isLoading && (
-              <div style={{ border: "1px solid gray" }}></div>
-            )}
-
-            {/* ---------- BOTTOM VALUE (TotalValue) ---------- */}
-            <div style={{ textAlign: "center" }}>
-              {forceEmpty ? (
-                "" // empty
-              ) : !isLoading && (TotalValue || TotalValue === 0) ? (
-                <div>{TotalValue}</div>
-              ) : (
-                ""
-              )}
-            </div>
+                : null}
           </div>
-        )}
+
+          {!isLoading && <div style={{ border: "1px solid gray" }}></div>}
+
+          <div style={{ textAlign: "center" }}>
+            {!isLoading && (TotalValue || TotalValue === 0) ? (
+              <div>{TotalValue}</div>
+            ) : null}
+          </div>
+        </div>
+        {/* )} */}
       </div>
     </div>
   );
 };
 
 export default Card;
-
-// import styles from "../../CSS/DashbordCss/Card.module.css";
-// import { FaArrowRightLong } from "react-icons/fa6";
-// import { FaSpinner } from "react-icons/fa"; // Import a spinner icon
-
-// const Card = ({
-//   title,
-//   TotalValue,
-//   presentValue,
-//   color,
-//   icon,
-//   roleId,
-//   disableLoader,
-// }) => {
-//   const isLoading = disableLoader ? false : !(presentValue || TotalValue);
-//   const shouldShowValues = roleId !== "T";
-
-//   const renderLoader = () => (
-//     <FaSpinner className="animate-spin text-blue-500" />
-//   );
-
-//   return (
-//     <div className="w-full rounded-lg bg-white flex items-center justify-around shadow-card h-28">
-//       <div className="flex items-center justify-between flex-col w-1/2">
-//         {icon && (
-//           <div className={`${styles.icon} text-6xl text-blue-500`}>{icon}</div>
-//         )}
-//         <div
-//           className={`${styles["card-title"]} text-gray-600`}
-//           style={{ fontSize: ".8em", fontWeight: "600" }}
-//         >
-//           {title}
-//         </div>
-//       </div>
-
-//       <div className="w-1 h-10 border-l"></div>
-
-//       <div
-//         className={styles["small-desc"]}
-//         style={{
-//           width: "50%",
-//           display: "flex",
-//           justifyContent: "center",
-//           fontWeight: "500",
-//         }}
-//       >
-//         {shouldShowValues && (
-//           <div
-//             className="flex align-item-center justify-between text-sm gap-1 flex-col"
-//             style={{ fontSize: "1.3em" }}
-//           >
-//             <div style={{ textAlign: "center" }}>
-//               {isLoading
-//                 ? renderLoader()
-//                 : presentValue || presentValue === 0
-//                 ? presentValue
-//                 : null}
-//             </div>
-
-//             {!isLoading && <div style={{ border: "1px solid gray" }}></div>}
-
-//             <div style={{ textAlign: "center" }}>
-//               {!isLoading && (TotalValue || TotalValue === 0) ? (
-//                 <div>{TotalValue}</div>
-//               ) : null}
-//             </div>
-//           </div>
-//         )}
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default Card;

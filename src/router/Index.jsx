@@ -293,6 +293,14 @@ import TeacherPendingIdCardReport from "../componants/IDCards/TeacherPendingIdCa
 import TodayBirthdayTeacherDashboard from "../componants/Dashbord/TodayBirthdayTeacherDashboard.jsx";
 import DefaulterStudentList from "../componants/Dashbord/DefaulterStudentList.jsx";
 import HomeworkNotSubmittedStudent from "../componants/Dashbord/HomeworkNotSubmittedStudent.jsx";
+import CompleteStudentListForAdmission from "../componants/AdmissionAdminModule/CompleteStudentListForAdmission/CompleteStudentListForAdmission.jsx";
+import ViewStudentAdmissionForm from "../componants/AdmissionAdminModule/ViewStudentAdmissionForm.jsx";
+import StudentListForAdmissionSubmission from "../componants/AdmissionAdminModule/StudentListForAdmissionSubmission/StudentListForAdmissionSubmission.jsx";
+import StudentListForSchedulingInterview from "../componants/AdmissionAdminModule/StudentListForSchedulingInterview/StudentListForSchedulingInterview.jsx";
+import StudentListForVerification from "../componants/AdmissionAdminModule/StudentListForVerification/StudentListForVerification.jsx";
+import StudentListForApproval from "../componants/AdmissionAdminModule/StudentListForApproval/StudentListForApproval.jsx";
+import ApplicationFromManagement from "../componants/AdmissionAdminModule/ApplicationFromManagement/ApplicationFromManagement.jsx"
+import DynamicMailer from "../componants/AdmissionAdminModule/DynamicMailer/DynamicMailer.jsx";
 // import Menus from "../c";
 function Index() {
   return (
@@ -1601,6 +1609,46 @@ function Index() {
         <Route
           path="/returnBook"
           element={<PrivateRoute element={<ReturnBook />} />}
+        />
+        {/* Admission module for Admin */}
+        {/* Admission module for Admin */}
+        <Route
+          path="/listofAdmissionSuccessfulPayment"
+          element={
+            <PrivateRoute element={<CompleteStudentListForAdmission />} />
+          }
+        />
+        <Route
+          path="/viewAdmissionForm/:id"
+          element={<PrivateRoute element={<ViewStudentAdmissionForm />} />}
+        />
+        <Route
+          path="/listOfStudentsForDocumentSubmission"
+          element={
+            <PrivateRoute element={<StudentListForAdmissionSubmission />} />
+          }
+        />
+        <Route
+          path="/listOfStudentForSchedulingInterview"
+          element={
+            <PrivateRoute element={<StudentListForSchedulingInterview />} />
+          }
+        />
+        <Route
+          path="/listOfStudentForVerification"
+          element={<PrivateRoute element={<StudentListForVerification />} />}
+        />
+        <Route
+          path="/listOfStudentForApproval"
+          element={<PrivateRoute element={<StudentListForApproval />} />}
+        />
+        <Route
+          path="/admissionManagement"
+          element={<PrivateRoute element={<ApplicationFromManagement />} />}
+        />
+        <Route
+          path="/dynamicMailer"
+          element={<PrivateRoute element={<DynamicMailer />} />}
         />
       </Route>
 
