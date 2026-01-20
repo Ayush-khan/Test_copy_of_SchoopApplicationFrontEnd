@@ -1,45 +1,23 @@
 import {
-  FaSchool,
   FaUserGroup,
   FaUserShield,
   FaUsersLine,
 } from "react-icons/fa6";
 import Card from "../common/Card.jsx";
-// import EventCard from "./EventCard.js";
-import EventCard from "./EventCard.jsx"
+import EventCard from "./EventCard.jsx";
 import CardStuStaf from "../common/CardStuStaf.jsx";
-import StudentsChart from "./Charts/StudentsChart.jsx";
 import {
   FaBirthdayCake,
-  FaCalendarAlt,
-  FaChalkboardTeacher,
   FaClipboardCheck,
 } from "react-icons/fa";
 import { HiCollection } from "react-icons/hi";
-// import { IoTicket } from "react-icons/io5";
-// import NoticeBord from "./NoticeBord.js";
 import axios from "axios";
 import { useEffect, useState } from "react";
-// import HouseStudentChart from "./Charts/HouseStudentChart.js";
-// import TableFeeCollect from "./TableFeeCollect.js";
 import { Link, useNavigate } from "react-router-dom";
-// import LoadingSpinner from "../common/LoadingSpinner.jsx";
 import { ToastContainer, toast } from "react-toastify";
 import { RiPassValidFill } from "react-icons/ri";
 import { GiTeacher } from "react-icons/gi";
-// import { TfiWrite } from "react-icons/tfi";
-// import { MdAssessment, MdGroup } from "react-icons/md";
-// import ClassWiseAcademicPerformance from "./ClassWiseAcademicPerformance.js";
-// import TimeTableForTeacherDashbord from "./TimeTableForTeacherDashbord.js";
-// import TicketForDashboard from "./TicketForDashboard.js";
-import StudentAttendanceChart from "./Charts/StudentAttendanceChart.jsx"
-// import { MdOutlinePayments } from "react-icons/md";
-// import { MdOutlineWarningAmber } from "react-icons/md";
-// import { HiOutlineDocumentText } from "react-icons/hi";
-// import { MdOutlineAssignment } from "react-icons/md";
-// import TodoListandRemainders from "./TodoListandRemainders.js";
-// import StudentAttendanceChart from "./charts/StudentAttendanceChart.jsx"
-// import StudentAttendanceSACS from "./Charts/StudentAttendanceSACS.js";
+import StudentAttendanceChart from "./Charts/StudentAttendanceChart.jsx";
 
 const PrincipalDashboardSACS = () => {
   const API_URL = import.meta.env.VITE_API_URL; // url for host
@@ -171,7 +149,7 @@ const PrincipalDashboardSACS = () => {
 
             "Role-Id": roleId, // add roleId for different role
           },
-        }
+        },
       );
       // console.log(
       //   "***the roleiD count*******",
@@ -185,7 +163,7 @@ const PrincipalDashboardSACS = () => {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
       setApproveLeaveCount(responseApproveLeaveCount?.data?.data);
 
@@ -207,7 +185,7 @@ const PrincipalDashboardSACS = () => {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
       // console.log(
       //   "the birthday count and it's value is=",
@@ -222,12 +200,12 @@ const PrincipalDashboardSACS = () => {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
       console.log("lesson plan summary", ApprovedLessonPlane);
       setApprovedLessonPlaneCount(ApprovedLessonPlane.data.lessonPlanSubmitted);
       setNotSubmittedLessonPlanCount(
-        ApprovedLessonPlane.data.lessonPlanNotSubmitted
+        ApprovedLessonPlane.data.lessonPlanNotSubmitted,
       );
       setPendingApprovealLP(ApprovedLessonPlane.data.pendingForApproval);
       setNoOfTeachers(ApprovedLessonPlane.data.totalNumberOfTeachers);
@@ -240,7 +218,7 @@ const PrincipalDashboardSACS = () => {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       const dataAttendace = AttendanceCountStaff.data.data;
@@ -252,7 +230,9 @@ const PrincipalDashboardSACS = () => {
       setSecondary(getDept("SACS teachers"));
       setHigherSecondary(getDept("Higher Secondary"));
       setCaretaker(getDept("Caretakers"));
-      // console.log("preprimary", getDept("PrePrimary"));
+      console.log("nursery", getDept("Nursery teachers"));
+      console.log("KG ", getDept("KG teachers"));
+
       // console.log("Attendancecount staff", AttendanceCountStaff.data.data);
     } catch (error) {
       setError(error.message);
@@ -310,7 +290,7 @@ const PrincipalDashboardSACS = () => {
                   }}
                 >
                   <Link
-                    to={sortNameCookie === "HSCS" ? "#" : "/teacherList"}
+                    to={sortNameCookie === "HSCS" ? "#" : "/todayStaffList"}
                     className="no-underline"
                     style={
                       sortNameCookie === "HSCS" ? { pointerEvents: "none" } : {}
@@ -506,8 +486,8 @@ const PrincipalDashboardSACS = () => {
               <Card
                 title="Nursery"
                 value={prePrimary.present}
-                valuePendingFee={prePrimary.absent}
-                valueAbsent={prePrimary.total}
+                valueAbsent={prePrimary.absent}
+                valuePendingFee={prePrimary.total}
                 color="#4CAF50"
                 icon={
                   <div
@@ -532,8 +512,8 @@ const PrincipalDashboardSACS = () => {
               <Card
                 title="KG"
                 value={primary.present}
-                valuePendingFee={primary.absent}
-                valueAbsent={primary.total}
+                valueAbsent={primary.absent}
+                valuePendingFee={primary.total}
                 color="#4CAF50"
                 icon={
                   <div
@@ -558,8 +538,8 @@ const PrincipalDashboardSACS = () => {
               <Card
                 title="School"
                 value={secondary.present}
-                valuePendingFee={secondary.absent}
-                valueAbsent={secondary.total}
+                valueAbsent={secondary.absent}
+                valuePendingFee={secondary.total}
                 color="#4CAF50"
                 icon={
                   <div
@@ -584,8 +564,8 @@ const PrincipalDashboardSACS = () => {
               <Card
                 title="Caretaker"
                 value={caretaker.present}
-                valuePendingFee={caretaker.absent}
-                valueAbsent={caretaker.total}
+                valueAbsent={caretaker.absent}
+                valuePendingFee={caretaker.total}
                 color="#4CAF50"
                 icon={
                   <div

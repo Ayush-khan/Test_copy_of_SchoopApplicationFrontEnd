@@ -194,9 +194,7 @@ const Card = ({
                         Absent:
                       </span>
                       <span className="text-red-600 font-semibold text-sm">
-                        {new Intl.NumberFormat("en-IN", {}).format(
-                          valuePendingFee
-                        )}
+                        {valueAbsent}
                       </span>
                     </div>
                     <div className="flex justify-between items-center gap-x-2">
@@ -204,19 +202,17 @@ const Card = ({
                         Total:
                       </span>
                       <span className="text-blue-600 font-semibold text-sm">
-                        {new Intl.NumberFormat("en-IN", {}).format(
-                          valuePendingFee
-                        )}
+                        {valuePendingFee}
                       </span>
                     </div>
                   </div>
                 ) : title === "Lesson Plans" ? (
                   <div className="mx-2 space-y-1 text-[.7em]">
                     <div className="flex justify-between items-center gap-x-2">
-                      <span className="text-green-700 font-semibold text-xs">
+                      <span className="text-blue-700 font-semibold text-xs">
                         No of Teachers:
                       </span>
-                      <span className="text-green-600 font-semibold text-xs">
+                      <span className="text-blue-600 font-semibold text-xs">
                         {value}
                       </span>
                     </div>
@@ -238,10 +234,10 @@ const Card = ({
                       </span>
                     </div>
                     <div className="flex justify-between items-center gap-x-2 whitespace-nowrap">
-                      <span className="text-green-700 font-semibold text-xs ">
+                      <span className="text-orange-700 font-semibold text-xs ">
                         Pending for approval:
                       </span>
-                      <span className="text-green-600 font-semibold text-xs">
+                      <span className="text-orange-600 font-semibold text-xs">
                         {valueTeacher}
                         {/* 100 */}
                       </span>

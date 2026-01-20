@@ -302,6 +302,7 @@ import StudentListForApproval from "../componants/AdmissionAdminModule/StudentLi
 import ApplicationFromManagement from "../componants/AdmissionAdminModule/ApplicationFromManagement/ApplicationFromManagement.jsx"
 import DynamicMailer from "../componants/AdmissionAdminModule/DynamicMailer/DynamicMailer.jsx";
 import LessonPlanData from "../componants/Dashbord/PrinciplalDashboardSACS/LessonPlanData.jsx";
+import TodayStaffList from "../componants/AllTableList/TodayStaffList.jsx";
 // import Menus from "../c";../componants/Dashbord/PrinciplalDashboardSACS/LessonPlanData.jsx
 function Index() {
   return (
@@ -1655,6 +1656,10 @@ function Index() {
         <Route
           path="/lessonPlanData"
           element={<PrivateRoute element={<LessonPlanData />} />}
+        />
+        <Route
+          path="/todayStaffList"
+          element={<PrivateRoute element={<TodayStaffList />} />}
         />
       </Route>
 

@@ -10,6 +10,9 @@ import { FiSearch } from "react-icons/fi";
 
 function LessonPlanData() {
   const API_URL = import.meta.env.VITE_API_URL;
+  const [loadingSubmitted, setLoadingSubmitted] = useState(false);
+  const [loadingNotSubmitted, setLoadingNotSubmitted] = useState(false);
+  const [loadingPendingApproval, setLoadingPendingApproval] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
@@ -24,6 +27,8 @@ function LessonPlanData() {
 
   const [notSubmittedTeachers, setNotSubmittedTeachers] = useState([]);
   const [notSubmittedCount, setNotSubmittedCount] = useState(0);
+
+  const activeTabRef = useRef(activeTab);
 
   const previousPageRef = useRef(0);
   const prevSearchTermRef = useRef("");
@@ -41,8 +46,12 @@ function LessonPlanData() {
     fetchPendingApprovalList();
   }, []);
 
+  useEffect(() => {
+    activeTabRef.current = activeTab;
+  }, [activeTab]);
+
   const fetchPendingApprovalList = async () => {
-    setLoading(true);
+    setLoadingPendingApproval(true);
 
     try {
       const token = localStorage.getItem("authToken");
@@ -56,7 +65,7 @@ function LessonPlanData() {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       // ✅ API returns lists directly
@@ -70,12 +79,12 @@ function LessonPlanData() {
     } catch (error) {
       setError(error.message || "Something went wrong while fetching data.");
     } finally {
-      setLoading(false);
+      setLoadingPendingApproval(false);
     }
   };
 
   const fetchSubmittedList = async () => {
-    setLoading(true);
+    setLoadingSubmitted(true);
 
     try {
       const token = localStorage.getItem("authToken");
@@ -89,7 +98,7 @@ function LessonPlanData() {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       // ✅ API returns lists directly
@@ -103,12 +112,12 @@ function LessonPlanData() {
     } catch (error) {
       setError(error.message || "Something went wrong while fetching data.");
     } finally {
-      setLoading(false);
+      setLoadingSubmitted(false);
     }
   };
 
   const fetchNotSubmittedList = async () => {
-    setLoading(true);
+    setLoadingNotSubmitted(true);
 
     try {
       const token = localStorage.getItem("authToken");
@@ -122,7 +131,7 @@ function LessonPlanData() {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       const absentStaff = response.data.data || [];
@@ -135,7 +144,7 @@ function LessonPlanData() {
     } catch (error) {
       setError(error.message || "Something went wrong while fetching data.");
     } finally {
-      setLoading(false);
+      setLoadingNotSubmitted(false);
     }
   };
 
@@ -201,12 +210,12 @@ function LessonPlanData() {
         phone.includes(searchLower) ||
         pendingClasses.includes(searchLower)
       );
-    }
+    },
   );
 
   const displayedPendingTeachers = filteredPendingTeachers.slice(
     currentPage * pageSize,
-    currentPage * pageSize + pageSize
+    currentPage * pageSize + pageSize,
   );
   console.log("pending Approval teachers", displayedPendingTeachers);
 
@@ -224,12 +233,12 @@ function LessonPlanData() {
         phone.includes(searchLower) ||
         pendingClasses.includes(searchLower)
       );
-    }
+    },
   );
 
   const displayedNotSubmittedTeachers = filteredNotSubmittedTeachers.slice(
     currentPage * pageSize,
-    currentPage * pageSize + pageSize
+    currentPage * pageSize + pageSize,
   );
   console.log("not submitted teachers", displayedNotSubmittedTeachers);
 
@@ -249,16 +258,16 @@ function LessonPlanData() {
         pendingClasses.includes(searchLower) ||
         teacherId.includes(searchLower)
       );
-    }
+    },
   );
 
   const displayedSubmittedTeachers = filteredSubmittedTeachers.slice(
     currentPage * pageSize,
-    currentPage * pageSize + pageSize
+    currentPage * pageSize + pageSize,
   );
   console.log("Submitted teachers", displayedSubmittedTeachers);
 
-  // No id teachers
+  // No of teachers
   const filteredNoOfTeachers = (noOfTeachers || []).filter((staff) => {
     const searchLower = searchTerm.toLowerCase().trim();
 
@@ -266,18 +275,20 @@ function LessonPlanData() {
     const phone = (staff?.phone || "").toLowerCase();
     const pendingClasses = (staff?.pending_classes || "").toLowerCase();
     const teacherId = String(staff?.teacher_id || "").toLowerCase();
+    const category = (staff?.category_name || "").toLowerCase();
 
     return (
       fullName.includes(searchLower) ||
       phone.includes(searchLower) ||
       pendingClasses.includes(searchLower) ||
-      teacherId.includes(searchLower)
+      teacherId.includes(searchLower) ||
+      category.includes(searchLower)
     );
   });
 
   const displayedNoOfTeachers = filteredNoOfTeachers.slice(
     currentPage * pageSize,
-    currentPage * pageSize + pageSize
+    currentPage * pageSize + pageSize,
   );
   console.log("no of teachers", displayedNoOfTeachers);
 
@@ -306,7 +317,7 @@ function LessonPlanData() {
     }
 
     // Calculate the total pages
-    const pages = Math.ceil(total / pageSize) || 1; // ensure at least 1 page
+    const pages = Math.ceil(total / pageSize) || 1;
     setPageCount(pages);
   }, [
     filteredNoOfTeachers,
@@ -359,10 +370,10 @@ function LessonPlanData() {
         {/* Tab Navigation */}
         <ul className="grid grid-cols-2 gap-x-10 relative -left-6 md:left-0 md:flex md:flex-row -top-4">
           {[
-            { label: "No. of Teachers" },
-            { label: "Submitted Lesson Plan" },
-            { label: "Not Submitted Lesson Plan" },
-            { label: "Pending for Approval" },
+            { label: "No. of Teachers", count: noOfTeacherCount },
+            { label: "Submitted Lesson Plan", count: submittedCount },
+            { label: "Not Submitted Lesson Plan", count: notSubmittedCount },
+            { label: "Pending for Approval", count: pendingApprovalLPCount },
           ].map((tab) => (
             <li
               key={tab.label}
@@ -374,9 +385,9 @@ function LessonPlanData() {
                 className="px-2 md:px-4 py-1 hover:bg-gray-200 text-[1em] md:text-sm text-nowrap"
               >
                 {tab.label.replace(/([A-Z])/g, " $1")}{" "}
-                {/* <span className="text-sm text-[#C03078] font-bold">
+                <span className="text-sm text-[#C03078] font-bold">
                   ({tab.count})
-                </span> */}
+                </span>
               </button>
             </li>
           ))}
@@ -387,7 +398,7 @@ function LessonPlanData() {
           <div className="card mx-auto lg:w-full shadow-lg">
             {showSearch && (
               <>
-                <div className=" px-3 bg-gray-100 border-none flex justify-between items-center">
+                <div className=" px-3 py-1 bg-gray-100 border-none flex justify-between items-center">
                   <div className="w-full flex flex-row justify-between mr-0 ">
                     <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
                       {/* {activeTab === "Teacher Attendance"
@@ -470,8 +481,8 @@ function LessonPlanData() {
                             <td className="sm:px-0.5 text-center lg:px-1 border border-gray-950 text-sm">
                               <p
                                 className={`whitespace-no-wrap relative top-2 ${student.late === "Y"
-                                  ? "text-red-600"
-                                  : "text-gray-900"
+                                    ? "text-red-600"
+                                    : "text-gray-900"
                                   }`}
                               >
                                 {currentPage * pageSize + index + 1}
@@ -481,8 +492,8 @@ function LessonPlanData() {
                             <td className="text-center px-2 lg:px-2 border border-gray-950 text-sm">
                               <p
                                 className={`whitespace-no-wrap relative top-2 ${student.late === "Y"
-                                  ? "text-red-600"
-                                  : "text-gray-900"
+                                    ? "text-red-600"
+                                    : "text-gray-900"
                                   }`}
                               >
                                 {student?.name
@@ -495,9 +506,9 @@ function LessonPlanData() {
                                         .map(
                                           (part) =>
                                             part.charAt(0).toUpperCase() +
-                                            part.slice(1)
+                                            part.slice(1),
                                         )
-                                        .join("'")
+                                        .join("'"),
                                     )
                                     .join(" ")
                                   : " "}
@@ -507,8 +518,8 @@ function LessonPlanData() {
                             <td className="text-center px-2 lg:px-2 border border-gray-950 text-sm">
                               <p
                                 className={`whitespace-no-wrap relative top-2 ${student.late === "Y"
-                                  ? "text-red-600"
-                                  : "text-gray-900"
+                                    ? "text-red-600"
+                                    : "text-gray-900"
                                   }`}
                               >
                                 {student.phone || " "}
@@ -517,8 +528,8 @@ function LessonPlanData() {
                             <td className="text-center px-2 lg:px-2 border border-gray-950 text-sm">
                               <p
                                 className={`whitespace-no-wrap relative top-2 ${student.late === "Y"
-                                  ? "text-red-600"
-                                  : "text-gray-900"
+                                    ? "text-red-600"
+                                    : "text-gray-900"
                                   }`}
                               >
                                 {student?.category_name
@@ -531,9 +542,9 @@ function LessonPlanData() {
                                         .map(
                                           (part) =>
                                             part.charAt(0).toUpperCase() +
-                                            part.slice(1)
+                                            part.slice(1),
                                         )
-                                        .join("'")
+                                        .join("'"),
                                     )
                                     .join(" ")
                                   : " "}
@@ -582,7 +593,7 @@ function LessonPlanData() {
                       </tr>
                     </thead>
                     <tbody>
-                      {loading ? (
+                      {loadingSubmitted ? (
                         <tr>
                           <td
                             colSpan="9"
@@ -598,11 +609,11 @@ function LessonPlanData() {
                             className={`${index % 2 === 0 ? "bg-white" : "bg-gray-100"
                               } hover:bg-gray-50`}
                           >
-                            <td className="sm:px-0.5 text-center lg:px-1 border border-gray-950 text-sm">
+                            <td className="sm:px-0.5 text-center lg:px-1   border border-gray-950 text-sm">
                               <p
                                 className={`whitespace-no-wrap relative top-2 ${student.late === "Y"
-                                  ? "text-red-600"
-                                  : "text-gray-900"
+                                    ? "text-red-600"
+                                    : "text-gray-900"
                                   }`}
                               >
                                 {currentPage * pageSize + index + 1}
@@ -612,8 +623,8 @@ function LessonPlanData() {
                             <td className="text-center px-2 lg:px-2 border border-gray-950 text-sm">
                               <p
                                 className={`whitespace-no-wrap relative top-2 ${student.late === "Y"
-                                  ? "text-red-600"
-                                  : "text-gray-900"
+                                    ? "text-red-600"
+                                    : "text-gray-900"
                                   }`}
                               >
                                 {student?.name
@@ -626,9 +637,9 @@ function LessonPlanData() {
                                         .map(
                                           (part) =>
                                             part.charAt(0).toUpperCase() +
-                                            part.slice(1)
+                                            part.slice(1),
                                         )
-                                        .join("'")
+                                        .join("'"),
                                     )
                                     .join(" ")
                                   : " "}
@@ -638,8 +649,8 @@ function LessonPlanData() {
                             <td className="text-center px-2 lg:px-2 border border-gray-950 text-sm">
                               <p
                                 className={`whitespace-no-wrap relative top-2 ${student.late === "Y"
-                                  ? "text-red-600"
-                                  : "text-gray-900"
+                                    ? "text-red-600"
+                                    : "text-gray-900"
                                   }`}
                               >
                                 {student.phone || " "}
@@ -647,15 +658,15 @@ function LessonPlanData() {
                             </td>
                             <td className="text-center px-2 lg:px-2 border border-gray-950 text-sm">
                               <p
-                                className={`whitespace-no-wrap relative top-2 ${student.late === "Y"
-                                  ? "text-red-600"
-                                  : "text-gray-900"
+                                className={`whitespace-no-wrap relative top-1 ${student.late === "Y"
+                                    ? "text-red-600"
+                                    : "text-gray-900"
                                   }`}
                               >
                                 <p
-                                  className={`whitespace-no-wrap relative top-2 ${student.late === "Y"
-                                    ? "text-red-600"
-                                    : "text-gray-900"
+                                  className={`whitespace-no-wrap relative top-1 ${student.late === "Y"
+                                      ? "text-red-600"
+                                      : "text-gray-900"
                                     }`}
                                 >
                                   {student.pending_classes || "-"}
@@ -705,7 +716,7 @@ function LessonPlanData() {
                       </tr>
                     </thead>
                     <tbody>
-                      {loading ? (
+                      {loadingNotSubmitted ? (
                         <tr>
                           <td
                             colSpan="9"
@@ -724,8 +735,8 @@ function LessonPlanData() {
                             <td className="sm:px-0.5 text-center lg:px-1 border border-gray-950 text-sm">
                               <p
                                 className={`whitespace-no-wrap relative top-2 ${student.late === "Y"
-                                  ? "text-red-600"
-                                  : "text-gray-900"
+                                    ? "text-red-600"
+                                    : "text-gray-900"
                                   }`}
                               >
                                 {currentPage * pageSize + index + 1}
@@ -735,8 +746,8 @@ function LessonPlanData() {
                             <td className="text-center px-2 lg:px-2 border border-gray-950 text-sm">
                               <p
                                 className={`whitespace-no-wrap relative top-2 ${student.late === "Y"
-                                  ? "text-red-600"
-                                  : "text-gray-900"
+                                    ? "text-red-600"
+                                    : "text-gray-900"
                                   }`}
                               >
                                 {student?.name
@@ -749,9 +760,9 @@ function LessonPlanData() {
                                         .map(
                                           (part) =>
                                             part.charAt(0).toUpperCase() +
-                                            part.slice(1)
+                                            part.slice(1),
                                         )
-                                        .join("'")
+                                        .join("'"),
                                     )
                                     .join(" ")
                                   : " "}
@@ -761,8 +772,8 @@ function LessonPlanData() {
                             <td className="text-center px-2 lg:px-2 border border-gray-950 text-sm">
                               <p
                                 className={`whitespace-no-wrap relative top-2 ${student.late === "Y"
-                                  ? "text-red-600"
-                                  : "text-gray-900"
+                                    ? "text-red-600"
+                                    : "text-gray-900"
                                   }`}
                               >
                                 {student.phone || " "}
@@ -770,15 +781,15 @@ function LessonPlanData() {
                             </td>
                             <td className="text-center px-2 lg:px-2 border border-gray-950 text-sm">
                               <p
-                                className={`whitespace-no-wrap relative top-2 ${student.late === "Y"
-                                  ? "text-red-600"
-                                  : "text-gray-900"
+                                className={`whitespace-no-wrap relative top-1 ${student.late === "Y"
+                                    ? "text-red-600"
+                                    : "text-gray-900"
                                   }`}
                               >
                                 <p
-                                  className={`whitespace-no-wrap relative top-2 ${student.late === "Y"
-                                    ? "text-red-600"
-                                    : "text-gray-900"
+                                  className={`whitespace-no-wrap relative top-1 ${student.late === "Y"
+                                      ? "text-red-600"
+                                      : "text-gray-900"
                                     }`}
                                 >
                                   {student.pending_classes || "-"}
@@ -828,7 +839,7 @@ function LessonPlanData() {
                       </tr>
                     </thead>
                     <tbody>
-                      {loading ? (
+                      {loadingPendingApproval ? (
                         <tr>
                           <td
                             colSpan="9"
@@ -847,8 +858,8 @@ function LessonPlanData() {
                             <td className="sm:px-0.5 text-center lg:px-1 border border-gray-950 text-sm">
                               <p
                                 className={`whitespace-no-wrap relative top-2 ${student.late === "Y"
-                                  ? "text-red-600"
-                                  : "text-gray-900"
+                                    ? "text-red-600"
+                                    : "text-gray-900"
                                   }`}
                               >
                                 {currentPage * pageSize + index + 1}
@@ -858,8 +869,8 @@ function LessonPlanData() {
                             <td className="text-center px-2 lg:px-2 border border-gray-950 text-sm">
                               <p
                                 className={`whitespace-no-wrap relative top-2 ${student.late === "Y"
-                                  ? "text-red-600"
-                                  : "text-gray-900"
+                                    ? "text-red-600"
+                                    : "text-gray-900"
                                   }`}
                               >
                                 {student?.name
@@ -872,9 +883,9 @@ function LessonPlanData() {
                                         .map(
                                           (part) =>
                                             part.charAt(0).toUpperCase() +
-                                            part.slice(1)
+                                            part.slice(1),
                                         )
-                                        .join("'")
+                                        .join("'"),
                                     )
                                     .join(" ")
                                   : " "}
@@ -884,8 +895,8 @@ function LessonPlanData() {
                             <td className="text-center px-2 lg:px-2 border border-gray-950 text-sm">
                               <p
                                 className={`whitespace-no-wrap relative top-2 ${student.late === "Y"
-                                  ? "text-red-600"
-                                  : "text-gray-900"
+                                    ? "text-red-600"
+                                    : "text-gray-900"
                                   }`}
                               >
                                 {student.phone || " "}
@@ -893,15 +904,15 @@ function LessonPlanData() {
                             </td>
                             <td className="text-center px-2 lg:px-2 border border-gray-950 text-sm">
                               <p
-                                className={`whitespace-no-wrap relative top-2 ${student.late === "Y"
-                                  ? "text-red-600"
-                                  : "text-gray-900"
+                                className={`whitespace-no-wrap relative top-1 ${student.late === "Y"
+                                    ? "text-red-600"
+                                    : "text-gray-900"
                                   }`}
                               >
                                 <p
-                                  className={`whitespace-no-wrap relative top-2 ${student.late === "Y"
-                                    ? "text-red-600"
-                                    : "text-gray-900"
+                                  className={`whitespace-no-wrap relative top-1 ${student.late === "Y"
+                                      ? "text-red-600"
+                                      : "text-gray-900"
                                     }`}
                                 >
                                   {student.pending_classes || "-"}
