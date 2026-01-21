@@ -103,7 +103,7 @@ const LowAttendanceTab = () => {
 
         key: `${cls.department_id}`,
       })),
-    [classesforForm]
+    [classesforForm],
   );
 
   const [selectedStudents, setSelectedStudents] = useState([]);
@@ -153,7 +153,7 @@ const LowAttendanceTab = () => {
           `${API_URL}/api/get_teacherclasseswithclassteacher?teacher_id=${regId}`,
           {
             headers: { Authorization: `Bearer ${token}` },
-          }
+          },
         );
 
         const mappedData =
@@ -214,13 +214,13 @@ const LowAttendanceTab = () => {
 
   // set default value to 75% from the same list
   const [selectedInstallment, setSelectedInstallment] = useState(
-    installmentOptions.find((opt) => opt.value === 75) || null
+    installmentOptions.find((opt) => opt.value === 75) || null,
   );
 
   useEffect(() => {
     if (!selectedInstallment) {
       setSelectedInstallment(
-        installmentOptions.find((opt) => opt.value === 75)
+        installmentOptions.find((opt) => opt.value === 75),
       );
     }
   }, [installmentOptions]);
@@ -396,7 +396,7 @@ const LowAttendanceTab = () => {
     let hasError = false;
     if (selectedStudents.length === 0) {
       toast.error(
-        "Please select at least one student to send message to the parents."
+        "Please select at least one student to send message to the parents.",
       );
       hasError = true;
     }
@@ -424,7 +424,7 @@ const LowAttendanceTab = () => {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       // Handle successful response
@@ -691,7 +691,11 @@ const LowAttendanceTab = () => {
                     backgroundColor: "#C03078",
                   }}
                 ></div>
-                <div className="card-body w-full ">
+                {/* <div className="card-body w-full "> */}
+                <div
+                  className={`card-body ${roleId === "T" ? "md:w-[75%] ml-[12%]" : "md:w-full"
+                    }`}
+                >
                   <div className="h-96 lg:h-96 overflow-y-scroll lg:overflow-x-hidden w-full mx-auto">
                     <div className="bg-white rounded-lg shadow-xs">
                       {loading ? (
@@ -752,11 +756,11 @@ const LowAttendanceTab = () => {
                                           <input
                                             type="checkbox"
                                             checked={selectedStudents.includes(
-                                              student.student_id
+                                              student.student_id,
                                             )}
                                             onChange={() =>
                                               handleCheckboxChange(
-                                                student.student_id
+                                                student.student_id,
                                               )
                                             }
                                             className="cursor-pointer"
@@ -770,7 +774,7 @@ const LowAttendanceTab = () => {
                                     <p className="text-gray-900 whitespace-no-wrap relative top-2">
                                       {toTitleCase(
                                         `${student.first_name || ""} ${student.mid_name || ""
-                                        } ${student.last_name || ""}`
+                                        } ${student.last_name || ""}`,
                                       )}
                                     </p>
                                   </td>

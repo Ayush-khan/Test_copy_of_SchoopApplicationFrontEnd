@@ -94,7 +94,7 @@ const TimeTableForTeacherDashbord = () => {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       const teacherCards = response?.data?.data?.timetable;
@@ -189,7 +189,7 @@ const TimeTableForTeacherDashbord = () => {
         `${API_URL}/api/teachers/${regId}/dashboard/timetable/${t_id}`,
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
 
       const teacherTimetable = response?.data?.data?.lessonPlanData;
@@ -244,7 +244,7 @@ const TimeTableForTeacherDashbord = () => {
                   timetableData(
                     item.t_id,
                     `${item.class}-${item.section}`,
-                    item.subject
+                    item.subject,
                   )
                 }
                 className="bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 border border-gray-200"
@@ -418,10 +418,10 @@ const TimeTableForTeacherDashbord = () => {
                       ([chapterName, lessons], chapterIndex) => {
                         // Separate normal and daily change lessons
                         const normalLessons = lessons.filter(
-                          (l) => l.change_daily === ""
+                          (l) => l.change_daily === "",
                         );
                         const dailyChangeLessons = lessons.filter(
-                          (l) => l.change_daily === "Y"
+                          (l) => l.change_daily === "Y",
                         );
 
                         // Function to group by heading
@@ -485,17 +485,18 @@ const TimeTableForTeacherDashbord = () => {
                                           <p className="text-sm text-gray-600  font-medium leading-relaxed whitespace-pre-line">
                                             {lesson.description}
                                           </p>
-                                          <p
-                                            className={`text-xs mt-1 ${lesson.start_date ===
-                                                new Date()
-                                                  .toISOString()
-                                                  .split("T")[0]
+                                          {/* <p
+                                            className={`text-xs mt-1 ${
+                                              lesson.start_date ===
+                                              new Date()
+                                                .toISOString()
+                                                .split("T")[0]
                                                 ? "text-red-600 font-semibold"
                                                 : ""
-                                              }`}
+                                            }`}
                                           >
                                             {formatDate(lesson.start_date)}
-                                          </p>
+                                          </p> */}
                                         </div>
                                       </div>
                                     </div>
@@ -657,13 +658,13 @@ const TimeTableForTeacherDashbord = () => {
                                               >
                                                 {/* Date (fixed width, left aligned) */}
                                                 <p
-                                                  className={`text-sm leading-tight whitespace-nowrap w-28 ${isToday
+                                                  className={`text-sm leading-tight whitespace-nowrap w-28 mt-1 ${isToday
                                                       ? "text-green-700 font-semibold"
                                                       : "text-gray-600"
                                                     }`}
                                                 >
                                                   {formatDate(
-                                                    lesson.start_date
+                                                    lesson.start_date,
                                                   )}
                                                 </p>
 
@@ -681,14 +682,14 @@ const TimeTableForTeacherDashbord = () => {
                                           })}
                                         </div>
                                       </div>
-                                    )
+                                    ),
                                   )}
                                 </div>
                               </div>
                             )}
                           </div>
                         );
-                      }
+                      },
                     )}
                   </div>
                 )

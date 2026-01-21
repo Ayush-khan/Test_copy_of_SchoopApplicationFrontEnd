@@ -464,44 +464,6 @@ function IndividualStudentTab() {
       console.error("Failed to fetch session data:", error);
     }
   };
-
-  // const classOptions = classes.map((cls) => ({
-  //   value: `${cls?.get_class?.name}-${cls.name}`,
-  //   label: `${cls?.get_class?.name} ${cls.name}`,
-  //   class_id: cls.class_id,
-  //   section_id: cls.section_id,
-  // }));
-
-  // const handleClassSelect = (selectedOption) => {
-  //   setNameError("");
-  //   setSelectedClass(selectedOption);
-
-  //   if (selectedOption) {
-  //     setclassIdForManage(selectedOption.class_id);
-  //     setSectionIdForManage(selectedOption.section_id);
-  //   } else {
-  //     setclassIdForManage("");
-  //     setSectionIdForManage("");
-  //   }
-  // };
-
-  // const fetchClassNames = async () => {
-  //   try {
-  //     const token = localStorage.getItem("authToken");
-  //     const response = await axios.get(`${API_URL}/api/get_class_section`, {
-  //       headers: { Authorization: `Bearer ${token}` },
-  //     });
-  //     if (Array.isArray(response.data)) {
-  //       setClasses(response.data);
-  //     } else {
-  //       setError("Unexpected data format");
-  //     }
-  //   } catch (error) {
-  //     console.error("Error fetching class and section names:", error);
-  //     setError("Error fetching class and section names");
-  //   }
-  // };
-
   const fetchClassNames = async () => {
     try {
       const token = localStorage.getItem("authToken");
@@ -512,7 +474,7 @@ function IndividualStudentTab() {
           `${API_URL}/api/get_teacherclasseswithclassteacher?teacher_id=${regId}`,
           {
             headers: { Authorization: `Bearer ${token}` },
-          }
+          },
         );
 
         const mappedData =
@@ -562,64 +524,6 @@ function IndividualStudentTab() {
     }
   };
 
-  // const handleSearch = async () => {
-  //   if (isSubmitting) return;
-  //   setIsSubmitting(true);
-  //   setSearchTerm("");
-  //   const today = new Date().toISOString().split("T")[0];
-
-  //   try {
-  //     const token = localStorage.getItem("authToken");
-  //     setLoading(true);
-  //     const response = await axios.get(
-  //       `${API_URL}/api/get_absentstudentfortoday`,
-  //       {
-  //         headers: { Authorization: `Bearer ${token}` },
-  //         params: {
-  //           class_id: classIdForManage,
-  //           section_id: sectionIdForManage,
-  //           date: today,
-  //           // date: "2025-11-03",
-  //         },
-  //       }
-  //     );
-  //     if (response?.data?.data.absent_student.length > 0) {
-  //       // Add a unique ID to each student (if missing)
-  //       const studentsWithIds = response.data.data.absent_student.map(
-  //         (s, index) => ({
-  //           ...s,
-  //           student_id: `${s?.student_id}`, // unique id
-  //         })
-  //       );
-
-  //       setSubjects(studentsWithIds);
-  //       setPageCount(Math.ceil(response.data.data.absent_student.length / 10));
-  //       setCountAbsentStudents(response.data.data.count_absent_student);
-  //     }
-  //     // if (response?.data?.data.absent_student.length > 0) {
-  //     //   setSubjects(response.data.data.absent_student);
-  //     //   setPageCount(Math.ceil(response.data.data.absent_student.length / 10));
-  //     //   setCountAbsentStudents(response.data.data.count_absent_student);
-  //     // }
-  //     else {
-  //       setSubjects([]);
-  //       setCountAbsentStudents("");
-  //       toast.error(
-  //         `Hooray! No students are absent today in ${
-  //           selectedClass?.label || ""
-  //         }`
-  //       );
-  //     }
-  //   } catch (error) {
-  //     console.error("Error fetching data:", error);
-  //     toast.error("Error fetching absent students");
-  //   } finally {
-  //     setIsSubmitting(false);
-  //     setLoading(false);
-  //     setSelectedStudents([]);
-  //     setSelectAll(false);
-  //   }
-  // };
 
   const handleSearch = async () => {
     if (isSubmitting) return;
@@ -663,7 +567,7 @@ function IndividualStudentTab() {
         setCountAbsentStudents("");
         toast.error(
           `Hooray! No students are absent today in ${selectedClass?.label || ""
-          }`
+          }`,
         );
       }
     } catch (error) {
@@ -731,7 +635,7 @@ function IndividualStudentTab() {
         postData,
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
 
       if (response.status === 200) {
@@ -780,7 +684,7 @@ function IndividualStudentTab() {
 
   const displayedSections = filteredSections.slice(
     currentPage * pageSize,
-    (currentPage + 1) * pageSize
+    (currentPage + 1) * pageSize,
   );
   const handleSend = async (student_id) => {
     try {
@@ -801,14 +705,14 @@ function IndividualStudentTab() {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       // Handle response
       if (response.status === 200 && response.data.success) {
         toast.success(
           response.data.message ||
-          `Message sent successfully to student ID: ${student_id}`
+          `Message sent successfully to student ID: ${student_id}`,
         );
         setMessage("");
         setSelectedStudents([]);
@@ -820,7 +724,7 @@ function IndividualStudentTab() {
       console.error("Error sending message:", error);
       toast.error(
         error.response?.data?.message ||
-        "An unexpected error occurred while sending the message."
+        "An unexpected error occurred while sending the message.",
       );
     } finally {
       // Reset loading state
@@ -832,6 +736,11 @@ function IndividualStudentTab() {
     <>
       <ToastContainer />
       <div className="md:mx-auto md:w-full p-4 bg-white">
+        {/* <div
+        className={`md:mx-auto p-4 bg-white ${
+          roleId === "T" ? "md:w-[70%]" : "md:w-full"
+        }`}
+      > */}
         <div className="bg-white rounded-md">
           {activeTab === "Manage" && (
             <div>
@@ -874,7 +783,11 @@ function IndividualStudentTab() {
               {/* Table Section */}
               {subjects.length > 0 && (
                 <div className="container mt-4">
-                  <div className="card mx-auto lg:w-full shadow-lg">
+                  {/* <div className="card mx-auto lg:w-full shadow-lg"> */}
+                  <div
+                    className={`card  shadow-lg ${roleId === "T" ? "md:w-[75%] ml-[12%]" : "md:w-full"
+                      }`}
+                  >
                     <div className="p-2 px-3 bg-gray-100 flex justify-between items-center">
                       <h3 className="text-gray-700 text-lg font-semibold">
                         Today's Absentees{" "}
@@ -954,8 +867,8 @@ function IndividualStudentTab() {
                                   <tr
                                     key={student.student_id}
                                     className={`${index % 2 === 0
-                                        ? "bg-white"
-                                        : "bg-gray-50"
+                                      ? "bg-white"
+                                      : "bg-gray-50"
                                       } hover:bg-red-50 transition-colors duration-150`}
                                   >
                                     {/* Sr.No */}
@@ -970,11 +883,11 @@ function IndividualStudentTab() {
                                           <input
                                             type="checkbox"
                                             checked={selectedStudents.includes(
-                                              student.student_id
+                                              student.student_id,
                                             )}
                                             onChange={() =>
                                               handleCheckboxChange(
-                                                student.student_id
+                                                student.student_id,
                                               )
                                             }
                                             className="cursor-pointer accent-red-600"
@@ -986,12 +899,12 @@ function IndividualStudentTab() {
                                     {/* Student Name */}
                                     <td className="text-center px-2 py-2 border border-gray-200 text-sm">
                                       {`${capitalizeFirstLetter(
-                                        student.first_name
+                                        student.first_name,
                                       )} ${capitalizeFirstLetter(
-                                        student.mid_name
+                                        student.mid_name,
                                       ) || ""
                                         } ${capitalizeFirstLetter(
-                                          student.last_name
+                                          student.last_name,
                                         )}`}
                                     </td>
 
@@ -1007,8 +920,8 @@ function IndividualStudentTab() {
                                         <td className="text-center px-2 py-2 border border-gray-200 text-sm">
                                           <span
                                             className={`px-2 py-1 rounded text-xs font-semibold ${student.messages_sent_count > 0
-                                                ? "bg-green-100 text-green-800"
-                                                : "bg-gray-100 text-gray-600"
+                                              ? "bg-green-100 text-green-800"
+                                              : "bg-gray-100 text-gray-600"
                                               }`}
                                           >
                                             {student.messages_sent_count}
@@ -1019,7 +932,7 @@ function IndividualStudentTab() {
                                         <td className="text-center px-2 py-2 border border-gray-200 text-sm text-gray-700">
                                           {student.last_message_sent_at ? (
                                             new Date(
-                                              student.last_message_sent_at
+                                              student.last_message_sent_at,
                                             ).toLocaleString("en-IN", {
                                               day: "2-digit",
                                               month: "short",
@@ -1058,8 +971,8 @@ function IndividualStudentTab() {
                                                 handleSend(student?.webhook_id)
                                               }
                                               className={`flex items-center justify-center mx-auto px-3 py-1 gap-1 text-xs md:text-sm font-medium rounded-md transition-all duration-200 ${sendingSMS[student?.student_id]
-                                                  ? "bg-blue-300 cursor-not-allowed"
-                                                  : "bg-blue-500 hover:bg-blue-600 text-white"
+                                                ? "bg-blue-300 cursor-not-allowed"
+                                                : "bg-blue-500 hover:bg-blue-600 text-white"
                                                 }`}
                                             >
                                               {sendingSMS[
@@ -1169,8 +1082,8 @@ function IndividualStudentTab() {
                               onClick={handleSubmit}
                               disabled={loading}
                               className={`text-white px-4 py-1 rounded font-bold transition-colors duration-200 ${loading
-                                  ? "bg-blue-400 cursor-not-allowed"
-                                  : "bg-blue-600 hover:bg-blue-700"
+                                ? "bg-blue-400 cursor-not-allowed"
+                                : "bg-blue-600 hover:bg-blue-700"
                                 }`}
                             >
                               {loading ? "Sending..." : "Send Message"}

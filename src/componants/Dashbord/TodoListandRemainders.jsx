@@ -57,7 +57,7 @@ function TodoListandRemainders() {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
       setRemaindersList(staffResponse.data?.data);
     } catch (error) {
@@ -124,7 +124,7 @@ function TodoListandRemainders() {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       const data = response.data.data;
@@ -174,6 +174,16 @@ function TodoListandRemainders() {
 
   const hasTodos = remainderlist.todoForToday.length > 0;
 
+  // const isClassTeacher = remainderlist?.isClassTeacher === true;
+  // const isAttendanceMarked = remainderlist?.isAttendanceMarked === true;
+  // const showAttendanceReminder = isClassTeacher && !isAttendanceMarked;
+  const isClassTeacher = remainderlist?.isClassTeacher === true;
+  const isAttendanceMarked = remainderlist?.isAttendanceMarked === true;
+
+  const showAttendanceReminder = isClassTeacher && !isAttendanceMarked;
+
+  console.log("showAttendanceReminder:", showAttendanceReminder);
+
   const lessonPlanCount =
     remainderlist?.incomplete_lesson_plan_for_next_week?.length || 0;
 
@@ -181,7 +191,10 @@ function TodoListandRemainders() {
 
   const todoCount = remainderlist?.todoForToday?.length || 0;
 
-  const totalRemaindersCount = lessonPlanCount + noticeCount + todoCount;
+  const attendanceReminderCount = showAttendanceReminder ? 1 : 0;
+
+  const totalRemaindersCount =
+    lessonPlanCount + noticeCount + todoCount + attendanceReminderCount;
 
   const handleToggleTodoStatus = async (todo) => {
     const token = localStorage.getItem("authToken");
@@ -198,7 +211,7 @@ function TodoListandRemainders() {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       if (response.data.status === "success") {
@@ -250,7 +263,7 @@ function TodoListandRemainders() {
           },
           {
             headers: { Authorization: `Bearer ${token}` },
-          }
+          },
         );
       } else {
         // 🔹 ADD NEW TODO
@@ -263,7 +276,7 @@ function TodoListandRemainders() {
           },
           {
             headers: { Authorization: `Bearer ${token}` },
-          }
+          },
         );
       }
 
@@ -271,7 +284,7 @@ function TodoListandRemainders() {
         toast.success(
           todoMode === "edit"
             ? "Todo updated successfully!"
-            : "Todo added successfully!"
+            : "Todo added successfully!",
         );
 
         setTodoForm({ title: "", dueDate: "", description: "" });
@@ -333,11 +346,9 @@ function TodoListandRemainders() {
         </button> */}
 
         <button
-          className={`${
-            Styles.tab
-          } flex items-center justify-between w-full font-bold p-2 text-sm ${
-            activeTab === "todolist" ? Styles.active : ""
-          } sm:w-1/2`}
+          className={`${Styles.tab
+            } flex items-center justify-between w-full font-bold p-2 text-sm ${activeTab === "todolist" ? Styles.active : ""
+            } sm:w-1/2`}
           onClick={() => {
             handleTabChange("todolist");
             setTodoMode("view");
@@ -348,9 +359,8 @@ function TodoListandRemainders() {
           <div className="flex items-center gap-3 text-sm">
             <span
               title="Add Todo"
-              className={`cursor-pointer ${
-                todoMode === "add" ? "text-green-500" : ""
-              }`}
+              className={`cursor-pointer ${todoMode === "add" ? "text-green-500" : ""
+                }`}
               onClick={(e) => {
                 e.stopPropagation();
                 setTodoMode("add");
@@ -360,10 +370,9 @@ function TodoListandRemainders() {
             </span>
 
             <span
-              title="View Today Todos"
-              className={`cursor-pointer ${
-                todoMode === "view" ? "text-blue-500" : ""
-              }`}
+              title="View Todo's"
+              className={`cursor-pointer ${todoMode === "view" ? "text-blue-500" : ""
+                }`}
               onClick={(e) => {
                 e.stopPropagation();
                 setTodoMode("view");
@@ -373,10 +382,9 @@ function TodoListandRemainders() {
             </span>
 
             <span
-              title="View All Todos"
-              className={`cursor-pointer ${
-                todoMode === "viewall" ? "text-purple-500" : ""
-              }`}
+              title="View All Todo's"
+              className={`cursor-pointer ${todoMode === "viewall" ? "text-purple-500" : ""
+                }`}
               onClick={(e) => {
                 e.stopPropagation();
                 setTodoMode("viewall");
@@ -388,11 +396,9 @@ function TodoListandRemainders() {
         </button>
 
         <button
-          className={`${
-            Styles.tab
-          } flex items-center justify-center gap-2 w-full font-bold p-2 text-sm ${
-            activeTab === "remainders" ? Styles.active : ""
-          } sm:w-1/2`}
+          className={`${Styles.tab
+            } flex items-center justify-center gap-2 w-full font-bold p-2 text-sm ${activeTab === "remainders" ? Styles.active : ""
+            } sm:w-1/2`}
           onClick={() => handleTabChange("remainders")}
         >
           <span>Reminders</span>
@@ -489,7 +495,7 @@ function TodoListandRemainders() {
               {todoList.map((todo) => (
                 <div
                   key={todo.id}
-                  className="relative bg-white rounded-xl shadow-md hover:shadow-lg transition p-3 flex flex-col justify-between border-l-4 border-pink-500"
+                  className="relative bg-white rounded-xl shadow-md hover:shadow-lg transition p-2 flex flex-col justify-between border-l-4 border-pink-500"
                 >
                   <div className="flex justify-between items-start mb-2">
                     <h3 className="text-base font-medium text-gray-800">
@@ -599,7 +605,7 @@ function TodoListandRemainders() {
               {todoAll.map((todo) => (
                 <div
                   key={todo.id}
-                  className="relative bg-white rounded-xl shadow-md hover:shadow-lg transition p-3 flex flex-col justify-between border-l-4 border-pink-500"
+                  className="relative bg-white rounded-xl shadow-md hover:shadow-lg transition p-2 flex flex-col justify-between border-l-4 border-pink-500"
                 >
                   <div className="flex justify-between items-start mb-2">
                     <h3 className="text-base font-semibold text-gray-800">
@@ -646,10 +652,29 @@ function TodoListandRemainders() {
 
         {activeTab === "remainders" && (
           <>
-            {remainderlist.incomplete_lesson_plan_for_next_week.length > 0 ||
-            remainderlist.notice_for_teacher.length > 0 ||
-            remainderlist.todoForToday.length > 0 ? (
+            {showAttendanceReminder ||
+              remainderlist.incomplete_lesson_plan_for_next_week.length > 0 ||
+              remainderlist.notice_for_teacher.length > 0 ||
+              remainderlist.todoForToday.length > 0 ? (
               <div className="space-y-5">
+                {showAttendanceReminder && (
+                  <div>
+                    <h2 className="text-base font-semibold text-red-600 mb-3">
+                      🕘 Attendance Reminder
+                    </h2>
+
+                    <div className="bg-white rounded-xl shadow-md p-2 border-l-4 border-red-400 hover:shadow-lg transition">
+                      <p className="text-sm font-semibold text-gray-800 mb-2">
+                        ❗Attendance not marked today
+                      </p>
+
+                      {/* <p className="text-sm text-gray-600">
+                        Please mark today’s attendance for your class.
+                      </p> */}
+                    </div>
+                  </div>
+                )}
+
                 {hasTodos && (
                   <div>
                     <h2 className="text-base font-semibold text-blue-600 ">
@@ -763,7 +788,7 @@ function TodoListandRemainders() {
                                   ))}
                               </div> */}
                           </div>
-                        )
+                        ),
                       )}
                     </div>
                   </div>

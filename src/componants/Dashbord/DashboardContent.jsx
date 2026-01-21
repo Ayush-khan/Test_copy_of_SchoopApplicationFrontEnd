@@ -41,7 +41,7 @@ const DashboardContent = () => {
     present: 0,
   });
   const [sortNameCookie, setSortNameCookie] = useState("");
-  console.log("school name", sortNameCookie);
+  // console.log("school name", sortNameCookie);
   const [staffData, setStaffData] = useState({
     teachingStaff: "",
     nonTeachingStaff: "",
@@ -66,6 +66,10 @@ const DashboardContent = () => {
   const [pendingStudentFeeT, setPendingStudentFeeT] = useState("");
   const [pendingStudentCount, setPendingStudentCount] = useState("");
 
+  const [markAbsentees, setMarkAbsentees] = useState("");
+  const [classTeacher, setClassTeacher] = useState([]);
+  const [isClassTeacher, setIsClassTeacher] = useState("");
+
   const [loading, setLoading] = useState(true);
 
   // useEffect(() => {
@@ -87,14 +91,18 @@ const DashboardContent = () => {
   }, []);
 
   useEffect(() => {
-    if (!roleId || !sortNameCookie) return;
+    if (!roleId || !sortNameCookie || !regId) return;
+
+    if (regId) {
+      fetchClassTeacherData();
+    }
 
     if (roleId === "T") {
       fetchTeachersCardData();
     } else {
       fetchData();
     }
-  }, [roleId, sortNameCookie]);
+  }, [roleId, sortNameCookie, regId]);
 
   const isSACSManagerDashboard = sortNameCookie === "SACS" && roleId === "M";
 
@@ -129,7 +137,7 @@ const DashboardContent = () => {
     try {
       const token = localStorage.getItem("authToken");
       const roleId = localStorage.getItem("roleId");
-      console.log("**** role ID******", roleId);
+      // console.log("**** role ID******", roleId);
 
       if (!token) {
         toast.error("Authentication token not found Please login again");
@@ -155,7 +163,7 @@ const DashboardContent = () => {
           Authorization: `Bearer ${token}`,
         },
       });
-      console.log("reponse of the staffAPI", staffResponse);
+      // console.log("reponse of the staffAPI", staffResponse);
       setStaffData({
         teachingStaff: staffResponse?.data?.teachingStaff,
         attendanceteachingstaff: staffResponse?.data?.attendanceteachingstaff,
@@ -173,12 +181,12 @@ const DashboardContent = () => {
 
             "Role-Id": roleId, // add roleId for different role
           },
-        }
+        },
       );
-      console.log(
-        "***the roleiD count*******",
-        responseTickingCount.data.count
-      );
+      // console.log(
+      //   "***the roleiD count*******",
+      //   responseTickingCount.data.count,
+      // );
       setTicketCount(responseTickingCount.data.count);
       // Fetch the data of approveLeave count
       const responseApproveLeaveCount = await axios.get(
@@ -187,7 +195,7 @@ const DashboardContent = () => {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
       setApproveLeaveCount(responseApproveLeaveCount?.data?.data);
 
@@ -200,7 +208,7 @@ const DashboardContent = () => {
       // setPendingFee(pendingFeeCount.data.pendingFee);
       setCollectedFee(pendingFeeCount.data["Collected Fees"]);
       setPendingFee(pendingFeeCount.data["Pending Fees"]);
-      console.log("pendingFee count is here******", pendingFeeCount.data);
+      // console.log("pendingFee count is here******", pendingFeeCount.data);
 
       // Fetch birthday Count
       const Birthdaycount = await axios.get(
@@ -209,12 +217,12 @@ const DashboardContent = () => {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
-      console.log(
-        "the birthday count and it's value is=",
-        Birthdaycount.data.count
-      );
+      // console.log(
+      //   "the birthday count and it's value is=",
+      //   Birthdaycount.data.count,
+      // );
       setStaffBirthday(Birthdaycount.data.count);
 
       // fetch Approved lesson plane count
@@ -224,13 +232,59 @@ const DashboardContent = () => {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
       setApprovedLessonPlaneCount(ApprovedLessonPlane.data.data);
-      console.log("pendingFee count is here******", pendingFeeCount.data.data);
+      // console.log("pendingFee count is here******", pendingFeeCount.data.data);
+
+      const markAbsenttesCount = await axios.get(
+        `${API_URL}/api/attendance/notmarked/count`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+      const markAbsenteesData =
+        markAbsenttesCount?.data?.AttendanceNotMarkedCount;
+
+      console.log("mark absettes", markAbsenteesData);
+      setMarkAbsentees(markAbsenteesData);
     } catch (error) {
       setError(error.message);
       console.error("Error fetching data:", error);
+    }
+  };
+
+  const fetchClassTeacherData = async () => {
+    setLoading(true);
+    const token = localStorage.getItem("authToken");
+
+    try {
+      const response = await axios.get(
+        `${API_URL}/api/get_classes_of_classteacher?teacher_id=${regId}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
+
+      const classData = response.data.data;
+      console.log("class teacher", classData);
+
+      setClassTeacher(classData);
+
+      // Check if the teacher is a class teacher
+      const isClassTeacherFlag = classData.some(
+        (cls) => cls.is_class_teacher === 1,
+      )
+        ? 1
+        : 0; // store as 1 or 0
+      setIsClassTeacher(isClassTeacherFlag);
+
+      setLoading(false);
+    } catch (err) {
+      console.error("Error fetching class teacher data:", err);
+      setLoading(false);
     }
   };
 
@@ -250,34 +304,34 @@ const DashboardContent = () => {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       const teacherCards = response?.data?.data;
-      console.log("Teacher card api..", teacherCards);
+      // console.log("Teacher card api..", teacherCards);
       setTeachersCardsData(teacherCards);
 
       const studentCard = response?.data?.data?.studentCard;
-      console.log("student T card api..", studentCard);
+      // console.log("student T card api..", studentCard);
       setStudentCardT({
         total: studentCard?.totalStudents ?? 0,
         present: studentCard?.totalStudentsPresentToday ?? 0,
       });
 
       const homeworkCard = response?.data?.data?.homeworkCard;
-      console.log("homework T card api..", homeworkCard);
+      // console.log("homework T card api..", homeworkCard);
       setHomeworkCardT({
         submissiondate: homeworkCard?.countOfHomeworksDueToday ?? 0,
       });
 
       const birthdayCard = response?.data?.data?.birthDayCard;
-      console.log("birthday T card api..", birthdayCard);
+      // console.log("birthday T card api..", birthdayCard);
       setBirthdayCardT({
         birthdaycount: birthdayCard?.countOfBirthdaysToday ?? 0,
       });
 
       const defaulterCard = response.data?.data?.defaulterCount;
-      console.log("defaulter T card api..", defaulterCard);
+      // console.log("defaulter T card api..", defaulterCard);
       setPendingStudentCount(defaulterCard?.totalNumberOfDefaulters);
       setPendingStudentFeeT(defaulterCard?.totalPendingAmount);
     } catch (error) {
@@ -297,6 +351,31 @@ const DashboardContent = () => {
             <ToastContainer />
             <div className="flex flex-col lg:flex-row items-start justify-between w-full gap-4 p-6 ">
               <div className="w-full lg:w-2/3  grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {/* <Link to="/studentAbsent" className="no-underline">
+                  <CardStuStaf
+                    title="Student"
+                    roleId={roleId}
+                    TotalValue={
+                      roleId === "T" ? studentCardT?.total : studentData?.total
+                    }
+                    presentValue={
+                      roleId === "T"
+                        ? studentCardT?.present
+                        : studentData?.present
+                    }
+                    color="#4CAF50"
+                    icon={
+                      <FaUsersLine
+                        style={{
+                          color: "violet",
+                          backgroundColor: "white",
+                          padding: "10px",
+                          borderRadius: "50%",
+                        }}
+                      />
+                    }
+                  />
+                </Link> */}
                 <Link to="/studentAbsent" className="no-underline">
                   <CardStuStaf
                     title="Student"
@@ -309,6 +388,7 @@ const DashboardContent = () => {
                         ? studentCardT?.present
                         : studentData?.present
                     }
+                    badge={markAbsentees} // 👈 badge value
                     color="#4CAF50"
                     icon={
                       <FaUsersLine
@@ -782,6 +862,64 @@ const DashboardContent = () => {
                     }
                   />
                 </Link>
+                {/* {isClassTeacher === 1 ? (
+                  <Link to="/studentAbsent" className="no-underline">
+                    <CardStuStaf
+                      title="Student"
+                      roleId={roleId}
+                      TotalValue={
+                        roleId === "T"
+                          ? studentCardT?.total
+                          : studentData?.total
+                      }
+                      presentValue={
+                        roleId === "T"
+                          ? studentCardT?.present
+                          : studentData?.present
+                      }
+                      color="#4CAF50"
+                      icon={
+                        <FaUsersLine
+                          style={{
+                            color: "violet",
+                            backgroundColor: "white",
+                            padding: "10px",
+                            borderRadius: "50%",
+                          }}
+                        />
+                      }
+                    />
+                  </Link>
+                ) : (
+                  <Link to="#" className="no-underline">
+                    <CardStuStaf
+                      title="Student"
+                      roleId={roleId}
+                      TotalValue={
+                        isClassTeacher === 1 ? studentCardT?.total : " "
+                      }
+                      presentValue={
+                        isClassTeacher === 1 ? studentCardT?.present : " "
+                      }
+                      color="#4CAF50"
+                      icon={
+                        <FaUsersLine
+                          style={{
+                            color: "violet",
+                            backgroundColor: "white",
+                            padding: "10px",
+                            borderRadius: "50%",
+                          }}
+                        />
+                      }
+                      className={
+                        isClassTeacher !== 1
+                          ? "cursor-not-allowed opacity-60"
+                          : "cursor-pointer"
+                      }
+                    />
+                  </Link>
+                )} */}
 
                 <Link to="#" className="no-underline">
                   <Card
