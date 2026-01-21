@@ -1,5 +1,4 @@
 import {
-  FaSchool,
   FaUserGroup,
   FaUserShield,
   FaUsersLine,
@@ -7,38 +6,19 @@ import {
 import Card from "../common/Card.jsx";
 import EventCard from "./EventCard.jsx";
 import CardStuStaf from "../common/CardStuStaf.jsx";
-import StudentsChart from "../Dashbord/Charts/StudentsChart.jsx";
 import {
   FaBirthdayCake,
-  FaCalendarAlt,
-  FaChalkboardTeacher,
   FaClipboardCheck,
 } from "react-icons/fa";
 import { HiCollection } from "react-icons/hi";
-import { IoTicket } from "react-icons/io5";
-import NoticeBord from "./NoticeBord.jsx";
 import axios from "axios";
 import { useEffect, useState } from "react";
-import HouseStudentChart from "./Charts/HouseStudentChart.jsx";
-import TableFeeCollect from "./TableFeeCollect.jsx";
 import { Link, useNavigate } from "react-router-dom";
-import LoadingSpinner from "../common/LoadingSpinner.jsx";
 import { ToastContainer, toast } from "react-toastify";
 import { RiPassValidFill } from "react-icons/ri";
 import { GiTeacher } from "react-icons/gi";
-import { TfiWrite } from "react-icons/tfi";
-import { MdAssessment, MdGroup } from "react-icons/md";
-import ClassWiseAcademicPerformance from "./ClassWiseAcademicPerformance.jsx";
-import TimeTableForTeacherDashbord from "./TimeTableForTeacherDashbord.jsx";
-import TicketForDashboard from "./TicketForDashboard.jsx";
-
-import { MdOutlinePayments } from "react-icons/md";
-import { MdOutlineWarningAmber } from "react-icons/md";
-import { HiOutlineDocumentText } from "react-icons/hi";
-import { MdOutlineAssignment } from "react-icons/md";
-import TodoListandRemainders from "./TodoListandRemainders.jsx";
 import StudentAttendanceChart from "./Charts/StudentAttendanceChart.jsx";
-import StudentAttendanceSACS from "./Charts/StudentAttendanceSACS.jsx";
+
 
 const PrincipalDashboardSACS = () => {
   const API_URL = import.meta.env.VITE_API_URL; // url for host
