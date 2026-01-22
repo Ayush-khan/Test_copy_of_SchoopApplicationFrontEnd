@@ -9,6 +9,8 @@ import { ToastContainer, toast } from "react-toastify";
 
 const UserVerification = () => {
   const API_URL = import.meta.env.VITE_API_URL;
+  const VITE_API_VALIDATE_USER = import.meta.env.VITE_API_VALIDATE_USER;
+  const VITE_API_CHECK_USER = import.meta.env.VITE_API_CHECK_USER;
   const [userId, setUserId] = useState("");
   const [newPasswordLoading, setNewPasswordLoading] = useState(false);
   const [motherName, setMotherName] = useState("");
@@ -56,8 +58,7 @@ const UserVerification = () => {
     setNewPasswordLoading(true);
 
     try {
-      const response = await axios.post(
-        `https://api.aceventura.in/evolvuUserService/validate_user`,
+      const response = await axios.post(`${VITE_API_VALIDATE_USER}`,
         {
           user_id: userId,
         }
@@ -67,8 +68,7 @@ const UserVerification = () => {
         const shortName = response.data[0].short_name;
 
         // Second API call using shortName
-        const secondResponse = await axios.post(
-          `https://api.aceventura.in/demo/evolvuUserService/check_user_access`,
+        const secondResponse = await axios.post(`${VITE_API_CHECK_USER}`,
           {
             short_name: shortName,
           }
@@ -85,7 +85,7 @@ const UserVerification = () => {
     } catch (error) {
       toast.error(
         error.response?.data?.message ||
-          "Something went wrong. Please try again."
+        "Something went wrong. Please try again."
       );
     } finally {
       setLoading(false);
@@ -158,9 +158,8 @@ const UserVerification = () => {
                     type="button"
                     onClick={handleResetPassword}
                     disabled={loading}
-                    className={`bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-6 rounded shadow ${
-                      loading ? "opacity-50 cursor-not-allowed" : ""
-                    }`}
+                    className={`bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-6 rounded shadow ${loading ? "opacity-50 cursor-not-allowed" : ""
+                      }`}
                   >
                     {loading ? (
                       <span className="flex items-center justify-center">

@@ -1,60 +1,3 @@
-// // // //this is responsive
-// import React, { useState, useEffect } from "react";
-// import LoginForm from "./LoginForm";
-// import { useNavigate } from "react-router-dom";
-// import styles from "../CSS/LoginParent.module.css";
-// import Notification from "./Notification";
-// import { IoArrowUndoCircle } from "react-icons/io5";
-
-// const LandingPage = () => {
-//   const [isMobileView, setIsMobileView] = useState(window.innerWidth <= 768);
-//   const navigate = useNavigate();
-
-//   useEffect(() => {
-//     const handleResize = () => {
-//       setIsMobileView(window.innerWidth <= 768);
-//     };
-
-//     window.addEventListener("resize", handleResize);
-//     return () => {
-//       window.removeEventListener("resize", handleResize);
-//     };
-//   }, []);
-
-//   const showNotificationPage = () => {
-//     navigate("/notification");
-//   };
-
-//   return (
-//     <div className={styles.loginContainer}>
-//       <div
-//         className={`${styles.loginContainerChild} bg-none lg:h-5/6 lg:flex lg:justify-start`}
-//       >
-//         <LoginForm />
-//         {isMobileView && (
-//           <button
-//             className={`${styles.notificationButton}  flex justify-between`}
-//             onClick={showNotificationPage}
-//           >
-//             <span>
-//               <IoArrowUndoCircle fontSize={"1.5em"} />
-//             </span>{" "}
-//             Gerneral Instruction
-//           </button>
-//         )}
-//       </div>
-//       {!isMobileView && (
-//         <div
-//           className={`${styles.notificationContainer}  flex lg:justify-end lg:w-full lg:h-5/6`}
-//         >
-//           <Notification />
-//         </div>
-//       )}
-//     </div>
-//   );
-// };
-
-// export default LandingPage;
 import { useState, useEffect } from "react";
 import axios from "axios";
 import styles from "../CSS/Navbar.module.css";
@@ -66,6 +9,9 @@ import { MdMarkEmailRead } from "react-icons/md";
 import { IoArrowUndoCircle } from "react-icons/io5";
 
 const LandingPage = () => {
+  const VITE_API_VALIDATE_STAFF_USER = import.meta.env.VITE_API_VALIDATE_STAFF_USER;
+  const VITE_API_VALIDATE_USER = import.meta.env.VITE_API_VALIDATE_USER;
+
   const [userId, setUserId] = useState("");
   const [logoUrl, setLogoUrl] = useState("");
   const [schoolImageUrl, setSchoolImageUrl] = useState("");
@@ -93,7 +39,6 @@ const LandingPage = () => {
     } else {
       lastYear = year; // Before July, academic year ends current year
     }
-
     return `2016-${lastYear}`;
   }
 
@@ -170,8 +115,8 @@ const LandingPage = () => {
     let shortName = "0";
 
     // Step 1: validate_staff_user
-    const staffResponse = await axios.post(
-      "https://api.aceventura.in/demo/evolvuUserService/validate_staff_user",
+    const staffResponse = await axios.post(`${VITE_API_VALIDATE_STAFF_USER}`,
+
       // "https://api.aceventura.in/demo/evolvuUserService/vaidate_staff_user"
 
       formData
@@ -185,9 +130,9 @@ const LandingPage = () => {
       shortName = staffResponse.data[0].short_name;
     } else {
       // Step 2: fallback to validate_user
-      const userResponse = await axios.post(
+      const userResponse = await axios.post(`${VITE_API_VALIDATE_USER}`,
         // "https://api.aceventura.in/demo/evolvuUserService/validate_user",
-        "https://api.aceventura.in/demo/evolvuUserService/validate_user",
+        // "https://api.aceventura.in/demo/evolvuUserService/validate_user",
 
         formData
       );
@@ -259,8 +204,8 @@ const LandingPage = () => {
         error.response?.data === "Not a valid user"
           ? "Not a valid user"
           : error.message ||
-            error.response?.data?.message ||
-            "Something went wrong. Please try again.";
+          error.response?.data?.message ||
+          "Something went wrong. Please try again.";
       toast.error(errMsg);
       setBackendError(errMsg);
     } finally {
@@ -310,9 +255,8 @@ const LandingPage = () => {
       <div
         className={loginStyles.loginContainer}
         style={{
-          background: `url(${
-            schoolImageUrl || "/default-bg.jpg"
-          }) center center/cover no-repeat fixed`,
+          background: `url(${schoolImageUrl || "/default-bg.jpg"
+            }) center center/cover no-repeat fixed`,
         }}
       >
         <ToastContainer />
@@ -459,9 +403,8 @@ const LandingPage = () => {
                   type="submit"
                   onClick={handleResetPassword}
                   disabled={loading}
-                  className={`bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-6 rounded shadow ${
-                    loading ? "opacity-50 cursor-not-allowed" : ""
-                  }`}
+                  className={`bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-6 rounded shadow ${loading ? "opacity-50 cursor-not-allowed" : ""
+                    }`}
                 >
                   {loading ? "Loading..." : "Next"}
                 </button>
