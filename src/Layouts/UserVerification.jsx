@@ -68,7 +68,7 @@ const UserVerification = () => {
 
         // Second API call using shortName
         const secondResponse = await axios.post(
-          `https://api.aceventura.in/demo/evolvuUserService/check_user_access`,
+          `https://api.aceventura.in/evolvuUserService/check_user_access`,
           {
             short_name: shortName,
           }
@@ -85,7 +85,7 @@ const UserVerification = () => {
     } catch (error) {
       toast.error(
         error.response?.data?.message ||
-          "Something went wrong. Please try again."
+        "Something went wrong. Please try again."
       );
     } finally {
       setLoading(false);
@@ -158,9 +158,8 @@ const UserVerification = () => {
                     type="button"
                     onClick={handleResetPassword}
                     disabled={loading}
-                    className={`bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-6 rounded shadow ${
-                      loading ? "opacity-50 cursor-not-allowed" : ""
-                    }`}
+                    className={`bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-6 rounded shadow ${loading ? "opacity-50 cursor-not-allowed" : ""
+                      }`}
                   >
                     {loading ? (
                       <span className="flex items-center justify-center">

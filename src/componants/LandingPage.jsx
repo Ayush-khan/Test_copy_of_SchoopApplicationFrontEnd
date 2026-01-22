@@ -171,7 +171,7 @@ const LandingPage = () => {
 
     // Step 1: validate_staff_user
     const staffResponse = await axios.post(
-      "https://api.aceventura.in/demo/evolvuUserService/validate_staff_user",
+      "https://api.aceventura.in/evolvuUserService/validate_staff_user",
       // "https://api.aceventura.in/demo/evolvuUserService/vaidate_staff_user"
 
       formData
@@ -259,8 +259,8 @@ const LandingPage = () => {
         error.response?.data === "Not a valid user"
           ? "Not a valid user"
           : error.message ||
-            error.response?.data?.message ||
-            "Something went wrong. Please try again.";
+          error.response?.data?.message ||
+          "Something went wrong. Please try again.";
       toast.error(errMsg);
       setBackendError(errMsg);
     } finally {
@@ -310,9 +310,8 @@ const LandingPage = () => {
       <div
         className={loginStyles.loginContainer}
         style={{
-          background: `url(${
-            schoolImageUrl || "/default-bg.jpg"
-          }) center center/cover no-repeat fixed`,
+          background: `url(${schoolImageUrl || "/default-bg.jpg"
+            }) center center/cover no-repeat fixed`,
         }}
       >
         <ToastContainer />
@@ -459,9 +458,8 @@ const LandingPage = () => {
                   type="submit"
                   onClick={handleResetPassword}
                   disabled={loading}
-                  className={`bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-6 rounded shadow ${
-                    loading ? "opacity-50 cursor-not-allowed" : ""
-                  }`}
+                  className={`bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-6 rounded shadow ${loading ? "opacity-50 cursor-not-allowed" : ""
+                    }`}
                 >
                   {loading ? "Loading..." : "Next"}
                 </button>
