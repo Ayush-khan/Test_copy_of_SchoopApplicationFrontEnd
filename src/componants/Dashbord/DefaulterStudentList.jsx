@@ -39,7 +39,7 @@ function DefaulterStudentList() {
         `${API_URL}/api/teachers/class-teacher/defaulter-students`,
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
 
       const raw = response.data;
@@ -63,6 +63,17 @@ function DefaulterStudentList() {
 
       //   setPageCount(Math.ceil(studentsList.length / pageSize));
     } catch (error) {
+      // If backend sent a response
+      if (error.response?.data) {
+        const { status, message } = error.response.data;
+
+        if (status === false) {
+          toast.error(message); // "No data found for this teacher"
+          return;
+        }
+      }
+
+      // Fallback
       toast.error(error.message || "Error fetching data");
     } finally {
       setLoading(false);
@@ -116,9 +127,8 @@ function DefaulterStudentList() {
   //   });
   const filteredSections = sections.filter((leave) => {
     const searchLower = searchTerm.trim().toLowerCase();
-    const fullName = `${leave.first_name || ""} ${leave.mid_name || ""} ${
-      leave.last_name || ""
-    }`.toLowerCase();
+    const fullName = `${leave.first_name || ""} ${leave.mid_name || ""} ${leave.last_name || ""
+      }`.toLowerCase();
 
     return (
       leave.first_name.toLowerCase().includes(searchLower) || // filter by name
@@ -179,11 +189,11 @@ function DefaulterStudentList() {
       });
 
       return acc;
-    }, {})
+    }, {}),
   ).map((student) => ({
     ...student,
     installments: student.installments.sort(
-      (a, b) => a.installment - b.installment
+      (a, b) => a.installment - b.installment,
     ),
   }));
 
@@ -193,7 +203,7 @@ function DefaulterStudentList() {
 
   const displayedSections = groupedStudents.slice(
     currentPage * pageSize,
-    (currentPage + 1) * pageSize
+    (currentPage + 1) * pageSize,
   );
 
   const handlePageClick = (data) => {
@@ -333,9 +343,9 @@ function DefaulterStudentList() {
                           {student.installments.map((inst, iIndex) => (
                             <tr
                               key={`${student.roll_no}-${iIndex}`}
-                              //   className={
-                              //     iIndex % 2 === 0 ? "bg-white" : "bg-white"
-                              //   }
+                            //   className={
+                            //     iIndex % 2 === 0 ? "bg-white" : "bg-white"
+                            //   }
                             >
                               {iIndex === 0 && (
                                 <td
@@ -365,10 +375,9 @@ function DefaulterStudentList() {
                                   {camelCase(student.last_name)} */}
                                   {camelCase(
                                     student.first_name
-                                      ? `${student.first_name} ${
-                                          student.mid_name || ""
-                                        } ${student.last_name || ""}`
-                                      : student.name
+                                      ? `${student.first_name} ${student.mid_name || ""
+                                      } ${student.last_name || ""}`
+                                      : student.name,
                                   )}
                                 </td>
                               )}

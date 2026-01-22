@@ -213,7 +213,7 @@ const CardStuStaf = ({
       {badge > 0 && (
         <Link
           to="/studentAbsent"
-          state={{ openTab: "Today's Not Mark Absentees Classes" }}
+          state={{ openTab: "Today's Attendance not mark classes" }}
           onClick={(e) => e.stopPropagation()}
           title="Today's attendance not marked classes"
           style={{
