@@ -91,7 +91,7 @@ function Chapter() {
         `${API_URL}/api/get_only_classes_allotted_to_teacher?teacher_id=${roleIdValue}`,
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
 
       console.log("Fetched Class List:", response.data.data);
@@ -117,7 +117,7 @@ function Chapter() {
         `${API_URL}/api/get_subjects_according_class?class_id=${classId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
       setAllSubject(response.data.data || []);
     } catch (error) {
@@ -362,7 +362,7 @@ function Chapter() {
         formData,
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
 
       const data = response.data;
@@ -373,8 +373,8 @@ function Chapter() {
           prev.map((holiday) =>
             selectedHolidays.includes(holiday.chapter_id)
               ? { ...holiday, publish: "Y" }
-              : holiday
-          )
+              : holiday,
+          ),
         );
         setSelectedHolidays([]);
         setSelectAll(false);
@@ -425,7 +425,7 @@ function Chapter() {
       // Call API to delete holiday
       const response = await axios.delete(
         `${API_URL}/api/delete_chapters/${holidayId}`,
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
 
       const { data } = response;
@@ -437,14 +437,14 @@ function Chapter() {
       }
 
       setHolidays((prevHolidays) =>
-        prevHolidays.filter((h) => h.chapter_id !== holidayId)
+        prevHolidays.filter((h) => h.chapter_id !== holidayId),
       );
 
       setDeletedHolidays((prev) => {
         const updatedDeletedHolidays = [...prev, holidayId];
         localStorage.setItem(
           "deletedChapters",
-          JSON.stringify(updatedDeletedHolidays)
+          JSON.stringify(updatedDeletedHolidays),
         );
         return updatedDeletedHolidays;
       });
@@ -488,7 +488,7 @@ function Chapter() {
         {
           headers: { Authorization: `Bearer ${token}` },
           responseType: "blob",
-        }
+        },
       );
 
       let filename = "chapter.csv";
@@ -502,8 +502,8 @@ function Chapter() {
         .map((cls) =>
           (cls.name || cls.classname || cls.class_name || "Class").replace(
             /\s+/g,
-            "_"
-          )
+            "_",
+          ),
         );
 
       const selectedSubjectName =
@@ -513,7 +513,7 @@ function Chapter() {
 
       if (selectedClassNames.length > 0 && selectedSubjectName) {
         filename = `Chapters_${selectedClassNames.join(
-          "_"
+          "_",
         )}_${selectedSubjectName}.csv`;
       } else if (selectedClassNames.length > 0) {
         filename = `${selectedClassNames.join("_")}.csv`;
@@ -565,7 +565,7 @@ function Chapter() {
             Authorization: `Bearer ${token}`,
           },
           responseType: "blob", //Correct placement
-        }
+        },
       );
 
       //  Build dynamic filename based on selected classes
@@ -646,8 +646,8 @@ function Chapter() {
       .map((cls) =>
         (cls.name || cls.classname || cls.class_name || "Class").replace(
           /\s+/g,
-          "_"
-        )
+          "_",
+        ),
       );
 
     const selectedClassNameStr = selectedClassNameArr[0];
@@ -660,21 +660,21 @@ function Chapter() {
     // 6️⃣ Validate file name
     const classPattern = selectedClassNameStr.replace(
       /[-\/\\^$*+?.()|[\]{}]/g,
-      "\\$&"
+      "\\$&",
     );
     const subjectPattern = selectedSubjectName.replace(
       /[-\/\\^$*+?.()|[\]{}]/g,
-      "\\$&"
+      "\\$&",
     );
 
     const validPattern = new RegExp(
       `^Chapters_${classPattern}_${subjectPattern}(\\s?\\(\\d+\\))?\\.csv$`,
-      "i"
+      "i",
     );
 
     if (!validPattern.test(fileName)) {
       toast.warning(
-        `Invalid file name. Please upload file in format: Chapters_${selectedClassNameStr}_${selectedSubjectName}.csv`
+        `Invalid file name. Please upload file in format: Chapters_${selectedClassNameStr}_${selectedSubjectName}.csv`,
       );
       return;
     }
@@ -695,7 +695,7 @@ function Chapter() {
       const response = await axios.post(
         `${API_URL}/api/upload_chapters_through_excelsheet`,
         formData,
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
 
       // ✅ Check if backend returned 422 inside body
@@ -786,15 +786,17 @@ function Chapter() {
         const createdBy = holiday?.tec_name?.toLowerCase().trim() || "";
         const lessonNo =
           holiday?.chapter_no != null ? String(holiday.chapter_no) : "";
+        const nameSubject = holiday?.name?.toLowerCase().trim() || "";
 
         return (
           subjectName.includes(searchLower) ||
           subSubjectName.includes(searchLower) ||
           createdBy.includes(searchLower) ||
           className.includes(searchLower) ||
-          lessonNo.includes(searchLower)
+          lessonNo.includes(searchLower) ||
+          nameSubject.includes(searchLower)
         );
-      }
+      },
     );
 
     setFilteredSections(filtered);
@@ -807,7 +809,7 @@ function Chapter() {
 
   const displayedSections = filteredSections.slice(
     currentPage * pageSize,
-    (currentPage + 1) * pageSize
+    (currentPage + 1) * pageSize,
   );
 
   console.log("displayted sections", displayedSections);
@@ -871,7 +873,7 @@ function Chapter() {
                                   label: cls.class_name,
                                 }))
                                 .find(
-                                  (option) => option.value === selectedClasses
+                                  (option) => option.value === selectedClasses,
                                 ) || null
                             }
                             onChange={handleClassChange}
@@ -1108,7 +1110,7 @@ function Chapter() {
 
             <div className="w-full  mt-4">
               <div className="card mx-auto lg:w-full shadow-lg">
-                <div className="p-2 px-3 bg-gray-100 border-none flex justify-between items-center">
+                {/* <div className="p-2 px-3 bg-gray-100 border-none flex justify-between items-center">
                   <div>
                     <button
                       onClick={() => setShowUploadSection(true)}
@@ -1146,7 +1148,50 @@ function Chapter() {
                       {isSubmitting ? "Publishing..." : "Publish"}
                     </button>
                   </div>
+                </div> */}
+                <div className="p-2 px-3 bg-gray-100 border-none">
+                  <div className="w-full flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                    {/* Left: Upload Button */}
+                    <div className="w-full md:w-auto">
+                      <button
+                        onClick={() => setShowUploadSection(true)}
+                        className="w-full md:w-auto bg-green-600 text-white px-4 md:px-6 py-2 rounded-md hover:bg-green-700 transition duration-200"
+                      >
+                        Upload Chapter Data from Excel Sheet
+                      </button>
+                    </div>
+
+                    {/* Right: Search + Actions */}
+                    <div className="w-full md:w-auto flex flex-col sm:flex-row gap-2 sm:items-center sm:justify-end">
+                      {/* Search */}
+                      <input
+                        type="text"
+                        className="form-control w-full sm:w-48 md:w-56"
+                        placeholder="Search"
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                      />
+
+                      {/* Add */}
+                      <button
+                        className="btn btn-primary btn-sm h-9 text-xs sm:text-sm w-full sm:w-auto whitespace-nowrap"
+                        onClick={handleAdd}
+                      >
+                        <FontAwesomeIcon icon={faPlus} className="mr-1" />
+                        Add
+                      </button>
+
+                      {/* Publish */}
+                      <button
+                        className="btn btn-primary btn-sm h-9 text-xs sm:text-sm w-full sm:w-auto"
+                        onClick={handlePublish}
+                        disabled={isSubmitting}
+                      >
+                        {isSubmitting ? "Publishing..." : "Publish"}
+                      </button>
+                    </div>
+                  </div>
                 </div>
+
                 <div
                   className=" relative w-[97%]   mb-3 h-0.5  mx-auto bg-red-700"
                   style={{
@@ -1239,12 +1284,12 @@ function Chapter() {
                                       <input
                                         type="checkbox"
                                         checked={selectedHolidays.includes(
-                                          holiday.chapter_id
+                                          holiday.chapter_id,
                                         )}
                                         onChange={(e) => {
                                           e.stopPropagation();
                                           handleCheckboxChange(
-                                            holiday.chapter_id
+                                            holiday.chapter_id,
                                           );
                                         }}
                                       />
@@ -1318,7 +1363,7 @@ function Chapter() {
                                 {roleIdValue === holiday.created_by &&
                                   (holiday.isDelete === "Y" ||
                                     deletedHolidays.includes(
-                                      holiday.chapter_id
+                                      holiday.chapter_id,
                                     ) ? (
                                     <span className="text-red-600 font-semibold">
                                       Deleted
@@ -1334,10 +1379,17 @@ function Chapter() {
                               </td>
                             </tr>
                           ))
+                        ) : holidays.length === 0 ? (
+                          <div className="absolute left-[1%] w-[100%]  text-center flex justify-center items-center mt-14">
+                            <div className=" text-center text-xl text-red-700">
+                              {/* Oops! No data found.. */}
+                              Please create chapter to view.
+                            </div>
+                          </div>
                         ) : (
                           <div className="absolute left-[1%] w-[100%]  text-center flex justify-center items-center mt-14">
                             <div className=" text-center text-xl text-red-700">
-                              Oops! No data found..
+                              Result not found!
                             </div>
                           </div>
                         )}
@@ -1387,7 +1439,7 @@ function Chapter() {
                   />
                   {console.log(
                     "the currecnt section inside delete of the Holiday",
-                    currentHoliday
+                    currentHoliday,
                   )}
                 </div>
                 <div

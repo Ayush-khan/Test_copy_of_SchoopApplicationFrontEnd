@@ -339,8 +339,8 @@ const Card = ({
                   </div>
                 ) : title === "Defaulter List" ? (
                   /* 🔹 Defaulter List card (separate condition) */
-                  <div className="mx-2 -space-y-2 text-[.7em]">
-                    <div className="flex justify-between items-center gap-x-2">
+                  <div className="mx-2 -space-y-0 text-[.7em]">
+                    <div className="flex justify-between items-center gap-x-2 text-xs">
                       <span className="text-green-700 font-semibold">
                         Student Count:
                       </span>
@@ -349,7 +349,7 @@ const Card = ({
                       </span>
                     </div>
 
-                    <div className="flex justify-between items-center gap-x-2">
+                    <div className="flex justify-between items-center gap-x-2 text-xs">
                       <span className="text-red-700 font-semibold">
                         Pending:
                       </span>
@@ -363,11 +363,11 @@ const Card = ({
                   </div>
                 ) : title === "Homework" ? (
                   <div className="mx-2 -space-y-2 text-[.7em]">
-                    <div className="flex justify-between items-center gap-x-2">
-                      <span className="text-sm text-red-700 font-semibold whitespace-nowrap">
+                    <div className="flex justify-between items-center gap-x-2 text-xs">
+                      <span className=" text-red-700 font-semibold whitespace-nowrap">
                         Not Submitted:
                       </span>
-                      <span className="text-base text-red-600 font-semibold whitespace-nowrap">
+                      <span className=" text-red-600 font-semibold whitespace-nowrap ">
                         {value}
                       </span>
                     </div>

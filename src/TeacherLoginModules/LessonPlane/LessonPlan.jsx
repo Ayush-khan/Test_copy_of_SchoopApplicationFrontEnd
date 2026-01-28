@@ -93,8 +93,8 @@ function LessonPlan() {
   const handleStatusChange = async (lessonPlanId, newStatus) => {
     setNotices((prev) =>
       prev.map((item) =>
-        item.unq_id === lessonPlanId ? { ...item, status: newStatus } : item
-      )
+        item.unq_id === lessonPlanId ? { ...item, status: newStatus } : item,
+      ),
     );
 
     try {
@@ -113,7 +113,7 @@ function LessonPlan() {
             Authorization: `Bearer ${token}`,
             "Content-Type": "multipart/form-data",
           },
-        }
+        },
       );
 
       toast.success("Status updated successfully");
@@ -157,7 +157,7 @@ function LessonPlan() {
         `${API_URL}/api/get_teacherclasseswithclassteacher?teacher_id=${roleIdValue}`,
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
 
       setStudentNameWithClassId(response?.data?.data || []);
@@ -245,7 +245,7 @@ function LessonPlan() {
         `${API_URL}/api/get_subsubject_by_class_sub?class_id=${classId}&subject_id=${subjectId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
 
       console.log("fetch chapters", response?.data?.data);
@@ -265,7 +265,7 @@ function LessonPlan() {
             label: `${cls.classname} ${cls.sectionname}`,
           }))
         : [],
-    [studentNameWithClassId]
+    [studentNameWithClassId],
   );
 
   const subjectOptions = useMemo(
@@ -276,7 +276,7 @@ function LessonPlan() {
             label: `${cls.name}`,
           }))
         : [],
-    [allSubject]
+    [allSubject],
   );
 
   const chapterOptions = useMemo(
@@ -287,7 +287,7 @@ function LessonPlan() {
             label: `${cls.sub_subject}`,
           }))
         : [],
-    [allChapter]
+    [allChapter],
   );
 
   useEffect(() => {
@@ -339,14 +339,14 @@ function LessonPlan() {
           `${API_URL}/api/get_lp_classes_by_unq_id?unq_id=${id}`,
           {
             headers: { Authorization: `Bearer ${token}` },
-          }
+          },
         );
 
         const apiData = response?.data?.data || [];
 
         // Collect all class-section pairs for the same unq_id
         const pairs = apiData.map(
-          (item) => `${item.class_name} ${item.sec_name}`
+          (item) => `${item.class_name} ${item.sec_name}`,
         );
 
         results[id] = pairs; // store array for each unq_id
@@ -470,12 +470,12 @@ function LessonPlan() {
       const apiData = Array.isArray(rawData)
         ? rawData
         : rawData?.data
-        ? Array.isArray(rawData.data)
-          ? rawData.data
-          : [rawData.data]
-        : rawData
-        ? [rawData]
-        : [];
+          ? Array.isArray(rawData.data)
+            ? rawData.data
+            : [rawData.data]
+          : rawData
+            ? [rawData]
+            : [];
 
       if (apiData.length > 0) {
         const updatedNotices = apiData.map((notice) => ({
@@ -492,7 +492,9 @@ function LessonPlan() {
         setPageCount(Math.ceil(updatedNotices.length / pageSize));
       } else {
         setNotices([]);
+        // if (notices.length !== 0) {
         toast.error("No lesson plan found for the selected criteria.");
+        // }
       }
     } catch (error) {
       console.error("Error fetching lesson plan:", error);
@@ -545,7 +547,7 @@ function LessonPlan() {
           `${API_URL}/api/get_smsnoticedata/${section.unq_id}`,
           {
             headers: { Authorization: `Bearer ${token}` },
-          }
+          },
         );
         console.log("responsedata of notice edit", response);
         if (response.data.success) {
@@ -576,12 +578,12 @@ function LessonPlan() {
       const token = localStorage.getItem("authToken");
       console.log(
         "the currecnt section inside the delte___",
-        currentSection?.classToDelete?.subject_id
+        currentSection?.classToDelete?.subject_id,
       );
       console.log("the classes inside the delete", classes);
       console.log(
         "the current section insde the handlesbmitdelete",
-        currentSection.classToDelete
+        currentSection.classToDelete,
       );
       if (!token || !currentSection || !currentSection?.unq_id) {
         throw new Error("Unique ID is missing");
@@ -595,7 +597,7 @@ function LessonPlan() {
             Authorization: `Bearer ${token}`,
           },
           withCredentials: true,
-        }
+        },
       );
 
       // fetchClassNames();
@@ -605,16 +607,16 @@ function LessonPlan() {
       // setSubjects([]);
       toast.success(
         response.data.message ||
-          `${currestSubjectNameForDelete} Publish successfully!`
+          `${currestSubjectNameForDelete} Publish successfully!`,
       );
     } catch (error) {
       if (error.response && error.response.data) {
         toast.error(
-          `Error In Publishing ${currestSubjectNameForDelete}: ${error.response.data.message}`
+          `Error In Publishing ${currestSubjectNameForDelete}: ${error.response.data.message}`,
         );
       } else {
         toast.error(
-          `Error In Publishing ${currestSubjectNameForDelete}: ${error.message}`
+          `Error In Publishing ${currestSubjectNameForDelete}: ${error.message}`,
         );
       }
       console.error("Error In Publishing:", error);
@@ -643,7 +645,7 @@ function LessonPlan() {
             Authorization: `Bearer ${token}`,
           },
           withCredentials: true,
-        }
+        },
       );
 
       // fetchClassNames();
@@ -653,16 +655,16 @@ function LessonPlan() {
       // setSubjects([]);
       toast.success(
         response.data.message ||
-          `${currestSubjectNameForDelete} Deleted successfully!`
+          `${currestSubjectNameForDelete} Deleted successfully!`,
       );
     } catch (error) {
       if (error.response && error.response.data) {
         toast.error(
-          `Error In Deleting ${currestSubjectNameForDelete}: ${error.response.data.message}`
+          `Error In Deleting ${currestSubjectNameForDelete}: ${error.response.data.message}`,
         );
       } else {
         toast.error(
-          `Error In Deleting ${currestSubjectNameForDelete}: ${error.message}`
+          `Error In Deleting ${currestSubjectNameForDelete}: ${error.message}`,
         );
       }
     } finally {
@@ -716,7 +718,7 @@ function LessonPlan() {
 
   const displayedSections = filteredSections.slice(
     currentPage * pageSize,
-    (currentPage + 1) * pageSize
+    (currentPage + 1) * pageSize,
   );
 
   const tabs = [
@@ -788,13 +790,13 @@ function LessonPlan() {
                             options={studentOptions}
                             value={
                               studentOptions.find(
-                                (opt) => opt.value === selectedStudent?.value
+                                (opt) => opt.value === selectedStudent?.value,
                               ) || selectedStudent
                             }
                             onChange={(selected) => {
                               setSelectedStudent(selected);
                               setSelectedStudentId(
-                                selected ? selected.value : null
+                                selected ? selected.value : null,
                               );
                               if (!selected) {
                                 // 🔥 CLEAR SUBJECT
@@ -859,7 +861,7 @@ function LessonPlan() {
                             onChange={(selected) => {
                               setSelectedSubject(selected);
                               setSelectedSubjectId(
-                                selected ? selected.value : null
+                                selected ? selected.value : null,
                               );
 
                               if (!selected) {
@@ -912,13 +914,13 @@ function LessonPlan() {
                             options={chapterOptions}
                             value={
                               chapterOptions.find(
-                                (opt) => opt.value === selectedChapter?.value
+                                (opt) => opt.value === selectedChapter?.value,
                               ) || selectedChapter
                             }
                             onChange={(selected) => {
                               setSelectedChapter(selected);
                               setSelectedChapterId(
-                                selected ? selected.value : null
+                                selected ? selected.value : null,
                               );
                               if (selected)
                                 setChapterError(""); // ✅ Clear error
@@ -1056,10 +1058,10 @@ function LessonPlan() {
                                   {unqIdDetails[subject.unq_id]?.length
                                     ? unqIdDetails[subject.unq_id].join(", ")
                                     : subject?.c_name
-                                    ? `${subject.c_name} ${
-                                        subject.sec_name || ""
-                                      }`
-                                    : "-"}
+                                      ? `${subject.c_name} ${
+                                          subject.sec_name || ""
+                                        }`
+                                      : "-"}
                                 </td>
                                 <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                   {subject?.sub_name}
@@ -1079,7 +1081,7 @@ function LessonPlan() {
                                     onChange={(e) =>
                                       handleStatusChange(
                                         subject.unq_id,
-                                        e.target.value
+                                        e.target.value,
                                       )
                                     }
                                     className="border border-gray-400 rounded px-1 py-1 text-sm bg-white"
@@ -1122,7 +1124,7 @@ function LessonPlan() {
                                               },
                                               section_id: subject.section_id,
                                             },
-                                          }
+                                          },
                                         );
                                       }}
                                     >
@@ -1146,7 +1148,8 @@ function LessonPlan() {
                           ) : (
                             <div className=" absolute left-[1%] w-[100%]  text-center flex justify-center items-center mt-14">
                               <div className=" text-center text-xl text-red-700">
-                                Oops! No data found..
+                                {/* Oops! No data found.. */}
+                                Please create lesson plan to view.
                               </div>
                             </div>
                           )}
@@ -1239,7 +1242,7 @@ function LessonPlan() {
                   />
                   {console.log(
                     "the currecnt section inside delete of the managesubjhect",
-                    currentSection
+                    currentSection,
                   )}
                 </div>
                 <div

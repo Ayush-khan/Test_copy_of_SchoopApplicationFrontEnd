@@ -8,10 +8,12 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { RxCross1 } from "react-icons/rx";
 import Select from "react-select";
+import { useNavigate } from "react-router-dom";
 
 function SubstituteClassTeacher() {
   const today = new Date().toISOString().split("T")[0];
   const API_URL = import.meta.env.VITE_API_URL; // URL for host
+  const navigate = useNavigate();
   const [sections, setSections] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -87,7 +89,7 @@ function SubstituteClassTeacher() {
             teacher_id: classItem?.teacher_id,
           },
           label: `${classItem?.name}`,
-        }))
+        })),
       );
     } catch (error) {
       toast.error("Error fetching class names");
@@ -104,7 +106,7 @@ function SubstituteClassTeacher() {
         response.data.data.map((teacher) => ({
           value: teacher.teacher_id,
           label: teacher.name,
-        }))
+        })),
       );
     } catch (error) {
       toast.error("Error fetching teachers");
@@ -119,7 +121,7 @@ function SubstituteClassTeacher() {
         `${API_URL}/api/get_substitute_classteacherlist`,
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
       // setPageCount(Math.ceil(response.data.data.length / pageSize));
       setSections(response.data.data);
@@ -160,7 +162,7 @@ function SubstituteClassTeacher() {
   };
   const handleDelete = (id) => {
     const sectionToDelete = sections.find(
-      (sec) => sec.class_substitute_id === id
+      (sec) => sec.class_substitute_id === id,
     );
     if (sectionToDelete) {
       setCurrentSection(sectionToDelete); // Set the section to delete in state
@@ -234,7 +236,7 @@ function SubstituteClassTeacher() {
         },
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
 
       fetchClassTeacher();
@@ -272,7 +274,7 @@ function SubstituteClassTeacher() {
         },
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
       if (response?.data?.status === 200) {
         toast.success(response.data.message);
@@ -306,7 +308,7 @@ function SubstituteClassTeacher() {
             "X-Academic-Year": academicYr,
           },
           withCredentials: true,
-        }
+        },
       );
 
       if (response.data.success) {
@@ -317,7 +319,7 @@ function SubstituteClassTeacher() {
         toast.success("Substitute Class Teacher deleted successfully!");
       } else {
         toast.error(
-          response.data.message || "Failed to delete Substitute Class Teacher"
+          response.data.message || "Failed to delete Substitute Class Teacher",
         );
       }
     } catch (error) {
@@ -334,6 +336,13 @@ function SubstituteClassTeacher() {
     }
   };
 
+  const camelCase = (str) =>
+    str
+      ?.toLowerCase()
+      .split(" ")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
+
   useEffect(() => {
     const trimmedSearch = searchTerm.trim().toLowerCase();
 
@@ -349,14 +358,26 @@ function SubstituteClassTeacher() {
     prevSearchTermRef.current = trimmedSearch;
   }, [searchTerm]);
 
-  const filteredSections = sections.filter((section) => {
-    const searchLower = searchTerm.trim().toLowerCase();
-    return (
-      section.class_teacher_name.toLowerCase().includes(searchLower) ||
-      section.substitute_teacher_name.toLowerCase().includes(searchLower) ||
-      section.classname.toLowerCase().includes(searchLower)
-    );
-  });
+  // const filteredSections = sections.filter((section) => {
+  //   const searchLower = searchTerm.trim().toLowerCase();
+  //   return (
+  //     section.class_teacher_name.toLowerCase().includes(searchLower) ||
+  //     section.substitute_teacher_name.toLowerCase().includes(searchLower) ||
+  //     section.classname.toLowerCase().includes(searchLower)
+  //   );
+  // });
+  const filteredSections = Array.isArray(sections)
+    ? sections.filter((section) => {
+      const searchLower = searchTerm.trim().toLowerCase();
+      return (
+        section?.class_teacher_name?.toLowerCase().includes(searchLower) ||
+        section?.substitute_teacher_name
+          ?.toLowerCase()
+          .includes(searchLower) ||
+        section?.classname?.toLowerCase().includes(searchLower)
+      );
+    })
+    : [];
 
   useEffect(() => {
     setPageCount(Math.ceil(filteredSections.length / pageSize));
@@ -365,7 +386,7 @@ function SubstituteClassTeacher() {
   // Get the sections for the current page
   const displayedSections = filteredSections.slice(
     currentPage * pageSize,
-    (currentPage + 1) * pageSize
+    (currentPage + 1) * pageSize,
   );
 
   // Handle page change
@@ -452,6 +473,12 @@ function SubstituteClassTeacher() {
                 <FontAwesomeIcon icon={faPlus} style={{ marginRight: "5px" }} />
                 Add
               </button>
+              <RxCross1
+                className="float-end relative top-2 ml-2 right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
+                onClick={() => {
+                  navigate("/dashboard");
+                }}
+              />
             </div>
           </div>
           <div
@@ -506,9 +533,8 @@ function SubstituteClassTeacher() {
                       displayedSections.map((section, index) => (
                         <tr
                           key={`${section.section_id}-${index}`}
-                          className={`${
-                            index % 2 === 0 ? "bg-white" : "bg-gray-100"
-                          } hover:bg-gray-50`}
+                          className={`${index % 2 === 0 ? "bg-white" : "bg-gray-100"
+                            } hover:bg-gray-50`}
                         >
                           <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
                             <p className="text-gray-900 whitespace-no-wrap relative top-2">
@@ -532,12 +558,14 @@ function SubstituteClassTeacher() {
                           </td>
                           <td className="text-center px-2 lg:px-5 border border-gray-950 text-sm">
                             <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                              {section?.class_teacher_name || ""}
+                              {camelCase(section?.class_teacher_name || "")}
                             </p>
                           </td>
                           <td className="text-center px-2 lg:px-5 border border-gray-950 text-sm">
                             <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                              {section?.substitute_teacher_name || ""}
+                              {camelCase(
+                                section?.substitute_teacher_name || "",
+                              )}
                             </p>
                           </td>
 
@@ -679,7 +707,7 @@ function SubstituteClassTeacher() {
                         options={classes}
                         isClearable
                         value={classes.find(
-                          (option) => option.value === newDepartmentId
+                          (option) => option.value === newDepartmentId,
                         )}
                         onChange={handleClassChange}
                       />
@@ -715,9 +743,8 @@ function SubstituteClassTeacher() {
                   <div className=" flex justify-end p-3">
                     <button
                       type="button"
-                      className={`btn btn-primary px-3 mb-2 ${
-                        isSubmitting ? "opacity-50 cursor-not-allowed" : ""
-                      }`}
+                      className={`btn btn-primary px-3 mb-2 ${isSubmitting ? "opacity-50 cursor-not-allowed" : ""
+                        }`}
                       onClick={handleSubmitAdd}
                       disabled={isSubmitting}
                     >
@@ -836,9 +863,8 @@ function SubstituteClassTeacher() {
                   {/* <button type="button" className="btn btn-secondary" onClick={handleCloseModal}>Cancel</button> */}
                   <button
                     type="button"
-                    className={`btn btn-primary px-3 mb-2 ${
-                      isUpdating ? "opacity-50 cursor-not-allowed" : ""
-                    }`}
+                    className={`btn btn-primary px-3 mb-2 ${isUpdating ? "opacity-50 cursor-not-allowed" : ""
+                      }`}
                     onClick={handleSubmitEdit}
                     disabled={isUpdating}
                   >

@@ -35,13 +35,129 @@ import TodoListandRemainders from "./TodoListandRemainders.jsx";
 
 const DashboardContent = () => {
   const API_URL = import.meta.env.VITE_API_URL; // url for host
+
+  const LMS_URL = "https://ednova.evolvu.in";
   const navigate = useNavigate();
   const [studentData, setStudentData] = useState({
     total: 0,
     present: 0,
   });
   const [sortNameCookie, setSortNameCookie] = useState("");
+
+  const tokenToLMS = localStorage.getItem("authToken");
+  console.log("TOken to lms", tokenToLMS);
+
+  // const goToLMS = async () => {
+  //   try {
+  //     const token = localStorage.getItem("authToken");
+
+  //     if (!token) {
+  //       console.error("No token found");
+  //       return;
+  //     }
+
+  //     const response = await axios.post(
+  //       `${LMS_URL}/sso/school/login`,
+  //       // `https://ednova.evolvu.in/sso/api/school/lms-sso`,
+  //       {},
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //       },
+  //     );
+
+  //     if (response.data?.success && response.data?.lms_url) {
+  //       // ✅ FINAL REDIRECT
+  //       window.location.href = response.data.lms_url;
+  //     } else {
+  //       console.error("Invalid LMS response");
+  //     }
+  //   } catch (error) {
+  //     console.error("LMS redirect failed", error);
+  //   }
+  // };
+
   // console.log("school name", sortNameCookie);
+
+  // const goToLMS = async () => {
+  //   try {
+  //     const token = localStorage.getItem("authToken");
+
+  //     if (!token) {
+  //       console.error("No token found");
+  //       return;
+  //     }
+
+  //     console.log("Before apiSSO Response:");
+  //     const response = await axios.post(
+  //       `${LMS_URL}/sso/api/school/lms-sso`,
+  //       {}, // request body (empty)
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //         withCredentials: true, //  MUST be here
+  //       },
+  //     );
+
+  //     console.log("SSO Response:", response.data);
+  //     if (response.data?.success && response.data?.lms_url) {
+  //       //  FINAL REDIRECT TO LMS
+  //       window.location.href = response.data.lms_url;
+  //     } else {
+  //       console.error("Invalid LMS response", response.data);
+  //     }
+  //   } catch (error) {
+  //     console.error(
+  //       "LMS redirect failed",
+  //       error.response?.data || error.message,
+  //     );
+  //   }
+  // };
+
+  const goToLMS = async () => {
+    try {
+      const schoolToken = localStorage.getItem("authToken");
+
+      if (!schoolToken) {
+        alert("Please login first");
+        return;
+      }
+
+      console.log("🔐 Initiating SSO login...");
+
+      const response = await axios.post(
+        `${LMS_URL}/sso/api/school/lms-sso`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${schoolToken}`, // ✅ FIXED
+            "Content-Type": "application/json",
+          },
+          withCredentials: true,
+        },
+      );
+
+      console.log("✅ SSO Response:", response.data);
+
+      if (response.data?.success && response.data?.lms_url) {
+        console.log("🚀 Redirecting to LMS...");
+        window.location.href = response.data.lms_url; // ✅ BEST
+      } else {
+        alert("Login failed. Invalid response from LMS.");
+      }
+    } catch (error) {
+      console.error("❌ SSO failed:", error.response?.data || error.message);
+
+      if (error.response?.status === 403) {
+        alert("Authentication failed. Please login again.");
+      } else {
+        alert("Connection error. Please try again later.");
+      }
+    }
+  };
+
   const [staffData, setStaffData] = useState({
     teachingStaff: "",
     nonTeachingStaff: "",
@@ -69,8 +185,11 @@ const DashboardContent = () => {
   const [markAbsentees, setMarkAbsentees] = useState("");
   const [classTeacher, setClassTeacher] = useState([]);
   const [isClassTeacher, setIsClassTeacher] = useState("");
+  const [substituteCT, setSubstituteCT] = useState("");
 
   const [loading, setLoading] = useState(true);
+
+  const comingSoonValue = "Coming Soon";
 
   // useEffect(() => {
   //   fetchRoleId();
@@ -334,6 +453,9 @@ const DashboardContent = () => {
       // console.log("defaulter T card api..", defaulterCard);
       setPendingStudentCount(defaulterCard?.totalNumberOfDefaulters);
       setPendingStudentFeeT(defaulterCard?.totalPendingAmount);
+
+      const substituteClassTeacher = response?.data?.data?.substituteCount;
+      setSubstituteCT(substituteClassTeacher);
     } catch (error) {
       console.error("Failed to fetch session data:", error);
     }
@@ -626,7 +748,7 @@ const DashboardContent = () => {
                   <Link to="#" className="no-underline">
                     <Card
                       title="Assessment"
-                      value={" "}
+                      value=" "
                       color="#4CAF50"
                       icon={
                         <MdAssessment
@@ -921,10 +1043,15 @@ const DashboardContent = () => {
                   </Link>
                 )} */}
 
-                <Link to="#" className="no-underline">
+                <Link to="/substituteClassTeacher" className="no-underline">
                   <Card
-                    title="Substitution Class"
-                    value=" "
+                    // title="Class Teacher Substitution"
+                    title={
+                      <p className="truncate text-xs max-w-full ml-5 mb-0">
+                        Class Teacher Substitution
+                      </p>
+                    }
+                    value={substituteCT}
                     color="#2196F3"
                     icon={
                       <HiOutlineDocumentText
@@ -979,7 +1106,7 @@ const DashboardContent = () => {
                 <Link to="#" className="no-underline">
                   <Card
                     title="Assessment"
-                    value=" "
+                    value={comingSoonValue}
                     color="#4CAF50"
                     icon={
                       <MdAssessment
@@ -1053,6 +1180,19 @@ const DashboardContent = () => {
               </div>
             </div>
           </section>
+          {/* Go to LMS */}
+          {/* <section className="w-full px-4 md:px-6 py-3">
+            <div className="flex justify-end">
+              <button
+                onClick={goToLMS}
+                className="flex items-center gap-2 bg-pink-700 text-white
+               px-5 py-3 rounded-lg shadow-md hover:bg-pink-800
+               transition-all duration-200 font-semibold"
+              >
+                Go to LMS →
+              </button>
+            </div>
+          </section> */}
         </>
       )}
     </>

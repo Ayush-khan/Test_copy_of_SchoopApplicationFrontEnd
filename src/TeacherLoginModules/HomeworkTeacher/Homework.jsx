@@ -143,7 +143,7 @@ function Homework() {
             Authorization: `Bearer ${token}`,
             "Content-Type": "multipart/form-data",
           },
-        }
+        },
       );
 
       const remarkList = response?.data?.homework_details || [];
@@ -154,7 +154,7 @@ function Homework() {
         setPageCount(Math.ceil(remarkList.length / pageSize));
       } else {
         setNotices([]);
-        toast.error("No homeworks found.");
+        // toast.error("No homeworks found.");
       }
     } catch (error) {
       console.error("Error fetching homeworks:", error);
@@ -199,7 +199,7 @@ function Homework() {
     setCurrentSection({ classToDelete });
 
     setCurrestSubjectNameForDelete(
-      `${classToDelete?.cls_name || ""} ${classToDelete?.sec_name || ""}`.trim()
+      `${classToDelete?.cls_name || ""} ${classToDelete?.sec_name || ""}`.trim(),
     );
     setShowDeleteModal(true);
   };
@@ -211,6 +211,15 @@ function Homework() {
       state: section,
     });
   };
+
+  const formatDate = (date) =>
+    new Date(date)
+      .toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "2-digit",
+      })
+      .replace(/\//g, "-");
 
   const handleViewBy = (section) => {
     navigate(`/homework/viewBy/${section.homework_id}`, {
@@ -316,18 +325,18 @@ function Homework() {
       setShowDeleteModal(false);
 
       toast.success(
-        `${currestSubjectNameForDelete} Homework deleted successfully!`
+        `${currestSubjectNameForDelete} Homework deleted successfully!`,
       );
     } catch (error) {
       console.error("Error deleting homework:", error);
 
       if (error.response?.data) {
         toast.error(
-          `Error deleting ${currestSubjectNameForDelete}: ${error.response.data.message}`
+          `Error deleting ${currestSubjectNameForDelete}: ${error.response.data.message}`,
         );
       } else {
         toast.error(
-          `Error deleting ${currestSubjectNameForDelete}: ${error.message}`
+          `Error deleting ${currestSubjectNameForDelete}: ${error.message}`,
         );
       }
     } finally {
@@ -373,21 +382,30 @@ function Homework() {
       }`
       .toLowerCase()
       .trim();
-    const publishDate = section?.publish_date?.toLowerCase().trim() || "";
-    const subjectName = section?.subjectname?.toLowerCase() || "";
+    const startDate = formatDate(section?.start_date);
+    const publishDate = formatDate(section?.publish_date);
+    const endDate = formatDate(section?.end_date);
+    const subjectName = section?.sub_name?.toLowerCase() || "";
 
+    const classSection =
+      `(${section?.cls_name || ""} ${section?.sec_name || ""})`
+        .toLowerCase()
+        .trim();
     return (
       remarkType.includes(searchLower) ||
       subjectName.includes(searchLower) ||
       noticeDesc.includes(searchLower) ||
       fullName.includes(searchLower) ||
-      publishDate.includes(searchLower)
+      publishDate.includes(searchLower) ||
+      startDate.includes(searchLower) ||
+      endDate.includes(searchLower) ||
+      classSection.includes(searchLower)
     );
   });
 
   const displayedSections = filteredSections.slice(
     currentPage * pageSize,
-    (currentPage + 1) * pageSize
+    (currentPage + 1) * pageSize,
   );
 
   console.log("disply section", displayedSections);
@@ -537,7 +555,7 @@ function Homework() {
                             </th>
                           </tr>
                         </thead>
-                        <tbody>
+                        {/* <tbody>
                           {loading ? (
                             <div className=" absolute left-[4%] w-[100%]  text-center flex justify-center items-center mt-14">
                               <div className=" text-center text-xl text-blue-700">
@@ -559,26 +577,26 @@ function Homework() {
                                 </td>
                                 <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                   {subject?.start_date &&
-                                    subject.start_date !== "0000-00-00"
+                                  subject.start_date !== "0000-00-00"
                                     ? new Date(
-                                      subject.start_date
-                                    ).toLocaleDateString("en-GB")
+                                        subject.start_date,
+                                      ).toLocaleDateString("en-GB")
                                     : ""}
                                 </td>
                                 <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                   {subject?.end_date &&
-                                    subject.end_date !== "0000-00-00"
+                                  subject.end_date !== "0000-00-00"
                                     ? new Date(
-                                      subject.end_date
-                                    ).toLocaleDateString("en-GB")
+                                        subject.end_date,
+                                      ).toLocaleDateString("en-GB")
                                     : ""}
                                 </td>
                                 <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                   {subject?.publish_date &&
-                                    subject.publish_date !== "0000-00-00"
+                                  subject.publish_date !== "0000-00-00"
                                     ? new Date(
-                                      subject.publish_date
-                                    ).toLocaleDateString("en-GB")
+                                        subject.publish_date,
+                                      ).toLocaleDateString("en-GB")
                                     : ""}
                                 </td>
                                 <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
@@ -614,7 +632,7 @@ function Homework() {
                                 </td>
                                 <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                   {subject.publish === "N" &&
-                                    subject.remark_type !== "Observation" ? (
+                                  subject.remark_type !== "Observation" ? (
                                     <button
                                       onClick={() => handlePublish(subject)}
                                       className="text-green-500 hover:text-green-700 hover:bg-transparent"
@@ -626,15 +644,6 @@ function Homework() {
                                   )}
                                 </td>
 
-                                {/* <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                  {subject.publish === "Y" && (
-                                    <FontAwesomeIcon
-                                      icon={faBookReader}
-                                      style={{ color: "#C03078" }}
-                                      className="text-base"
-                                    />
-                                  )}
-                                </td> */}
                                 <td
                                   className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm cursor-pointer"
                                   onClick={() => handleViewBy(subject)}
@@ -655,7 +664,132 @@ function Homework() {
                                 colSpan="11"
                                 className="text-center py-6 text-red-700 text-lg"
                               >
-                                Oops! No data found..
+                                Please create homework to view.
+                              </td>
+                            </tr>
+                          )}
+                        </tbody> */}
+
+                        <tbody>
+                          {loading ? (
+                            <tr>
+                              <td
+                                colSpan="11"
+                                className="text-center py-10 text-blue-700 text-lg"
+                              >
+                                Please wait while data is loading...
+                              </td>
+                            </tr>
+                          ) : displayedSections.length > 0 ? (
+                            displayedSections.map((subject, index) => (
+                              <tr key={subject.notice_id} className="text-sm">
+                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950">
+                                  {currentPage * pageSize + index + 1}
+                                </td>
+
+                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950">
+                                  {`${subject?.cls_name} (${subject?.sec_name})`}
+                                </td>
+
+                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950">
+                                  {subject?.sub_name}
+                                </td>
+
+                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950">
+                                  {subject?.start_date &&
+                                    subject.start_date !== "0000-00-00"
+                                    ? formatDate(subject.start_date)
+                                    : "-"}
+                                </td>
+
+                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950">
+                                  {subject?.end_date &&
+                                    subject.end_date !== "0000-00-00"
+                                    ? formatDate(subject.end_date)
+                                    : "-"}
+                                </td>
+
+                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950">
+                                  {subject?.publish_date &&
+                                    subject.publish_date !== "0000-00-00"
+                                    ? formatDate(subject.publish_date)
+                                    : "-"}
+                                </td>
+
+                                <td className="text-center px-2 lg:px-3 border border-gray-950">
+                                  {subject.publish === "Y" ? (
+                                    <button
+                                      className="text-blue-600 hover:text-blue-800"
+                                      onClick={() => handleView(subject)}
+                                    >
+                                      <MdOutlineRemoveRedEye className="text-xl" />
+                                    </button>
+                                  ) : (
+                                    <button
+                                      className="text-blue-600 hover:text-blue-800"
+                                      onClick={() => handleEdit(subject)}
+                                    >
+                                      <FontAwesomeIcon icon={faEdit} />
+                                    </button>
+                                  )}
+                                </td>
+
+                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950">
+                                  {subject.publish === "N" && (
+                                    <button
+                                      onClick={() =>
+                                        handleDelete(subject?.homework_id)
+                                      }
+                                      className="text-red-600 hover:text-red-800"
+                                    >
+                                      <FontAwesomeIcon icon={faTrash} />
+                                    </button>
+                                  )}
+                                </td>
+
+                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950">
+                                  {subject.publish === "N" &&
+                                    subject.remark_type !== "Observation" && (
+                                      <button
+                                        onClick={() => handlePublish(subject)}
+                                        className="text-green-500 hover:text-green-700"
+                                      >
+                                        <FaCheck />
+                                      </button>
+                                    )}
+                                </td>
+
+                                <td
+                                  className="px-2 text-center lg:px-3 py-2 border border-gray-950 cursor-pointer"
+                                  onClick={() => handleViewBy(subject)}
+                                >
+                                  {subject.publish === "Y" && (
+                                    <FontAwesomeIcon
+                                      icon={faBookReader}
+                                      style={{ color: "#C03078" }}
+                                    />
+                                  )}
+                                </td>
+                              </tr>
+                            ))
+                          ) : notices.length === 0 ? (
+                            // ✅ Case 1: No homework created
+                            <tr>
+                              <td
+                                colSpan="11"
+                                className="text-center py-6 text-red-700 text-lg"
+                              >
+                                Please create homework to view.
+                              </td>
+                            </tr>
+                          ) : (
+                            // ✅ Case 2: Homework exists but search/date filter failed
+                            <tr>
+                              <td
+                                colSpan="11"
+                                className="text-center py-6 text-red-600 text-lg"
+                              >
+                                Result not found!
                               </td>
                             </tr>
                           )}
@@ -715,7 +849,7 @@ function Homework() {
                   />
                   {console.log(
                     "the currecnt section inside delete of the managesubjhect",
-                    currentSection
+                    currentSection,
                   )}
                 </div>
                 <div
@@ -890,7 +1024,7 @@ function Homework() {
                           // Files that should NOT be previewable (only download)
                           const isNonPreviewable =
                             /\.(pdf|csv|docx?|xlsx?|pptx?|txt|zip|json)$/i.test(
-                              fileUrl
+                              fileUrl,
                             );
 
                           return (
@@ -995,12 +1129,12 @@ function Homework() {
                               selectedFile.file_name ||
                               fileUrl.split("/").pop();
                             const isImage = /\.(jpe?g|png|gif|bmp|webp)$/i.test(
-                              fileUrl
+                              fileUrl,
                             );
                             const isPDF = /\.pdf$/i.test(fileUrl);
                             const isDownloadOnly =
                               /\.(csv|docx?|xlsx?|zip|txt|pptx?|json)$/i.test(
-                                fileUrl
+                                fileUrl,
                               );
 
                             if (isImage) {

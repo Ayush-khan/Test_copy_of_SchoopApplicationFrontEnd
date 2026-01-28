@@ -6,6 +6,8 @@ import { useNavigate } from "react-router-dom";
 import LoaderStyle from "../common/LoaderFinal/LoaderStyle";
 import "react-toastify/dist/ReactToastify.css";
 import { MdOutlineRemoveRedEye } from "react-icons/md";
+import "@fortawesome/fontawesome-free/css/all.min.css";
+import { RxCross1 } from "react-icons/rx";
 
 const TicketList = () => {
   const API_URL = import.meta.env.VITE_API_URL;
@@ -123,16 +125,26 @@ const TicketList = () => {
               <div className="w-full">
                 <div className="card mx-auto lg:w-full shadow-lg">
                   <div className="p-2 px-3 bg-gray-100 border-none flex justify-between items-center">
-                    <div className="w-full flex flex-row justify-between mr-0 md:mr-4 ">
-                      <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
+                    <div className="w-full flex items-center justify-between">
+                      {/* LEFT */}
+                      <h3 className="text-gray-700 text-[1.2em] lg:text-xl whitespace-nowrap">
                         List of Tickets
                       </h3>
-                      <div className="w-1/2 md:w-[18%] mr-1 ">
-                        <input
-                          type="text"
-                          className="form-control"
-                          placeholder="Search "
-                          onChange={(e) => setSearchTerm(e.target.value)}
+
+                      {/* RIGHT */}
+                      <div className="flex items-center gap-2">
+                        <div className="w-[180px] md:w-[220px]">
+                          <input
+                            type="text"
+                            className="form-control"
+                            placeholder="Search"
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                          />
+                        </div>
+
+                        <RxCross1
+                          className="text-red-600 cursor-pointer hover:bg-red-100 rounded w-5 h-5"
+                          onClick={() => navigate("/dashboard")}
                         />
                       </div>
                     </div>
@@ -230,8 +242,9 @@ const TicketList = () => {
                                 </td>
                                 <td className="px-2 py-2 text-center border border-gray-300">
                                   {camelCase(
-                                    `${student?.first_name || ""} ${student?.mid_name || ""
-                                    } ${student?.last_name || ""}`
+                                    `${student?.first_name || ""} ${
+                                      student?.mid_name || ""
+                                    } ${student?.last_name || ""}`,
                                   )}
                                 </td>
                                 <td className="px-2 py-2 text-center border border-gray-300">
@@ -258,10 +271,16 @@ const TicketList = () => {
                                 </td>
                               </tr>
                             ))
+                          ) : displayedSections.length === 0 ? (
+                            <div className="absolute left-[1%] w-[100%] text-center flex justify-center items-center mt-14">
+                              <div className="text-center text-xl text-red-700">
+                                Yet not assign ticket.
+                              </div>
+                            </div>
                           ) : (
                             <div className="absolute left-[1%] w-[100%] text-center flex justify-center items-center mt-14">
                               <div className="text-center text-xl text-red-700">
-                                Oops! No data found..
+                                Results not found!
                               </div>
                             </div>
                           )}

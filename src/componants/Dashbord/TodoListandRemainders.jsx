@@ -588,11 +588,11 @@ function TodoListandRemainders() {
           ) : (
             <div className="relative left-[1%] w-[100%] text-center flex justify-center items-center mt-10">
               <div className="flex flex-col items-center justify-center text-center">
-                <p className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-red-600 via-red-400 to-pink-500 drop-shadow-md mb-3">
+                {/* <p className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-red-600 via-red-400 to-pink-500 drop-shadow-md mb-3">
                   Oops!
-                </p>
+                </p> */}
                 <p className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500">
-                  No data available.
+                  Create Todo to view.
                 </p>
               </div>
             </div>
@@ -640,9 +640,9 @@ function TodoListandRemainders() {
           ) : (
             <div className="relative left-[1%] w-[100%] text-center flex justify-center items-center mt-10">
               <div className="flex flex-col items-center justify-center text-center">
-                <p className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-red-600 via-red-400 to-pink-500 drop-shadow-md mb-3">
+                {/* <p className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-red-600 via-red-400 to-pink-500 drop-shadow-md mb-3">
                   Oops!
-                </p>
+                </p> */}
                 <p className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500">
                   No data available.
                 </p>
@@ -797,9 +797,9 @@ function TodoListandRemainders() {
             ) : (
               <div className="relative left-[1%] w-[100%] text-center flex justify-center items-center mt-10">
                 <div className="flex flex-col items-center justify-center text-center">
-                  <p className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-red-600 via-red-400 to-pink-500 drop-shadow-md mb-3">
+                  {/* <p className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-red-600 via-red-400 to-pink-500 drop-shadow-md mb-3">
                     Oops!
-                  </p>
+                  </p> */}
                   <p className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500">
                     No data available.
                   </p>

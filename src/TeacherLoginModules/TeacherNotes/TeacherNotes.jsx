@@ -143,7 +143,7 @@ function TeacherNotes() {
         formData,
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
 
       console.log("response", response?.data);
@@ -175,7 +175,7 @@ function TeacherNotes() {
         setPageCount(Math.ceil(updatedNotices.length / pageSize));
       } else {
         setNotices([]);
-        toast.error("No daily notes found.");
+        // toast.error("Not teacher note found.");
       }
     } catch (error) {
       console.error("Error fetching remarks:", error);
@@ -242,13 +242,13 @@ function TeacherNotes() {
             Authorization: `Bearer ${token}`,
             "Content-Type": "multipart/form-data",
           },
-        }
+        },
       );
 
       if (response.data?.status && response.data.images?.length > 0) {
         const baseUrl = response.data.url;
         const urls = response.data.images.map(
-          (img) => `${baseUrl}/${img.image_name}`
+          (img) => `${baseUrl}/${img.image_name}`,
         );
         setImageUrls(urls);
       } else {
@@ -317,7 +317,7 @@ function TeacherNotes() {
 
     setCurrentSection(classToDelete); // no need to wrap in {}
     setCurrestSubjectNameForDelete(
-      `${classToDelete?.name || ""}` || "this note"
+      `${classToDelete?.name || ""}` || "this note",
     );
     setShowDeleteModal(true);
   };
@@ -394,7 +394,7 @@ function TeacherNotes() {
             "Content-Type": "multipart/form-data",
           },
           withCredentials: true,
-        }
+        },
       );
 
       toast.success("Notice updated successfully!");
@@ -452,13 +452,14 @@ function TeacherNotes() {
             Authorization: `Bearer ${token}`,
             "Content-Type": "multipart/form-data",
           },
-        }
+        },
       );
 
       if (response.data?.status) {
         toast.success(
-          `Teacher's note for "${currentSection.name || "this note"
-          }" published successfully!`
+          `Teacher's note for "${
+            currentSection.name || "this note"
+          }" published successfully!`,
         );
 
         setShowPublishModal(false);
@@ -468,8 +469,9 @@ function TeacherNotes() {
       }
     } catch (error) {
       toast.error(
-        `Error publishing ${currentSection.name || "note"}: ${error.response?.data?.message || error.message
-        }`
+        `Error publishing ${currentSection.name || "note"}: ${
+          error.response?.data?.message || error.message
+        }`,
       );
     } finally {
       setIsSubmitting(false);
@@ -517,13 +519,14 @@ function TeacherNotes() {
             Authorization: `Bearer ${token}`,
             "Content-Type": "multipart/form-data",
           },
-        }
+        },
       );
 
       if (response.data?.status) {
         toast.success(
-          `Teacher's note for "${currentSection.name || "this note"
-          }" deleted successfully!`
+          `Teacher's note for "${
+            currentSection.name || "this note"
+          }" deleted successfully!`,
         );
 
         setTimeout(() => {
@@ -534,8 +537,9 @@ function TeacherNotes() {
       }
     } catch (error) {
       toast.error(
-        `Error deleting ${currestSubjectNameForDelete}: ${error.response?.data?.message || error.message
-        }`
+        `Error deleting ${currestSubjectNameForDelete}: ${
+          error.response?.data?.message || error.message
+        }`,
       );
     } finally {
       setIsSubmitting(false);
@@ -566,14 +570,14 @@ function TeacherNotes() {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       // Handle success response
       if (response.status === 200 && response.data.success) {
         toast.success(
           response?.data?.message ||
-          `Message sent successfully for Unique ID: ${uniqueId}`
+            `Message sent successfully for Unique ID: ${uniqueId}`,
         );
         handleSearch();
       } else {
@@ -620,20 +624,69 @@ function TeacherNotes() {
     prevSearchTermRef.current = trimmedSearch;
   }, [searchTerm]);
 
+  const formatDateForSearch = (date) => {
+    if (!date || date === "0000-00-00") return "";
+
+    return new Date(date)
+      .toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "2-digit",
+      })
+      .replace(/\//g, "-") // DD-MM-YY
+      .toLowerCase()
+      .trim();
+  };
+
+  const searchLower = searchTerm.toLowerCase().trim();
+
+  // const filteredSections = notices.filter((section) => {
+  //   const searchLower = searchTerm.toLowerCase();
+
+  //   return (
+  //     section.name?.toLowerCase().includes(searchLower) ||
+  //     section.remark_subject?.toLowerCase().includes(searchLower) ||
+  //     section.description?.toLowerCase().includes(searchLower) ||
+  //     section.publish_date?.toLowerCase().includes(searchLower)
+  //   );
+  // });
+
   const filteredSections = notices.filter((section) => {
-    const searchLower = searchTerm.toLowerCase();
+    const remarkType = section?.remark_type?.toLowerCase() || "";
+    // const noticeDesc = section?.remark_subject?.toLowerCase() || "";
+
+    const fullName = `${section?.first_name || ""} ${section?.mid_name || ""} ${
+      section?.last_name || ""
+    }`
+      .toLowerCase()
+      .trim();
+
+    const classSection = `${section?.name || ""} ${section?.sec_name || ""}`
+      .toLowerCase()
+      .trim();
+
+    const subjectName = section?.sub_name?.toLowerCase() || "";
+
+    // ✅ DATE SEARCH (CORRECT)
+    const startDate = formatDateForSearch(section?.date);
+    const publishDate = formatDateForSearch(section?.publish_date);
+
+    const noticeDesc = section?.description?.toLowerCase() || "";
 
     return (
-      section.name?.toLowerCase().includes(searchLower) ||
-      section.remark_subject?.toLowerCase().includes(searchLower) ||
-      section.description?.toLowerCase().includes(searchLower) ||
-      section.publish_date?.toLowerCase().includes(searchLower)
+      remarkType.includes(searchLower) ||
+      noticeDesc.includes(searchLower) ||
+      fullName.includes(searchLower) ||
+      classSection.includes(searchLower) ||
+      subjectName.includes(searchLower) ||
+      startDate.includes(searchLower) || // ⭐ now works
+      publishDate.includes(searchLower) // ⭐ now works
     );
   });
 
   const displayedSections = filteredSections.slice(
     currentPage * pageSize,
-    (currentPage + 1) * pageSize
+    (currentPage + 1) * pageSize,
   );
 
   const [uploadedFiles, setUploadedFiles] = useState([]);
@@ -687,8 +740,9 @@ function TeacherNotes() {
           {tabs.map(({ id, label }) => (
             <li
               key={id}
-              className={`md:-ml-7 shadow-md ${activeTab === id ? "text-blue-500 font-bold" : ""
-                }`}
+              className={`md:-ml-7 shadow-md ${
+                activeTab === id ? "text-blue-500 font-bold" : ""
+              }`}
             >
               <button
                 onClick={() => handleTabChange(id)}
@@ -783,23 +837,25 @@ function TeacherNotes() {
                                   {subject?.name}
                                 </td>
                                 <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                  {subject?.date &&
-                                    subject.date !== "0000-00-00"
+                                  {/* {subject?.date &&
+                                  subject.date !== "0000-00-00"
                                     ? subject.date
-                                      .split("-")
-                                      .reverse()
-                                      .join("-") // → 29-10-2025
-                                    : ""}
+                                        .split("-")
+                                        .reverse()
+                                        .join("-") // → 29-10-2025
+                                    : ""} */}
+                                  {formatDateForSearch(subject?.date)}
                                 </td>
 
                                 <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                  {subject?.publish_date &&
-                                    subject.publish_date !== "0000-00-00"
+                                  {/* {subject?.publish_date &&
+                                  subject.publish_date !== "0000-00-00"
                                     ? subject.publish_date
-                                      .split("-")
-                                      .reverse()
-                                      .join("-") // 👉 "2025-10-29" → "29/10/2025"
-                                    : ""}
+                                        .split("-")
+                                        .reverse()
+                                        .join("-") // 👉 "2025-10-29" → "29/10/2025"
+                                    : ""} */}
+                                  {formatDateForSearch(subject?.publish_date)}
                                 </td>
 
                                 <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
@@ -865,13 +921,23 @@ function TeacherNotes() {
                                 </td>
                               </tr>
                             ))
-                          ) : (
+                          ) : notices.length === 0 ? (
                             <tr>
                               <td
                                 colSpan="11"
                                 className="text-center py-6 text-red-700 text-lg"
                               >
-                                Oops! No data found..
+                                {/* Oops! No data found.. */}
+                                Please create teacher note to view.
+                              </td>
+                            </tr>
+                          ) : (
+                            <tr>
+                              <td
+                                colSpan="11"
+                                className="text-center py-6 text-red-600 text-lg"
+                              >
+                                Result not found!
                               </td>
                             </tr>
                           )}
@@ -987,7 +1053,7 @@ function TeacherNotes() {
                           const cursorPos = e.target.selectionStart; // Current cursor position
                           const textBeforeCursor = noticeDesc.slice(
                             0,
-                            cursorPos
+                            cursorPos,
                           ); // Text before the cursor is:
 
                           const textAfterCursor = noticeDesc.slice(cursorPos); // Text after the cursor
@@ -1048,7 +1114,7 @@ function TeacherNotes() {
                           <div>
                             {preselectedFiles.map((url, index) => {
                               const fileName = url.substring(
-                                url.lastIndexOf("/") + 1
+                                url.lastIndexOf("/") + 1,
                               );
                               return (
                                 <div
@@ -1107,7 +1173,7 @@ function TeacherNotes() {
                   />
                   {console.log(
                     "the currecnt section inside delete of the managesubjhect",
-                    currentSection
+                    currentSection,
                   )}
                 </div>
                 <div
@@ -1153,7 +1219,7 @@ function TeacherNotes() {
                   />
                   {console.log(
                     "the currecnt section inside delete of the managesubjhect",
-                    currentSection
+                    currentSection,
                   )}
                 </div>
                 <div
@@ -1277,10 +1343,10 @@ function TeacherNotes() {
                       <div className="relative mt-2 left-4 flex flex-col mx-4 gap-y-2">
                         {imageUrls.map((url, index) => {
                           const fileName = url.substring(
-                            url.lastIndexOf("/") + 1
+                            url.lastIndexOf("/") + 1,
                           );
                           const isImage = /\.(jpg|jpeg|png|gif)$/i.test(
-                            fileName
+                            fileName,
                           );
 
                           return (

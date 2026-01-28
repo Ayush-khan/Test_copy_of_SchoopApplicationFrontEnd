@@ -252,30 +252,30 @@ const TimeTableForTeacherDashbord = () => {
                 <div className="flex items-center w-full">
                   <div
                     className={`bg-gradient-to-br ${colors[index % colors.length]
-                      } text-white flex flex-col items-center justify-center px-1 py-2 min-w-[70px]`}
+                      } text-white flex flex-col items-center justify-center px-1 py-2 min-w-[120px]`}
                   >
-                    <span className="text-xs font-bold">
+                    <span className="text-sm font-bold">
                       Period <span className="text-sm">{item.period_no}</span>
                     </span>
                   </div>
 
                   <div className="w-full p-2">
                     <div className="flex flex-col gap-2 sm:grid sm:grid-cols-[auto_1fr_auto] sm:items-center">
-                      <span className="px-4 py-1 bg-purple-100 text-purple-700 rounded-full font-semibold w-fit sm:ml-24">
+                      <span className="px-9 py-1 bg-purple-100 text-purple-700 rounded-full font-semibold w-fit sm:ml-52">
                         {item.class}-{item.section}
                       </span>
 
-                      <h3 className="flex items-center gap-2 min-w-0 text-sm sm:text-base font-medium text-gray-800 sm:justify-center">
+                      <h3 className="flex items-center gap-2 min-w-0 text-sm sm:text-base font-medium text-gray-800 sm:justify-end mr-4">
                         <FaBook className="w-4 h-4 text-purple-600 shrink-0" />
                         <span className="truncate">{item.subject}</span>
                       </h3>
 
-                      <span className="flex items-center gap-1 px-4 py-1 bg-pink-100 text-pink-700 rounded-full text-xs sm:text-sm w-fit sm:mr-2">
+                      {/* <span className="flex items-center gap-1 px-4 py-1 bg-pink-100 text-pink-700 rounded-full text-xs sm:text-sm w-fit sm:mr-2">
                         <FiClock className="w-4 h-4" />
                         <span className="truncate">
                           {item.item_in} - {item.item_out}
                         </span>
-                      </span>
+                      </span> */}
                     </div>
                   </div>
                 </div>
@@ -712,109 +712,3 @@ const TimeTableForTeacherDashbord = () => {
 };
 
 export default TimeTableForTeacherDashbord;
-
-{
-  /* <div className="bg-gradient-to-r from-purple-600 to-pink-600 p-1 rounded-t-xl">
-              <div className="flex items-center justify-between">
-                <div className="flex flex-col">
-                  <div className="flex items-center space-x-3">
-                    <FaClipboardCheck className="w-5 h-5 text-white" />
-                    <h2 className="text-lg font-bold text-white">
-                      Lesson Plan Detail
-                    </h2>
-                  </div>
-
-                  <div className="text-sm text-purple-100 ml-8">
-                    <span className="font-semibold">
-                      {selectedInfo.className}
-                    </span>
-                    <span className="mx-1">•</span>
-                    <span>{selectedInfo.subject}</span>
-                  </div>
-                </div>
-
-                <button
-                  onClick={() => setOpenModal(false)}
-                  className="bg-white/20 hover:bg-white/30 px-2 py-1 rounded-full transition-colors duration-300"
-                >
-                  <i className="fas fa-times text-white"></i>
-                </button>
-              </div>
-            </div> */
-}
-
-// selectedTimetable && (
-//   <div className="space-y-2">
-//     {Object.entries(selectedTimetable).map(
-//       ([chapterName, lessons], chapterIndex) => {
-//         // 🔹 FILTER PER CHAPTER
-//         const todayLessons = lessons.filter(
-//           (lesson) =>
-//             lesson.start_date === today &&
-//             lesson.change_daily === "Y"
-//         );
-
-//         const otherLessons = lessons.filter(
-//           (lesson) =>
-//             !(
-//               lesson.start_date === today &&
-//               lesson.change_daily === "Y"
-//             )
-//         );
-
-//         return (
-//           <div
-//             key={chapterIndex}
-//             className="bg-white rounded-2xl shadow-lg overflow-hidden border border-purple-100 hover:shadow-xl transition-all duration-300"
-//           >
-//             {/* Chapter Header */}
-//             <div className="bg-gradient-to-r from-purple-100 to-pink-100 p-2 border-b border-purple-200">
-//               <div className="flex items-center gap-3">
-//                 {lessons?.[0] && (
-//                   <span className="text-lg font-bold text-purple-700">
-//                     Chapter No: {lessons[0].chapter_no}
-//                   </span>
-//                 )}
-
-//                 <h3 className="text-base font-bold text-gray-800 mt-1">
-//                   {chapterName}
-//                 </h3>
-//               </div>
-//             </div>
-
-//             <div className="p-2 space-y-2">
-
-//               {todayLessons.map((lesson, index) => (
-//                 <div
-//                   key={`today-${index}`}
-//                   className="bg-gradient-to-br from-green-100 to-emerald-50 rounded-xl p-2 border-2 border-green-400 shadow-md"
-//                 >
-//                   <h4 className="font-semibold text-green-800 mb-2 text-base">
-//                     {lesson.heading_name}
-//                   </h4>
-//                   <p className="text-sm text-gray-700 whitespace-pre-line">
-//                     {lesson.description}
-//                   </p>
-//                 </div>
-//               ))}
-
-//               {otherLessons.map((lesson, index) => (
-//                 <div
-//                   key={`other-${index}`}
-//                   className="group bg-gradient-to-br from-white to-purple-50 rounded-xl p-2 border-2 border-transparent hover:border-purple-300 transition-all duration-300 shadow-sm hover:shadow-md"
-//                 >
-//                   <h4 className="font-medium text-blue-800 mb-2 text-base">
-//                     {lesson.heading_name}
-//                   </h4>
-//                   <p className="text-sm text-gray-600 whitespace-pre-line">
-//                     {lesson.description}
-//                   </p>
-//                 </div>
-//               ))}
-//             </div>
-//           </div>
-//         );
-//       }
-//     )}
-//   </div>
-// )
