@@ -192,117 +192,122 @@ function NotMarkAbsentees() {
           {activeTab === "Manage" && (
             <div>
               {/* Table Section */}
-              {subjects.length > 0 && (
-                <div className="card mx-auto lg:w-full shadow-lg">
-                  <div className="p-2 px-3 bg-gray-100 flex justify-between items-center">
-                    <h3 className="text-gray-700 text-lg font-semibold">
-                      Today's Attendance not mark Classes{" "}
-                      {/* <span className="text-blue-500 text-sm">
+              {loading ? (
+                <div className="flex justify-center items-center h-64">
+                  <LoaderStyle />
+                </div>
+              ) : (
+                subjects.length > 0 && (
+                  <div className="card mx-auto lg:w-full shadow-lg">
+                    <div className="p-2 px-3 bg-gray-100 flex justify-between items-center">
+                      <h3 className="text-gray-700 text-lg font-semibold">
+                        Today's Attendance not mark Classes{" "}
+                        {/* <span className="text-blue-500 text-sm">
                           ({countAbsentStudent} Students)
                         </span> */}
-                    </h3>
-                    <div className="w-1/2 md:w-fit mr-1">
-                      <input
-                        type="text"
-                        className="form-control"
-                        placeholder="Search"
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                      />
+                      </h3>
+                      <div className="w-1/2 md:w-fit mr-1">
+                        <input
+                          type="text"
+                          className="form-control"
+                          placeholder="Search"
+                          onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                      </div>
                     </div>
-                  </div>
-                  <div
-                    className="relative w-[97%] h-1 mx-auto bg-red-700"
-                    style={{ backgroundColor: "#C03078" }}
-                  ></div>
+                    <div
+                      className="relative w-[97%] h-1 mx-auto bg-red-700"
+                      style={{ backgroundColor: "#C03078" }}
+                    ></div>
 
-                  <div className="card-body w-full">
-                    <div className="h-96 overflow-y-scroll">
-                      {loading ? (
-                        <div className="flex justify-center items-center h-64">
-                          <LoaderStyle />
-                        </div>
-                      ) : (
-                        <table className="min-w-full leading-normal table-auto border-collapse rounded-lg overflow-hidden shadow-md">
-                          <thead>
-                            <tr className="bg-gray-200 text-gray-900">
-                              <th className="px-2 w-[20%] text-center py-2 border border-gray-300 text-sm font-semibold">
-                                Sr. No
-                              </th>
+                    <div className="card-body w-full">
+                      <div className="h-96 overflow-y-scroll">
+                        {loading ? (
+                          <div className="flex justify-center items-center h-64">
+                            <LoaderStyle />
+                          </div>
+                        ) : (
+                          <table className="min-w-full leading-normal table-auto border-collapse rounded-lg overflow-hidden shadow-md">
+                            <thead>
+                              <tr className="bg-gray-200 text-gray-900">
+                                <th className="px-2 w-[20%] text-center py-2 border border-gray-300 text-sm font-semibold">
+                                  Sr. No
+                                </th>
 
-                              <th className="px-2 w-[25%] text-center py-2 border border-gray-300 text-sm font-semibold">
-                                Class
-                              </th>
-                              <th className="px-2 w-[40%] text-center py-2 border border-gray-300 text-sm font-semibold">
-                                Class Teacher Name
-                              </th>
-                            </tr>
-                          </thead>
+                                <th className="px-2 w-[25%] text-center py-2 border border-gray-300 text-sm font-semibold">
+                                  Class
+                                </th>
+                                <th className="px-2 w-[40%] text-center py-2 border border-gray-300 text-sm font-semibold">
+                                  Class Teacher Name
+                                </th>
+                              </tr>
+                            </thead>
 
-                          <tbody>
-                            {displayedSections.length ? (
-                              displayedSections.map((student, index) => (
-                                <tr
-                                  key={student.student_id}
-                                  className={`${index % 2 === 0 ? "bg-white" : "bg-gray-50"
-                                    } hover:bg-gray-50 transition-colors duration-150`}
-                                >
-                                  {/* Sr.No */}
-                                  <td className="text-center px-2 py-2 border border-gray-200 text-sm">
-                                    {currentPage * pageSize + index + 1}
-                                  </td>
+                            <tbody>
+                              {displayedSections.length ? (
+                                displayedSections.map((student, index) => (
+                                  <tr
+                                    key={student.student_id}
+                                    className={`${index % 2 === 0 ? "bg-white" : "bg-gray-50"
+                                      } hover:bg-gray-50 transition-colors duration-150`}
+                                  >
+                                    {/* Sr.No */}
+                                    <td className="text-center px-2 py-2 border border-gray-200 text-sm">
+                                      {currentPage * pageSize + index + 1}
+                                    </td>
 
-                                  {/* Class */}
-                                  <td className="text-center px-2 py-2 border border-gray-200 text-sm">
-                                    {student?.class_name}{" "}
-                                    {student?.section_name}
-                                  </td>
+                                    {/* Class */}
+                                    <td className="text-center px-2 py-2 border border-gray-200 text-sm">
+                                      {student?.class_name}{" "}
+                                      {student?.section_name}
+                                    </td>
 
-                                  {/* Student Name */}
-                                  <td className="text-center px-2 py-2 border border-gray-200 text-sm">
-                                    {`${camelCase(student.teacher_name)} `}
+                                    {/* Student Name */}
+                                    <td className="text-center px-2 py-2 border border-gray-200 text-sm">
+                                      {`${camelCase(student.teacher_name)} `}
+                                    </td>
+                                  </tr>
+                                ))
+                              ) : (
+                                <tr>
+                                  <td
+                                    colSpan="8"
+                                    className="text-center py-6 text-red-700 font-medium bg-gray-50"
+                                  >
+                                    Oops! No data found...
                                   </td>
                                 </tr>
-                              ))
-                            ) : (
-                              <tr>
-                                <td
-                                  colSpan="8"
-                                  className="text-center py-6 text-red-700 font-medium bg-gray-50"
-                                >
-                                  Oops! No data found...
-                                </td>
-                              </tr>
-                            )}
-                          </tbody>
-                        </table>
-                      )}
-                    </div>
+                              )}
+                            </tbody>
+                          </table>
+                        )}
+                      </div>
 
-                    {/* Pagination is */}
-                    <div className="flex justify-center pt-2 -mb-3">
-                      <ReactPaginate
-                        previousLabel={"Previous"}
-                        nextLabel={"Next"}
-                        breakLabel={"..."}
-                        breakClassName={"page-item"}
-                        breakLinkClassName={"page-link"}
-                        pageCount={pageCount}
-                        marginPagesDisplayed={1}
-                        pageRangeDisplayed={1}
-                        onPageChange={handlePageClick}
-                        containerClassName={"pagination justify-content-center"}
-                        pageClassName={"page-item"}
-                        pageLinkClassName={"page-link"}
-                        previousClassName={"page-item"}
-                        previousLinkClassName={"page-link"}
-                        nextClassName={"page-item"}
-                        nextLinkClassName={"page-link"}
-                        activeClassName={"active"}
-                      />
+                      {/* Pagination is */}
+                      <div className="flex justify-center pt-2 -mb-3">
+                        <ReactPaginate
+                          previousLabel={"Previous"}
+                          nextLabel={"Next"}
+                          breakLabel={"..."}
+                          breakClassName={"page-item"}
+                          breakLinkClassName={"page-link"}
+                          pageCount={pageCount}
+                          marginPagesDisplayed={1}
+                          pageRangeDisplayed={1}
+                          onPageChange={handlePageClick}
+                          containerClassName={"pagination justify-content-center"}
+                          pageClassName={"page-item"}
+                          pageLinkClassName={"page-link"}
+                          previousClassName={"page-item"}
+                          previousLinkClassName={"page-link"}
+                          nextClassName={"page-item"}
+                          nextLinkClassName={"page-link"}
+                          activeClassName={"active"}
+                        />
+                      </div>
                     </div>
                   </div>
-                </div>
-              )}
+                ))}
             </div>
           )}
         </div>

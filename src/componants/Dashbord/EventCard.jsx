@@ -176,6 +176,9 @@ const EventCard = () => {
   });
 
   console.log("filtered event list", filteredEvents);
+  const selectedMonthLabel = months.find(
+    (m) => m.value === Number(selectedMonth)
+  )?.label;
 
   return (
     <div className={`  border-2 border-solid h-64 bg-slate-100`}>
@@ -328,7 +331,7 @@ const EventCard = () => {
                 ) : (
                   <>
                     <p className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500">
-                      No data available.
+                      No events scheduled for {selectedMonthLabel} {currentYear}.
                     </p>
                   </>
                 )}
