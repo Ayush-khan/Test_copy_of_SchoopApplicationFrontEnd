@@ -99,7 +99,7 @@ const DailyAttendance = () => {
           section_id: selectedSectionId,
           dateatt: fromDate,
         },
-      }
+      },
     );
 
     const attendanceArray = Array.isArray(resAttendance.data)
@@ -121,7 +121,7 @@ const DailyAttendance = () => {
           class_id: selectedStudentId,
           section_id: selectedSectionId,
         },
-      }
+      },
     );
 
     const studentsArray = Array.isArray(resStudents.data)
@@ -174,7 +174,7 @@ const DailyAttendance = () => {
           `${API_URL}/api/get_classes_of_classteacher?teacher_id=${regId}`,
           {
             headers: { Authorization: `Bearer ${token}` },
-          }
+          },
         );
 
         const mappedData = (response.data.data || [])
@@ -276,7 +276,7 @@ const DailyAttendance = () => {
             class_id: selectedStudentId,
             section_id: selectedSectionId,
           },
-        }
+        },
       );
 
       const studentsData = studentsResponse?.data?.data ?? [];
@@ -295,7 +295,7 @@ const DailyAttendance = () => {
             section_id: selectedSectionId,
             dateatt: fromDate,
           },
-        }
+        },
       );
 
       const attendanceData = attendanceResponse?.data?.data ?? [];
@@ -369,7 +369,7 @@ const DailyAttendance = () => {
         }
 
         const existingTimetableStudent = timetable.find(
-          (s) => s.student_id === studentId
+          (s) => s.student_id === studentId,
         );
 
         return {
@@ -508,7 +508,7 @@ const DailyAttendance = () => {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
-        }
+        },
       );
 
       // if (response.data.status === true || response.status === 200) {
@@ -557,7 +557,7 @@ const DailyAttendance = () => {
             only_date: fromDate,
           },
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
 
       if (response.data.status) {
@@ -635,7 +635,7 @@ const DailyAttendance = () => {
         `${API_URL}/api/delete_studentmarkattendance?attendance_id=${deleteAttendanceId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
 
       if (response.data.status === 200) {
@@ -646,8 +646,8 @@ const DailyAttendance = () => {
           prev.map((s) =>
             s.attendance_id === deleteAttendanceId
               ? { ...s, isAbsent: false, attendance_id: null } // keep isChecked intact
-              : s
-          )
+              : s,
+          ),
         );
 
         // 🔹 Close modal but keep table open
@@ -694,7 +694,7 @@ const DailyAttendance = () => {
     <>
       {/* <div className="w-full md:w-[85%]  mx-auto p-4 "> */}
       <div
-        className={` transition-all duration-500 w-[85%]  mx-auto p-4 ${showStudentReport ? "w-[80%] " : "w-[85%] "
+        className={` transition-all duration-500 w-[85%]  mx-auto p-4 ${showStudentReport ? "w-[75%] " : "w-[85%] "
           }`}
       >
         <ToastContainer />
@@ -723,7 +723,7 @@ const DailyAttendance = () => {
 
           <>
             {!showStudentReport && (
-              <div className=" w-full md:w-[100%] flex justify-center flex-col md:flex-row gap-x-1 ml-0 p-2">
+              <div className=" w-full md:w-[100%] flex justify-center flex-col md:flex-row gap-x-1 md:m-3 p-2">
                 <div className="w-full md:w-[99%] flex md:flex-row justify-between items-center mt-0 md:mt-4">
                   <div className="w-full md:w-[80%]  gap-x-0 md:gap-x-4 flex flex-col gap-y-2 md:gap-y-0 md:flex-row">
                     <div className="w-full md:w-[45%] gap-x-2   justify-around  my-1 md:my-4 flex md:flex-row ">
@@ -792,7 +792,7 @@ const DailyAttendance = () => {
 
                             const [year, month, day] = raw.split("-");
                             setFormattedFromDate(
-                              `${day}-${month}-${year.slice(2)}`
+                              `${day}-${month}-${year.slice(2)}`,
                             );
                           }}
                           className="text-sm w-full border border-gray-300 rounded px-2 py-2"
@@ -857,99 +857,12 @@ const DailyAttendance = () => {
                 <>
                   <div className="w-full ">
                     <div className="card mx-auto lg:w-full shadow-lg">
-                      <div className="p-2 px-3 bg-gray-100 border-none flex items-center justify-between">
-                        <div className="w-full flex flex-row items-center justify-between ">
+                      {/* <div className="p-2 px-3 bg-gray-100 border-none flex items-center justify-between"> */}
+                      {/* <div className="w-full flex flex-row items-center justify-between ">
                           <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap mr-6">
                             Daily Attendance
                           </h3>
-                          {/* <div className="flex items-center w-full">
-                            <div className="flex flex-row flex-nowrap items-center gap-4 w-full overflow-x-auto bg-blue-50 border-l-2 border-r-2 border-pink-500 rounded-md shadow-md px-4 py-2">
-                              <div className="flex items-center gap-2 flex-1 min-w-[100px]">
-                                <label
-                                  className="w-[30%] whitespace-nowrap text-md sm:text-md"
-                                  htmlFor="studentSelect"
-                                >
-                                  Select Class{" "}
-                                  <span className="text-red-500">*</span>
-                                </label>
-                                <div className="flex-1">
-                                  <Select
-                                    menuPortalTarget={document.body}
-                                    menuPosition="fixed"
-                                    id="studentSelect"
-                                    value={selectedStudent}
-                                    onChange={handleStudentSelect}
-                                    options={studentOptions}
-                                    placeholder={
-                                      loadingExams ? "Loading..." : "Select"
-                                    }
-                                    isSearchable
-                                    isClearable
-                                    className="text-sm"
-                                    isDisabled={loadingExams}
-                                  />
-                                  {studentError && (
-                                    <div className="text-danger text-xs mt-1">
-                                      {studentError}
-                                    </div>
-                                  )}
-                                </div>
-                              </div>
 
-                              <div className="flex items-center gap-2 flex-1 min-w-[150px]">
-                                <label
-                                  className="ml-0 md:ml-4 w-full md:w-[50%] text-md mt-1.5"
-                                  htmlFor="fromDate"
-                                >
-                                  Select Date{" "}
-                                  <span className="text-red-500">*</span>
-                                </label>
-                                <div className="w-full md:w-[85%]">
-                                  <input
-                                    type="date"
-                                    id="fromDate"
-                                    min={academicYrFrom}
-                                    // max={academicYrTo}
-                                    max={today}
-                                    value={fromDate}
-                                    onChange={(e) => {
-                                      setDateError("");
-                                      const raw = e.target.value;
-                                      setFromDate(raw); // for input
-
-                                      const [year, month, day] = raw.split("-");
-                                      setFormattedFromDate(
-                                        `${day}-${month}-${year.slice(2)}`
-                                      );
-                                    }}
-                                    className="text-sm w-full border border-gray-300 rounded px-2 py-2"
-                                  />
-
-                                  {dateError && (
-                                    <div className="h-8 relative ml-1 text-danger text-xs">
-                                      {dateError}
-                                    </div>
-                                  )}
-                                </div>
-                              </div>
-
-                              <div className="flex items-center min-w-[90px]">
-                                <button
-                                  type="button"
-                                  onClick={handleSearch}
-                                  style={{ backgroundColor: "#2196F3" }}
-                                  className={`btn h-9 w-full btn-primary text-white font-bold px-3 rounded ${
-                                    loadingForSearch
-                                      ? "opacity-50 cursor-not-allowed"
-                                      : ""
-                                  }`}
-                                  disabled={loadingForSearch}
-                                >
-                                  {loadingForSearch ? "Browsing..." : "Browse"}
-                                </button>
-                              </div>
-                            </div>
-                          </div> */}
                           <div className="flex items-center w-full">
                             <div
                               className="bg-blue-50 border-l-2 border-r-2 text-[1em] border-pink-500 rounded-md shadow-md mx-auto px-6 py-2"
@@ -967,7 +880,8 @@ const DailyAttendance = () => {
                                     className="text-md whitespace-nowrap"
                                     htmlFor="studentSelect"
                                   >
-                                    <span className="text-lg">🏫</span> Class :{" "}
+                                    <span className="text-lg">🏫</span> Class
+                                    :{" "}
                                   </label>
                                   <span>{selectedStudent.label}</span>
                                 </div>
@@ -985,13 +899,58 @@ const DailyAttendance = () => {
                               </div>
                             </div>
                           </div>
-                        </div>
+                        </div> */}
 
-                        <div className="flex mb-1.5 flex-col md:flex-row gap-x-6 justify-center md:justify-end ml-2">
+                      {/* <div className="flex mb-1.5 mt-7 flex-col md:flex-row gap-x-6 justify-center md:justify-end ml-2">
                           <RxCross1
-                            className="text-base text-red-600 cursor-pointer hover:bg-red-100 rounded"
+                            className="text-base text-red-600 cursor-pointer hover:bg-red-100 rounded w- h-7"
                             onClick={() => handleCloseBack()}
                           />
+                        </div> */}
+                      {/* </div> */}
+                      <div className="p-2 px-3 bg-gray-100 border-none">
+                        <div
+                          className="
+      w-full
+      grid
+      grid-cols-1
+      lg:grid-cols-[auto_1fr_auto]
+      items-center
+      gap-y-3
+      lg:gap-y-0
+    "
+                        >
+                          {/* Left */}
+                          <h3 className="text-gray-700 text-base sm:text-lg lg:text-xl whitespace-nowrap">
+                            Daily Attendance
+                          </h3>
+
+                          {/* Center */}
+                          <div className="flex justify-center">
+                            <div className="bg-blue-50 border-l-2 border-r-2 border-pink-500 rounded-md shadow-md px-3 py-2 sm:px-4 lg:px-6 w-full sm:w-auto">
+                              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-y-2 gap-x-6 text-blue-800 font-medium text-sm sm:text-base">
+                                <div className="flex items-center gap-2">
+                                  <span className="text-lg">🏫</span>
+                                  <span>Class:</span>
+                                  <span>{selectedStudent.label}</span>
+                                </div>
+
+                                <div className="flex items-center gap-2">
+                                  <span className="text-lg">📆</span>
+                                  <span>Date:</span>
+                                  <span>{formattedFromDate || "-"}</span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Right */}
+                          <div className="flex justify-end">
+                            <RxCross1
+                              className="text-base text-red-600 cursor-pointer hover:bg-red-100 rounded w-5 h-5"
+                              onClick={handleCloseBack}
+                            />
+                          </div>
                         </div>
                       </div>
 
@@ -1002,7 +961,7 @@ const DailyAttendance = () => {
                         }}
                       ></div>
 
-                      <div className="card-body w-[85%] ml-20">
+                      <div className="card-body w-full">
                         <div
                           className="h-96 lg:h-96 overflow-y-scroll overflow-x-scroll"
                           style={{
@@ -1060,7 +1019,7 @@ const DailyAttendance = () => {
                                               prev.map((s) => ({
                                                 ...s,
                                                 isChecked: true,
-                                              }))
+                                              })),
                                             );
                                           } else {
                                             // CI: restore original DB state
@@ -1132,8 +1091,8 @@ const DailyAttendance = () => {
                                                       ? s.isAbsent
                                                       : false,
                                                   }
-                                                  : s
-                                              )
+                                                  : s,
+                                              ),
                                             );
                                           }}
                                         />
@@ -1167,7 +1126,7 @@ const DailyAttendance = () => {
                                       <td className="px-2 py-2 text-center border border-gray-300">
                                         {camelCase(
                                           `${student?.first_name || ""} ${student?.mid_name || ""
-                                          } ${student?.last_name || ""}`
+                                          } ${student?.last_name || ""}`,
                                         )}
                                       </td>
 
@@ -1189,8 +1148,8 @@ const DailyAttendance = () => {
                                                     isAbsent:
                                                       checked && s.isChecked,
                                                   }
-                                                  : s
-                                              )
+                                                  : s,
+                                              ),
                                             );
                                           }}
                                         />
@@ -1223,7 +1182,7 @@ const DailyAttendance = () => {
                                               <button
                                                 onClick={() =>
                                                   handleDeleteSingle(
-                                                    student.attendance_id
+                                                    student.attendance_id,
                                                   )
                                                 }
                                                 className="text-red-600 hover:text-red-800"

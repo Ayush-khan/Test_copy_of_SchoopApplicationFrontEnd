@@ -50,7 +50,7 @@ function ServiceType() {
             Authorization: `Bearer ${token}`,
           },
           withCredentials: true,
-        }
+        },
       );
 
       console.log("reaponse", response.data.data);
@@ -123,7 +123,7 @@ function ServiceType() {
   // Paginate results
   const displayedSections = filteredSections.slice(
     currentPage * pageSize,
-    (currentPage + 1) * pageSize
+    (currentPage + 1) * pageSize,
   );
 
   useEffect(() => {
@@ -237,7 +237,7 @@ function ServiceType() {
 
     const validationErrors = validateSectionName(
       newSectionName,
-      newSequenceName
+      newSequenceName,
     );
 
     if (Object.keys(validationErrors).length > 0) {
@@ -249,7 +249,7 @@ function ServiceType() {
     // 🔴 DUPLICATE SEQUENCE CHECK
     const isDuplicateSequence = sections?.some(
       (section) =>
-        String(section.sequence).trim() === String(newSequenceName).trim()
+        String(section.sequence).trim() === String(newSequenceName).trim(),
     );
 
     if (isDuplicateSequence) {
@@ -281,7 +281,7 @@ function ServiceType() {
             "Content-Type": "multipart/form-data",
           },
           withCredentials: true,
-        }
+        },
       );
 
       if (response.data?.status === 400) {
@@ -385,7 +385,7 @@ function ServiceType() {
     // Validate before submitting
     const validationErrors = validateSectionName(
       newSectionName,
-      newSequenceName
+      newSequenceName,
     );
 
     if (Object.keys(validationErrors).length > 0) {
@@ -399,7 +399,7 @@ function ServiceType() {
       (section) =>
         String(section.sequence).trim() === String(newSequenceName).trim() &&
         section.lesson_plan_headings_id !==
-        currentSection.lesson_plan_headings_id
+        currentSection.lesson_plan_headings_id,
     );
 
     if (isDuplicateSequence) {
@@ -428,13 +428,13 @@ function ServiceType() {
             "Content-Type": "application/json",
           },
           withCredentials: true,
-        }
+        },
       );
 
       // Custom backend 400
       if (response.data?.status === 400) {
         toast.error(
-          response.data.message || "Lesson plan heading already exists!"
+          response.data.message || "Lesson plan heading already exists!",
         );
         setIsSubmitting(false);
         return;
@@ -462,7 +462,7 @@ function ServiceType() {
       // Backend 400
       else if (error.response?.data?.status === 400) {
         toast.error(
-          error.response.data.message || "Lesson plan heading already exists!"
+          error.response.data.message || "Lesson plan heading already exists!",
         );
       } else {
         toast.error("Server error. Please try again later.");
@@ -475,7 +475,7 @@ function ServiceType() {
   const handleDelete = (id) => {
     console.log("the deleted lesson plan heading id", id);
     const sectionToDelete = sections.find(
-      (sec) => sec.lesson_plan_headings_id === id
+      (sec) => sec.lesson_plan_headings_id === id,
     );
     console.log("the deleted lesson plan heading id", sectionToDelete);
     setCurrentSection(sectionToDelete);
@@ -497,7 +497,7 @@ function ServiceType() {
       }
       console.log(
         "delete this service_id",
-        currentSection.lesson_plan_headings_id
+        currentSection.lesson_plan_headings_id,
       );
       const response = await axios.delete(
         `${API_URL}/api/delete_lesson_plan_heading/${currentSection.lesson_plan_headings_id}`,
@@ -506,7 +506,7 @@ function ServiceType() {
             Authorization: `Bearer ${token}`,
           },
           withCredentials: true,
-        }
+        },
       );
       if (response.data.success) {
         fetchSections();
@@ -516,7 +516,7 @@ function ServiceType() {
         handleCloseModal();
       } else {
         toast.error(
-          response.data.message || "Failed to delete lesson plan heading!"
+          response.data.message || "Failed to delete lesson plan heading!",
         );
       }
     } catch (error) {
@@ -602,7 +602,7 @@ function ServiceType() {
           ></div>
 
           <div className="card-body w-full">
-            <div className="h-96 lg:h-96 w-full md:w-[80%] mx-auto w-overflow-y-scroll lg:overflow-x-hidden">
+            <div className="lg:h-96 w-full md:w-[80%] mx-auto w-overflow-y-scroll lg:overflow-x-hidden">
               <div className="bg-white rounded-lg shadow-xs">
                 <table className="min-w-full leading-normal table-auto">
                   <thead>
@@ -677,10 +677,16 @@ function ServiceType() {
                           </td>
                         </tr>
                       ))
+                    ) : sections.length === 0 ? (
+                      <div className=" absolute left-[1%] w-[100%]  text-center flex justify-center items-center mt-14">
+                        <div className=" text-center text-xl text-red-700">
+                          Create lesson plan heading to view.
+                        </div>
+                      </div>
                     ) : (
                       <div className=" absolute left-[1%] w-[100%]  text-center flex justify-center items-center mt-14">
                         <div className=" text-center text-xl text-red-700">
-                          Oops! No data found..
+                          Result not found!
                         </div>
                       </div>
                     )}

@@ -91,7 +91,7 @@ function StationeryRequisition() {
             Authorization: `Bearer ${token}`,
           },
           withCredentials: true,
-        }
+        },
       );
 
       //   console.log("Stationery Requisition data", response.data.data);
@@ -191,7 +191,7 @@ function StationeryRequisition() {
 
   const stationeryMatchesSearch = (stationeryId, searchLower) => {
     const item = stationeryType.find(
-      (s) => s.stationery_id?.toString() === stationeryId?.toString()
+      (s) => s.stationery_id?.toString() === stationeryId?.toString(),
     );
 
     if (!item) return false;
@@ -235,7 +235,7 @@ function StationeryRequisition() {
 
     const stationeryMatch = stationeryMatchesSearch(
       section?.stationery_id,
-      searchLower
+      searchLower,
     );
 
     return (
@@ -256,7 +256,7 @@ function StationeryRequisition() {
   // Paginate results
   const displayedSections = filteredSections.slice(
     currentPage * pageSize,
-    (currentPage + 1) * pageSize
+    (currentPage + 1) * pageSize,
   );
 
   useEffect(() => {
@@ -303,7 +303,7 @@ function StationeryRequisition() {
 
     const validationErrors = validateStationeryForm(
       newSectionName,
-      newDepartmentId
+      newDepartmentId,
     );
     if (Object.keys(validationErrors).length > 0) {
       setFieldErrors(validationErrors);
@@ -324,7 +324,7 @@ function StationeryRequisition() {
           staff_id: regId,
           status: "A",
         },
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
 
       fetchSections();
@@ -344,7 +344,7 @@ function StationeryRequisition() {
 
     const validationErrors = validateStationeryForm(
       newSectionName,
-      newDepartmentId
+      newDepartmentId,
     );
     if (Object.keys(validationErrors).length > 0) {
       setFieldErrors(validationErrors);
@@ -365,7 +365,7 @@ function StationeryRequisition() {
           staff_id: regId,
           status: currentSection.status,
         },
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
 
       fetchSections();
@@ -384,7 +384,7 @@ function StationeryRequisition() {
 
     if (sectionToDelete) {
       const stationery = stationeryType.find(
-        (s) => s.stationery_id === sectionToDelete.stationery_id
+        (s) => s.stationery_id === sectionToDelete.stationery_id,
       );
 
       // Add the stationery name
@@ -415,7 +415,7 @@ function StationeryRequisition() {
             Authorization: `Bearer ${token}`,
           },
           withCredentials: true,
-        }
+        },
       );
       //   console.log(
       //     "The response of the delete api in the stationery",
@@ -428,7 +428,7 @@ function StationeryRequisition() {
         toast.success("Stationery Requsition deleted!");
       } else {
         toast.error(
-          response.data.message || "Failed to delete stationery requsition!"
+          response.data.message || "Failed to delete stationery requsition!",
         );
       }
     } catch (error) {
@@ -654,10 +654,16 @@ function StationeryRequisition() {
                           </td>
                         </tr>
                       ))
+                    ) : sections.length === 0 ? (
+                      <div className=" absolute left-[1%] w-[100%]  text-center flex justify-center items-center mt-14">
+                        <div className=" text-center text-xl text-red-700">
+                          Create stationery requisition to view.
+                        </div>
+                      </div>
                     ) : (
                       <div className=" absolute left-[1%] w-[100%]  text-center flex justify-center items-center mt-14">
                         <div className=" text-center text-xl text-red-700">
-                          Oops! No data found..
+                          Result not found!
                         </div>
                       </div>
                     )}

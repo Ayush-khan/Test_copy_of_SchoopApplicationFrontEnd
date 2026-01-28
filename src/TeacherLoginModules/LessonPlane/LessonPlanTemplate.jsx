@@ -75,7 +75,7 @@ function LessonPlanTemplate() {
         setclassesforsubjectallot(response.data);
         console.log(
           "this is the dropdown of the allot subject tab for class",
-          response.data
+          response.data,
         );
       } else {
         setError("Unexpected data format");
@@ -148,13 +148,13 @@ function LessonPlanTemplate() {
         {
           headers: { Authorization: `Bearer ${token}` },
           params,
-        }
+        },
       );
 
       const data = response.data?.data || [];
       if (data.length === 0) {
         setNotices([]);
-        toast.error("Lesson plan template not found.");
+        // toast.error("Lesson plan template not found.");
         return;
       }
 
@@ -185,7 +185,7 @@ function LessonPlanTemplate() {
             description: item.description || "",
           });
           return acc;
-        }, {})
+        }, {}),
       );
 
       setNotices(groupedTemplates); // now each notice has all its headings/descriptions
@@ -226,7 +226,7 @@ function LessonPlanTemplate() {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
       const { imageurl } = response.data.data;
       console.log("imageURL", imageurl);
@@ -238,7 +238,7 @@ function LessonPlanTemplate() {
 
   const handleDelete = (sectionId) => {
     const classToDelete = notices.find(
-      (cls) => cls.les_pln_temp_id === sectionId
+      (cls) => cls.les_pln_temp_id === sectionId,
     );
     setCurrentSection({ classToDelete });
     setCurrestSubjectNameForDelete(currentSection?.classToDelete?.name);
@@ -274,7 +274,7 @@ function LessonPlanTemplate() {
             Authorization: `Bearer ${token}`,
           },
           withCredentials: true,
-        }
+        },
       );
 
       console.log(response);
@@ -289,11 +289,11 @@ function LessonPlanTemplate() {
     } catch (error) {
       if (error.response && error.response.data) {
         toast.error(
-          `Error In Deleting ${currestSubjectNameForDelete}: ${error.response.data.message}`
+          `Error In Deleting ${currestSubjectNameForDelete}: ${error.response.data.message}`,
         );
       } else {
         toast.error(
-          `Error In Deleting ${currestSubjectNameForDelete}: ${error.message}`
+          `Error In Deleting ${currestSubjectNameForDelete}: ${error.message}`,
         );
       }
       console.error("Error In Deleting:", error);
@@ -340,7 +340,7 @@ function LessonPlanTemplate() {
 
   const displayedSections = filteredSections.slice(
     currentPage * pageSize,
-    (currentPage + 1) * pageSize
+    (currentPage + 1) * pageSize,
   );
 
   //   This is tab
@@ -409,8 +409,10 @@ function LessonPlanTemplate() {
               <div className="container mt-4">
                 <div className="card mx-auto lg:w-full shadow-lg">
                   <div className="card-body w-full">
-                    <div className="h-96 lg:h-96 overflow-y-scroll lg:overflow-x-hidden">
-                      <div className="overflow-x-auto">
+                    {/* <div className="h-96 lg:h-96 overflow-y-scroll lg:overflow-x-hidden">
+                      <div className="overflow-x-auto"> */}
+                    <div className="lg:h-96 overflow-y-auto">
+                      <div className="overflow-x-auto scrollbar-hide">
                         <table className="w-full table-fixed border-collapse border border-gray-950">
                           <thead>
                             <tr className="bg-gray-200">
@@ -498,7 +500,7 @@ function LessonPlanTemplate() {
                                                   label: subject.name,
                                                 },
                                               },
-                                            }
+                                            },
                                           );
                                         }}
                                         className="text-blue-500 hover:text-blue-500"
@@ -521,13 +523,22 @@ function LessonPlanTemplate() {
                                   </td>
                                 </tr>
                               ))
+                            ) : notices.length === 0 ? (
+                              <tr>
+                                <td
+                                  colSpan="6"
+                                  className="text-center py-6 text-red-700 text-xl"
+                                >
+                                  Please create lesson plan template to view.
+                                </td>
+                              </tr>
                             ) : (
                               <tr>
                                 <td
                                   colSpan="6"
-                                  className="text-center py-6 text-red-700 text-lg font-medium"
+                                  className="text-center py-6 text-red-700 text-xl"
                                 >
-                                  Oops! No data found..
+                                  Result not found!
                                 </td>
                               </tr>
                             )}
@@ -580,7 +591,7 @@ function LessonPlanTemplate() {
                   />
                   {console.log(
                     "the currecnt section inside delete of the managesubjhect",
-                    currentSection
+                    currentSection,
                   )}
                 </div>
                 <div

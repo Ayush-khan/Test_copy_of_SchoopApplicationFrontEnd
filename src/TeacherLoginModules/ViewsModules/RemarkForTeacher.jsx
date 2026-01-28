@@ -12,12 +12,14 @@ import Select from "react-select";
 import Loader from "../../componants/common/LoaderFinal/LoaderStyle";
 import { faThumbsUp } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { FiSearch } from "react-icons/fi";
 
 function RemarkForTeacher() {
   const API_URL = import.meta.env.VITE_API_URL; // URL for host
   // const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   // for allot subject tab
+  const [showSearch, setShowSearch] = useState(false);
   const [showTable, setShowTable] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
   const [showPublish, setShowPublishModal] = useState(false);
@@ -173,7 +175,7 @@ function RemarkForTeacher() {
       // Classes
       const classRes = await axios.get(
         `${API_URL}/api/get_only_classes_allotted_to_teacher`,
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
 
       const classOptions =
@@ -189,7 +191,7 @@ function RemarkForTeacher() {
         `${API_URL}/api/get_remark_of_teacher`,
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
 
       const data = remarkRes.data?.data || [];
@@ -202,7 +204,7 @@ function RemarkForTeacher() {
       } else {
         setNotices([]);
         setShowTable(false);
-        toast.info("No published remarks found for this teacher.");
+        toast.info("No remarks found.");
       }
     } catch (error) {
       console.error("Initialization error:", error);
@@ -233,7 +235,7 @@ function RemarkForTeacher() {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
       const { imageurl } = response.data.data;
       console.log("imageURL", imageurl);
@@ -333,7 +335,7 @@ function RemarkForTeacher() {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       if (response.status === 200) {
@@ -345,7 +347,7 @@ function RemarkForTeacher() {
     } catch (error) {
       console.error(
         "Error acknowledging remark:",
-        error.response?.data || error.message
+        error.response?.data || error.message,
       );
       toast.error("Failed to acknowledge remark");
     }
@@ -403,11 +405,24 @@ function RemarkForTeacher() {
 
   const searchLower = searchTerm.toLowerCase();
 
+  const formatDateForSearch = (date) => {
+    if (!date) return "";
+    return new Date(date)
+      .toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "2-digit",
+      })
+      .replace(/\//g, "-")
+      .toLowerCase();
+  };
+
   const filteredSections = notices.filter((notice) => {
     const searchLower = searchTerm.toLowerCase();
     const subject = notice?.remark_subject?.toLowerCase() || "";
     const type = notice?.remark_type?.toLowerCase() || "";
-    const date = notice?.remark_date?.toLowerCase() || "";
+    // const date = notice?.remark_date?.toLowerCase() || "";
+    const date = formatDateForSearch(notice?.remark_date);
     const ack = notice?.acknowledge?.toLowerCase() || "";
 
     return (
@@ -420,7 +435,7 @@ function RemarkForTeacher() {
 
   const displayedSections = filteredSections.slice(
     currentPage * pageSize,
-    (currentPage + 1) * pageSize
+    (currentPage + 1) * pageSize,
   );
 
   const [uploadedFiles, setUploadedFiles] = useState([]);
@@ -434,17 +449,50 @@ function RemarkForTeacher() {
   return (
     <>
       {/* <ToastContainer /> */}
-      <div className="md:mx-auto md:w-3/4 p-4 bg-white mt-4 ">
+      <div className="md:mx-auto md:w-3/4 p-3 bg-white mt-4 ">
         <div className=" card-header  flex justify-between items-center  ">
           <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
             Teacher Remark
           </h3>
-          <RxCross1
+          {/* <RxCross1
             className="float-end relative -top-1 right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
             onClick={() => {
               navigate("/dashboard");
             }}
-          />
+          /> */}
+          <div className="flex flex-row gap-3 items-center justify-end">
+            {/* Search */}
+            <div className="relative group">
+              {/* <button
+                onClick={() => setShowSearch((prev) => !prev)}
+                className="text-black hover:text-pink-500"
+              >
+                <FiSearch size={20} />
+              </button>
+
+              <span className="absolute bottom-full mt-1 right-0 hidden group-hover:block bg-blue-500 text-white text-xs px-2 py-1 rounded shadow">
+                Search
+              </span> */}
+
+              {showTable && !loading && (
+                <div className="w-1/2 md:w-full mr-1 mb-1">
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Search"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+                </div>
+              )}
+            </div>
+
+            {/* Close */}
+            <RxCross1
+              className="text-red-600 cursor-pointer hover:bg-red-100 rounded w-5 h-5"
+              onClick={() => navigate("/dashboard")}
+            />
+          </div>
         </div>
         <div
           className=" relative  mb-8   h-1  mx-auto bg-red-700"
@@ -455,9 +503,8 @@ function RemarkForTeacher() {
 
         <div className="bg-white  rounded-md ">
           <ToastContainer />
-          <div className="w-full bg-gray-50 p-4 rounded-lg shadow-sm mb-6">
+          {/* <div className="w-full bg-gray-50 p-4 rounded-lg shadow-sm mb-6">
             <div className="flex flex-col md:flex-row items-center gap-4 md:gap-6">
-              {/* Teacher Name Label + Input */}
               <div className="flex items-center w-full md:w-1/2">
                 <label
                   htmlFor="teacherName"
@@ -474,7 +521,6 @@ function RemarkForTeacher() {
                 />
               </div>
 
-              {/* Search Box */}
               <div className="flex items-center w-full md:w-1/2">
                 <div className="flex w-full">
                   <input
@@ -487,7 +533,7 @@ function RemarkForTeacher() {
                 </div>
               </div>
             </div>
-          </div>
+          </div> */}
 
           {/* Loader Overlay */}
           {loading && (
@@ -499,21 +545,36 @@ function RemarkForTeacher() {
           {/* Show table only when data is fetched and showTable is true */}
           {showTable && !loading && (
             <div className="h-96 lg:h-96 overflow-y-scroll lg:overflow-x-hidden">
+              {/* {showSearch && (
+                <div className="p-1 px-3 bg-gray-100  rounded-sm">
+                  <div className="w-full flex justify-end mr-0 md:mr-4">
+                    <div className="w-1/2 md:w-[20%] mr-1">
+                      <input
+                        type="text"
+                        className="form-control"
+                        placeholder="Search"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                </div>
+              )} */}
               <div className="h-96 lg:h-96 overflow-y-scroll lg:overflow-x-hidden">
                 <table className="min-w-full leading-normal table-auto">
                   <thead>
                     <tr className="bg-gray-200">
                       <th className="px-2 text-center py-2 border border-gray-950 text-sm font-semibold text-gray-900">
-                        Sr.No
+                        Sr. No
                       </th>
-                      <th className="px-2 text-center py-2 border border-gray-950 text-sm font-semibold text-gray-900">
+                      {/* <th className="px-2 text-center py-2 border border-gray-950 text-sm font-semibold text-gray-900">
                         ID
-                      </th>
+                      </th> */}
                       <th className="px-2 text-center py-2 border border-gray-950 text-sm font-semibold text-gray-900">
                         Date
                       </th>
                       <th className="px-2 text-center py-2 border border-gray-950 text-sm font-semibold text-gray-900">
-                        Remark Subject
+                        Remark
                       </th>
                       <th className="px-2 text-center py-2 border border-gray-950 text-sm font-semibold text-gray-900">
                         Acknowledge
@@ -524,7 +585,7 @@ function RemarkForTeacher() {
                     </tr>
                   </thead>
 
-                  <tbody>
+                  {/* <tbody>
                     {displayedSections.length ? (
                       displayedSections.map((item, index) => (
                         <tr
@@ -555,10 +616,11 @@ function RemarkForTeacher() {
                                   ? "Acknowledged"
                                   : "Click to acknowledge"
                               }
-                              className={`text-base cursor-pointer transition ${item.acknowledge === "Y"
+                              className={`text-base cursor-pointer transition ${
+                                item.acknowledge === "Y"
                                   ? "text-black"
                                   : "text-black opacity-30 hover:opacity-70"
-                                }`}
+                              }`}
                               onClick={() =>
                                 item.acknowledge === "N" &&
                                 handleAcknowledge(item.t_remark_id)
@@ -583,6 +645,80 @@ function RemarkForTeacher() {
                           className="text-center py-10 text-red-700"
                         >
                           Oops! No data found.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody> */}
+                  <tbody>
+                    {displayedSections.length > 0 ? (
+                      displayedSections.map((item, index) => (
+                        <tr
+                          key={item.t_remark_id}
+                          className="text-sm hover:bg-gray-50 transition"
+                        >
+                          <td className="px-3 py-2 border border-gray-300 text-center">
+                            {currentPage * pageSize + index + 1}
+                          </td>
+
+                          {/* <td className="px-3 py-2 border border-gray-300 text-center">
+                            {item.t_remark_id}
+                          </td> */}
+
+                          <td className="px-3 py-2 border border-gray-300 text-center">
+                            {formatDateForSearch(item.remark_date)}
+                          </td>
+
+                          <td className="px-3 py-2 border border-gray-300 text-center">
+                            {item.remark_subject}
+                          </td>
+
+                          <td className="px-3 py-2 border border-gray-300 text-center">
+                            <FontAwesomeIcon
+                              icon={faThumbsUp}
+                              title={
+                                item.acknowledge === "Y"
+                                  ? "Acknowledged"
+                                  : "Click to acknowledge"
+                              }
+                              className={`text-base cursor-pointer transition ${item.acknowledge === "Y"
+                                  ? "text-black"
+                                  : "text-black opacity-30 hover:opacity-70"
+                                }`}
+                              onClick={() =>
+                                item.acknowledge === "N" &&
+                                handleAcknowledge(item.t_remark_id)
+                              }
+                            />
+                          </td>
+
+                          <td className="px-3 py-2 border border-gray-300 text-center">
+                            <button
+                              className="text-blue-500 hover:text-blue-600"
+                              onClick={() => handleView(item)}
+                            >
+                              <MdOutlineRemoveRedEye className="text-xl inline-block" />
+                            </button>
+                          </td>
+                        </tr>
+                      ))
+                    ) : notices.length === 0 ? (
+                      // ✅ Case 1: No remarks created at all
+                      <tr>
+                        <td
+                          colSpan={6}
+                          className="text-center py-10 text-red-700 text-xl"
+                        >
+                          Yet not remark is published.
+                        </td>
+                      </tr>
+                    ) : (
+                      // ✅ Case 2: Remarks exist but search returned nothing
+                      <tr>
+                        <td
+                          colSpan={6}
+                          className="text-center py-10 text-red-600 text-xl"
+                        >
+                          Results not found!!
                         </td>
                       </tr>
                     )}
@@ -680,7 +816,7 @@ function RemarkForTeacher() {
                         {imageUrls.map((url, index) => {
                           // Extracting file name from the URL
                           const fileName = url.substring(
-                            url.lastIndexOf("/") + 1
+                            url.lastIndexOf("/") + 1,
                           );
                           return (
                             <div

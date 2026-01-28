@@ -88,7 +88,7 @@ const EditLessonPlan = () => {
     const sunday = monday.add(6, "day");
 
     setWeekRange(
-      `${monday.format("DD-MM-YYYY")} / ${sunday.format("DD-MM-YYYY")}`
+      `${monday.format("DD-MM-YYYY")} / ${sunday.format("DD-MM-YYYY")}`,
     );
 
     // store Date objects ONLY
@@ -149,7 +149,7 @@ const EditLessonPlan = () => {
         `${API_URL}/api/get_lesson_plan_heading_non_daily`,
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
 
       const data = response?.data?.data || [];
@@ -169,7 +169,7 @@ const EditLessonPlan = () => {
         `${API_URL}/api/get_lesson_plan_heading_daily`,
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
 
       const data = response?.data?.data || [];
@@ -230,7 +230,7 @@ const EditLessonPlan = () => {
         const token = localStorage.getItem("authToken");
         const response = await axios.get(
           `${API_URL}/api/get_lesson_plan_by_unq_id/${id}`,
-          { headers: { Authorization: `Bearer ${token}` } }
+          { headers: { Authorization: `Bearer ${token}` } },
         );
 
         const details = response?.data?.data?.details || [];
@@ -267,10 +267,10 @@ const EditLessonPlan = () => {
         const remarks = {};
 
         const dailyHeadingIds = new Set(
-          (dailyHeading || []).map((h) => h.lesson_plan_headings_id)
+          (dailyHeading || []).map((h) => h.lesson_plan_headings_id),
         );
         const nonDailyHeadingIds = new Set(
-          (heading || []).map((h) => h.lesson_plan_headings_id)
+          (heading || []).map((h) => h.lesson_plan_headings_id),
         );
 
         // 🔹 STEP 1: Build rows from daily start_date
@@ -293,7 +293,7 @@ const EditLessonPlan = () => {
 
           if (dailyHeadingIds.has(headingId) && item.start_date) {
             const rowIndex = rowsArr.findIndex(
-              (r) => r.startDate === item.start_date
+              (r) => r.startDate === item.start_date,
             );
 
             if (rowIndex !== -1) {
@@ -505,7 +505,7 @@ const EditLessonPlan = () => {
       }
 
       const invalidStudent = studentsArray.find(
-        (s) => !s.class_id || s.section_id === undefined || s.section_id === ""
+        (s) => !s.class_id || s.section_id === undefined || s.section_id === "",
       );
       if (invalidStudent) {
         toast.error("Selected class has invalid class or section.");
@@ -518,7 +518,7 @@ const EditLessonPlan = () => {
         .map((s) => s.section_id?.toString() || "0")
         .join(",");
       const classIdArray = studentsArray.map(
-        (s) => `${s.class_id}^${s.section_id}`
+        (s) => `${s.class_id}^${s.section_id}`,
       );
 
       const descriptions = {};
@@ -546,7 +546,7 @@ const EditLessonPlan = () => {
 
       // Validation: check if any non-empty description exists
       const hasAnyDescription = Object.values(descriptions).some(
-        (val) => val && val.trim() !== ""
+        (val) => val && val.trim() !== "",
       );
 
       if (!hasAnyDescription) {
@@ -592,7 +592,7 @@ const EditLessonPlan = () => {
             ] ||
             "";
           return val.trim() !== "";
-        })
+        }),
       );
 
       if (!hasTeachingPoints) {
@@ -625,7 +625,7 @@ const EditLessonPlan = () => {
       const response = await axios.put(
         `${API_URL}/api/update_lesson_plan/${id}`,
         payload,
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
 
       if (response.data.status === 200) {
@@ -656,11 +656,11 @@ const EditLessonPlan = () => {
       student.non_daily.forEach((item) => {
         if (item.heading)
           flatValues.push(
-            item.heading.trim().replace(/\s+/g, "").toLowerCase()
+            item.heading.trim().replace(/\s+/g, "").toLowerCase(),
           );
         if (Array.isArray(item.description)) {
           item.description.forEach((desc) =>
-            flatValues.push(desc.trim().replace(/\s+/g, "").toLowerCase())
+            flatValues.push(desc.trim().replace(/\s+/g, "").toLowerCase()),
           );
         }
       });
@@ -671,13 +671,13 @@ const EditLessonPlan = () => {
       student.daily_changes.forEach((change) => {
         if (change.heading)
           flatValues.push(
-            change.heading.trim().replace(/\s+/g, "").toLowerCase()
+            change.heading.trim().replace(/\s+/g, "").toLowerCase(),
           );
         if (Array.isArray(change.entries)) {
           change.entries.forEach((entry) => {
             if (Array.isArray(entry.description)) {
               entry.description.forEach((desc) =>
-                flatValues.push(desc.trim().replace(/\s+/g, "").toLowerCase())
+                flatValues.push(desc.trim().replace(/\s+/g, "").toLowerCase()),
               );
             }
           });
@@ -717,7 +717,7 @@ const EditLessonPlan = () => {
                 <>
                   <div className="w-full  mx-auto transition-all duration-300">
                     <div className="card mx-auto shadow-lg">
-                      <div className="p-2 px-3 bg-gray-100 border-none flex items-center justify-between">
+                      {/* <div className="p-2 px-3 bg-gray-100 border-none flex items-center justify-between">
                         <div className="w-full flex flex-row items-center justify-between mr-0 md:mr-4 gap-x-1">
                           <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap mr-6">
                             Edit Lesson Plan
@@ -734,7 +734,7 @@ const EditLessonPlan = () => {
                                 className="flex items-center gap-x-4 text-blue-800 font-medium"
                                 style={{ flexWrap: "nowrap" }}
                               >
-                                {/* Teacher */}
+                               
                                 <div className="flex items-center gap-2">
                                   <label
                                     className="text-md whitespace-nowrap"
@@ -746,7 +746,7 @@ const EditLessonPlan = () => {
                                   <span>{selectedStudent.label}</span>
                                 </div>
 
-                                {/* Month */}
+                               
                                 <div className="flex items-center gap-3">
                                   <label
                                     className="text-md whitespace-nowrap"
@@ -779,6 +779,47 @@ const EditLessonPlan = () => {
                             onClick={() => navigate("/lessonPlan")}
                           />
                         </div>
+                      </div> */}
+                      <div className="p-2 px-3 bg-gray-100 border-none">
+                        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+                          {/* Title */}
+                          <h3 className="text-gray-700 text-base sm:text-lg lg:text-xl whitespace-nowrap">
+                            Edit Lesson Plan
+                          </h3>
+
+                          {/* Scrollable blue strip */}
+                          <div className="overflow-x-auto scrollbar-hidden">
+                            <div className="min-w-max bg-blue-50 border-x-2 border-pink-500 rounded-md px-4 py-2">
+                              <div className="flex items-center gap-x-4 text-blue-800 font-medium whitespace-nowrap">
+                                <div className="flex items-center gap-2">
+                                  <span className="text-lg">🏫</span>
+                                  <span>Class:</span>
+                                  <span>{selectedStudent.label}</span>
+                                </div>
+
+                                <div className="flex items-center gap-2">
+                                  <span className="text-lg">📚</span>
+                                  <span>Subject:</span>
+                                  <span>{selectedSubject.label}</span>
+                                </div>
+
+                                <div className="flex items-center gap-2">
+                                  <span className="text-lg">📝</span>
+                                  <span>Chapter:</span>
+                                  <span>{selectedChapter.label}</span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Close button */}
+                          <div className="flex justify-end">
+                            <RxCross1
+                              className="text-base text-red-600 cursor-pointer hover:bg-red-100 rounded"
+                              onClick={() => setShowStudentReport(false)}
+                            />
+                          </div>
+                        </div>
                       </div>
                       <div
                         className=" w-[97%] h-1 mx-auto"
@@ -806,8 +847,8 @@ const EditLessonPlan = () => {
                                 key={index}
                                 className="mb-10 border rounded-lg shadow-md p-1"
                               >
-                                <div className="flex items-center justify-end gap-10 mr-10 mb-2 flex-wrap md:flex-nowrap">
-                                  {/* No. of Periods */}
+                                {/* <div className="flex items-center justify-end gap-10 mr-10 mb-2 flex-wrap md:flex-nowrap">
+                                 
                                   <div className="flex items-center gap-2">
                                     <label className="text-sm font-medium text-gray-700 whitespace-nowrap">
                                       No. of Periods{" "}
@@ -819,9 +860,7 @@ const EditLessonPlan = () => {
                                       placeholder="Enter periods"
                                       className="w-32 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-400"
                                       value={numPeriods}
-                                      // onChange={(e) =>
-                                      //   setNumPeriods(e.target.value)
-                                      // }
+                                      
                                       onChange={(e) => {
                                         const value = e.target.value;
                                         if (
@@ -835,7 +874,7 @@ const EditLessonPlan = () => {
                                     />
                                   </div>
 
-                                  {/* Date (Week Picker) */}
+                                 
                                   <div className="flex items-center gap-2 mr-10">
                                     <label className="text-sm font-medium text-gray-700 whitespace-nowrap">
                                       Date{" "}
@@ -883,6 +922,99 @@ const EditLessonPlan = () => {
                                       className="hidden"
                                       maxDate={maxDate}
                                       minDate={minDate}
+                                    />
+                                  </div>
+                                </div> */}
+                                <div
+                                  className="
+                                    flex flex-col gap-3
+                                    md:flex-row md:items-center md:justify-end md:gap-6
+                                    mb-2 px-2
+                                  "
+                                >
+                                  {/* No. of Periods */}
+                                  <div className="flex items-center gap-2 w-full md:w-auto">
+                                    <label className="text-sm font-medium text-gray-700 whitespace-nowrap">
+                                      No. of Periods{" "}
+                                      <span className="text-red-500">*</span>
+                                    </label>
+                                    <input
+                                      type="number"
+                                      min="1"
+                                      placeholder="Enter periods"
+                                      className="
+                                        w-full md:w-32
+                                        p-2 border border-gray-300 rounded-lg
+                                        focus:outline-none focus:ring-1 focus:ring-gray-400
+                                      "
+                                      value={numPeriods}
+                                      onChange={(e) =>
+                                        setNumPeriods(e.target.value)
+                                      }
+                                      required
+                                    />
+                                  </div>
+
+                                  {/* Date (Week Picker) */}
+                                  <div className="relative flex flex-col md:flex-row md:items-center gap-2 w-full md:w-auto">
+                                    <label className="text-sm font-medium text-gray-700 whitespace-nowrap">
+                                      Date{" "}
+                                      <span className="text-red-500">*</span>
+                                    </label>
+
+                                    {/* Input */}
+                                    <div
+                                      onClick={openDatePicker}
+                                      className="
+                                      w-full md:w-[260px]
+                                      text-sm text-gray-700 border border-gray-300 px-3 py-2 rounded-lg
+                                      flex items-center justify-between cursor-pointer bg-white
+                                      shadow-sm hover:border-gray-400 transition
+                                    "
+                                    >
+                                      <div className="flex-1 truncate">
+                                        {weekRange || (
+                                          <span className="flex items-center text-gray-400">
+                                            <FaRegCalendarAlt className="mr-2 text-pink-500" />
+                                            Select Week
+                                          </span>
+                                        )}
+                                      </div>
+
+                                      {weekRange && (
+                                        <button
+                                          type="button"
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            setFromDate(null);
+                                            setWeekRange("");
+                                          }}
+                                        >
+                                          <RxCross1 className="text-xs text-red-600 ml-2" />
+                                        </button>
+                                      )}
+                                    </div>
+
+                                    {/* DatePicker */}
+                                    <DatePicker
+                                      ref={datePickerRef}
+                                      selected={fromDate}
+                                      onChange={handleDateChange}
+                                      showWeekPicker
+                                      dateFormat="dd-MM-yyyy"
+                                      minDate={minDate}
+                                      maxDate={maxDate}
+                                      /* 🔥 INLINE FIX */
+                                      popperPlacement="bottom-start"
+                                      popperModifiers={[
+                                        {
+                                          name: "preventOverflow",
+                                          options: {
+                                            boundary: "viewport",
+                                          },
+                                        },
+                                      ]}
+                                      className="hidden"
                                     />
                                   </div>
                                 </div>
@@ -950,7 +1082,7 @@ const EditLessonPlan = () => {
                                                         ...prev,
                                                         [item.lesson_plan_headings_id]:
                                                           e.target.value,
-                                                      })
+                                                      }),
                                                     )
                                                   }
                                                   // value={
@@ -984,27 +1116,27 @@ const EditLessonPlan = () => {
                                                       const lineStart =
                                                         value.lastIndexOf(
                                                           "\n",
-                                                          selectionStart - 1
+                                                          selectionStart - 1,
                                                         ) + 1;
                                                       const currentLine =
                                                         value.substring(
                                                           lineStart,
-                                                          selectionStart
+                                                          selectionStart,
                                                         );
 
                                                       const before =
                                                         value.substring(
                                                           0,
-                                                          selectionStart
+                                                          selectionStart,
                                                         );
                                                       const after =
                                                         value.substring(
-                                                          selectionEnd
+                                                          selectionEnd,
                                                         );
 
                                                       const newBullet =
                                                         currentLine.startsWith(
-                                                          "• "
+                                                          "• ",
                                                         )
                                                           ? "• "
                                                           : "";
@@ -1031,17 +1163,17 @@ const EditLessonPlan = () => {
                                                       const lineStart =
                                                         value.lastIndexOf(
                                                           "\n",
-                                                          selectionStart - 1
+                                                          selectionStart - 1,
                                                         ) + 1;
                                                       const currentLine =
                                                         value.substring(
                                                           lineStart,
-                                                          selectionStart
+                                                          selectionStart,
                                                         );
 
                                                       if (
                                                         currentLine.startsWith(
-                                                          "• "
+                                                          "• ",
                                                         ) &&
                                                         selectionStart ===
                                                         lineStart + 2
@@ -1050,10 +1182,10 @@ const EditLessonPlan = () => {
                                                         const newValue =
                                                           value.substring(
                                                             0,
-                                                            lineStart
+                                                            lineStart,
                                                           ) +
                                                           value.substring(
-                                                            lineStart + 2
+                                                            lineStart + 2,
                                                           );
                                                         e.target.value =
                                                           newValue;
@@ -1069,14 +1201,14 @@ const EditLessonPlan = () => {
                                                   onInput={(e) => {
                                                     const lines =
                                                       e.target.value.split(
-                                                        "\n"
+                                                        "\n",
                                                       );
                                                     const updatedLines =
                                                       lines.map((line) =>
                                                         line.trim() === "" ||
                                                           line.startsWith("• ")
                                                           ? line
-                                                          : "• " + line
+                                                          : "• " + line,
                                                       );
                                                     const newValue =
                                                       updatedLines.join("\n");
@@ -1097,7 +1229,7 @@ const EditLessonPlan = () => {
                                                       "at row",
                                                       // rowIndex,
                                                       "col",
-                                                      colIndex
+                                                      colIndex,
                                                     );
                                                   }}
                                                   className="w-full h-full resize-none p-2 border border-gray-300 focus:outline-none"
@@ -1141,7 +1273,7 @@ const EditLessonPlan = () => {
                                           <tr className="bg-gray-200 border-2 border-gray-400">
                                             {/* Start Date Header */}
                                             <th
-                                              className="border-2 px-4 py-2 text-left text-sm font-semibold text-gray-800 sticky left-0 bg-gray-200"
+                                              className="border-2 px-4 py-2 text-left text-sm font-semibold text-gray-800  bg-gray-200"
                                               style={{
                                                 width: "180px",
                                                 minWidth: "180px",
@@ -1166,7 +1298,7 @@ const EditLessonPlan = () => {
                                                 >
                                                   {item.name}
                                                 </th>
-                                              )
+                                              ),
                                             )}
 
                                             {/* Add Button Header */}
@@ -1193,7 +1325,7 @@ const EditLessonPlan = () => {
                                             >
                                               {/* Start Date */}
                                               <td
-                                                className="border-2 border-gray-400 px-4 py-2 sticky left-0 bg-white"
+                                                className="border-2 border-gray-400 px-4 py-2  bg-white"
                                                 style={{
                                                   width: "180px",
                                                   minWidth: "180px",
@@ -1208,7 +1340,7 @@ const EditLessonPlan = () => {
                                                     handleChange(
                                                       rowIndex,
                                                       "startDate",
-                                                      e.target.value
+                                                      e.target.value,
                                                     )
                                                   }
                                                   className="w-full p-2 border border-gray-300 rounded focus:ring-1 focus:ring-pink-400"
@@ -1252,27 +1384,28 @@ const EditLessonPlan = () => {
                                                           const lineStart =
                                                             value.lastIndexOf(
                                                               "\n",
-                                                              selectionStart - 1
+                                                              selectionStart -
+                                                              1,
                                                             ) + 1;
                                                           const currentLine =
                                                             value.substring(
                                                               lineStart,
-                                                              selectionStart
+                                                              selectionStart,
                                                             );
 
                                                           const before =
                                                             value.substring(
                                                               0,
-                                                              selectionStart
+                                                              selectionStart,
                                                             );
                                                           const after =
                                                             value.substring(
-                                                              selectionEnd
+                                                              selectionEnd,
                                                             );
 
                                                           const newBullet =
                                                             currentLine.startsWith(
-                                                              "• "
+                                                              "• ",
                                                             )
                                                               ? "• "
                                                               : "";
@@ -1292,7 +1425,7 @@ const EditLessonPlan = () => {
                                                               ...prev,
                                                               [`${item.lesson_plan_headings_id}_${rowIndex}`]:
                                                                 newValue,
-                                                            })
+                                                            }),
                                                           );
 
                                                           const cursorPos =
@@ -1312,17 +1445,18 @@ const EditLessonPlan = () => {
                                                           const lineStart =
                                                             value.lastIndexOf(
                                                               "\n",
-                                                              selectionStart - 1
+                                                              selectionStart -
+                                                              1,
                                                             ) + 1;
                                                           const currentLine =
                                                             value.substring(
                                                               lineStart,
-                                                              selectionStart
+                                                              selectionStart,
                                                             );
 
                                                           if (
                                                             currentLine.startsWith(
-                                                              "• "
+                                                              "• ",
                                                             ) &&
                                                             selectionStart ===
                                                             lineStart + 2
@@ -1332,10 +1466,10 @@ const EditLessonPlan = () => {
                                                             const newValue =
                                                               value.substring(
                                                                 0,
-                                                                lineStart
+                                                                lineStart,
                                                               ) +
                                                               value.substring(
-                                                                lineStart + 2
+                                                                lineStart + 2,
                                                               );
 
                                                             e.target.value =
@@ -1347,7 +1481,7 @@ const EditLessonPlan = () => {
                                                                 ...prev,
                                                                 [`${item.lesson_plan_headings_id}_${rowIndex}`]:
                                                                   newValue,
-                                                              })
+                                                              }),
                                                             );
 
                                                             setTimeout(() => {
@@ -1361,21 +1495,21 @@ const EditLessonPlan = () => {
                                                       onInput={(e) => {
                                                         const lines =
                                                           e.target.value.split(
-                                                            "\n"
+                                                            "\n",
                                                           );
                                                         const updatedLines =
                                                           lines.map((line) =>
                                                             line.trim() ===
                                                               "" ||
                                                               line.startsWith(
-                                                                "• "
+                                                                "• ",
                                                               )
                                                               ? line
-                                                              : "• " + line
+                                                              : "• " + line,
                                                           );
                                                         const newValue =
                                                           updatedLines.join(
-                                                            "\n"
+                                                            "\n",
                                                           );
                                                         if (
                                                           newValue !==
@@ -1394,7 +1528,7 @@ const EditLessonPlan = () => {
                                                             ...prev,
                                                             [`${item.lesson_plan_headings_id}_${rowIndex}`]:
                                                               e.target.value,
-                                                          })
+                                                          }),
                                                         )
                                                       }
                                                       className="w-full resize-none p-2 border border-gray-300 focus:ring-1 focus:ring-pink-400 rounded"
@@ -1404,7 +1538,7 @@ const EditLessonPlan = () => {
                                                       rows={2}
                                                     />
                                                   </td>
-                                                )
+                                                ),
                                               )}
 
                                               {/* Delete Button */}

@@ -103,7 +103,7 @@ const CreateLessonPlanTemplate = () => {
         `${API_URL}/api/get_only_classes_allotted_to_teacher?teacher_id=${roleIdValue}`,
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
       // console.log("Classes", response.data.data);
       setStudentNameWithClassId(response?.data?.data || []);
@@ -124,7 +124,7 @@ const CreateLessonPlanTemplate = () => {
         `${API_URL}/api/get_subjects_according_class?class_id=${classId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
       // console.log("fetch subjects", response.data.data);
       setAllSubject(response.data.data || []);
@@ -144,7 +144,7 @@ const CreateLessonPlanTemplate = () => {
         `${API_URL}/api/get_chapter_info_class_sub_id?class_id=${classId}&subject_id=${SubjectId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
       // console.log("fetch chapters", response.data.data);
       setAllChapter(response.data.data || []);
@@ -159,33 +159,33 @@ const CreateLessonPlanTemplate = () => {
     () =>
       Array.isArray(allSubject)
         ? allSubject.map((cls) => ({
-          value: cls?.sm_id,
-          label: `${cls.name}`,
-        }))
+            value: cls?.sm_id,
+            label: `${cls.name}`,
+          }))
         : [],
-    [allSubject]
+    [allSubject],
   );
 
   const studentOptions = useMemo(
     () =>
       Array.isArray(studentNameWithClassId)
         ? studentNameWithClassId.map((cls) => ({
-          value: cls?.class_id,
-          label: `${cls.class_name}`,
-        }))
+            value: cls?.class_id,
+            label: `${cls.class_name}`,
+          }))
         : [],
-    [studentNameWithClassId]
+    [studentNameWithClassId],
   );
 
   const chapterOptions = useMemo(
     () =>
       Array.isArray(allChapter)
         ? allChapter.map((cls) => ({
-          value: cls?.chapter_id,
-          label: `${cls.name}`,
-        }))
+            value: cls?.chapter_id,
+            label: `${cls.name}`,
+          }))
         : [],
-    [allChapter]
+    [allChapter],
   );
 
   const fetchHeadings = async () => {
@@ -196,7 +196,7 @@ const CreateLessonPlanTemplate = () => {
         `${API_URL}/api/get_lesson_plan_heading_non_daily`,
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
 
       const data = response?.data?.data || [];
@@ -345,7 +345,7 @@ const CreateLessonPlanTemplate = () => {
         {
           headers: { Authorization: `Bearer ${token}` },
           params,
-        }
+        },
       );
 
       // ⭐⭐⭐ ADD THIS CHECK HERE ⭐⭐⭐
@@ -458,7 +458,7 @@ const CreateLessonPlanTemplate = () => {
         },
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
 
       if (response.data.status === 200) {
@@ -537,7 +537,7 @@ const CreateLessonPlanTemplate = () => {
         },
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
 
       if (response.data.status === 200) {
@@ -584,11 +584,11 @@ const CreateLessonPlanTemplate = () => {
       student.non_daily.forEach((item) => {
         if (item.heading)
           flatValues.push(
-            item.heading.trim().replace(/\s+/g, "").toLowerCase()
+            item.heading.trim().replace(/\s+/g, "").toLowerCase(),
           );
         if (Array.isArray(item.description)) {
           item.description.forEach((desc) =>
-            flatValues.push(desc.trim().replace(/\s+/g, "").toLowerCase())
+            flatValues.push(desc.trim().replace(/\s+/g, "").toLowerCase()),
           );
         }
       });
@@ -598,13 +598,13 @@ const CreateLessonPlanTemplate = () => {
       student.daily_changes.forEach((change) => {
         if (change.heading)
           flatValues.push(
-            change.heading.trim().replace(/\s+/g, "").toLowerCase()
+            change.heading.trim().replace(/\s+/g, "").toLowerCase(),
           );
         if (Array.isArray(change.entries)) {
           change.entries.forEach((entry) => {
             if (Array.isArray(entry.description)) {
               entry.description.forEach((desc) =>
-                flatValues.push(desc.trim().replace(/\s+/g, "").toLowerCase())
+                flatValues.push(desc.trim().replace(/\s+/g, "").toLowerCase()),
               );
             }
           });
@@ -631,8 +631,9 @@ const CreateLessonPlanTemplate = () => {
   return (
     <>
       <div
-        className={` transition-all duration-500 w-[95%]  mx-auto p-4 ${showStudentReport ? "w-full " : "w-[90%] "
-          }`}
+        className={` transition-all duration-500 w-[95%]  mx-auto p-4 ${
+          showStudentReport ? "w-full " : "w-[90%] "
+        }`}
       >
         <ToastContainer />
         <div className="card pb-4  rounded-md ">
@@ -676,13 +677,13 @@ const CreateLessonPlanTemplate = () => {
                           options={studentOptions}
                           value={
                             studentOptions.find(
-                              (opt) => opt.value === selectedStudent?.value
+                              (opt) => opt.value === selectedStudent?.value,
                             ) || selectedStudent
                           }
                           onChange={(selected) => {
                             setSelectedStudent(selected);
                             setSelectedStudentId(
-                              selected ? selected.value : null
+                              selected ? selected.value : null,
                             );
                             if (selected) setStudentError("");
                             // ✅ Clear error when class selected
@@ -732,15 +733,16 @@ const CreateLessonPlanTemplate = () => {
                           options={subjectOptions}
                           value={
                             subjectOptions.find(
-                              (opt) => opt.value === selectedSubject?.value
+                              (opt) => opt.value === selectedSubject?.value,
                             ) || selectedSubject
                           }
                           onChange={(selected) => {
                             setSelectedSubject(selected);
                             setSelectedSubjectId(
-                              selected ? selected.value : null
+                              selected ? selected.value : null,
                             );
-                            if (selected) setSubjectError(""); //  Clear error
+                            if (selected)
+                              setSubjectError(""); //  Clear error
                             else setSubjectError("Please select subject.");
                           }}
                           placeholder={loadingExams ? "Loading..." : "Select"}
@@ -787,15 +789,16 @@ const CreateLessonPlanTemplate = () => {
                           options={chapterOptions}
                           value={
                             chapterOptions.find(
-                              (opt) => opt.value === selectedChapter?.value
+                              (opt) => opt.value === selectedChapter?.value,
                             ) || selectedChapter
                           }
                           onChange={(selected) => {
                             setSelectedChapter(selected);
                             setSelectedChapterId(
-                              selected ? selected.value : null
+                              selected ? selected.value : null,
                             );
-                            if (selected) setChapterError(""); // ✅ Clear error
+                            if (selected)
+                              setChapterError(""); // ✅ Clear error
                             else setChapterError("Please select chapter.");
                           }}
                           placeholder={loadingExams ? "Loading..." : "Select"}
@@ -833,10 +836,11 @@ const CreateLessonPlanTemplate = () => {
                         type="search"
                         onClick={handleSearch}
                         style={{ backgroundColor: "#2196F3" }}
-                        className={`btn h-10 w-18 md:w-auto btn-primary text-white font-bold py-1 border-1 border-blue-500 px-4 rounded ${loadingForSearch
+                        className={`btn h-10 w-18 md:w-auto btn-primary text-white font-bold py-1 border-1 border-blue-500 px-4 rounded ${
+                          loadingForSearch
                             ? "opacity-50 cursor-not-allowed"
                             : ""
-                          }`}
+                        }`}
                         disabled={loadingForSearch}
                       >
                         {loadingForSearch ? (
@@ -878,7 +882,7 @@ const CreateLessonPlanTemplate = () => {
                 <>
                   <div className="w-full  mx-auto transition-all duration-300">
                     <div className="card mx-auto shadow-lg">
-                      <div className="p-2 px-3 bg-gray-100 border-none flex items-center justify-between">
+                      {/* <div className="p-2 px-3 bg-gray-100 border-none flex items-center justify-between">
                         <div className="w-full flex flex-row items-center justify-between mr-0 md:mr-4 gap-x-1">
                           <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap mr-6">
                             Create Lesson Plan Template
@@ -913,7 +917,6 @@ const CreateLessonPlanTemplate = () => {
                                   >
                                     <span className="text-lg">📚</span>
                                     Subject :{" "}
-                                    {/* <span className="text-red-500">*</span> */}
                                   </label>
                                   <span>{selectedSubject.label}</span>
                                 </div>
@@ -925,7 +928,6 @@ const CreateLessonPlanTemplate = () => {
                                   >
                                     <span className="text-lg">📝</span>
                                     Chapter :{" "}
-                                    {/* <span className="text-red-500">*</span> */}
                                   </label>
                                   <span>{selectedChapter.label}</span>
                                 </div>
@@ -940,7 +942,50 @@ const CreateLessonPlanTemplate = () => {
                             onClick={() => setShowStudentReport(false)}
                           />
                         </div>
+                      </div> */}
+
+                      <div className="p-2 px-3 bg-gray-100 border-none">
+                        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+                          {/* Title */}
+                          <h3 className="text-gray-700 text-base sm:text-lg lg:text-xl whitespace-nowrap">
+                            Create Lesson Plan Template
+                          </h3>
+
+                          {/* Scrollable blue strip */}
+                          <div className="overflow-x-auto scrollbar-hidden">
+                            <div className="min-w-max bg-blue-50 border-x-2 border-pink-500 rounded-md px-4 py-2">
+                              <div className="flex items-center gap-x-4 text-blue-800 font-medium whitespace-nowrap">
+                                <div className="flex items-center gap-2">
+                                  <span className="text-lg">🏫</span>
+                                  <span>Class:</span>
+                                  <span>{selectedStudent.label}</span>
+                                </div>
+
+                                <div className="flex items-center gap-2">
+                                  <span className="text-lg">📚</span>
+                                  <span>Subject:</span>
+                                  <span>{selectedSubject.label}</span>
+                                </div>
+
+                                <div className="flex items-center gap-2">
+                                  <span className="text-lg">📝</span>
+                                  <span>Chapter:</span>
+                                  <span>{selectedChapter.label}</span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Close button */}
+                          <div className="flex justify-end">
+                            <RxCross1
+                              className="text-base text-red-600 cursor-pointer hover:bg-red-100 rounded"
+                              onClick={() => setShowStudentReport(false)}
+                            />
+                          </div>
+                        </div>
                       </div>
+
                       <div
                         className=" w-[97%] h-1 mx-auto"
                         style={{ backgroundColor: "#C03078" }}
@@ -948,7 +993,7 @@ const CreateLessonPlanTemplate = () => {
 
                       <div className="card-body w-full">
                         <div
-                          className="h-96 lg:h-96 overflow-y-scroll "
+                          className=" lg:h-96 overflow-y-scroll "
                           // overflow-x-scroll
                           style={{
                             scrollbarWidth: "thin",
@@ -956,7 +1001,7 @@ const CreateLessonPlanTemplate = () => {
                           }}
                         >
                           {loading ? (
-                            <div className="absolute left-[4%] w-[100%] text-center flex justify-center items-center mt-14">
+                            <div className="bg-white absolute left-[4%] w-[100%] text-center flex justify-center items-center mt-14">
                               <div className="text-center text-xl text-blue-700">
                                 Please wait while data is loading...
                               </div>
@@ -990,10 +1035,11 @@ const CreateLessonPlanTemplate = () => {
                                           {(heading || []).map((item, i) => (
                                             <th
                                               key={item.lesson_plan_headings_id}
-                                              className={`px-6 py-2 border-2 text-sm font-semibold text-center text-gray-800 ${i === 0
+                                              className={`px-6 py-2 border-2 text-sm font-semibold text-center text-gray-800 ${
+                                                i === 0
                                                   ? "sticky left-0 bg-gray-200"
                                                   : ""
-                                                }`}
+                                              }`}
                                               style={{ width: "210px" }}
                                             >
                                               {item.name}
@@ -1017,10 +1063,11 @@ const CreateLessonPlanTemplate = () => {
                                                   key={
                                                     item.lesson_plan_headings_id
                                                   }
-                                                  className={`border-2 px-2 py-1 ${colIndex === 0
+                                                  className={`border-2 px-2 py-1 ${
+                                                    colIndex === 0
                                                       ? "sticky left-0 bg-white"
                                                       : ""
-                                                    }`}
+                                                  }`}
                                                   style={{
                                                     width: "210px",
                                                     minHeight: "250px",
@@ -1029,12 +1076,12 @@ const CreateLessonPlanTemplate = () => {
                                                   <textarea
                                                     value={
                                                       studentRemarks[
-                                                      item
-                                                        .lesson_plan_headings_id
+                                                        item
+                                                          .lesson_plan_headings_id
                                                       ] ||
                                                       template[
-                                                      item
-                                                        .lesson_plan_headings_id
+                                                        item
+                                                          .lesson_plan_headings_id
                                                       ] ||
                                                       ""
                                                     }
@@ -1044,7 +1091,7 @@ const CreateLessonPlanTemplate = () => {
                                                           ...prev,
                                                           [item.lesson_plan_headings_id]:
                                                             e.target.value,
-                                                        })
+                                                        }),
                                                       )
                                                     }
                                                     onKeyDown={(e) => {
@@ -1061,27 +1108,27 @@ const CreateLessonPlanTemplate = () => {
                                                         const lineStart =
                                                           value.lastIndexOf(
                                                             "\n",
-                                                            selectionStart - 1
+                                                            selectionStart - 1,
                                                           ) + 1;
                                                         const currentLine =
                                                           value.substring(
                                                             lineStart,
-                                                            selectionStart
+                                                            selectionStart,
                                                           );
 
                                                         const before =
                                                           value.substring(
                                                             0,
-                                                            selectionStart
+                                                            selectionStart,
                                                           );
                                                         const after =
                                                           value.substring(
-                                                            selectionEnd
+                                                            selectionEnd,
                                                           );
 
                                                         const newBullet =
                                                           currentLine.startsWith(
-                                                            "• "
+                                                            "• ",
                                                           )
                                                             ? "• "
                                                             : "";
@@ -1101,7 +1148,7 @@ const CreateLessonPlanTemplate = () => {
                                                         setTimeout(() => {
                                                           e.target.selectionStart =
                                                             e.target.selectionEnd =
-                                                            cursorPos;
+                                                              cursorPos;
                                                         }, 0);
                                                       }
 
@@ -1111,29 +1158,29 @@ const CreateLessonPlanTemplate = () => {
                                                         const lineStart =
                                                           value.lastIndexOf(
                                                             "\n",
-                                                            selectionStart - 1
+                                                            selectionStart - 1,
                                                           ) + 1;
                                                         const currentLine =
                                                           value.substring(
                                                             lineStart,
-                                                            selectionStart
+                                                            selectionStart,
                                                           );
 
                                                         if (
                                                           currentLine.startsWith(
-                                                            "• "
+                                                            "• ",
                                                           ) &&
                                                           selectionStart ===
-                                                          lineStart + 2
+                                                            lineStart + 2
                                                         ) {
                                                           e.preventDefault();
                                                           const newValue =
                                                             value.substring(
                                                               0,
-                                                              lineStart
+                                                              lineStart,
                                                             ) +
                                                             value.substring(
-                                                              lineStart + 2
+                                                              lineStart + 2,
                                                             );
                                                           e.target.value =
                                                             newValue;
@@ -1141,7 +1188,7 @@ const CreateLessonPlanTemplate = () => {
                                                           setTimeout(() => {
                                                             e.target.selectionStart =
                                                               e.target.selectionEnd =
-                                                              lineStart;
+                                                                lineStart;
                                                           }, 0);
                                                         }
                                                       }
@@ -1149,14 +1196,14 @@ const CreateLessonPlanTemplate = () => {
                                                     onInput={(e) => {
                                                       const lines =
                                                         e.target.value.split(
-                                                          "\n"
+                                                          "\n",
                                                         );
                                                       const updatedLines =
                                                         lines.map((line) =>
                                                           line.trim() === "" ||
-                                                            line.startsWith("• ")
+                                                          line.startsWith("• ")
                                                             ? line
-                                                            : "• " + line
+                                                            : "• " + line,
                                                         );
                                                       const newValue =
                                                         updatedLines.join("\n");
@@ -1168,7 +1215,7 @@ const CreateLessonPlanTemplate = () => {
                                                           newValue;
                                                         e.target.selectionStart =
                                                           e.target.selectionEnd =
-                                                          newValue.length;
+                                                            newValue.length;
                                                       }
                                                     }}
                                                     onBlur={(e) => {
@@ -1178,7 +1225,7 @@ const CreateLessonPlanTemplate = () => {
                                                         "at row",
                                                         rowIndex,
                                                         "col",
-                                                        colIndex
+                                                        colIndex,
                                                       );
                                                     }}
                                                     className="w-full h-full resize-none p-2 border border-gray-300 focus:outline-none"
@@ -1190,14 +1237,26 @@ const CreateLessonPlanTemplate = () => {
                                                     }}
                                                   />
                                                 </td>
-                                              )
+                                              ),
                                             )}
                                           </tr>
                                         ))}
                                       </tbody>
                                     </table>
                                   </div>
-                                  <div className="flex justify-end gap-2 pr-3 mt-4 mr-2 ">
+                                  {/* <div
+                                    //  className="flex justify-end gap-2 pr-3 mt-4 mr-2 "
+                                    className="
+  flex
+  flex-nowrap
+  justify-end
+  gap-2
+  mt-4
+  pt-3
+  overflow-x-auto
+  w-full
+"
+                                  >
                                     <button
                                       onClick={handleSubmit}
                                       className="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-4 py-2 rounded"
@@ -1223,6 +1282,50 @@ const CreateLessonPlanTemplate = () => {
                                         setShowStudentReport(false)
                                       }
                                       className="bg-yellow-300 hover:bg-yellow-400 text-white font-semibold px-4 py-2 rounded"
+                                    >
+                                      Back
+                                    </button>
+                                  </div> */}
+                                  <div
+                                    className="
+  flex
+  flex-col
+  sm:flex-row
+  sm:flex-wrap
+  sm:justify-end
+  gap-2
+  mt-4
+  px-2
+"
+                                  >
+                                    <button
+                                      onClick={handleSubmit}
+                                      className="w-full sm:w-auto bg-blue-500 hover:bg-blue-600 text-white font-semibold px-4 py-2 rounded"
+                                    >
+                                      {isSubmitting ? "Saving..." : "Save"}
+                                    </button>
+
+                                    <button
+                                      onClick={handleSubmitPublish}
+                                      className="w-full sm:w-auto bg-blue-500 hover:bg-blue-600 text-white font-semibold px-4 py-2 rounded"
+                                    >
+                                      {isPublishing
+                                        ? "Publishing..."
+                                        : "Save & Publish"}
+                                    </button>
+
+                                    <button
+                                      onClick={() => reset()}
+                                      className="w-full sm:w-auto bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-2 rounded"
+                                    >
+                                      Reset
+                                    </button>
+
+                                    <button
+                                      onClick={() =>
+                                        setShowStudentReport(false)
+                                      }
+                                      className="w-full sm:w-auto bg-yellow-400 hover:bg-yellow-500 text-white font-semibold px-4 py-2 rounded"
                                     >
                                       Back
                                     </button>

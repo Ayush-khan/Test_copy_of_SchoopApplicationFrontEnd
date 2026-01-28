@@ -37,12 +37,15 @@ const PublishProficiencyCertificate = () => {
   const academicYrTo = localStorage.getItem("academic_yr_to");
   const [termsOptions, setTermsOptions] = useState([]);
 
-  const camelCase = (str) =>
-    str
-      ?.toLowerCase()
+  const camelCase = (str) => {
+    if (typeof str !== "string") return "";
+
+    return str
+      .toLowerCase()
       .split(" ")
       .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
       .join(" ");
+  };
 
   useEffect(() => {
     const initData = async () => {
@@ -69,7 +72,7 @@ const PublishProficiencyCertificate = () => {
           `${API_URL}/api/get_classes_of_classteacher?teacher_id=${fetchedRegId}`,
           {
             headers: { Authorization: `Bearer ${token}` },
-          }
+          },
         );
 
         const mappedClasses = (classResponse.data.data || [])
@@ -144,7 +147,7 @@ const PublishProficiencyCertificate = () => {
             section_id,
             term_id: terms[0].value,
           },
-        }
+        },
       );
 
       const maxHighestMarks = maxMarksResponse?.data?.data || 0;
@@ -197,7 +200,7 @@ const PublishProficiencyCertificate = () => {
                         student_id: student.student_id,
                         term_id: term.value,
                       },
-                    }
+                    },
                   );
 
                   const publishValue = publishResponse?.data?.data || "N";
@@ -212,7 +215,7 @@ const PublishProficiencyCertificate = () => {
                 } catch (err) {
                   console.error(
                     `Error fetching publish value for student ${student.student_id}:`,
-                    err
+                    err,
                   );
                   return {
                     ...student,
@@ -223,7 +226,7 @@ const PublishProficiencyCertificate = () => {
                     certificate_type: range.label,
                   };
                 }
-              })
+              }),
             );
 
             allData.push(...enrichedData);
@@ -238,7 +241,7 @@ const PublishProficiencyCertificate = () => {
         setTimetable(allData);
         console.log(
           "✅ Combined Data (with range and certificate type):",
-          allData
+          allData,
         );
       }
     } catch (error) {
@@ -250,13 +253,13 @@ const PublishProficiencyCertificate = () => {
   };
 
   const goldStudents = timetable.filter(
-    (student) => student.percentage >= 95 && student.percentage <= 100
+    (student) => student.percentage >= 95 && student.percentage <= 100,
   );
   const silverStudents = timetable.filter(
-    (student) => student.percentage >= 93 && student.percentage <= 94.99
+    (student) => student.percentage >= 93 && student.percentage <= 94.99,
   );
   const bronzeStudents = timetable.filter(
-    (student) => student.percentage >= 90 && student.percentage <= 92.99
+    (student) => student.percentage >= 90 && student.percentage <= 92.99,
   );
 
   const handlePublish = async (student, type) => {
@@ -275,7 +278,7 @@ const PublishProficiencyCertificate = () => {
         formData,
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
 
       if (response.data?.status === 200) {
@@ -286,7 +289,7 @@ const PublishProficiencyCertificate = () => {
             selectedClassId,
             selectedSectionId,
             selectedTerms,
-            selectedClassName
+            selectedClassName,
           );
         }, 500);
       } else {
@@ -355,7 +358,7 @@ const PublishProficiencyCertificate = () => {
         formData,
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
 
       if (response.data?.status === 200) {
@@ -366,7 +369,7 @@ const PublishProficiencyCertificate = () => {
             selectedClassId,
             selectedSectionId,
             selectedTerms,
-            selectedClassName
+            selectedClassName,
           );
         }, 500);
       } else {
@@ -470,6 +473,11 @@ const PublishProficiencyCertificate = () => {
                     }}
                   ></div>
 
+                  <div className="ml-4 mr-4 px-4 py-1 bg-blue-50 border-l-4 border-blue-500 text-blue-800 text-sm rounded">
+                    <strong>Note:</strong> Certificates are generated based on
+                    the results.
+                  </div>
+
                   <div className="card-body w-full">
                     <div
                       className="h-96 lg:h-96 overflow-y-scroll overflow-x-scroll"
@@ -525,9 +533,12 @@ const PublishProficiencyCertificate = () => {
                                   {index + 1}
                                 </td>
                                 <td className="px-2 py-2 text-center border border-gray-300">
-                                  {`${student.first_name || ""} ${student.mid_name || ""
-                                    } ${student.last_name || ""}`}
+                                  {camelCase(
+                                    `${student.first_name || ""} ${student.mid_name || ""} ${student.last_name || ""}`,
+                                  )}{" "}
+                                  {`( ${student?.class_name} ${student?.section_name} )`}
                                 </td>
+
                                 <td className="px-2 py-2 text-center border border-gray-300">
                                   {student.term_id || ""}
                                 </td>
@@ -535,29 +546,6 @@ const PublishProficiencyCertificate = () => {
                                   {student.percentage || ""}
                                 </td>
 
-                                {/* Publish / Unpublish */}
-                                {/* <td className="px-2 py-2 text-center border border-gray-300">
-                                  {student.publish_value === "N" && (
-                                    <button
-                                      onClick={() => handlePublish(student)}
-                                      className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600"
-                                    >
-                                      Publish
-                                    </button>
-                                  )}
-                                </td>
-                                <td className="px-2 py-2 text-center border border-gray-300">
-                                  {student.publish_value === "Y" && (
-                                    <button
-                                      onClick={() =>
-                                        handlePublish(student, "g")
-                                      }
-                                      className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
-                                    >
-                                      Unpublish
-                                    </button>
-                                  )}
-                                </td> */}
                                 <td className="px-2 py-2 text-center border border-gray-300">
                                   {student.publish_value === "N" && (
                                     <button
@@ -606,7 +594,7 @@ const PublishProficiencyCertificate = () => {
                                   </span>
                                 ) : (
                                   <span className="text-red-600 text-lg font-medium">
-                                    Oops! No data found.
+                                    {/* Results not found. */}{" "}
                                   </span>
                                 )}
                               </td>
@@ -662,9 +650,12 @@ const PublishProficiencyCertificate = () => {
                                   {index + 1}
                                 </td>
                                 <td className="px-2 py-2 text-center border border-gray-300">
-                                  {`${student.first_name || ""} ${student.mid_name || ""
-                                    } ${student.last_name || ""}`}
+                                  {camelCase(
+                                    `${student.first_name || ""} ${student.mid_name || ""} ${student.last_name || ""}`,
+                                  )}{" "}
+                                  {`( ${student?.class_name} ${student?.section_name} )`}
                                 </td>
+
                                 <td className="px-2 py-2 text-center border border-gray-300">
                                   {student.term_id || ""}
                                 </td>
@@ -672,29 +663,6 @@ const PublishProficiencyCertificate = () => {
                                   {student.percentage || ""}
                                 </td>
 
-                                {/* Publish / Unpublish */}
-                                {/* <td className="px-2 py-2 text-center border border-gray-300">
-                                  {student.publish_value === "N" && (
-                                    <button
-                                      onClick={() => handlePublish(student)}
-                                      className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600"
-                                    >
-                                      Publish
-                                    </button>
-                                  )}
-                                </td>
-                                <td className="px-2 py-2 text-center border border-gray-300">
-                                  {student.publish_value === "Y" && (
-                                    <button
-                                      onClick={() =>
-                                        handlePublish(student, "b")
-                                      }
-                                      className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
-                                    >
-                                      Unpublish
-                                    </button>
-                                  )}
-                                </td> */}
                                 <td className="px-2 py-2 text-center border border-gray-300">
                                   {student.publish_value === "N" && (
                                     <button
@@ -743,7 +711,7 @@ const PublishProficiencyCertificate = () => {
                                   </span>
                                 ) : (
                                   <span className="text-red-600 text-lg font-medium">
-                                    Oops! No data found.
+                                    {/* Results not found. */}{" "}
                                   </span>
                                 )}
                               </td>
@@ -799,9 +767,12 @@ const PublishProficiencyCertificate = () => {
                                   {index + 1}
                                 </td>
                                 <td className="px-2 py-2 text-center border border-gray-300">
-                                  {`${student.first_name || ""} ${student.mid_name || ""
-                                    } ${student.last_name || ""}`}
+                                  {camelCase(
+                                    `${student.first_name || ""} ${student.mid_name || ""} ${student.last_name || ""}`,
+                                  )}{" "}
+                                  {`( ${student?.class_name} ${student?.section_name} )`}
                                 </td>
+
                                 <td className="px-2 py-2 text-center border border-gray-300">
                                   {student.term_id || ""}
                                 </td>
@@ -857,7 +828,7 @@ const PublishProficiencyCertificate = () => {
                                   </span>
                                 ) : (
                                   <span className="text-red-600 text-lg font-medium">
-                                    Oops! No data found.
+                                    {/* Results not found. */}{" "}
                                   </span>
                                 )}
                               </td>

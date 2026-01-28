@@ -81,7 +81,7 @@ const ClassWiseAcademicPerformance = () => {
               Authorization: `Bearer ${token}`,
               "X-Academic-Year": academicYear,
             },
-          }
+          },
         );
 
         if (!response?.data?.length) {
@@ -96,7 +96,7 @@ const ClassWiseAcademicPerformance = () => {
           if (!students || isNaN(students)) return acc; // 🔴 Skip null or 0 students
 
           const existingClass = acc.find(
-            (entry) => entry.class === item.class_name
+            (entry) => entry.class === item.class_name,
           );
 
           if (existingClass) {
@@ -137,7 +137,7 @@ const ClassWiseAcademicPerformance = () => {
         ];
 
         const sortedData = filteredData.sort(
-          (a, b) => classOrder.indexOf(a.class) - classOrder.indexOf(b.class)
+          (a, b) => classOrder.indexOf(a.class) - classOrder.indexOf(b.class),
         );
 
         setData(sortedData);
@@ -205,7 +205,7 @@ const ClassWiseAcademicPerformance = () => {
           `${API_URL}/api/get_teacherclasseswithclassteacher?teacher_id=${regId}`,
           {
             headers: { Authorization: `Bearer ${token}` },
-          }
+          },
         );
 
         const mappedData =
@@ -322,7 +322,7 @@ const ClassWiseAcademicPerformance = () => {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       const teacherCards = response?.data?.data;
@@ -392,8 +392,8 @@ const ClassWiseAcademicPerformance = () => {
   const sectionKeys = [
     ...new Set(
       data.flatMap((entry) =>
-        Object.keys(entry).filter((key) => key.startsWith("Division-"))
-      )
+        Object.keys(entry).filter((key) => key.startsWith("Division-")),
+      ),
     ),
   ];
 
@@ -423,11 +423,11 @@ const ClassWiseAcademicPerformance = () => {
           </div>
 
           <div className="flex flex-col justify-center items-center h-[230px]">
-            <p className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-red-600 via-red-400 to-pink-500 mb-2">
+            {/* <p className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-red-600 via-red-400 to-pink-500 mb-2">
               Oops!
-            </p>
+            </p> */}
             <p className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500">
-              No data available.
+              Upload marks to view the graph.
             </p>
           </div>
         </div>
@@ -473,7 +473,7 @@ const ClassWiseAcademicPerformance = () => {
                   }
 
                   const selected = classOptions.find(
-                    (opt) => opt.value === value
+                    (opt) => opt.value === value,
                   );
 
                   handleClassSelect(selected);

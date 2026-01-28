@@ -121,7 +121,7 @@ const EditLessonPlanTemplate = () => {
         `${API_URL}/api/get_lesson_plan_heading_non_daily`,
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
 
       const data = response?.data?.data || [];
@@ -151,7 +151,7 @@ const EditLessonPlanTemplate = () => {
               chapter_id: selectedChapterId,
               les_pln_temp_id: id,
             },
-          }
+          },
         );
 
         const data = response?.data?.data || [];
@@ -242,7 +242,7 @@ const EditLessonPlanTemplate = () => {
         },
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
 
       if (response.data.status === 200) {
@@ -254,7 +254,7 @@ const EditLessonPlanTemplate = () => {
         setStudentRemarks({}); // clear the local state
       } else {
         toast.error(
-          response.data.message || "Failed to update lesson plan template."
+          response.data.message || "Failed to update lesson plan template.",
         );
       }
     } catch (error) {
@@ -311,7 +311,7 @@ const EditLessonPlanTemplate = () => {
         },
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
 
       console.log("mahima");
@@ -375,7 +375,7 @@ const EditLessonPlanTemplate = () => {
         },
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
 
       if (response.data.status === 200) {
@@ -413,11 +413,11 @@ const EditLessonPlanTemplate = () => {
       student.non_daily.forEach((item) => {
         if (item.headings)
           flatValues.push(
-            item.headings.trim().replace(/\s+/g, "").toLowerCase()
+            item.headings.trim().replace(/\s+/g, "").toLowerCase(),
           );
         if (Array.isArray(item.description)) {
           item.description.forEach((desc) =>
-            flatValues.push(desc.trim().replace(/\s+/g, "").toLowerCase())
+            flatValues.push(desc.trim().replace(/\s+/g, "").toLowerCase()),
           );
         }
       });
@@ -427,13 +427,13 @@ const EditLessonPlanTemplate = () => {
       student.daily_changes.forEach((change) => {
         if (change.headings)
           flatValues.push(
-            change.headings.trim().replace(/\s+/g, "").toLowerCase()
+            change.headings.trim().replace(/\s+/g, "").toLowerCase(),
           );
         if (Array.isArray(change.entries)) {
           change.entries.forEach((entry) => {
             if (Array.isArray(entry.description)) {
               entry.description.forEach((desc) =>
-                flatValues.push(desc.trim().replace(/\s+/g, "").toLowerCase())
+                flatValues.push(desc.trim().replace(/\s+/g, "").toLowerCase()),
               );
             }
           });
@@ -472,7 +472,7 @@ const EditLessonPlanTemplate = () => {
                 <>
                   <div className="w-full  mx-auto transition-all duration-300">
                     <div className="card mx-auto shadow-lg">
-                      <div className="p-2 px-3 bg-gray-100 border-none flex items-center justify-between">
+                      {/* <div className="p-2 px-3 bg-gray-100 border-none flex items-center justify-between">
                         <div className="w-full flex flex-row items-center justify-between mr-0 md:mr-4 gap-x-1">
                           <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap mr-6">
                             Edit Lesson Plan Template
@@ -489,7 +489,6 @@ const EditLessonPlanTemplate = () => {
                                 className="flex items-center gap-x-4 text-blue-800 font-medium"
                                 style={{ flexWrap: "nowrap" }}
                               >
-                                {/* Teacher */}
                                 <div className="flex items-center gap-2">
                                   <label
                                     className="text-md whitespace-nowrap"
@@ -497,37 +496,10 @@ const EditLessonPlanTemplate = () => {
                                   >
                                     <span className="text-lg">🏫</span>
                                     Class :{" "}
-                                    {/* <span className="text-red-500">*</span> */}
                                   </label>
                                   <span>{selectedStudent.label}</span>
-                                  {/* <Select
-                                    menuPortalTarget={document.body}
-                                    menuPosition="fixed"
-                                    id="studentSelect"
-                                    value={selectedStudent}
-                                    isSearchable
-                                    isClearable
-                                    className="text-sm min-w-[150px]"
-                                    isDisabled={loadingExams}
-                                    styles={{
-                                      control: (provided) => ({
-                                        ...provided,
-                                        fontSize: ".9em",
-                                        minHeight: "30px",
-                                      }),
-                                      menu: (provided) => ({
-                                        ...provided,
-                                        fontSize: "1em",
-                                      }),
-                                      option: (provided) => ({
-                                        ...provided,
-                                        fontSize: ".9em",
-                                      }),
-                                    }}
-                                  /> */}
                                 </div>
 
-                                {/* Month */}
                                 <div className="flex items-center gap-3">
                                   <label
                                     className="text-md whitespace-nowrap"
@@ -535,7 +507,6 @@ const EditLessonPlanTemplate = () => {
                                   >
                                     <span className="text-lg">📚</span>
                                     Subject :{" "}
-                                    {/* <span className="text-red-500">*</span> */}
                                   </label>
                                   <span>{selectedSubject.label}</span>
                                 </div>
@@ -547,7 +518,6 @@ const EditLessonPlanTemplate = () => {
                                   >
                                     <span className="text-lg">📝</span>
                                     Chapter :{" "}
-                                    {/* <span className="text-red-500">*</span> */}
                                   </label>
                                   <span>{selectedChapter.label}</span>
                                 </div>
@@ -562,6 +532,47 @@ const EditLessonPlanTemplate = () => {
                             onClick={() => navigate("/lessonPlanTemplate")}
                           />
                         </div>
+                      </div> */}
+                      <div className="p-2 px-3 bg-gray-100 border-none">
+                        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+                          {/* Title */}
+                          <h3 className="text-gray-700 text-base sm:text-lg lg:text-xl whitespace-nowrap">
+                            Edit Lesson Plan Template
+                          </h3>
+
+                          {/* Scrollable blue strip */}
+                          <div className="overflow-x-auto scrollbar-hidden">
+                            <div className="min-w-max bg-blue-50 border-x-2 border-pink-500 rounded-md px-4 py-2">
+                              <div className="flex items-center gap-x-4 text-blue-800 font-medium whitespace-nowrap">
+                                <div className="flex items-center gap-2">
+                                  <span className="text-lg">🏫</span>
+                                  <span>Class:</span>
+                                  <span>{selectedStudent.label}</span>
+                                </div>
+
+                                <div className="flex items-center gap-2">
+                                  <span className="text-lg">📚</span>
+                                  <span>Subject:</span>
+                                  <span>{selectedSubject.label}</span>
+                                </div>
+
+                                <div className="flex items-center gap-2">
+                                  <span className="text-lg">📝</span>
+                                  <span>Chapter:</span>
+                                  <span>{selectedChapter.label}</span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Close button */}
+                          <div className="flex justify-end">
+                            <RxCross1
+                              className="text-base text-red-600 cursor-pointer hover:bg-red-100 rounded"
+                              onClick={() => setShowStudentReport(false)}
+                            />
+                          </div>
+                        </div>
                       </div>
                       <div
                         className=" w-[97%] h-1 mx-auto"
@@ -570,7 +581,7 @@ const EditLessonPlanTemplate = () => {
 
                       <div className="card-body w-full">
                         <div
-                          className="h-96 lg:h-96 overflow-y-scroll "
+                          className="lg:h-96 overflow-y-scroll "
                           // overflow-x-scroll
                           style={{
                             scrollbarWidth: "thin",
@@ -689,7 +700,7 @@ const EditLessonPlanTemplate = () => {
                                                         (prev) => ({
                                                           ...prev,
                                                           [headingId]: value,
-                                                        })
+                                                        }),
                                                       );
                                                     }}
                                                     className={`w-full h-full resize-none p-2 border border-gray-300 focus:outline-none ${
@@ -711,27 +722,27 @@ const EditLessonPlanTemplate = () => {
                                                         const lineStart =
                                                           value.lastIndexOf(
                                                             "\n",
-                                                            selectionStart - 1
+                                                            selectionStart - 1,
                                                           ) + 1;
                                                         const currentLine =
                                                           value.substring(
                                                             lineStart,
-                                                            selectionStart
+                                                            selectionStart,
                                                           );
 
                                                         const before =
                                                           value.substring(
                                                             0,
-                                                            selectionStart
+                                                            selectionStart,
                                                           );
                                                         const after =
                                                           value.substring(
-                                                            selectionEnd
+                                                            selectionEnd,
                                                           );
 
                                                         const newBullet =
                                                           currentLine.startsWith(
-                                                            "• "
+                                                            "• ",
                                                           )
                                                             ? "• "
                                                             : "";
@@ -761,17 +772,17 @@ const EditLessonPlanTemplate = () => {
                                                         const lineStart =
                                                           value.lastIndexOf(
                                                             "\n",
-                                                            selectionStart - 1
+                                                            selectionStart - 1,
                                                           ) + 1;
                                                         const currentLine =
                                                           value.substring(
                                                             lineStart,
-                                                            selectionStart
+                                                            selectionStart,
                                                           );
 
                                                         if (
                                                           currentLine.startsWith(
-                                                            "• "
+                                                            "• ",
                                                           ) &&
                                                           selectionStart ===
                                                             lineStart + 2
@@ -780,10 +791,10 @@ const EditLessonPlanTemplate = () => {
                                                           const newValue =
                                                             value.substring(
                                                               0,
-                                                              lineStart
+                                                              lineStart,
                                                             ) +
                                                             value.substring(
-                                                              lineStart + 2
+                                                              lineStart + 2,
                                                             );
                                                           e.target.value =
                                                             newValue;
@@ -799,14 +810,14 @@ const EditLessonPlanTemplate = () => {
                                                     onInput={(e) => {
                                                       const lines =
                                                         e.target.value.split(
-                                                          "\n"
+                                                          "\n",
                                                         );
                                                       const updatedLines =
                                                         lines.map((line) =>
                                                           line.trim() === "" ||
                                                           line.startsWith("• ")
                                                             ? line
-                                                            : "• " + line
+                                                            : "• " + line,
                                                         );
                                                       const newValue =
                                                         updatedLines.join("\n");
@@ -828,7 +839,7 @@ const EditLessonPlanTemplate = () => {
                                                         "at row",
                                                         rowIndex,
                                                         "col",
-                                                        colIndex
+                                                        colIndex,
                                                       );
                                                     }}
                                                     // className="w-full h-full resize-none p-2 border border-gray-300 focus:outline-none"
@@ -847,7 +858,19 @@ const EditLessonPlanTemplate = () => {
                                       </tbody>
                                     </table>
                                   </div>
-                                  <div className="flex justify-end gap-2 pr-3 mt-2 mr-2">
+                                  <div
+                                    // className="flex justify-end gap-2 pr-3 mt-2 mr-2"
+                                    className="
+  flex
+  flex-col
+  sm:flex-row
+  sm:flex-wrap
+  sm:justify-end
+  gap-2
+  mt-4
+  px-2
+"
+                                  >
                                     {publish === "N" ? (
                                       <>
                                         <button
