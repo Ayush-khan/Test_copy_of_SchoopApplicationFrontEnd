@@ -65,7 +65,7 @@ function NoticeAndSmsForStaff() {
         setclassesforsubjectallot(response.data);
         console.log(
           "this is the dropdown of the allot subject tab for class",
-          response.data
+          response.data,
         );
       } else {
         setError("Unexpected data format");
@@ -135,7 +135,7 @@ function NoticeAndSmsForStaff() {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
       const { imageurl } = response.data.data;
       console.log("imageURL", imageurl);
@@ -279,7 +279,7 @@ function NoticeAndSmsForStaff() {
 
   const displayedSections = filteredSections.slice(
     currentPage * pageSize,
-    (currentPage + 1) * pageSize
+    (currentPage + 1) * pageSize,
   );
 
   const [uploadedFiles, setUploadedFiles] = useState([]);
@@ -434,10 +434,18 @@ function NoticeAndSmsForStaff() {
                               </td>
                             </tr>
                           ))
+                        ) : displayedSections.length === 0 ? (
+                          <div className=" absolute left-[1%] w-[100%]  text-center flex justify-center items-center mt-14">
+                            <div className=" text-center text-xl text-red-700">
+                              {/* Oops! No data found.. */}
+                              {/* Not yet any notice and sms created. */}
+                              No data available.
+                            </div>
+                          </div>
                         ) : (
                           <div className=" absolute left-[1%] w-[100%]  text-center flex justify-center items-center mt-14">
                             <div className=" text-center text-xl text-red-700">
-                              Oops! No data found..
+                              Results not found{" "}
                             </div>
                           </div>
                         )}
@@ -591,7 +599,7 @@ function NoticeAndSmsForStaff() {
                               : url?.image_name || url?.name;
 
                           const isImage = /\.(jpg|jpeg|png|gif)$/i.test(
-                            fileName
+                            fileName,
                           );
 
                           return (
