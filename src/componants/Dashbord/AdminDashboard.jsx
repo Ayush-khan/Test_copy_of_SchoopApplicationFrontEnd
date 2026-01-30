@@ -1,4 +1,5 @@
 import DashboardContent from "./DashboardContent.jsx";
+// import AdminDashboardProper from "./ProperDashbord/AdminDashboardProper.jsx";
 const AdminDashboard = () => {
   return (
     <div
@@ -8,6 +9,7 @@ const AdminDashboard = () => {
     // }}
     >
       <DashboardContent />
+      {/* <AdminDashboardProper /> */}
     </div>
   );
 };
