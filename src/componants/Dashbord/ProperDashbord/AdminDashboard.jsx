@@ -1,0 +1,175 @@
+import { Link } from "react-router-dom";
+import React, { Suspense } from "react";
+
+import { FaUsersLine, FaUserGroup } from "react-icons/fa6";
+import { HiCollection } from "react-icons/hi";
+import { IoTicket } from "react-icons/io5";
+import { FaBirthdayCake } from "react-icons/fa";
+
+import Card from "../../common/Card";
+import CardStuStaf from "../../common/CardStuStaf";
+import EventCard from "../EventCard";
+import NoticeBord from "../NoticeBord";
+import HouseStudentChart from "../Charts/HouseStudentChart";
+import TableFeeCollect from "../TableFeeCollect";
+
+const StudentsChart = React.lazy(() => import("../Charts/StudentsChart"));
+
+const AdminDashboard = ({ data, roleId, sortName }) => {
+  if (!data?.data) return null;
+
+  const api = data.data;
+
+  /* ================= DATA MAPPING ================= */
+  const student = {
+    total: api.student?.total ?? 0,
+    present: api.student?.present ?? 0,
+    notMarked: api.student?.attendanceNotMarked?.notMarked ?? 0,
+  };
+
+  const teachingStaff = {
+    total: api.teachingStaff?.total ?? 0,
+    present: api.teachingStaff?.count ?? 0,
+  };
+
+  const nonTeachingStaff = {
+    total: api.non_teachingStaff?.total ?? 0,
+    present: api.non_teachingStaff?.count ?? 0,
+
+  };
+
+  const fees = {
+    collected: api.fees_collection?.["Collected Fees"] ?? 0,
+    pending: api.fees_collection?.["Pending Fees"] ?? 0,
+  };
+
+  const ticket = api.ticket_count ?? 0;
+  const birthday = api.birthday_count ?? 0;
+
+  /* ================= ICON STYLES ================= */
+  const iconStyle = (color) => ({
+    color,
+    backgroundColor: "#fff",
+    padding: "10px",
+    borderRadius: "50%",
+  });
+
+  return (
+    <>
+      {/* ================= TOP SECTION ================= */}
+      <div className="flex flex-col lg:flex-row gap-4 p-6">
+
+        {/* CARDS */}
+        <div className="w-full lg:w-2/3 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+
+          {/* STUDENTS */}
+          <Link to="/studentAbsent" className="no-underline">
+            <CardStuStaf
+              title="Students"
+              TotalValue={student.total}
+              presentValue={student.present}
+              badge={student.notMarked}
+              color="#4CAF50"
+              icon={<FaUsersLine style={iconStyle("#4CAF50")} />}
+            />
+          </Link>
+
+          {/* TEACHING STAFF */}
+          <Link
+            to={sortName === "HSCS" ? "#" : "/teacherList"}
+            className="no-underline"
+            style={sortName === "HSCS" ? { pointerEvents: "none" } : {}}
+          >
+            <CardStuStaf
+              title="Teaching Staff"
+              TotalValue={teachingStaff.total}
+              presentValue={teachingStaff.present}
+              color="#2196F3"
+              icon={<FaUserGroup style={iconStyle("#2196F3")} />}
+            />
+          </Link>
+
+          {/* NON TEACHING */}
+          <Link
+            to={sortName === "HSCS" ? "#" : "/nonTeachingStaff"}
+            className="no-underline"
+            style={sortName === "HSCS" ? { pointerEvents: "none" } : {}}
+          >
+            <CardStuStaf
+              title="Non-Teaching Staff"
+              presentValue={nonTeachingStaff.present}
+              TotalValue={nonTeachingStaff.total}
+              color="#9C27B0"
+              icon={<FaUserGroup style={iconStyle("#9C27B0")} />}
+            />
+          </Link>
+
+          {/* FEES */}
+          <Link to="/feependinglist" className="no-underline">
+            <Card
+              title="Fee Collection"
+              value={fees.collected}
+              valuePendingFee={fees.pending}
+              color="#FF5722"
+              icon={<HiCollection style={iconStyle("#FF5722")} />}
+            />
+          </Link>
+
+          {/* TICKET */}
+          <Link to="/ticketList" className="no-underline">
+            <Card
+              title="Tickets"
+              value={ticket}
+              color="#FFC107"
+              icon={<IoTicket style={iconStyle("#FFC107")} />}
+            />
+          </Link>
+
+          {/* BIRTHDAY */}
+          <Link to="/staffbirthlist" className="no-underline">
+            <Card
+              title="Birthdays"
+              value={birthday}
+              color="#03A9F4"
+              icon={<FaBirthdayCake style={iconStyle("#03A9F4")} />}
+            />
+          </Link>
+        </div>
+
+        {/* EVENT CARD */}
+        <div className="w-full lg:w-1/3 h-3/4 border-4 border-red-900 bg-slate-100 rounded-lg shadow-md overflow-hidden">
+          <div className="h-full overflow-y-auto">
+            <EventCard />
+          </div>
+        </div>
+
+      </div>
+
+      {/* ================= CHART + NOTICE ================= */}
+      <div className="flex flex-col-reverse lg:flex-row gap-4 px-4">
+        <div className="w-full lg:w-2/3 bg-slate-50 rounded-lg shadow-md">
+          <Suspense fallback={<div className="p-6">Loading chart...</div>}>
+            <StudentsChart />
+          </Suspense>
+        </div>
+
+        <div className="w-full lg:w-1/3 bg-slate-50 rounded-lg shadow-md">
+          <NoticeBord />
+        </div>
+      </div>
+
+      {/* ================= EXTRA ================= */}
+      <div className="flex flex-col-reverse lg:flex-row gap-4 px-4 mt-6">
+        <div className="w-full lg:w-1/3 bg-slate-50 rounded-lg shadow-md">
+          <TableFeeCollect />
+        </div>
+
+        <div className="w-full lg:w-2/3 bg-slate-50 rounded-lg shadow-md">
+          <HouseStudentChart />
+        </div>
+      </div>
+    </>
+  );
+};
+
+export default AdminDashboard;

@@ -1,5 +1,6 @@
 import DashboardContent from "./DashboardContent.jsx";
-// import AdminDashboardProper from "./ProperDashbord/AdminDashboardProper.jsx";
+import DashboardContainerTry from "./ProperDashbord/DashboardContentTry";
+
 const AdminDashboard = () => {
   return (
     <div
@@ -8,8 +9,8 @@ const AdminDashboard = () => {
     //   background: "   linear-gradient(to bottom, #E91E63, #2196F3)",
     // }}
     >
-      <DashboardContent />
-      {/* <AdminDashboardProper /> */}
+      {/* <DashboardContent /> */}
+      <DashboardContainerTry />
     </div>
   );
 };

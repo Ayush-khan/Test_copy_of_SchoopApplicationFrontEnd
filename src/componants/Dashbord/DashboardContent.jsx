@@ -1153,6 +1153,7 @@ const DashboardContent = () => {
     const API_URL = import.meta.env.VITE_API_URL; // url for host
     const [dashboard, setDashboard] = useState(null);
     const [loading, setLoading] = useState(true);
+
     const LMS_URL = "https://ednova.evolvu.in";
     const navigate = useNavigate();
     const [studentData, setStudentData] = useState({
@@ -1238,15 +1239,13 @@ const DashboardContent = () => {
     const comingSoonValue = "Coming Soon";
 
 
-
-
     useEffect(() => {
         initDashboard();
     }, []);
 
     const initDashboard = async () => {
-        setLoading(true);
         try {
+            setLoading(true);
             const session = await fetchSession();
             await loadDashboard(session);
         } finally {
@@ -1271,121 +1270,109 @@ const DashboardContent = () => {
     };
 
 
-    const loadDashboard = async ({ roleId, sortName }) => {
-        // 🔥 fire & forget
-        fetchClassTeacherData(regId);
+    const loadDashboard = async () => {
+        setLoading(true);
 
-        try {
-            setLoading(true);
+        const session = await api.get("/api/sessionData");
+        const { role_id, reg_id } = session.data.user;
+        const sortName = session.data.custom_claims.short_name;
 
-            let res;
+        let res;
 
-            // Single API call based on role
-            if (sortName === "SACS" && roleId === "M") {
-                // Principal
-                res = await api.get("/api/principal/dashboard/summary");
-            } else {
-                // Admin
-                res = await api.get("/api/admin/dashboard/summary");
-            }
-
-            const data = res.data.data;
-            mapDashboardData(data);
-
-        } catch (err) {
-            console.error("Failed to load dashboard:", err);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const mapDashboardData = (data) => {
-        // Student
-        setStudentData({
-            total: data.student?.total ?? 0,
-            present: data.student?.present ?? 0,
-        });
-
-        setMarkAbsentees(data.student?.attendanceNotMarked?.notMarked ?? 0);
-
-        // Staff mapping
-        if (data.staff) {
-            // Principal format
-            setStaffData({
-                teachingStaff: data.staff.teachingStaff ?? 0,
-                attendanceteachingstaff: data.staff.attendanceteachingstaff ?? 0,
-                nonTeachingStaff: data.staff.non_teachingStaff ?? 0,
-                attendancenonteachingstaff: data.staff.attendancenonteachingstaff ?? 0,
-            });
+        if (role_id === "T") {
+            res = await api.get(`/api/teachers/${reg_id}/dashboard/summary`);
+        } else if (role_id === "M" && sortName === "SACS") {
+            res = await api.get("/api/principal/dashboard/summary");
         } else {
-            // Admin format
-            setStaffData({
-                teachingStaff: data.teachingStaff?.total ?? 0,
-                attendanceteachingstaff: data.teachingStaff?.count ?? 0,
-                nonTeachingStaff: data.non_teachingStaff?.total ?? 0,
-                attendancenonteachingstaff: data.non_teachingStaff?.count ?? 0,
-            });
+            res = await api.get("/api/admin/dashboard/summary");
         }
 
-        // Birthday
-        setStaffBirthday(data.staff_student_bday_count?.count ?? 0);
-
-        // Fees
-        setCollectedFee(data.fees_collection?.["Collected Fees"] ?? 0);
-        setPendingFee(data.fees_collection?.["Pending Fees"] ?? 0);
-
-        // Leaves
-        setApproveLeaveCount(data.approve_leave?.count ?? 0);
-
-        // Lesson Plans
-        setApprovedLessonPlaneCount(data.lesson_plan_summary?.pendingForApproval ?? 0);
-
-        // Principal-specific teacher cards
-        if (data["Nursery teachers"]) {
-            setTeachersCardsData([
-                { title: "Nursery", total: data["Nursery teachers"].total, present: data["Nursery teachers"].present },
-                { title: "KG", total: data["KG teachers"].total, present: data["KG teachers"].present },
-                { title: "SACS", total: data["SACS teachers"].total, present: data["SACS teachers"].present },
-                { title: "Caretakers", total: data["Caretakers"].total, present: data["Caretakers"].present },
-            ]);
-        } else {
-            setTeachersCardsData([]); // Admin may not have these
-        }
+        // 🔥 IMPORTANT: only ONE state update
+        setDashboard(res.data);
+        setLoading(false);
     };
 
 
+    const d = React.useMemo(() => {
+        if (!dashboard) return null;
+
+        const data = dashboard.data;
+
+        return {
+            student: {
+                total: data.student?.total ?? 0,
+                present: data.student?.present ?? 0,
+                notMarked: data.student?.attendanceNotMarked?.notMarked ?? 0,
+            },
+
+            staff: {
+                teachingTotal:
+                    data.teachingStaff?.total ??
+                    data.staff?.teachingStaff ??
+                    0,
+
+                teachingPresent:
+                    data.teachingStaff?.count ??
+                    data.staff?.attendanceteachingstaff ??
+                    0,
+
+                nonTeachingTotal:
+                    data.non_teachingStaff?.total ??
+                    data.staff?.non_teachingStaff ??
+                    0,
+            },
+
+            fees: {
+                collected: data.fees_collection?.["Collected Fees"] ?? 0,
+                pending: data.fees_collection?.["Pending Fees"] ?? 0,
+            },
+
+            ticket: data.ticket_count ?? 0,
+            birthday:
+                data.birthday_count ??
+                data.staff_student_bday_count?.count ??
+                0,
+
+            approveLeave: data.approve_leave?.count ?? 0,
+        };
+    }, [dashboard]);
 
 
 
-    const fetchClassTeacherData = async (regId) => {
-        const res = await api.get(
-            `/api/get_classes_of_classteacher?teacher_id=${regId}`
+    // if (loading || !dashboard) {
+    //     return <LoadingSpinner />;
+    // }
+
+
+    const CardSkeleton = () => (
+        <div className="animate-pulse bg-white rounded shadow-md p-4 w-full h-[114px] border">
+            <div className="h-6 bg-gray-300 rounded w-1/2 mb-4"></div>
+            <div className="h-8 bg-gray-300 rounded w-1/3"></div>
+        </div>
+    );
+    const SkeletonGrid = ({ count }) => (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {Array.from({ length: count }).map((_, i) => (
+                <CardSkeleton key={i} />
+            ))}
+        </div>
+    );
+
+
+    if (loading) {
+        return (
+            <div className="p-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {Array.from({ length: dashboard?.count ?? 6 }).map((_, i) => (
+                        <div
+                            key={i}
+                            className="animate-pulse bg-white rounded shadow-md h-[114px]"
+                        />
+                    ))}
+                </div>
+            </div>
         );
-
-        setClassTeacher(res.data.data);
-        setIsClassTeacher(
-            res.data.data.some(c => c.is_class_teacher === 1) ? 1 : 0
-        );
-    };
-
-    const fetchTeacherDashboard = async (regId) => {
-        const res = await api.get(
-            `/api/teachers/${regId}/dashboard/summary`
-        );
-
-        const d = res.data.data;
-
-        setTeachersCardsData(d);
-        setStudentCardT({
-            total: d.studentCard.totalStudents,
-            present: d.studentCard.totalStudentsPresentToday,
-        });
-    };
-
-    useEffect(() => {
-        if (!loading) console.log("Dashboard Ready");
-    }, [loading]);
-
+    }
 
 
     return (
@@ -1400,56 +1387,39 @@ const DashboardContent = () => {
                         <ToastContainer />
                         <div className="flex flex-col lg:flex-row items-start justify-between w-full gap-4 p-6 ">
                             <div className="w-full lg:w-2/3  grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                {/* <Link to="/studentAbsent" className="no-underline">
-                    <CardStuStaf
-                      title="Student"
-                      roleId={roleId}
-                      TotalValue={
-                        roleId === "T" ? studentCardT?.total : studentData?.total
-                      }
-                      presentValue={
-                        roleId === "T"
-                          ? studentCardT?.present
-                          : studentData?.present
-                      }
-                      color="#4CAF50"
-                      icon={
-                        <FaUsersLine
-                          style={{
-                            color: "violet",
-                            backgroundColor: "white",
-                            padding: "10px",
-                            borderRadius: "50%",
-                          }}
-                        />
-                      }
-                    />
-                  </Link> */}
+
                                 <Link to="/studentAbsent" className="no-underline">
-                                    <CardStuStaf
-                                        title="Student"
-                                        roleId={roleId}
-                                        TotalValue={
-                                            roleId === "T" ? studentCardT?.total : studentData?.total
-                                        }
-                                        presentValue={
-                                            roleId === "T"
-                                                ? studentCardT?.present
-                                                : studentData?.present
-                                        }
-                                        badge={markAbsentees} // 👈 badge value
-                                        color="#4CAF50"
-                                        icon={
-                                            <FaUsersLine
-                                                style={{
-                                                    color: "violet",
-                                                    backgroundColor: "white",
-                                                    padding: "10px",
-                                                    borderRadius: "50%",
-                                                }}
-                                            />
-                                        }
-                                    />
+                                    {d?.student?.total === null ? (
+                                        <CardSkeleton />
+                                    ) : (
+
+                                        <CardStuStaf
+                                            title="Student"
+                                            roleId={roleId}
+                                            TotalValue={
+                                                roleId === "T" ? d.studentCardT?.total : d.tudentData?.total
+                                            }
+                                            presentValue={
+                                                roleId === "T"
+                                                    ? d.studentCardT?.present
+                                                    : d.studentData?.present
+                                            }
+                                            badge={markAbsentees} // 👈 badge value
+                                            color="#4CAF50"
+                                            icon={
+                                                <FaUsersLine
+                                                    style={{
+                                                        color: "violet",
+                                                        backgroundColor: "white",
+                                                        padding: "10px",
+                                                        borderRadius: "50%",
+                                                    }}
+                                                />
+                                            }
+                                        />
+                                    )}
+
+
                                 </Link>
 
                                 {roleId === null ? (
@@ -1911,64 +1881,7 @@ const DashboardContent = () => {
                                         }
                                     />
                                 </Link>
-                                {/* {isClassTeacher === 1 ? (
-                    <Link to="/studentAbsent" className="no-underline">
-                      <CardStuStaf
-                        title="Student"
-                        roleId={roleId}
-                        TotalValue={
-                          roleId === "T"
-                            ? studentCardT?.total
-                            : studentData?.total
-                        }
-                        presentValue={
-                          roleId === "T"
-                            ? studentCardT?.present
-                            : studentData?.present
-                        }
-                        color="#4CAF50"
-                        icon={
-                          <FaUsersLine
-                            style={{
-                              color: "violet",
-                              backgroundColor: "white",
-                              padding: "10px",
-                              borderRadius: "50%",
-                            }}
-                          />
-                        }
-                      />
-                    </Link>
-                  ) : (
-                    <Link to="#" className="no-underline">
-                      <CardStuStaf
-                        title="Student"
-                        roleId={roleId}
-                        TotalValue={
-                          isClassTeacher === 1 ? studentCardT?.total : " "
-                        }
-                        presentValue={
-                          isClassTeacher === 1 ? studentCardT?.present : " "
-                        }
-                        color="#4CAF50"
-                        icon={
-                          <FaUsersLine
-                            style={{
-                              color: "violet",
-                              backgroundColor: "white",
-                              padding: "10px",
-                              borderRadius: "50%",
-                            }}
-                          />
-                        }
-                        className={
-                          isClassTeacher !== 1
-                            ? "cursor-not-allowed opacity-60"
-                            : "cursor-pointer"
-                        }
-                      />
-                    </Link>
-                  )} */}
+
 
                                 <Link to="/substituteClassTeacher" className="no-underline">
                                     <Card

@@ -5,6 +5,7 @@ import Styles from "./EventCard.module.css"; // Import CSS module
 import Loader from "../common/LoaderFinal/DashboardLoadder/Loader";
 import { useNavigate } from "react-router-dom";
 import MarkDropdownEditor from "../Events/MarkDropdownEditor";
+import zIndex from "@mui/material/styles/zIndex";
 
 const EventCard = () => {
   const API_URL = import.meta.env.VITE_API_URL; // url for host
@@ -182,7 +183,7 @@ const EventCard = () => {
 
   return (
     <div className={`  border-2 border-solid h-64 bg-slate-100`}>
-      <div className="  m-auto header p-1 flex justify-between items-center bg-gray-200 rounded-t-lg mb-3">
+      <div className="sticky top-0 m-auto header p-1 flex justify-between items-center bg-gray-200 rounded-t-lg mb-3" style={{ zIndex: "2" }}>
         <span className="lg:text-lg sm:text-xs sm:font-semibold text-gray-500 mb-1">
           Events List
         </span>
@@ -205,63 +206,64 @@ const EventCard = () => {
         </select>
         {/* <MdOutlineArrowDropDown /> */}
       </div>
-      {loading ? (
-        <p className="text-center relative top-[16%]  w-10 mt-10 mx-auto  ">
-          <Loader />
-        </p>
-      ) : (
-        <div
-          className={`${Styles.eventsList} rounded-lg pb-20 sm:pb-20  bg-gray-100 px-2`}
-        >
-          {filteredEvents.length > 0 ? (
-            filteredEvents.map((event, index) => (
-              <div key={index} className={`${Styles.eventCard} rounded-lg`}>
-                <div
-                  className={` h-full box-border  max-w-3/4 px-2  bg-gray-500   text-cyan-900 text-lg rounded-l-lg      `}
-                  style={{ background: "#00FFFF", color: "#C3347D" }}
-                >
+      {
+        loading ? (
+          <p className="text-center relative top-[16%]  w-10 mt-10 mx-auto  ">
+            <Loader />
+          </p>
+        ) : (
+          <div
+            className={`${Styles.eventsList} rounded-lg pb-20 sm:pb-20 bg-gray-100 px-2 max-h-full overflow-x-auto min-h-[200px]`}
+          >
+            {filteredEvents.length > 0 ? (
+              filteredEvents.map((event, index) => (
+                <div key={index} className={`${Styles.eventCard} rounded-lg flex flex-row justify-center items-center mx-auto w-full`}>
                   <div
-                    className={` box-border w-full text-center  text-cyan-900 text-lg rounded-l-lg  flex flex-col items-center justify-between     `}
+                    className={` box-border  max-w-3/4 px-2  bg-gray-500   text-cyan-900 text-lg rounded-l-lg      `}
+                    style={{ background: "#00FFFF", color: "#C3347D" }}
                   >
-                    {" "}
-                    <span className="    flex flex-col justify-start max-h-10px">
-                      <p className=" relative top-4 text-2.5em w-8 mx-auto font-medium text-center h-8 bg-gray-600 text-white rounded-lg">
-                        {event.start_date.split("-")[2] || ""}
-                      </p>
-                      <p>
-                        {new Date(event.start_date).toLocaleString("default", {
-                          month: "long",
-                        }) || " "}
-                      </p>
-                      <p>
-                        <span
-                          style={{ color: "#C3347D" }}
-                          className=" relative bottom-4 text-[.8em]"
-                        >
-                          {event?.start_time || " "}
-                        </span>
-                      </p>
-                    </span>
+                    <div
+                      className={` box-border w-full text-center  text-cyan-900 text-lg rounded-l-lg  flex flex-col items-center justify-between     `}
+                    >
+                      {" "}
+                      <span className="    flex flex-col justify-start max-h-10px">
+                        <p className=" relative top-4 text-2.5em w-8 mx-auto font-medium text-center h-8 bg-gray-600 text-white rounded-lg">
+                          {event.start_date.split("-")[2] || ""}
+                        </p>
+                        <p>
+                          {new Date(event.start_date).toLocaleString("default", {
+                            month: "long",
+                          }) || " "}
+                        </p>
+                        <p>
+                          <span
+                            style={{ color: "#C3347D" }}
+                            className=" relative bottom-4 text-[.8em]"
+                          >
+                            {event?.start_time || " "}
+                          </span>
+                        </p>
+                      </span>
+                    </div>
                   </div>
-                </div>
 
-                <div className={Styles.details}>
-                  <h5
-                    className="sm:text-xs"
-                    style={{
-                      // fontSize: "1.1em",
-                      fontWeight: "550",
-                      // marginTop: "1em",
-                      color: "#00FFFF",
-                    }}
-                  >
-                    {event.title}{" "}
-                    <span
-                      style={{ color: "#C334A2" }}
-                    >{` (class-${event?.class_name})`}</span>
-                  </h5>
-                  <div className="mb-3">
-                    {/* <div
+                  <div className={Styles.details}>
+                    <h5
+                      className="sm:text-xs"
+                      style={{
+                        // fontSize: "1.1em",
+                        fontWeight: "550",
+                        // marginTop: "1em",
+                        color: "#00FFFF",
+                      }}
+                    >
+                      {event.title}{" "}
+                      <span
+                        style={{ color: "#C334A2" }}
+                      >{` (class-${event?.class_name})`}</span>
+                    </h5>
+                    <div className="mb-3">
+                      {/* <div
                       className={`${Styles?.discription} box-border shadow-inner mb-0 p-2 text-sm sm:mb-1 mt-0 text-gray-800`}
                       style={{
                         maxHeight: "80px", // Adjust height as needed
@@ -274,73 +276,74 @@ const EventCard = () => {
                       {event?.event_desc}
                     </div> */}
 
-                    <div
-                      className={`${Styles?.discription} box-border bg-cyan-400 shadow-inner mb-0  text-sm sm:mb-1 mt-0 text-gray-800`}
-                      style={{
-                        maxHeight: "80px", // same as your earlier styling
-                        overflowY: "auto",
-                        padding: "2px",
-                        // backgroundColor: "#C334A2",
-                        width: "100%",
-                        // backgroundColor: "#f9f9f9",
-                        wordBreak: "break-word", // Ensures long words break to fit
-                      }}
-                    >
-                      <MarkDropdownEditor
-                        value={event?.event_desc || ""}
-                        readOnly
-                        disabled
-                        className="w-full text-sm  text-gray-800 bg-transparent cursor-not-allowed"
-                      />
-                    </div>
+                      <div
+                        className={`${Styles?.discription} box-border bg-cyan-400 shadow-inner mb-0  text-sm sm:mb-1 mt-0 text-gray-800`}
+                        style={{
+                          maxHeight: "80px", // same as your earlier styling
+                          overflowY: "auto",
+                          padding: "2px",
+                          // backgroundColor: "#C334A2",
+                          width: "100%",
+                          // backgroundColor: "#f9f9f9",
+                          wordBreak: "break-word", // Ensures long words break to fit
+                        }}
+                      >
+                        <MarkDropdownEditor
+                          value={event?.event_desc || ""}
+                          readOnly
+                          disabled
+                          className="w-full text-sm  text-gray-800 bg-transparent cursor-not-allowed"
+                        />
+                      </div>
 
-                    <p
-                      style={{
-                        fontSize: ".9em",
-                        color: "gray",
-                        marginTop: "2px",
-                        marginLeft: "5px",
-                        marginBottom: "-10px",
-                      }}
-                    >
-                      {`The event will conclude on ${new Date(
-                        event.end_date,
-                      ).getDate()} ${new Date(event.end_date).toLocaleString(
-                        "default",
-                        {
-                          month: "long",
-                        },
-                      )} at ${event?.end_time}`}
-                    </p>
+                      <p
+                        style={{
+                          fontSize: ".9em",
+                          color: "gray",
+                          marginTop: "2px",
+                          marginLeft: "5px",
+                          marginBottom: "-10px",
+                        }}
+                      >
+                        {`The event will conclude on ${new Date(
+                          event.end_date,
+                        ).getDate()} ${new Date(event.end_date).toLocaleString(
+                          "default",
+                          {
+                            month: "long",
+                          },
+                        )} at ${event?.end_time}`}
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))
-          ) : (
-            <div className="relative left-[1%] w-[100%] text-center flex justify-center items-center mt-10">
-              <div className="flex flex-col items-center justify-center text-center">
-                {/* <p className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-red-600 via-red-400 to-pink-500 drop-shadow-md mb-3">
+              ))
+            ) : (
+              <div className="relative left-[1%] w-[100%] text-center flex justify-center items-center mt-10">
+                <div className="flex flex-col items-center justify-center text-center">
+                  {/* <p className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-red-600 via-red-400 to-pink-500 drop-shadow-md mb-3">
                   Oops!
                 </p> */}
-                {roleId === "A" || roleId === "M" ? (
-                  <>
-                    <p className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500">
-                      Create event list.
-                    </p>
-                  </>
-                ) : (
-                  <>
-                    <p className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500">
-                      No events scheduled for {selectedMonthLabel} {currentYear}.
-                    </p>
-                  </>
-                )}
+                  {roleId === "A" || roleId === "M" ? (
+                    <>
+                      <p className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500">
+                        Create event list.
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <p className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500">
+                        No events scheduled for {selectedMonthLabel} {currentYear}.
+                      </p>
+                    </>
+                  )}
+                </div>
               </div>
-            </div>
-          )}
-        </div>
-      )}
-    </div>
+            )}
+          </div>
+        )
+      }
+    </div >
   );
 };
 
