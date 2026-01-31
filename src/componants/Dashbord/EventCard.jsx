@@ -1,11 +1,185 @@
+// import { useState, useEffect, useMemo } from "react";
+// import axios from "axios";
+// import { useNavigate } from "react-router-dom";
+// import Styles from "./EventCard.module.css";
+// import Loader from "../common/LoaderFinal/DashboardLoadder/Loader";
+// import MarkDropdownEditor from "../Events/MarkDropdownEditor";
+
+// const MONTHS = [
+//   "January", "February", "March", "April", "May", "June",
+//   "July", "August", "September", "October", "November", "December",
+// ];
+
+// const EventCard = () => {
+//   const API_URL = import.meta.env.VITE_API_URL;
+//   const navigate = useNavigate();
+
+//   const [events, setEvents] = useState([]);
+//   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
+//   const [loading, setLoading] = useState(false);
+//   const [roleId, setRoleId] = useState(null);
+//   const [regId, setRegId] = useState(null);
+
+//   const currentYear = new Date().getFullYear();
+
+//   /* ================= FETCH SESSION ================= */
+//   useEffect(() => {
+//     const fetchRoleId = async () => {
+//       try {
+//         const token = localStorage.getItem("authToken");
+//         if (!token) return navigate("/");
+
+//         const { data } = await axios.get(`${API_URL}/api/sessionData`, {
+//           headers: { Authorization: `Bearer ${token}` },
+//         });
+
+//         setRoleId(data?.user?.role_id);
+//         setRegId(data?.user?.reg_id);
+//       } catch (err) {
+//         console.error("Session fetch failed", err);
+//         navigate("/");
+//       }
+//     };
+
+//     fetchRoleId();
+//   }, [API_URL, navigate]);
+
+//   /* ================= FETCH EVENTS ================= */
+//   useEffect(() => {
+//     if (!roleId) return;
+
+//     const fetchEvents = async () => {
+//       setLoading(true);
+//       try {
+//         const token = localStorage.getItem("authToken");
+
+//         const url =
+//           roleId === "T"
+//             ? `${API_URL}/api/teachers/${regId}/dashboard/events`
+//             : `${API_URL}/api/events`;
+
+//         const { data } = await axios.get(url, {
+//           params: {
+//             month: selectedMonth + 1,
+//             year: currentYear,
+//           },
+//           headers: { Authorization: `Bearer ${token}` },
+//         });
+
+//         setEvents(Array.isArray(data) ? data : data?.data || []);
+//       } catch (err) {
+//         if (err.response?.data?.message === "Token has expired") {
+//           localStorage.removeItem("authToken");
+//           navigate("/");
+//         }
+//       } finally {
+//         setLoading(false);
+//       }
+//     };
+
+//     fetchEvents();
+//   }, [API_URL, roleId, regId, selectedMonth, currentYear, navigate]);
+
+//   /* ================= FILTER EVENTS ================= */
+//   const filteredEvents = useMemo(() => {
+//     return events.filter((e) => {
+//       if (!e.start_date) return false;
+//       const d = new Date(e.start_date);
+//       return d.getMonth() === selectedMonth && d.getFullYear() === currentYear;
+//     });
+//   }, [events, selectedMonth, currentYear]);
+
+//   /* ================= UI ================= */
+//   return (
+//     <div className="w-full border bg-slate-100 rounded-lg">
+//       {/* HEADER */}
+//       <div className="sticky top-0 flex justify-between items-center bg-gray-200 p-2 rounded-t-lg z-10">
+//         <h3 className="text-gray-600 font-semibold">Events List</h3>
+
+//         <select
+//           value={selectedMonth}
+//           onChange={(e) => setSelectedMonth(Number(e.target.value))}
+//           className="border rounded px-2 py-1 text-sm"
+//         >
+//           {MONTHS.map((m, i) => (
+//             <option key={i} value={i}>
+//               {m} {currentYear}
+//             </option>
+//           ))}
+//         </select>
+//       </div>
+
+//       {/* CONTENT */}
+//       {loading ? (
+//         <div className="flex justify-center py-10">
+//           <Loader />
+//         </div>
+//       ) : (
+//         <div className={`${Styles.eventsList} px-2`}>
+//           {filteredEvents.length ? (
+//             filteredEvents.map((event, i) => {
+//               const startDate = new Date(event.start_date);
+//               const endDate = new Date(event.end_date);
+
+//               return (
+//                 <div key={i} className={`${Styles.eventCard} flex rounded-lg mb-3`}>
+//                   {/* DATE */}
+//                   <div className="bg-cyan-300 text-center px-3 py-2 rounded-l-lg">
+//                     <p className="text-xl font-bold text-white bg-gray-700 rounded">
+//                       {startDate.getDate()}
+//                     </p>
+//                     <p>{MONTHS[startDate.getMonth()]}</p>
+//                     <p className="text-sm text-pink-600">{event.start_time}</p>
+//                   </div>
+
+//                   {/* DETAILS */}
+//                   <div className={Styles.details}>
+//                     <h5 className="font-semibold text-cyan-400">
+//                       {event.title}
+//                       <span className="text-pink-500">
+//                         {` (class-${event.class_name})`}
+//                       </span>
+//                     </h5>
+
+//                     <div className={`${Styles.discription} shadow-inner`}>
+//                       <MarkDropdownEditor
+//                         value={event.event_desc || ""}
+//                         readOnly
+//                         disabled
+//                       />
+//                     </div>
+
+//                     <p className="text-sm text-gray-500 mt-1">
+//                       Ends on {endDate.getDate()} {MONTHS[endDate.getMonth()]} at {event.end_time}
+//                     </p>
+//                   </div>
+//                 </div>
+//               );
+//             })
+//           ) : (
+//             (roleId === "A" || roleId === "M") && (
+//               <p className="text-center mt-10 font-bold bg-gradient-to-r from-pink-500 to-blue-500 text-transparent bg-clip-text">
+//                 Create event list ✨
+//               </p>
+//             )
+//           )}
+//         </div>
+//       )}
+//     </div>
+//   );
+// };
+
+// export default EventCard;
+
+
+
+
 import { useState, useEffect } from "react";
-// import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Styles from "./EventCard.module.css"; // Import CSS module
 import Loader from "../common/LoaderFinal/DashboardLoadder/Loader";
 import { useNavigate } from "react-router-dom";
 import MarkDropdownEditor from "../Events/MarkDropdownEditor";
-import zIndex from "@mui/material/styles/zIndex";
 
 const EventCard = () => {
   const API_URL = import.meta.env.VITE_API_URL; // url for host
@@ -65,46 +239,6 @@ const EventCard = () => {
     }
   };
 
-  // const fetchData = async () => {
-  //   setLoading(true);
-  //   try {
-  //     const token = localStorage.getItem("authToken");
-  //     console.log("token is", token);
-
-  //     if (!token) {
-  //       navigate("/");
-  //     }
-
-  //     const response = await axios.get(`${API_URL}/api/events`, {
-  //       params: {
-  //         month: selectedMonth + 1,
-  //         year: currentYear,
-  //       },
-  //       headers: {
-  //         Authorization: `Bearer ${token}`,
-  //       },
-  //     });
-
-  //     setEvents(response?.data);
-  //     console.log("responseData of Events", response?.data);
-  //   } catch (error) {
-  //     setError(error.message);
-  //     // working well code
-  //     const errorMsg = error.response?.data?.message;
-  //     // Handle expired token
-  //     if (errorMsg === "Token has expired") {
-  //       localStorage.removeItem("authToken"); // Optional: clear old token
-  //       navigate("/"); // Redirect to login
-  //       return;
-  //     }
-
-  //     // Other error handling
-
-  //     console.error("Error fetching events:", error);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
 
   const fetchData = async () => {
     setLoading(true);
@@ -176,27 +310,18 @@ const EventCard = () => {
     );
   });
 
-  console.log("filtered event list", filteredEvents);
-  const selectedMonthLabel = months.find(
-    (m) => m.value === Number(selectedMonth)
-  )?.label;
+
 
   return (
-    <div className={`relative w-full border-2 border-solid  bg-slate-100`}>
+    <div className={`relative w-full border-2 border-solid  bg-slate-100  `}>
       <div className="sticky top-0 w-full m-auto header p-1 flex justify-between items-center bg-gray-200 rounded-t-lg mb-3" style={{ zIndex: "2" }}>
         <span className="lg:text-lg sm:text-xs sm:font-semibold text-gray-500 mb-1">
           Events List
         </span>
-
-        {/* <div
-        className={`${Styles.header} `}
-        style={{ fontWeight: "800", fontSize: "1.3em" }}
-      > */}
         <select
           value={selectedMonth}
           onChange={handleMonthChange}
           className="   text-sm text-gray-700 font-semibold hover:cursor-pointer bg-gray-50 mb-1 border border-gray-400"
-        // className={`  hover:cursor-pointer gap-x-2`}
         >
           {months.map((month) => (
             <option key={month.value} value={month.value}>
@@ -204,7 +329,7 @@ const EventCard = () => {
             </option>
           ))}
         </select>
-        {/* <MdOutlineArrowDropDown /> */}
+
       </div>
       {
         loading ? (
@@ -213,7 +338,7 @@ const EventCard = () => {
           </p>
         ) : (
           <div
-            className={`${Styles.eventsList} rounded-lg pb-20 sm:pb-20 bg-gray-100 px-2 max-h-fit overflow-x-auto min-h-fit`}
+            className={`${Styles.eventsList} rounded-lg pb-3 bg-gray-100 px-2 max-h-fit overflow-x-auto min-h-fit`}
           >
             {filteredEvents.length > 0 ? (
               filteredEvents.map((event, index) => (
@@ -251,9 +376,8 @@ const EventCard = () => {
                     <h5
                       className="sm:text-xs"
                       style={{
-                        // fontSize: "1.1em",
+
                         fontWeight: "550",
-                        // marginTop: "1em",
                         color: "#00FFFF",
                       }}
                     >
@@ -263,21 +387,10 @@ const EventCard = () => {
                       >{` (class-${event?.class_name})`}</span>
                     </h5>
                     <div className="mb-3">
-                      {/* <div
-                      className={`${Styles?.discription} box-border shadow-inner mb-0 p-2 text-sm sm:mb-1 mt-0 text-gray-800`}
-                      style={{
-                        maxHeight: "80px", // Adjust height as needed
-                        overflowY: "auto", // Enables vertical scrolling
 
-                        padding: "8px",
-                        backgroundColor: "#f9f9f9", // Optional: Light background
-                      }}
-                    >
-                      {event?.event_desc}
-                    </div> */}
 
                       <div
-                        className={`${Styles?.discription} box-border bg-cyan-400 shadow-inner mb-0  text-sm sm:mb-1 mt-0 text-gray-800`}
+                        className={`${Styles?.discription} text-[1em]  shadow-inner mb-0  text-sm sm:mb-1 mt-0 text-gray-800`}
                         style={{
                           maxHeight: "80px", // same as your earlier styling
                           overflowY: "auto",
@@ -321,22 +434,15 @@ const EventCard = () => {
             ) : (
               <div className="relative left-[1%] w-[100%] text-center flex justify-center items-center mt-10">
                 <div className="flex flex-col items-center justify-center text-center">
-                  {/* <p className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-red-600 via-red-400 to-pink-500 drop-shadow-md mb-3">
-                  Oops!
-                </p> */}
-                  {roleId === "A" || roleId === "M" ? (
+
+                  {roleId === "A" || roleId === "M" && (
                     <>
                       <p className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500">
                         Create event list.
                       </p>
                     </>
-                  ) : (
-                    <>
-                      <p className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500">
-                        No events scheduled for {selectedMonthLabel} {currentYear}.
-                      </p>
-                    </>
                   )}
+
                 </div>
               </div>
             )}

@@ -1,3 +1,4 @@
+// old make by mahima
 // import {
 //   FaUserGroup,
 //   FaUserShield,
@@ -648,17 +649,231 @@
 // };
 
 // export default PrincipalDashboardSACS;
-import React, { Suspense } from "react";
+// this is test apan ne commonapi  se kar dia hailekin fast nahi  hai
+
+// import React, { Suspense } from "react";
+// import { Link } from "react-router-dom";
+// import {
+//   FaUsersLine,
+//   FaUserGroup,
+//   FaUserShield,
+// } from "react-icons/fa6";
+// import {
+//   FaBirthdayCake,
+//   FaClipboardCheck,
+// } from "react-icons/fa";
+// import { HiCollection } from "react-icons/hi";
+// import { RiPassValidFill } from "react-icons/ri";
+// import { GiTeacher } from "react-icons/gi";
+
+// import Card from "../common/Card.jsx";
+// import CardStuStaf from "../common/CardStuStaf.jsx";
+// import EventCard from "./EventCard.jsx";
+// import StudentAttendanceChart from "./Charts/StudentAttendanceChart.jsx";
+
+// const PrincipalDashboardSACS = ({ dashboard }) => {
+//   /* ================= DEFAULT SAFE DATA ================= */
+//   const defaultData = {
+//     student: {
+//       total: 0,
+//       present: 0,
+//       attendanceNotMarked: { notMarked: 0 },
+//     },
+//     staff: {
+//       teachingStaff: 0,
+//       non_teachingStaff: 0,
+//       attendanceteachingstaff: 0,
+//       attendancenonteachingstaff: 0,
+//     },
+//     staff_student_bday_count: { count: 0 },
+//     fees_collection: {
+//       "Collected Fees": 0,
+//       "Pending Fees": 0,
+//     },
+//     approve_leave: { count: 0 },
+//     lesson_plan_summary: {
+//       totalNumberOfTeachers: 0,
+//       lessonPlanSubmitted: 0,
+//       lessonPlanNotSubmitted: 0,
+//       pendingForApproval: 0,
+//     },
+//     "Nursery teachers": { total: 0, present: 0, absent: 0 },
+//     "KG teachers": { total: 0, present: 0, absent: 0 },
+//     "SACS teachers": { total: 0, present: 0, absent: 0 },
+//     Caretakers: { total: 0, present: 0, absent: 0 },
+//   };
+
+//   const data = { ...defaultData, ...(dashboard?.data || {}) };
+
+//   /* ================= ICON WRAPPER ================= */
+//   const iconWrap = (icon) => (
+//     <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center">
+//       {icon}
+//     </div>
+//   );
+
+//   return (
+//     <>
+//       {/* ================= TOP CARDS ================= */}
+//       <div className="flex flex-col lg:flex-row gap-4 p-6">
+//         <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+
+//           {/* STUDENTS */}
+//           <Link to="/studentAbsent" className="no-underline block">
+//             <CardStuStaf
+//               title="Students"
+//               TotalValue={data.student.total}
+//               presentValue={data.student.present}
+//               badge={data.student.attendanceNotMarked?.notMarked}
+//               color="#4CAF50"
+//               icon={iconWrap(<FaUsersLine className="text-violet-600 text-4xl" />)}
+//             />
+//           </Link>
+
+//           {/* STAFF */}
+//           <Link to="/todayStaffList" className="no-underline block">
+//             <CardStuStaf
+//               title="Staff"
+//               TotalValue={
+//                 data.staff.teachingStaff + data.staff.non_teachingStaff
+//               }
+//               presentValue={
+//                 data.staff.attendanceteachingstaff +
+//                 data.staff.attendancenonteachingstaff
+//               }
+//               color="#2196F3"
+//               icon={iconWrap(<FaUserGroup className="text-cyan-500 text-4xl" />)}
+//             />
+//           </Link>
+
+//           {/* BIRTHDAY */}
+//           <Link to="/staffbirthlist" className="no-underline block">
+//             <Card
+//               title="Birthdays"
+//               value={data.staff_student_bday_count.count}
+//               color="#2196F3"
+//               icon={iconWrap(<FaBirthdayCake className="text-pink-500 text-4xl" />)}
+//             />
+//           </Link>
+
+//           {/* FEES */}
+//           <Link to="/feependinglist" className="no-underline block">
+//             <Card
+//               title="Fee"
+//               value={data.fees_collection["Collected Fees"]}
+//               valuePendingFee={data.fees_collection["Pending Fees"]}
+//               color="#FF5722"
+//               icon={iconWrap(<HiCollection className="text-green-600 text-4xl" />)}
+//             />
+//           </Link>
+
+//           {/* APPROVE LEAVE */}
+//           <Link to="/approveLeavelist" className="no-underline block">
+//             <Card
+//               title="Approve Leave"
+//               value={data.approve_leave.count}
+//               color="#FFC107"
+//               icon={iconWrap(
+//                 <RiPassValidFill className="text-rose-600 text-4xl" />,
+//               )}
+//             />
+//           </Link>
+
+//           {/* LESSON PLAN */}
+//           <Link to="/lessonPlanData" className="no-underline block">
+//             <Card
+//               title="Lesson Plans"
+//               value={data.lesson_plan_summary.totalNumberOfTeachers}
+//               valuePendingFee={data.lesson_plan_summary.lessonPlanSubmitted}
+//               valueAbsent={data.lesson_plan_summary.lessonPlanNotSubmitted}
+//               valueTeacher={data.lesson_plan_summary.pendingForApproval}
+//               color="#4CAF50"
+//               icon={iconWrap(
+//                 <FaClipboardCheck className="text-green-600 text-4xl" />,
+//               )}
+//             />
+//           </Link>
+
+//           {/* NURSERY */}
+//           <Card
+//             title="Nursery"
+//             value={data["Nursery teachers"].present}
+//             valueAbsent={data["Nursery teachers"].absent}
+//             valuePendingFee={data["Nursery teachers"].total}
+//             color="#4CAF50"
+//             icon={iconWrap(<GiTeacher className="text-purple-500 text-4xl" />)}
+//           />
+
+//           {/* KG */}
+//           <Card
+//             title="KG"
+//             value={data["KG teachers"].present}
+//             valueAbsent={data["KG teachers"].absent}
+//             valuePendingFee={data["KG teachers"].total}
+//             color="#4CAF50"
+//             icon={iconWrap(<GiTeacher className="text-purple-500 text-4xl" />)}
+//           />
+
+//           {/* SCHOOL */}
+//           <Card
+//             title="School"
+//             value={data["SACS teachers"].present}
+//             valueAbsent={data["SACS teachers"].absent}
+//             valuePendingFee={data["SACS teachers"].total}
+//             color="#4CAF50"
+//             icon={iconWrap(<GiTeacher className="text-purple-500 text-4xl" />)}
+//           />
+
+//           {/* CARETAKER */}
+//           <Card
+//             title="Caretaker"
+//             value={data.Caretakers.present}
+//             valueAbsent={data.Caretakers.absent}
+//             valuePendingFee={data.Caretakers.total}
+//             color="#4CAF50"
+//             icon={iconWrap(
+//               <FaUserShield className="text-purple-500 text-4xl" />,
+//             )}
+//           />
+//         </div>
+//       </div>
+//       <div className="h-80 flex flex-col-reverse lg:flex-row gap-4 px-4">
+//         <div className="w-full lg:w-2/3 bg-slate-50 rounded-lg shadow-md">
+//           <Suspense fallback={<div className="p-6">Loading chart...</div>}>
+//             <StudentAttendanceChart />
+//           </Suspense>
+//         </div>
+
+//         <div className=" w-full lg:w-1/3 bg-slate-50  overflow-y-auto rounded-lg shadow-md">
+//           <EventCard />
+//         </div>
+//       </div>
+//       {/* ================= CHART ================= */}
+//       {/* <div className="mx-6 h-[400px] bg-slate-50 rounded-lg shadow">
+
+//         <StudentAttendanceChart />
+
+//       </div>
+
+//       <div className="m-6 bg-white rounded-lg shadow-md h-[350px] overflow-y-auto">
+//         <EventCard />
+//       </div> */}
+//     </>
+//   );
+// };
+
+// export default PrincipalDashboardSACS;
+
+// try new oneimport React, { Suspense, useMemo, lazy } from "react";
+import React, { Suspense, useEffect, useState, useMemo } from "react";
 import { Link } from "react-router-dom";
+
 import {
   FaUsersLine,
   FaUserGroup,
   FaUserShield,
 } from "react-icons/fa6";
-import {
-  FaBirthdayCake,
-  FaClipboardCheck,
-} from "react-icons/fa";
+import { FaBirthdayCake, FaClipboardCheck } from "react-icons/fa";
 import { HiCollection } from "react-icons/hi";
 import { RiPassValidFill } from "react-icons/ri";
 import { GiTeacher } from "react-icons/gi";
@@ -667,197 +882,202 @@ import Card from "../common/Card.jsx";
 import CardStuStaf from "../common/CardStuStaf.jsx";
 import EventCard from "./EventCard.jsx";
 import StudentAttendanceChart from "./Charts/StudentAttendanceChart.jsx";
+import SkeletonDashboard from "./ProperDashbord/SkeletonDashboard.jsx";
 
-const PrincipalDashboardSACS = ({ dashboard }) => {
-  /* ================= DEFAULT SAFE DATA ================= */
-  const defaultData = {
-    student: {
-      total: 0,
-      present: 0,
-      attendanceNotMarked: { notMarked: 0 },
-    },
-    staff: {
-      teachingStaff: 0,
-      non_teachingStaff: 0,
-      attendanceteachingstaff: 0,
-      attendancenonteachingstaff: 0,
-    },
-    staff_student_bday_count: { count: 0 },
-    fees_collection: {
-      "Collected Fees": 0,
-      "Pending Fees": 0,
-    },
-    approve_leave: { count: 0 },
-    lesson_plan_summary: {
-      totalNumberOfTeachers: 0,
-      lessonPlanSubmitted: 0,
-      lessonPlanNotSubmitted: 0,
-      pendingForApproval: 0,
-    },
-    "Nursery teachers": { total: 0, present: 0, absent: 0 },
-    "KG teachers": { total: 0, present: 0, absent: 0 },
-    "SACS teachers": { total: 0, present: 0, absent: 0 },
-    Caretakers: { total: 0, present: 0, absent: 0 },
-  };
-
-  const data = { ...defaultData, ...(dashboard?.data || {}) };
-
-  /* ================= ICON WRAPPER ================= */
-  const iconWrap = (icon) => (
-    <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center">
-      {icon}
+/* ================= RENDER GATE ================= */
+const RenderGate = ({ ready, children }) => {
+  return (
+    <div style={{ visibility: ready ? "visible" : "hidden" }}>
+      {children}
     </div>
   );
+};
 
+/* ================= STATIC ICONS ================= */
+const ICONS = {
+  students: <FaUsersLine className="text-violet-600 text-4xl" />,
+  staff: <FaUserGroup className="text-cyan-500 text-4xl" />,
+  birthday: <FaBirthdayCake className="text-pink-500 text-4xl" />,
+  fee: <HiCollection className="text-green-600 text-4xl" />,
+  leave: <RiPassValidFill className="text-rose-600 text-4xl" />,
+  lesson: <FaClipboardCheck className="text-green-600 text-4xl" />,
+  teacher: <GiTeacher className="text-purple-500 text-4xl" />,
+  caretaker: <FaUserShield className="text-purple-500 text-4xl" />,
+};
+
+const IconWrap = React.memo(({ icon }) => (
+  <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center">
+    {icon}
+  </div>
+));
+
+/* ================= MAIN COMPONENT ================= */
+const PrincipalDashboardSACS = ({ dashboard }) => {
+  const [ready, setReady] = useState(false);
+
+  /* 🛑 Skeleton ONLY */
+  if (!dashboard) {
+    return <SkeletonDashboard />;
+  }
+
+  /* 🧠 Wait till browser finishes full layout */
+  useEffect(() => {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        setReady(true);
+      });
+    });
+  }, []);
+
+  const d = dashboard.data || {};
+
+  /* ================= ALL CARDS (ATOMIC BUILD) ================= */
+  const cards = useMemo(() => [
+    {
+      link: "/studentAbsent",
+      node: (
+        <CardStuStaf
+          title="Students"
+          TotalValue={d.student?.total || 0}
+          presentValue={d.student?.present || 0}
+          badge={d.student?.attendanceNotMarked?.notMarked || 0}
+          icon={<IconWrap icon={ICONS.students} />}
+        />
+      ),
+    },
+    {
+      link: "/todayStaffList",
+      node: (
+        <CardStuStaf
+          title="Staff"
+          TotalValue={(d.staff?.teachingStaff || 0) + (d.staff?.non_teachingStaff || 0)}
+          presentValue={(d.staff?.attendanceteachingstaff || 0) + (d.staff?.attendancenonteachingstaff || 0)}
+          icon={<IconWrap icon={ICONS.staff} />}
+        />
+      ),
+    },
+    {
+      link: "/staffbirthlist",
+      node: (
+        <Card
+          title="Birthdays"
+          value={d.staff_student_bday_count?.count || 0}
+          icon={<IconWrap icon={ICONS.birthday} />}
+        />
+      ),
+    },
+    {
+      link: "/feependinglist",
+      node: (
+        <Card
+          title="Fee"
+          value={d.fees_collection?.["Collected Fees"] || 0}
+          valuePendingFee={d.fees_collection?.["Pending Fees"] || 0}
+          icon={<IconWrap icon={ICONS.fee} />}
+        />
+      ),
+    },
+    {
+      link: "/approveLeavelist",
+      node: (
+        <Card
+          title="Approve Leave"
+          value={d.approve_leave?.count || 0}
+          icon={<IconWrap icon={ICONS.leave} />}
+        />
+      ),
+    },
+    {
+      link: "/lessonPlanData",
+      node: (
+        <Card
+          title="Lesson Plans"
+          value={d.lesson_plan_summary?.totalNumberOfTeachers || 0}
+          valuePendingFee={d.lesson_plan_summary?.lessonPlanSubmitted || 0}
+          valueAbsent={d.lesson_plan_summary?.lessonPlanNotSubmitted || 0}
+          valueTeacher={d.lesson_plan_summary?.pendingForApproval || 0}
+          icon={<IconWrap icon={ICONS.lesson} />}
+        />
+      ),
+    },
+    {
+      node: (
+        <Card
+          title="Nursery"
+          value={d["Nursery teachers"]?.present || 0}
+          valueAbsent={d["Nursery teachers"]?.absent || 0}
+          valuePendingFee={d["Nursery teachers"]?.total || 0}
+          icon={<IconWrap icon={ICONS.teacher} />}
+        />
+      ),
+    },
+    {
+      node: (
+        <Card
+          title="KG"
+          value={d["KG teachers"]?.present || 0}
+          valueAbsent={d["KG teachers"]?.absent || 0}
+          valuePendingFee={d["KG teachers"]?.total || 0}
+          icon={<IconWrap icon={ICONS.teacher} />}
+        />
+      ),
+    },
+    {
+      node: (
+        <Card
+          title="School"
+          value={d["SACS teachers"]?.present || 0}
+          valueAbsent={d["SACS teachers"]?.absent || 0}
+          valuePendingFee={d["SACS teachers"]?.total || 0}
+          icon={<IconWrap icon={ICONS.teacher} />}
+        />
+      ),
+    },
+    {
+      node: (
+        <Card
+          title="Caretaker"
+          value={d.Caretakers?.present || 0}
+          valueAbsent={d.Caretakers?.absent || 0}
+          valuePendingFee={d.Caretakers?.total || 0}
+          icon={<IconWrap icon={ICONS.caretaker} />}
+        />
+      ),
+    },
+  ], [dashboard]);
+
+  /* ================= RENDER ================= */
   return (
-    <>
-      {/* ================= TOP CARDS ================= */}
-      <div className="flex flex-col lg:flex-row gap-4 p-6">
-        <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-
-          {/* STUDENTS */}
-          <Link to="/studentAbsent" className="no-underline block">
-            <CardStuStaf
-              title="Students"
-              TotalValue={data.student.total}
-              presentValue={data.student.present}
-              badge={data.student.attendanceNotMarked?.notMarked}
-              color="#4CAF50"
-              icon={iconWrap(<FaUsersLine className="text-violet-600 text-4xl" />)}
-            />
-          </Link>
-
-          {/* STAFF */}
-          <Link to="/todayStaffList" className="no-underline block">
-            <CardStuStaf
-              title="Staff"
-              TotalValue={
-                data.staff.teachingStaff + data.staff.non_teachingStaff
-              }
-              presentValue={
-                data.staff.attendanceteachingstaff +
-                data.staff.attendancenonteachingstaff
-              }
-              color="#2196F3"
-              icon={iconWrap(<FaUserGroup className="text-cyan-500 text-4xl" />)}
-            />
-          </Link>
-
-          {/* BIRTHDAY */}
-          <Link to="/staffbirthlist" className="no-underline block">
-            <Card
-              title="Birthdays"
-              value={data.staff_student_bday_count.count}
-              color="#2196F3"
-              icon={iconWrap(<FaBirthdayCake className="text-pink-500 text-4xl" />)}
-            />
-          </Link>
-
-          {/* FEES */}
-          <Link to="/feependinglist" className="no-underline block">
-            <Card
-              title="Fee"
-              value={data.fees_collection["Collected Fees"]}
-              valuePendingFee={data.fees_collection["Pending Fees"]}
-              color="#FF5722"
-              icon={iconWrap(<HiCollection className="text-green-600 text-4xl" />)}
-            />
-          </Link>
-
-          {/* APPROVE LEAVE */}
-          <Link to="/approveLeavelist" className="no-underline block">
-            <Card
-              title="Approve Leave"
-              value={data.approve_leave.count}
-              color="#FFC107"
-              icon={iconWrap(
-                <RiPassValidFill className="text-rose-600 text-4xl" />,
-              )}
-            />
-          </Link>
-
-          {/* LESSON PLAN */}
-          <Link to="/lessonPlanData" className="no-underline block">
-            <Card
-              title="Lesson Plans"
-              value={data.lesson_plan_summary.totalNumberOfTeachers}
-              valuePendingFee={data.lesson_plan_summary.lessonPlanSubmitted}
-              valueAbsent={data.lesson_plan_summary.lessonPlanNotSubmitted}
-              valueTeacher={data.lesson_plan_summary.pendingForApproval}
-              color="#4CAF50"
-              icon={iconWrap(
-                <FaClipboardCheck className="text-green-600 text-4xl" />,
-              )}
-            />
-          </Link>
-
-          {/* NURSERY */}
-          <Card
-            title="Nursery"
-            value={data["Nursery teachers"].present}
-            valueAbsent={data["Nursery teachers"].absent}
-            valuePendingFee={data["Nursery teachers"].total}
-            color="#4CAF50"
-            icon={iconWrap(<GiTeacher className="text-purple-500 text-4xl" />)}
-          />
-
-          {/* KG */}
-          <Card
-            title="KG"
-            value={data["KG teachers"].present}
-            valueAbsent={data["KG teachers"].absent}
-            valuePendingFee={data["KG teachers"].total}
-            color="#4CAF50"
-            icon={iconWrap(<GiTeacher className="text-purple-500 text-4xl" />)}
-          />
-
-          {/* SCHOOL */}
-          <Card
-            title="School"
-            value={data["SACS teachers"].present}
-            valueAbsent={data["SACS teachers"].absent}
-            valuePendingFee={data["SACS teachers"].total}
-            color="#4CAF50"
-            icon={iconWrap(<GiTeacher className="text-purple-500 text-4xl" />)}
-          />
-
-          {/* CARETAKER */}
-          <Card
-            title="Caretaker"
-            value={data.Caretakers.present}
-            valueAbsent={data.Caretakers.absent}
-            valuePendingFee={data.Caretakers.total}
-            color="#4CAF50"
-            icon={iconWrap(
-              <FaUserShield className="text-purple-500 text-4xl" />,
-            )}
-          />
+    <RenderGate ready={ready}>
+      {/* ===== CARDS ===== */}
+      <div className="p-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+          {cards.map((item, i) =>
+            item.link ? (
+              <Link key={i} to={item.link} className="no-underline block">
+                {item.node}
+              </Link>
+            ) : (
+              <div key={i}>{item.node}</div>
+            )
+          )}
         </div>
       </div>
+
+      {/* ===== CHART + EVENTS ===== */}
       <div className="h-80 flex flex-col-reverse lg:flex-row gap-4 px-4">
         <div className="w-full lg:w-2/3 bg-slate-50 rounded-lg shadow-md">
-          <Suspense fallback={<div className="p-6">Loading chart...</div>}>
+          <Suspense fallback={<div className="h-full bg-gray-200 animate-pulse" />}>
             <StudentAttendanceChart />
           </Suspense>
         </div>
 
-        <div className=" w-full lg:w-1/3 bg-slate-50  overflow-y-auto rounded-lg shadow-md">
+        <div className="w-full lg:w-1/3 bg-slate-50 overflow-y-auto rounded-lg shadow-md">
           <EventCard />
         </div>
       </div>
-      {/* ================= CHART ================= */}
-      {/* <div className="mx-6 h-[400px] bg-slate-50 rounded-lg shadow">
-
-        <StudentAttendanceChart />
-
-      </div>
-
-      <div className="m-6 bg-white rounded-lg shadow-md h-[350px] overflow-y-auto">
-        <EventCard />
-      </div> */}
-    </>
+    </RenderGate>
   );
 };
 
 export default PrincipalDashboardSACS;
-

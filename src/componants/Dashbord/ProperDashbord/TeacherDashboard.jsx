@@ -193,7 +193,7 @@
 
 // export default TeacherDashboard;
 import { Link } from "react-router-dom";
-import React, { useLayoutEffect, useState } from "react";
+import React, { useMemo } from "react";
 
 import { FaUsersLine } from "react-icons/fa6";
 import { HiCollection, HiOutlineDocumentText } from "react-icons/hi";
@@ -208,195 +208,192 @@ import TimeTableForTeacherDashbord from "../TimeTableForTeacherDashbord";
 import TodoListandRemainders from "../TodoListandRemainders";
 import TicketForDashboard from "../TicketForDashboard";
 import ClassWiseAcademicPerformance from "../ClassWiseAcademicPerformance";
+import SkeletonDashboard from "../ProperDashbord/SkeletonDashboard";
+
+/* ================= RENDER GATE ================= */
+const RenderGate = ({ ready, fallback, children }) => {
+    if (!ready) return fallback;
+    return children;
+};
 
 const TeacherDashboard = ({ dashboard }) => {
-    const [ready, setReady] = useState(false);
-
-    const data = dashboard?.data || {};
-
-    /* ========= UX FIX =========
-       Ensures ONE paint → no blink, no staggered cards
-    */
-    useLayoutEffect(() => {
-        setReady(true);
-    }, []);
+    /* ================= READY CHECK ================= */
+    const isReady = Boolean(dashboard && dashboard.data);
+    const data = isReady ? dashboard.data : null;
 
     /* ================= DATA MAPPING ================= */
-    const student = {
-        total: data.studentCard?.totalStudents ?? 0,
-        present: data.studentCard?.totalStudentsPresentToday ?? 0,
-    };
+    const mapped = useMemo(() => {
+        if (!data) return null;
 
-    const birthdayCount =
-        data.birthDayCard?.countOfBirthdaysToday ?? 0;
-
-    const homeworkCount =
-        data.homeworkCard?.countOfHomeworksDueToday ?? 0;
-
-    const defaulter = {
-        count: data.defaulterCount?.totalNumberOfDefaulters ?? 0,
-        pendingAmount: data.defaulterCount?.totalPendingAmount ?? 0,
-    };
-
-    const substituteCount = data.substituteCount ?? 0;
+        return {
+            student: {
+                total: data.studentCard?.totalStudents ?? 0,
+                present: data.studentCard?.totalStudentsPresentToday ?? 0,
+            },
+            birthdayCount:
+                data.birthDayCard?.countOfBirthdaysToday ?? 0,
+            homeworkCount:
+                data.homeworkCard?.countOfHomeworksDueToday ?? 0,
+            defaulter: {
+                count: data.defaulterCount?.totalNumberOfDefaulters ?? 0,
+                pendingAmount: data.defaulterCount?.totalPendingAmount ?? 0,
+            },
+            substituteCount: data.substituteCount ?? 0,
+        };
+    }, [data]);
 
     return (
-        <>
-            {/* ================= SECTION 1 : TOP CARDS ================= */}
-            <section className="w-full px-4 md:px-6 py-3">
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+        <RenderGate ready={isReady} fallback={<SkeletonDashboard />}>
+            <>
+                {/* ================= SECTION 1 : TOP CARDS ================= */}
+                <section className="w-full px-4 md:px-6 py-3">
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
 
-                    {/* CARDS */}
-                    <div
-                        className={`lg:col-span-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4
-            ${ready ? "opacity-100" : "opacity-0"}`}
-                    >
-                        {/* STUDENTS */}
-                        <Link to="/studentAbsent" className="no-underline">
-                            <CardStuStaf
-                                title="Students"
-                                TotalValue={student.total}
-                                presentValue={student.present}
+                        {/* CARDS */}
+                        <div className="lg:col-span-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+
+                            <Link to="/studentAbsent" className="no-underline">
+                                <CardStuStaf
+                                    title="Students"
+                                    TotalValue={mapped.student.total}
+                                    presentValue={mapped.student.present}
+                                    color="#4CAF50"
+                                    icon={
+                                        <FaUsersLine
+                                            style={{
+                                                color: "violet",
+                                                backgroundColor: "white",
+                                                padding: "10px",
+                                                borderRadius: "50%",
+                                            }}
+                                        />
+                                    }
+                                />
+                            </Link>
+
+                            <Link to="/substituteClassTeacher" className="no-underline">
+                                <Card
+                                    title="Substitution Class"
+                                    value={mapped.substituteCount}
+                                    color="#2196F3"
+                                    icon={
+                                        <HiOutlineDocumentText
+                                            style={{
+                                                color: "#FF6B6B",
+                                                backgroundColor: "white",
+                                                padding: "11px",
+                                            }}
+                                        />
+                                    }
+                                />
+                            </Link>
+
+                            <Link to="/homeworkNotSubmitedStudent" className="no-underline">
+                                <Card
+                                    title="Homework Due"
+                                    value={mapped.homeworkCount}
+                                    color="#FF9800"
+                                    icon={
+                                        <TfiWrite
+                                            style={{
+                                                color: "#2196F3",
+                                                backgroundColor: "white",
+                                                padding: "13px",
+                                            }}
+                                        />
+                                    }
+                                />
+                            </Link>
+
+                            <Link to="/defaulterStudentList" className="no-underline">
+                                <Card
+                                    title="Defaulter List"
+                                    value={mapped.defaulter.count}
+                                    valuePendingFee={mapped.defaulter.pendingAmount}
+                                    color="#FF5733"
+                                    icon={
+                                        <HiCollection
+                                            style={{
+                                                color: "green",
+                                                backgroundColor: "white",
+                                                padding: "10px",
+                                                borderRadius: "50%",
+                                            }}
+                                        />
+                                    }
+                                />
+                            </Link>
+
+                            <Card
+                                title="Assessment"
+                                value="Coming Soon"
                                 color="#4CAF50"
                                 icon={
-                                    <FaUsersLine
+                                    <MdAssessment
                                         style={{
-                                            color: "violet",
+                                            color: "#C03078",
                                             backgroundColor: "white",
                                             padding: "10px",
-                                            borderRadius: "50%",
                                         }}
                                     />
                                 }
                             />
-                        </Link>
 
-                        {/* SUBSTITUTE */}
-                        <Link to="/substituteClassTeacher" className="no-underline">
-                            <Card
-                                title="Substitution Class"
-                                value={substituteCount}
-                                color="#2196F3"
-                                icon={
-                                    <HiOutlineDocumentText
-                                        style={{
-                                            color: "#FF6B6B",
-                                            backgroundColor: "white",
-                                            padding: "11px",
-                                        }}
-                                    />
-                                }
-                            />
-                        </Link>
-
-                        {/* HOMEWORK */}
-                        <Link to="/homeworkNotSubmitedStudent" className="no-underline">
-                            <Card
-                                title="Homework Due"
-                                value={homeworkCount}
-                                color="#FF9800"
-                                icon={
-                                    <TfiWrite
-                                        style={{
-                                            color: "#2196F3",
-                                            backgroundColor: "white",
-                                            padding: "13px",
-                                        }}
-                                    />
-                                }
-                            />
-                        </Link>
-
-                        {/* DEFAULTER */}
-                        <Link to="/defaulterStudentList" className="no-underline">
-                            <Card
-                                title="Defaulter List"
-                                value={defaulter.count}
-                                valuePendingFee={defaulter.pendingAmount}
-                                color="#FF5733"
-                                icon={
-                                    <HiCollection
-                                        style={{
-                                            color: "green",
-                                            backgroundColor: "white",
-                                            padding: "10px",
-                                            borderRadius: "50%",
-                                        }}
-                                    />
-                                }
-                            />
-                        </Link>
-
-                        {/* ASSESSMENT */}
-                        <Card
-                            title="Assessment"
-                            value="Coming Soon"
-                            color="#4CAF50"
-                            icon={
-                                <MdAssessment
-                                    style={{
-                                        color: "#C03078",
-                                        backgroundColor: "white",
-                                        padding: "10px",
-                                    }}
+                            <Link to="/todayStudentBirthday" className="no-underline">
+                                <Card
+                                    title="Birthdays"
+                                    value={mapped.birthdayCount}
+                                    color="#2196F3"
+                                    icon={
+                                        <FaBirthdayCake
+                                            style={{
+                                                color: "cyan",
+                                                backgroundColor: "white",
+                                                padding: "10px",
+                                                borderRadius: "50%",
+                                            }}
+                                        />
+                                    }
                                 />
-                            }
-                        />
+                            </Link>
+                        </div>
 
-                        {/* BIRTHDAY */}
-                        <Link to="/todayStudentBirthday" className="no-underline">
-                            <Card
-                                title="Birthdays"
-                                value={birthdayCount}
-                                color="#2196F3"
-                                icon={
-                                    <FaBirthdayCake
-                                        style={{
-                                            color: "cyan",
-                                            backgroundColor: "white",
-                                            padding: "10px",
-                                            borderRadius: "50%",
-                                        }}
-                                    />
-                                }
-                            />
-                        </Link>
-                    </div>
-
-                    {/* EVENT CARD */}
-                    <div className="lg:col-span-4 h-64 relative">
-                        <div className="bg-slate-100 overflow-y-auto rounded-lg shadow-md h-full">
-                            <EventCard />
+                        {/* EVENT CARD */}
+                        <div className="lg:col-span-4 h-64">
+                            <div className="bg-slate-100 overflow-y-auto rounded-lg shadow-md h-full">
+                                <EventCard />
+                            </div>
                         </div>
                     </div>
-                </div>
-            </section>
+                </section>
 
-            {/* ================= SECTION 2 ================= */}
-            <section className="w-full px-4 md:px-6 py-3">
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-                    <div className="lg:col-span-8 bg-slate-50 rounded-lg shadow-md">
-                        <TimeTableForTeacherDashbord />
+                {/* ================= SECTION 2 ================= */}
+                <section className="w-full px-4 md:px-6 py-3">
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+                        <div className="lg:col-span-8 bg-slate-50 rounded-lg shadow-md">
+                            <TimeTableForTeacherDashbord />
+                        </div>
+                        <div className="lg:col-span-4 bg-slate-50 rounded-lg shadow-md">
+                            <TodoListandRemainders />
+                        </div>
                     </div>
-                    <div className="lg:col-span-4 bg-slate-50 rounded-lg shadow-md">
-                        <TodoListandRemainders />
-                    </div>
-                </div>
-            </section>
+                </section>
 
-            {/* ================= SECTION 3 ================= */}
-            <section className="w-full px-4 md:px-6 py-3">
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-                    <div className="lg:col-span-4 bg-slate-50 rounded-lg shadow-md">
-                        <TicketForDashboard />
+                {/* ================= SECTION 3 ================= */}
+                <section className="w-full px-4 md:px-6 py-3">
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+                        <div className="lg:col-span-4 bg-slate-50 rounded-lg shadow-md">
+                            <TicketForDashboard />
+                        </div>
+                        <div className="lg:col-span-8 bg-slate-50 rounded-lg shadow-md">
+                            <ClassWiseAcademicPerformance />
+                        </div>
                     </div>
-                    <div className="lg:col-span-8 bg-slate-50 rounded-lg shadow-md">
-                        <ClassWiseAcademicPerformance />
-                    </div>
-                </div>
-            </section>
-        </>
+                </section>
+            </>
+        </RenderGate>
     );
 };
 
 export default TeacherDashboard;
+
