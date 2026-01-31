@@ -1,3 +1,5 @@
+
+
 // import { Link } from "react-router-dom";
 // import React, { Suspense } from "react";
 
@@ -17,7 +19,6 @@
 
 // const AdminDashboard = ({ data, roleId, sortName }) => {
 //   if (!data?.data) return null;
-
 //   const api = data.data;
 
 //   /* ================= DATA MAPPING ================= */
@@ -35,7 +36,6 @@
 //   const nonTeachingStaff = {
 //     total: api.non_teachingStaff?.total ?? 0,
 //     present: api.non_teachingStaff?.count ?? 0,
-
 //   };
 
 //   const fees = {
@@ -46,7 +46,7 @@
 //   const ticket = api.ticket_count ?? 0;
 //   const birthday = api.birthday_count ?? 0;
 
-//   /* ================= ICON STYLES ================= */
+//   /* ================= ICON STYLE ================= */
 //   const iconStyle = (color) => ({
 //     color,
 //     backgroundColor: "#fff",
@@ -54,86 +54,105 @@
 //     borderRadius: "50%",
 //   });
 
+//   /* ================= CARDS LIST ================= */
+//   const cards = [
+//     {
+//       key: "students",
+//       link: "/studentAbsent",
+//       component: (
+//         <CardStuStaf
+//           title="Students"
+//           TotalValue={student.total}
+//           presentValue={student.present}
+//           badge={student.notMarked}
+//           color="#4CAF50"
+//           icon={<FaUsersLine style={iconStyle("#4CAF50")} />}
+//         />
+//       ),
+//     },
+//     {
+//       key: "teaching",
+//       link: sortName === "HSCS" ? "#" : "/teacherList",
+//       component: (
+//         <CardStuStaf
+//           title="Teaching Staff"
+//           TotalValue={teachingStaff.total}
+//           presentValue={teachingStaff.present}
+//           color="#2196F3"
+//           icon={<FaUserGroup style={iconStyle("#2196F3")} />}
+//         />
+//       ),
+//       disabled: sortName === "HSCS",
+//     },
+//     {
+//       key: "nonTeaching",
+//       link: sortName === "HSCS" ? "#" : "/nonTeachingStaff",
+//       component: (
+//         <CardStuStaf
+//           title="Non-Teaching Staff"
+//           TotalValue={nonTeachingStaff.total}
+//           presentValue={nonTeachingStaff.present}
+//           color="#9C27B0"
+//           icon={<FaUserGroup style={iconStyle("#9C27B0")} />}
+//         />
+//       ),
+//       disabled: sortName === "HSCS",
+//     },
+//     {
+//       key: "fees",
+//       link: "/feependinglist",
+//       component: (
+//         <Card
+//           title="Fee Collection"
+//           value={fees.collected}
+//           valuePendingFee={fees.pending}
+//           color="#FF5722"
+//           icon={<HiCollection style={iconStyle("#FF5722")} />}
+//         />
+//       ),
+//     },
+//     {
+//       key: "ticket",
+//       link: "/ticketList",
+//       component: (
+//         <Card
+//           title="Tickets"
+//           value={ticket}
+//           color="#FFC107"
+//           icon={<IoTicket style={iconStyle("#FFC107")} />}
+//         />
+//       ),
+//     },
+//     {
+//       key: "birthday",
+//       link: "/staffbirthlist",
+//       component: (
+//         <Card
+//           title="Birthdays"
+//           value={birthday}
+//           color="#03A9F4"
+//           icon={<FaBirthdayCake style={iconStyle("#03A9F4")} />}
+//         />
+//       ),
+//     },
+//   ];
+
 //   return (
 //     <>
-//       {/* ================= TOP SECTION ================= */}
+//       {/* ================= TOP CARDS ================= */}
 //       <div className="flex flex-col lg:flex-row gap-4 p-6">
-
-//         {/* CARDS */}
+//         {/* CARDS GRID */}
 //         <div className="w-full lg:w-2/3 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-
-//           {/* STUDENTS */}
-//           <Link to="/studentAbsent" className="no-underline">
-//             <CardStuStaf
-//               title="Students"
-//               TotalValue={student.total}
-//               presentValue={student.present}
-//               badge={student.notMarked}
-//               color="#4CAF50"
-//               icon={<FaUsersLine style={iconStyle("#4CAF50")} />}
-//             />
-//           </Link>
-
-//           {/* TEACHING STAFF */}
-//           <Link
-//             to={sortName === "HSCS" ? "#" : "/teacherList"}
-//             className="no-underline"
-//             style={sortName === "HSCS" ? { pointerEvents: "none" } : {}}
-//           >
-//             <CardStuStaf
-//               title="Teaching Staff"
-//               TotalValue={teachingStaff.total}
-//               presentValue={teachingStaff.present}
-//               color="#2196F3"
-//               icon={<FaUserGroup style={iconStyle("#2196F3")} />}
-//             />
-//           </Link>
-
-//           {/* NON TEACHING */}
-//           <Link
-//             to={sortName === "HSCS" ? "#" : "/nonTeachingStaff"}
-//             className="no-underline"
-//             style={sortName === "HSCS" ? { pointerEvents: "none" } : {}}
-//           >
-//             <CardStuStaf
-//               title="Non-Teaching Staff"
-//               presentValue={nonTeachingStaff.present}
-//               TotalValue={nonTeachingStaff.total}
-//               color="#9C27B0"
-//               icon={<FaUserGroup style={iconStyle("#9C27B0")} />}
-//             />
-//           </Link>
-
-//           {/* FEES */}
-//           <Link to="/feependinglist" className="no-underline">
-//             <Card
-//               title="Fee Collection"
-//               value={fees.collected}
-//               valuePendingFee={fees.pending}
-//               color="#FF5722"
-//               icon={<HiCollection style={iconStyle("#FF5722")} />}
-//             />
-//           </Link>
-
-//           {/* TICKET */}
-//           <Link to="/ticketList" className="no-underline">
-//             <Card
-//               title="Tickets"
-//               value={ticket}
-//               color="#FFC107"
-//               icon={<IoTicket style={iconStyle("#FFC107")} />}
-//             />
-//           </Link>
-
-//           {/* BIRTHDAY */}
-//           <Link to="/staffbirthlist" className="no-underline">
-//             <Card
-//               title="Birthdays"
-//               value={birthday}
-//               color="#03A9F4"
-//               icon={<FaBirthdayCake style={iconStyle("#03A9F4")} />}
-//             />
-//           </Link>
+//           {cards.map((c) => (
+//             <Link
+//               key={c.key}
+//               to={c.link}
+//               className="no-underline"
+//               style={c.disabled ? { pointerEvents: "none" } : {}}
+//             >
+//               {c.component}
+//             </Link>
+//           ))}
 //         </div>
 
 //         {/* EVENT CARD */}
@@ -142,7 +161,6 @@
 //             <EventCard />
 //           </div>
 //         </div>
-
 //       </div>
 
 //       {/* ================= CHART + NOTICE ================= */}
@@ -158,7 +176,7 @@
 //         </div>
 //       </div>
 
-//       {/* ================= EXTRA ================= */}
+//       {/* ================= EXTRA TABLE + HOUSE CHART ================= */}
 //       <div className="flex flex-col-reverse lg:flex-row gap-4 px-4 mt-6">
 //         <div className="w-full lg:w-1/3 bg-slate-50 rounded-lg shadow-md">
 //           <TableFeeCollect />
@@ -174,7 +192,7 @@
 
 // export default AdminDashboard;
 import { Link } from "react-router-dom";
-import React, { Suspense } from "react";
+import React, { Suspense, useLayoutEffect, useState } from "react";
 
 import { FaUsersLine, FaUserGroup } from "react-icons/fa6";
 import { HiCollection } from "react-icons/hi";
@@ -191,8 +209,18 @@ import TableFeeCollect from "../TableFeeCollect";
 const StudentsChart = React.lazy(() => import("../Charts/StudentsChart"));
 
 const AdminDashboard = ({ data, roleId, sortName }) => {
+  const [ready, setReady] = useState(false);
+
   if (!data?.data) return null;
   const api = data.data;
+
+  /* ========= UX FIX =========
+     useLayoutEffect runs BEFORE browser paint
+     so cards become visible in ONE frame
+  */
+  useLayoutEffect(() => {
+    setReady(true);
+  }, []);
 
   /* ================= DATA MAPPING ================= */
   const student = {
@@ -246,6 +274,7 @@ const AdminDashboard = ({ data, roleId, sortName }) => {
     {
       key: "teaching",
       link: sortName === "HSCS" ? "#" : "/teacherList",
+      disabled: sortName === "HSCS",
       component: (
         <CardStuStaf
           title="Teaching Staff"
@@ -255,11 +284,11 @@ const AdminDashboard = ({ data, roleId, sortName }) => {
           icon={<FaUserGroup style={iconStyle("#2196F3")} />}
         />
       ),
-      disabled: sortName === "HSCS",
     },
     {
       key: "nonTeaching",
       link: sortName === "HSCS" ? "#" : "/nonTeachingStaff",
+      disabled: sortName === "HSCS",
       component: (
         <CardStuStaf
           title="Non-Teaching Staff"
@@ -269,7 +298,6 @@ const AdminDashboard = ({ data, roleId, sortName }) => {
           icon={<FaUserGroup style={iconStyle("#9C27B0")} />}
         />
       ),
-      disabled: sortName === "HSCS",
     },
     {
       key: "fees",
@@ -312,10 +340,13 @@ const AdminDashboard = ({ data, roleId, sortName }) => {
 
   return (
     <>
-      {/* ================= TOP CARDS ================= */}
+      {/* ================= TOP SECTION ================= */}
       <div className="flex flex-col lg:flex-row gap-4 p-6">
-        {/* CARDS GRID */}
-        <div className="w-full lg:w-2/3 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {/* CARDS GRID (UX FIX HERE) */}
+        <div
+          className={`w-full lg:w-2/3 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4
+          ${ready ? "opacity-100" : "opacity-0"}`}
+        >
           {cards.map((c) => (
             <Link
               key={c.key}
@@ -329,8 +360,8 @@ const AdminDashboard = ({ data, roleId, sortName }) => {
         </div>
 
         {/* EVENT CARD */}
-        <div className="w-full lg:w-1/3 h-3/4 border-4 border-red-900 bg-slate-100 rounded-lg shadow-md overflow-hidden">
-          <div className="h-full overflow-y-auto">
+        <div className="w-full lg:w-1/3 h-64  overflow-y-auto  bg-slate-100 rounded-lg shadow-md overflow-hidden">
+          <div className=" rounded-lg">
             <EventCard />
           </div>
         </div>
@@ -349,7 +380,7 @@ const AdminDashboard = ({ data, roleId, sortName }) => {
         </div>
       </div>
 
-      {/* ================= EXTRA TABLE + HOUSE CHART ================= */}
+      {/* ================= EXTRA ================= */}
       <div className="flex flex-col-reverse lg:flex-row gap-4 px-4 mt-6">
         <div className="w-full lg:w-1/3 bg-slate-50 rounded-lg shadow-md">
           <TableFeeCollect />

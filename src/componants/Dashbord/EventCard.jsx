@@ -182,8 +182,8 @@ const EventCard = () => {
   )?.label;
 
   return (
-    <div className={`  border-2 border-solid h-64 bg-slate-100`}>
-      <div className="sticky top-0 m-auto header p-1 flex justify-between items-center bg-gray-200 rounded-t-lg mb-3" style={{ zIndex: "2" }}>
+    <div className={`relative w-full border-2 border-solid  bg-slate-100`}>
+      <div className="sticky top-0 w-full m-auto header p-1 flex justify-between items-center bg-gray-200 rounded-t-lg mb-3" style={{ zIndex: "2" }}>
         <span className="lg:text-lg sm:text-xs sm:font-semibold text-gray-500 mb-1">
           Events List
         </span>
@@ -213,7 +213,7 @@ const EventCard = () => {
           </p>
         ) : (
           <div
-            className={`${Styles.eventsList} rounded-lg pb-20 sm:pb-20 bg-gray-100 px-2 max-h-full overflow-x-auto min-h-[200px]`}
+            className={`${Styles.eventsList} rounded-lg pb-20 sm:pb-20 bg-gray-100 px-2 max-h-fit overflow-x-auto min-h-fit`}
           >
             {filteredEvents.length > 0 ? (
               filteredEvents.map((event, index) => (
