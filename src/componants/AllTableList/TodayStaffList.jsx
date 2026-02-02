@@ -775,8 +775,8 @@ function TodayStaffList() {
                             <td className="sm:px-0.5 text-center lg:px-1 border border-gray-950 text-sm">
                               <p
                                 className={`whitespace-no-wrap relative top-2 ${student.late === "Y"
-                                    ? "text-red-600"
-                                    : "text-gray-900"
+                                  ? "text-red-600"
+                                  : "text-gray-900"
                                   }`}
                               >
                                 {index + 1}
@@ -798,8 +798,8 @@ function TodayStaffList() {
                             <td className="text-center px-2 lg:px-2 border border-gray-950 text-sm">
                               <p
                                 className={`whitespace-no-wrap relative top-2 ${student.late === "Y"
-                                    ? "text-red-600"
-                                    : "text-gray-900"
+                                  ? "text-red-600"
+                                  : "text-gray-900"
                                   }`}
                               >
                                 {student?.name
@@ -824,8 +824,8 @@ function TodayStaffList() {
                             <td className="text-center px-2 lg:px-2 border border-gray-950 text-sm">
                               <p
                                 className={`whitespace-no-wrap relative top-2 ${student.late === "Y"
-                                    ? "text-red-600"
-                                    : "text-gray-900"
+                                  ? "text-red-600"
+                                  : "text-gray-900"
                                   }`}
                               >
                                 {student.teachercategoryname}
@@ -835,8 +835,8 @@ function TodayStaffList() {
                             <td className="text-center px-2 lg:px-2 border border-gray-950 text-sm">
                               <p
                                 className={`whitespace-no-wrap relative top-2 ${student.late === "Y"
-                                    ? "text-red-600"
-                                    : "text-gray-900"
+                                  ? "text-red-600"
+                                  : "text-gray-900"
                                   }`}
                               >
                                 {student.punch_in || "-"}
@@ -845,8 +845,8 @@ function TodayStaffList() {
                             <td className="text-center px-2 lg:px-2 border border-gray-950 text-sm">
                               <p
                                 className={`whitespace-no-wrap relative top-2 ${student.late === "Y"
-                                    ? "text-red-600"
-                                    : "text-gray-900"
+                                  ? "text-red-600"
+                                  : "text-gray-900"
                                   }`}
                               >
                                 {student.punch_out || "-"}
@@ -855,8 +855,8 @@ function TodayStaffList() {
                             <td className="text-center px-2 lg:px-2 border border-gray-950 text-sm">
                               <p
                                 className={`whitespace-no-wrap relative top-2 ${student.late === "Y"
-                                    ? "text-red-600"
-                                    : "text-gray-900"
+                                  ? "text-red-600"
+                                  : "text-gray-900"
                                   }`}
                               >
                                 {student.late === "Y" &&
@@ -883,8 +883,8 @@ function TodayStaffList() {
                             <td className="text-center px-2 lg:px-2 border border-gray-950 text-sm">
                               <p
                                 className={`whitespace-no-wrap relative top-2 ${student.late === "Y"
-                                    ? "text-red-600"
-                                    : "text-gray-900"
+                                  ? "text-red-600"
+                                  : "text-gray-900"
                                   }`}
                               >
                                 {student.phone || " "}
@@ -893,8 +893,8 @@ function TodayStaffList() {
                             <td className="text-center px-2 lg:px-2 border border-gray-950 text-sm">
                               <p
                                 className={`whitespace-no-wrap relative top-2 ${student.late === "Y"
-                                    ? "text-red-600"
-                                    : "text-gray-900"
+                                  ? "text-red-600"
+                                  : "text-gray-900"
                                   }`}
                               >
                                 {student.class_section || "-"}
@@ -929,11 +929,16 @@ function TodayStaffList() {
                           </tr>
                         ))
                       ) : (
-                        <div className=" absolute left-[1%] w-[100%]  text-center flex justify-center items-center mt-14">
-                          <div className=" text-center text-xl text-red-700">
-                            No staff is on present today..
-                          </div>
-                        </div>
+
+
+                        <tr>
+                          <td
+                            colSpan={11}
+                            className="py-16 text-center text-xl font-semibold text-red-600"
+                          >
+                            No Teachers are present Today.
+                          </td>
+                        </tr>
                       )}
                     </tbody>
                   </table>
@@ -1112,8 +1117,8 @@ function TodayStaffList() {
                             <td className="sm:px-0.5 text-center lg:px-1 border border-gray-950 text-sm">
                               <p
                                 className={`whitespace-no-wrap relative top-2 ${student.late === "Y"
-                                    ? "text-red-600"
-                                    : "text-gray-900"
+                                  ? "text-red-600"
+                                  : "text-gray-900"
                                   }`}
                               >
                                 {index + 1}
@@ -1135,8 +1140,8 @@ function TodayStaffList() {
                             <td className="text-center px-2 lg:px-2 border border-gray-950 text-sm">
                               <p
                                 className={`whitespace-no-wrap relative top-2 ${student.late === "Y"
-                                    ? "text-red-600"
-                                    : "text-gray-900"
+                                  ? "text-red-600"
+                                  : "text-gray-900"
                                   }`}
                               >
                                 {/* {(student.name)} */}
@@ -1161,8 +1166,8 @@ function TodayStaffList() {
                             <td className="text-center px-2 lg:px-2 border border-gray-950 text-sm">
                               <p
                                 className={`whitespace-no-wrap relative top-2 ${student.late === "Y"
-                                    ? "text-red-600"
-                                    : "text-gray-900"
+                                  ? "text-red-600"
+                                  : "text-gray-900"
                                   }`}
                               >
                                 {student.teachercategoryname}
@@ -1172,8 +1177,8 @@ function TodayStaffList() {
                             <td className="text-center px-2 lg:px-2 border border-gray-950 text-sm">
                               <p
                                 className={`whitespace-no-wrap relative top-2 ${student.late === "Y"
-                                    ? "text-red-600"
-                                    : "text-gray-900"
+                                  ? "text-red-600"
+                                  : "text-gray-900"
                                   }`}
                               >
                                 {student.punch_time || "-"}
@@ -1182,8 +1187,8 @@ function TodayStaffList() {
                             <td className="text-center px-2 lg:px-2 border border-gray-950 text-sm">
                               <p
                                 className={`whitespace-no-wrap relative top-2 ${student.late === "Y"
-                                    ? "text-red-600"
-                                    : "text-gray-900"
+                                  ? "text-red-600"
+                                  : "text-gray-900"
                                   }`}
                               >
                                 {student.punch_out || "-"}
@@ -1192,8 +1197,8 @@ function TodayStaffList() {
                             <td className="text-center px-2 lg:px-2 border border-gray-950 text-sm">
                               <p
                                 className={`whitespace-no-wrap relative top-2 ${student.late === "Y"
-                                    ? "text-red-600"
-                                    : "text-gray-900"
+                                  ? "text-red-600"
+                                  : "text-gray-900"
                                   }`}
                               >
                                 {/* {student.late_time || "-"} */}
@@ -1221,8 +1226,8 @@ function TodayStaffList() {
                             <td className="text-center px-2 lg:px-2 border border-gray-950 text-sm">
                               <p
                                 className={`whitespace-no-wrap relative top-2 ${student.late === "Y"
-                                    ? "text-red-600"
-                                    : "text-gray-900"
+                                  ? "text-red-600"
+                                  : "text-gray-900"
                                   }`}
                               >
                                 {student.phone || " "}
@@ -1258,11 +1263,16 @@ function TodayStaffList() {
                           </tr>
                         ))
                       ) : (
-                        <div className=" absolute left-[1%] w-[100%]  text-center flex justify-center items-center mt-14">
-                          <div className=" text-center text-xl text-red-700">
+                        <tr>
+                          <td
+                            colSpan={11}
+                            className="py-16 text-center text-xl font-semibold text-red-600"
+                          >
                             No Staff are present Today.
-                          </div>
-                        </div>
+                          </td>
+                        </tr>
+
+
                       )}
                     </tbody>
                   </table>
@@ -1415,8 +1425,8 @@ function TodayStaffList() {
 
                     <button
                       className={`text-white font-semibold py-2 px-6 rounded-md transition duration-200 ${loadingForSend
-                          ? "bg-blue-500 opacity-50 cursor-not-allowed"
-                          : "bg-blue-600 hover:bg-blue-700"
+                        ? "bg-blue-500 opacity-50 cursor-not-allowed"
+                        : "bg-blue-600 hover:bg-blue-700"
                         }`}
                       onClick={handleSend}
                       disabled={loadingForSend}
@@ -1456,8 +1466,8 @@ function TodayStaffList() {
 
                     <button
                       className={`text-white font-semibold py-2 px-6 rounded-md transition duration-200 ${loadingForSend
-                          ? "bg-blue-500 opacity-50 cursor-not-allowed"
-                          : "bg-blue-600 hover:bg-blue-700"
+                        ? "bg-blue-500 opacity-50 cursor-not-allowed"
+                        : "bg-blue-600 hover:bg-blue-700"
                         }`}
                       onClick={handleSend}
                       disabled={loadingForSend}

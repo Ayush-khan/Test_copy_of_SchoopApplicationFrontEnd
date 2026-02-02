@@ -197,11 +197,15 @@ const LowAttendanceTab = () => {
   //   }
   //   return options;
   // };
-  const getInstallmentOptions = () =>
-    Array.from({ length: 4 }, (_, i) => {
-      const value = 60 + i * 5; // 60, 65, 70, 75
-      return { value, label: `${value}%` };
-    });
+  const getInstallmentOptions = () => {
+    const baseValues = [60, 65, 70, 75, 85, 90, 100];
+
+    return baseValues.map(value => ({
+      value,
+      label: `${value}%`,
+    }));
+  };
+
 
   // const getInstallmentOptions = () =>
   //   Array.from({ length: 9 }, (_, i) => {
