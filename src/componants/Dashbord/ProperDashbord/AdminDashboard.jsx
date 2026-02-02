@@ -270,6 +270,8 @@ const AdminDashboard = ({ data, roleId, sortName }) => {
             TotalValue={mapped.student.total}
             presentValue={mapped.student.present}
             badge={mapped.student.notMarked}
+            roleId={roleId}
+            sortName={sortName}
             icon={<FaUsersLine style={iconStyle("#4CAF50")} />}
           />
         ),
@@ -283,6 +285,8 @@ const AdminDashboard = ({ data, roleId, sortName }) => {
             title="Teaching Staff"
             TotalValue={mapped.teachingStaff.total}
             presentValue={mapped.teachingStaff.present}
+            roleId={roleId}
+            sortName={sortName}
             icon={<FaUserGroup style={iconStyle("#2196F3")} />}
           />
         ),
@@ -296,6 +300,8 @@ const AdminDashboard = ({ data, roleId, sortName }) => {
             title="Non-Teaching Staff"
             TotalValue={mapped.nonTeachingStaff.total}
             presentValue={mapped.nonTeachingStaff.present}
+            roleId={roleId}
+            sortName={sortName}
             icon={<FaUserGroup style={iconStyle("#9C27B0")} />}
           />
         ),
@@ -308,6 +314,8 @@ const AdminDashboard = ({ data, roleId, sortName }) => {
             title="Fee"
             value={mapped.fees.collected}
             valuePendingFee={mapped.fees.pending}
+            roleId={roleId}
+            sortName={sortName}
             icon={<HiCollection style={iconStyle("#FF5722")} />}
           />
         ),
@@ -319,6 +327,8 @@ const AdminDashboard = ({ data, roleId, sortName }) => {
           <Card
             title="Tickets"
             value={mapped.ticket}
+            roleId={roleId}
+            sortName={sortName}
             icon={<IoTicket style={iconStyle("#FFC107")} />}
           />
         ),
@@ -330,6 +340,8 @@ const AdminDashboard = ({ data, roleId, sortName }) => {
           <Card
             title="Birthdays"
             value={mapped.birthday}
+            roleId={roleId}
+            sortName={sortName}
             icon={<FaBirthdayCake style={iconStyle("#03A9F4")} />}
           />
         ),

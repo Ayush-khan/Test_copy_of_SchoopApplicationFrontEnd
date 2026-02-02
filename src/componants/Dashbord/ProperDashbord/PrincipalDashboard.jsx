@@ -30,7 +30,7 @@ const RenderGate = ({ ready, fallback, children }) => {
     return children;
 };
 
-const PrincipalDashboard = ({ dashboard }) => {
+const PrincipalDashboard = ({ dashboard, roleId, sortName }) => {
 
     /* ================= RENDER GATE CONDITION ================= */
     const isReady = Boolean(dashboard && dashboard.data);
@@ -74,6 +74,8 @@ const PrincipalDashboard = ({ dashboard }) => {
                         TotalValue={data.student.total}
                         presentValue={data.student.present}
                         badge={data.student.attendanceNotMarked?.notMarked || 0}
+                        roleId={roleId}
+                        sortName={sortName}
                         icon={<FaUsersLine style={iconStyle("violet")} />}
                     />
                 ),
@@ -86,6 +88,8 @@ const PrincipalDashboard = ({ dashboard }) => {
                         title="Teachers"
                         TotalValue={data.staff.teachingStaff}
                         presentValue={data.staff.attendanceteachingstaff}
+                        roleId={roleId}
+                        sortName={sortName}
                         icon={<FaUserGroup style={iconStyle("#00FFFF")} />}
                     />
                 ),
@@ -98,6 +102,8 @@ const PrincipalDashboard = ({ dashboard }) => {
                         title="Non-Teaching Staff"
                         TotalValue={data.staff.non_teachingStaff}
                         presentValue={data.staff.attendancenonteachingstaff}
+                        roleId={roleId}
+                        sortName={sortName}
                         icon={<FaUserGroup style={iconStyle("#A287F3")} />}
                     />
                 ),
@@ -110,6 +116,8 @@ const PrincipalDashboard = ({ dashboard }) => {
                         title="Fee"
                         value={data.fees_collection["Collected Fees"]}
                         valuePendingFee={data.fees_collection["Pending Fees"]}
+                        roleId={roleId}
+                        sortName={sortName}
                         icon={<HiCollection style={iconStyle("green")} />}
                     />
                 ),
@@ -121,6 +129,8 @@ const PrincipalDashboard = ({ dashboard }) => {
                     <Card
                         title="Approve Leave"
                         value={data.approve_leave.count}
+                        roleId={roleId}
+                        sortName={sortName}
                         icon={<RiPassValidFill style={iconStyle("#C03078")} />}
                     />
                 ),
@@ -133,6 +143,8 @@ const PrincipalDashboard = ({ dashboard }) => {
                         title="Approve Lesson Plan"
                         value={data.lesson_plan_summary.pendingForApproval}
                         spanLabel="Pending"
+                        roleId={roleId}
+                        sortName={sortName}
                         icon={<FaClipboardCheck style={iconStyle("green")} />}
                     />
                 ),

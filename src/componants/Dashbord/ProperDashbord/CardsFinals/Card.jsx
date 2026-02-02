@@ -1,9 +1,5 @@
-// just implenetn loader
-import { useEffect, useState } from "react";
 import styles from "../../CSS/DashbordCss/Card.module.css";
 import { FaSpinner } from "react-icons/fa"; // Import the spinner icon
-import { toast } from "react-toastify";
-import axios from "axios";
 
 const Card = ({
   title,
@@ -14,55 +10,16 @@ const Card = ({
   valueTeacher,
   color,
   icon,
-  roleId,
+  roleId,        // ✅ parent se aa raha
+  sortName,
   showDivider = false,
 }) => {
-  const API_URL = import.meta.env.VITE_API_URL;
-  const [roleIdT, setRoleId] = useState(null);
-  const [regId, setRegId] = useState(null);
-  useEffect(() => {
-    fetchRoleId();
-    // fetchData();
-    // fetchTeachersCardData();
-  }, []);
 
-  const [sortNameCookie, setSortNameCookie] = useState("");
-  console.log("school name", sortNameCookie);
 
-  const fetchRoleId = async () => {
-    const token = localStorage.getItem("authToken");
 
-    if (!token) {
-      toast.error("Authentication token not found Please login again");
 
-      return;
-    }
 
-    try {
-      const response = await axios.get(`${API_URL}/api/sessionData`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      const roleId = response?.data?.user?.role_id;
-      console.log("role id", response?.data?.user?.role_id);
-
-      const regId = response?.data?.user?.reg_id;
-      console.log("reg id", response?.data?.user?.reg_id);
-      setRegId(regId);
-      setSortNameCookie(response?.data?.custom_claims?.short_name);
-      if (roleId) {
-        setRoleId(roleId);
-      } else {
-        console.warn("role_id not found in sessionData response");
-      }
-    } catch (error) {
-      console.error("Failed to fetch session data:", error);
-    }
-  };
-
-  const isSacsM = sortNameCookie === "SACS" && roleIdT === "M";
+  const isSacsM = sortName === "SACS" && roleId === "M";
 
   // Check if value is empty string, undefined, null, or empty array
   const isLoading =
@@ -77,7 +34,7 @@ const Card = ({
 
   return (
     <>
-      {["A", "P", "M"].includes(roleIdT) && (
+      {["A", "P", "M"].includes(roleId) && (
         <>
           <div className="w-full bg-white flex items-center justify-around shadow-card h-28 rounded-lg">
             <div
@@ -264,7 +221,7 @@ const Card = ({
       )}
 
       {/* Teacher login Dashbord Cards */}
-      {["T"].includes(roleIdT) && (
+      {["T"].includes(roleId) && (
         <>
           <div className="w-full bg-white flex items-center justify-around shadow-card h-28 rounded-lg">
             <div
@@ -396,5 +353,3 @@ const Card = ({
 };
 
 export default Card;
-
-

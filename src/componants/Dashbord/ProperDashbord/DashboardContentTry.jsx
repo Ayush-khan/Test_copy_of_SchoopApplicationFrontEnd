@@ -203,14 +203,17 @@ const DashboardContainerTry = () => {
 
     if (roleId === "M") {
         return sortName === "SACS" ? (
-            <PrincipalDashboardSACS dashboard={dashboard} ready={ready} />
+            <PrincipalDashboardSACS dashboard={dashboard} ready={ready} roleId={roleId}
+                sortName={sortName} />
         ) : (
-            <PrincipalDashboard dashboard={dashboard} />
+            <PrincipalDashboard dashboard={dashboard} roleId={roleId}
+                sortName={sortName} />
         );
     }
 
     if (roleId === "T") {
-        return <TeacherDashboard dashboard={dashboard} />;
+        return <TeacherDashboard dashboard={dashboard} roleId={roleId}
+            sortName={sortName} />;
     }
 
     return <AdminDashboard data={dashboard} roleId={roleId} sortName={sortName} />;

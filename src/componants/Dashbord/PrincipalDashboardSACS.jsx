@@ -912,7 +912,7 @@ const IconWrap = React.memo(({ icon }) => (
 ));
 
 /* ================= MAIN COMPONENT ================= */
-const PrincipalDashboardSACS = ({ dashboard }) => {
+const PrincipalDashboardSACS = ({ dashboard, roleId, sortName }) => {
   const [ready, setReady] = useState(false);
 
   /* 🛑 Skeleton ONLY */
@@ -940,6 +940,8 @@ const PrincipalDashboardSACS = ({ dashboard }) => {
           title="Students"
           TotalValue={d.student?.total || 0}
           presentValue={d.student?.present || 0}
+          roleId={roleId}
+          sortName={sortName}
           badge={d.student?.attendanceNotMarked?.notMarked || 0}
           icon={<IconWrap icon={ICONS.students} />}
         />
@@ -952,6 +954,8 @@ const PrincipalDashboardSACS = ({ dashboard }) => {
           title="Staff"
           TotalValue={(d.staff?.teachingStaff || 0) + (d.staff?.non_teachingStaff || 0)}
           presentValue={(d.staff?.attendanceteachingstaff || 0) + (d.staff?.attendancenonteachingstaff || 0)}
+          roleId={roleId}
+          sortName={sortName}
           icon={<IconWrap icon={ICONS.staff} />}
         />
       ),
@@ -962,6 +966,8 @@ const PrincipalDashboardSACS = ({ dashboard }) => {
         <Card
           title="Birthdays"
           value={d.staff_student_bday_count?.count || 0}
+          roleId={roleId}
+          sortName={sortName}
           icon={<IconWrap icon={ICONS.birthday} />}
         />
       ),
@@ -973,6 +979,8 @@ const PrincipalDashboardSACS = ({ dashboard }) => {
           title="Fee"
           value={d.fees_collection?.["Collected Fees"] || 0}
           valuePendingFee={d.fees_collection?.["Pending Fees"] || 0}
+          roleId={roleId}
+          sortName={sortName}
           icon={<IconWrap icon={ICONS.fee} />}
         />
       ),
@@ -983,6 +991,8 @@ const PrincipalDashboardSACS = ({ dashboard }) => {
         <Card
           title="Approve Leave"
           value={d.approve_leave?.count || 0}
+          roleId={roleId}
+          sortName={sortName}
           icon={<IconWrap icon={ICONS.leave} />}
         />
       ),
@@ -996,6 +1006,8 @@ const PrincipalDashboardSACS = ({ dashboard }) => {
           valuePendingFee={d.lesson_plan_summary?.lessonPlanSubmitted || 0}
           valueAbsent={d.lesson_plan_summary?.lessonPlanNotSubmitted || 0}
           valueTeacher={d.lesson_plan_summary?.pendingForApproval || 0}
+          roleId={roleId}
+          sortName={sortName}
           icon={<IconWrap icon={ICONS.lesson} />}
         />
       ),
@@ -1007,6 +1019,8 @@ const PrincipalDashboardSACS = ({ dashboard }) => {
           value={d["Nursery teachers"]?.present || 0}
           valueAbsent={d["Nursery teachers"]?.absent || 0}
           valuePendingFee={d["Nursery teachers"]?.total || 0}
+          roleId={roleId}
+          sortName={sortName}
           icon={<IconWrap icon={ICONS.teacher} />}
         />
       ),
@@ -1018,6 +1032,8 @@ const PrincipalDashboardSACS = ({ dashboard }) => {
           value={d["KG teachers"]?.present || 0}
           valueAbsent={d["KG teachers"]?.absent || 0}
           valuePendingFee={d["KG teachers"]?.total || 0}
+          roleId={roleId}
+          sortName={sortName}
           icon={<IconWrap icon={ICONS.teacher} />}
         />
       ),
@@ -1029,6 +1045,8 @@ const PrincipalDashboardSACS = ({ dashboard }) => {
           value={d["SACS teachers"]?.present || 0}
           valueAbsent={d["SACS teachers"]?.absent || 0}
           valuePendingFee={d["SACS teachers"]?.total || 0}
+          roleId={roleId}
+          sortName={sortName}
           icon={<IconWrap icon={ICONS.teacher} />}
         />
       ),
@@ -1040,6 +1058,8 @@ const PrincipalDashboardSACS = ({ dashboard }) => {
           value={d.Caretakers?.present || 0}
           valueAbsent={d.Caretakers?.absent || 0}
           valuePendingFee={d.Caretakers?.total || 0}
+          roleId={roleId}
+          sortName={sortName}
           icon={<IconWrap icon={ICONS.caretaker} />}
         />
       ),
