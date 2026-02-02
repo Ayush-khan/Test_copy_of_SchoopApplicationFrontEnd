@@ -8,7 +8,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import LoaderStyle from "../../common/LoaderFinal/LoaderStyle";
 import Select from "react-select";
 import { IoMdSend } from "react-icons/io";
-import { FaCheck, FaUserAlt } from "react-icons/fa";
+import { FaCheck, FaCheckDouble, FaUserAlt } from "react-icons/fa";
 
 function NotMarkAbsentees() {
   const API_URL = import.meta.env.VITE_API_URL;
@@ -30,6 +30,11 @@ function NotMarkAbsentees() {
   const [selectedStudents, setSelectedStudents] = useState([]);
   const [selectAll, setSelectAll] = useState(false);
   const [sendingSMS, setSendingSMS] = useState({});
+
+  const [selectedTeacherIds, setSelectedTeacherIds] = useState([]);
+  const [isAllSelected, setIsAllSelected] = useState(false);
+  const [sending, setSending] = useState(false);
+
   const previousPageRef = useRef(0);
   const prevSearchTermRef = useRef("");
   const navigate = useNavigate();
@@ -37,15 +42,47 @@ function NotMarkAbsentees() {
   const maxCharacters = 150;
   const [roleId, setRoleId] = useState(null);
   const [regId, setRegId] = useState(null);
+  const renderWhatsAppStatus = (status) => {
+    if (!status) return <span className="text-gray-500">-</span>;
 
+    switch (status) {
+      case "sent":
+        return (
+          <span className="flex items-center justify-center gap-1 text-blue-600 font-medium">
+            <FaCheck className="text-blue-600" />
+            Sent
+          </span>
+        );
+
+      case "delivered":
+        return (
+          <span className="flex items-center justify-center gap-1 text-gray-800 font-semibold">
+            <FaCheckDouble className="text-gray-700" />
+            Delivered
+          </span>
+        );
+
+      case "read":
+        return (
+          <span className="flex items-center justify-center gap-1 text-blue-800 font-semibold">
+            <FaCheckDouble className="text-blue-600" />
+            Read
+          </span>
+        );
+
+
+
+      default:
+        return <span className="text-gray-500"></span>;
+    }
+  };
   const capitalizeFirstLetter = (str) => {
     return str ? str.charAt(0).toUpperCase() + str.slice(1).toLowerCase() : "";
   };
 
+
   useEffect(() => {
     fetchRoleId();
-    // fetchClassNames();
-    // handleSearch();
   }, []);
 
   useEffect(() => {
@@ -120,7 +157,6 @@ function NotMarkAbsentees() {
         }));
 
         setSubjects(studentsWithIds);
-        setPageCount(Math.ceil(absentStudents.length / 10));
         setCountAbsentStudents(response.data.data.count_absent_student);
       } else {
         setSubjects([]);
@@ -148,21 +184,7 @@ function NotMarkAbsentees() {
       .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
       .join(" ");
 
-  const handlePageClick = (data) => {
-    setCurrentPage(data.selected);
-  };
 
-  useEffect(() => {
-    const trimmedSearch = searchTerm.trim().toLowerCase();
-    if (trimmedSearch !== "" && prevSearchTermRef.current === "") {
-      previousPageRef.current = currentPage;
-      setCurrentPage(0);
-    }
-    if (trimmedSearch === "" && prevSearchTermRef.current !== "") {
-      setCurrentPage(previousPageRef.current);
-    }
-    prevSearchTermRef.current = trimmedSearch;
-  }, [searchTerm]);
 
   const searchLower = searchTerm.trim().toLowerCase();
   const filteredSections = subjects.filter((student) => {
@@ -179,15 +201,84 @@ function NotMarkAbsentees() {
     );
   });
 
-  const displayedSections = filteredSections.slice(
-    currentPage * pageSize,
-    (currentPage + 1) * pageSize,
-  );
+  const displayedSections = filteredSections;
+
+  const allTeachers = displayedSections || [];
+  const toggleSelectAll = () => {
+    if (isAllSelected) {
+      setSelectedTeacherIds([]);
+    } else {
+      const ids = allTeachers.map(t => t.teacher_id);
+      setSelectedTeacherIds(ids);
+    }
+    setIsAllSelected(!isAllSelected);
+  };
+
+  const toggleSelectOne = (id) => {
+    setSelectedTeacherIds(prev =>
+      prev.includes(id)
+        ? prev.filter(x => x !== id)
+        : [...prev, id]
+    );
+  };
+  useEffect(() => {
+    if (allTeachers.length > 0) {
+      setIsAllSelected(
+        selectedTeacherIds.length === allTeachers.length
+      );
+    }
+  }, [selectedTeacherIds, allTeachers]);
+
+  const handleSendMessage = async () => {
+    if (selectedTeacherIds.length === 0) {
+      toast.error("Please select at least one teacher");
+      return;
+    }
+
+    if (!message.trim()) {
+      toast.error("Please enter message");
+      return;
+    }
+
+    try {
+      setSending(true);
+      const token = localStorage.getItem("authToken");
+
+      const payload = {
+        teacher_ids: selectedTeacherIds,
+        message: message,
+        message_type: "attendance_not_marked",
+      };
+
+      const res = await axios.post(
+        `${API_URL}/api/send_messagesforteacher`,
+        payload,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (res.status === 200) {
+        toast.success("Message sent successfully");
+        setMessage("");
+        setSelectedTeacherIds([]);
+        setIsAllSelected(false);
+        handleSearch(); // refresh list
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to send message");
+    } finally {
+      setSending(false);
+    }
+  };
 
   return (
     <>
       <ToastContainer />
-      <div className="md:mx-auto md:w-[75%] p-4 bg-white">
+      <div className="md:mx-auto md:w-[85%] p-4 bg-white">
         <div className="bg-white rounded-md">
           {activeTab === "Manage" && (
             <div>
@@ -201,7 +292,7 @@ function NotMarkAbsentees() {
                   <div className="card mx-auto lg:w-full shadow-lg">
                     <div className="p-2 px-3 bg-gray-100 flex justify-between items-center">
                       <h3 className="text-gray-700 text-lg font-semibold">
-                        Today's Attendance not mark Classes{" "}
+                        Today's Attendance not mark classes{" "}
                         {/* <span className="text-blue-500 text-sm">
                           ({countAbsentStudent} Students)
                         </span> */}
@@ -227,84 +318,157 @@ function NotMarkAbsentees() {
                             <LoaderStyle />
                           </div>
                         ) : (
-                          <table className="min-w-full leading-normal table-auto border-collapse rounded-lg overflow-hidden shadow-md">
-                            <thead>
-                              <tr className="bg-gray-200 text-gray-900">
-                                <th className="px-2 w-[20%] text-center py-2 border border-gray-300 text-sm font-semibold">
-                                  Sr. No
-                                </th>
+                          <div
+                            className="max-h-96 overflow-y-auto relative"
+                          >
+                            <table className="min-w-full table-fixed ">
+                              <thead className="sticky top-0  bg-gray-200" style={{ zIndex: 2 }}>
+                                <tr>
+                                  <th className="px-2 py-2 text-center border border-gray-300 text-sm font-semibold">
+                                    Sr. No
+                                  </th>
 
-                                <th className="px-2 w-[25%] text-center py-2 border border-gray-300 text-sm font-semibold">
-                                  Class
-                                </th>
-                                <th className="px-2 w-[40%] text-center py-2 border border-gray-300 text-sm font-semibold">
-                                  Class Teacher Name
-                                </th>
-                              </tr>
-                            </thead>
+                                  <th className="px-2 py-2 text-center border border-gray-300 text-sm font-semibold">
+                                    Select All <br />
+                                    <input
+                                      type="checkbox"
+                                      checked={isAllSelected}
+                                      onChange={toggleSelectAll}
+                                    />
+                                  </th>
 
-                            <tbody>
-                              {displayedSections.length ? (
-                                displayedSections.map((student, index) => (
-                                  <tr
-                                    key={student.student_id}
-                                    className={`${index % 2 === 0 ? "bg-white" : "bg-gray-50"
-                                      } hover:bg-gray-50 transition-colors duration-150`}
-                                  >
-                                    {/* Sr.No */}
-                                    <td className="text-center px-2 py-2 border border-gray-200 text-sm">
-                                      {currentPage * pageSize + index + 1}
-                                    </td>
+                                  <th className="px-2 py-2 text-center  border border-gray-300 text-sm font-semibold">
+                                    Class
+                                  </th>
 
-                                    {/* Class */}
-                                    <td className="text-center px-2 py-2 border border-gray-200 text-sm">
-                                      {student?.class_name}{" "}
-                                      {student?.section_name}
-                                    </td>
+                                  <th className="px-2 py-2 text-center  border border-gray-300 text-sm font-semibold">
+                                    Class Teacher Name
+                                  </th>
 
-                                    {/* Student Name */}
-                                    <td className="text-center px-2 py-2 border border-gray-200 text-sm">
-                                      {`${camelCase(student.teacher_name)} `}
+                                  <th className="px-2 py-2 text-center  border border-gray-300 text-sm font-semibold">
+                                    Message Status
+                                  </th>
+
+                                  <th className="px-2 py-2 text-center  border border-gray-300 text-sm font-semibold">
+                                    WhatsApp Status
+                                  </th>
+                                </tr>
+                              </thead>
+
+
+                              <tbody>
+                                {displayedSections.length ? (
+                                  displayedSections.map((student, index) => (
+                                    <tr
+                                      key={student.student_id}
+                                      className={`${index % 2 === 0 ? "bg-white" : "bg-gray-50"
+                                        } hover:bg-gray-50 transition-colors duration-150`}
+                                    > {/* Sr.No */}
+                                      <td className="text-center px-2 py-2 border border-gray-200 text-sm">
+                                        {index + 1}
+
+                                      </td>
+                                      <td className="text-center px-2 py-2 border border-gray-200">
+                                        <input
+                                          type="checkbox"
+                                          checked={selectedTeacherIds.includes(student.teacher_id)}
+                                          onChange={() => toggleSelectOne(student.teacher_id)}
+                                        />
+                                      </td>
+
+
+
+                                      {/* Class */}
+                                      <td className="text-center px-2 py-2 border border-gray-200 text-sm">
+                                        {student?.class_name}{" "}
+                                        {student?.section_name}
+                                      </td>
+
+                                      {/* Student Name */}
+                                      <td className="text-center px-2 py-2 border border-gray-200 text-sm">
+                                        {`${camelCase(student.teacher_name)} `}
+                                      </td>
+                                      <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                        {/* Show Send button if published and messages pending */}
+                                        {
+                                          student.sms_sent === "Y" &&
+                                            student?.whatsapp_status === "failed" ? (
+                                            <div className="flex flex-col items-center gap-1">
+                                              <span className="text-green-600 font-semibold text-sm">
+                                                Message sent
+                                              </span>
+                                            </div>
+                                          ) : student?.sms_sent === "Y" &&
+                                            (student?.whatsapp_status === "sent" ||
+                                              student?.whatsapp_status === "read" ||
+                                              student?.whatsapp_status === "delivered") ? (
+                                            // Show 'S' when published and no pending messages
+                                            <div className="flex flex-col items-center">
+                                              <div className="group relative flex items-center justify-center gap-1 text-green-600 font-semibold text-sm cursor-default">
+                                                Whatsapp Sent {/* Tooltip */}
+                                              </div>
+                                            </div>
+                                          ) : student.sms_sent === "N" ? null : null // Show Publish button when not published
+                                        }
+                                      </td>
+                                      <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                        {renderWhatsAppStatus(student?.whatsapp_status)}
+                                      </td>
+                                    </tr>
+                                  ))
+                                ) : (
+                                  <tr>
+                                    <td
+                                      colSpan="8"
+                                      className="text-center py-6 text-red-700 font-medium bg-gray-50"
+                                    >
+                                      Oops! No data found...
                                     </td>
                                   </tr>
-                                ))
-                              ) : (
-                                <tr>
-                                  <td
-                                    colSpan="8"
-                                    className="text-center py-6 text-red-700 font-medium bg-gray-50"
-                                  >
-                                    Oops! No data found...
-                                  </td>
-                                </tr>
-                              )}
-                            </tbody>
-                          </table>
+                                )}
+                              </tbody>
+                            </table>
+                          </div>
                         )}
                       </div>
+                      {subjects.length > 0 && (
+                        <div className="bg-white rounded-md mt-4 p-4 shadow">
+                          <p className="text-sm text-gray-600 mb-2">
+                            Select teachers and send message for attendance not marked
+                          </p>
 
-                      {/* Pagination is */}
-                      <div className="flex justify-center pt-2 -mb-3">
-                        <ReactPaginate
-                          previousLabel={"Previous"}
-                          nextLabel={"Next"}
-                          breakLabel={"..."}
-                          breakClassName={"page-item"}
-                          breakLinkClassName={"page-link"}
-                          pageCount={pageCount}
-                          marginPagesDisplayed={1}
-                          pageRangeDisplayed={1}
-                          onPageChange={handlePageClick}
-                          containerClassName={"pagination justify-content-center"}
-                          pageClassName={"page-item"}
-                          pageLinkClassName={"page-link"}
-                          previousClassName={"page-item"}
-                          previousLinkClassName={"page-link"}
-                          nextClassName={"page-item"}
-                          nextLinkClassName={"page-link"}
-                          activeClassName={"active"}
-                        />
-                      </div>
+                          <div className="flex gap-x-3 items-end">
+                            <div className="w-full relative">
+                              <span className="font-light">Dear Staff,</span>
+                              <textarea
+                                value={message}
+                                onChange={(e) =>
+                                  e.target.value.length <= maxCharacters &&
+                                  setMessage(e.target.value)
+                                }
+                                className="w-full h-28 p-3 border rounded-md resize-none"
+                                placeholder="Enter message"
+                              />
+                              <div className="absolute bottom-2 right-3 text-xs text-gray-500">
+                                {message.length}/{maxCharacters}
+                              </div>
+                            </div>
+
+                            <button
+                              disabled={sending}
+                              onClick={handleSendMessage}
+                              className={`px-6 py-2 rounded-md text-white font-semibold ${sending
+                                ? "bg-blue-400 cursor-not-allowed"
+                                : "bg-blue-600 hover:bg-blue-700"
+                                }`}
+                            >
+                              {sending ? "Sending..." : "Send"}
+                            </button>
+                          </div>
+                        </div>
+                      )}
+
+
                     </div>
                   </div>
                 ))}

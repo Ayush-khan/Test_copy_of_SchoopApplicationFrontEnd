@@ -13,7 +13,7 @@ import CreateShortSMS from "./CreateShortSmsforStaff";
 import CreateNotice from "./CreateNoticeforStaff";
 // import { PiCertificateBold } from "react-icons/pi";
 import { MdOutlineRemoveRedEye } from "react-icons/md";
-import { FaCheck } from "react-icons/fa";
+import { FaCheck, FaCheckDouble } from "react-icons/fa";
 import { ImDownload } from "react-icons/im";
 import { Navigate, useNavigate } from "react-router-dom";
 
@@ -68,7 +68,40 @@ function NoticeAndSmsforStaff() {
 
   // for react-search of manage tab teacher Edit and select class
   const pageSize = 10;
+  const renderWhatsAppStatus = (status) => {
+    if (!status) return <span className="text-gray-500">-</span>;
 
+    switch (status) {
+      case "sent":
+        return (
+          <span className="flex items-center justify-center gap-1 text-blue-600 font-medium">
+            <FaCheck className="text-blue-600" />
+            Sent
+          </span>
+        );
+
+      case "delivered":
+        return (
+          <span className="flex items-center justify-center gap-1 text-gray-800 font-semibold">
+            <FaCheckDouble className="text-gray-700" />
+            Delivered
+          </span>
+        );
+
+      case "read":
+        return (
+          <span className="flex items-center justify-center gap-1 text-blue-800 font-semibold">
+            <FaCheckDouble className="text-blue-600" />
+            Read
+          </span>
+        );
+
+
+
+      default:
+        return <span className="text-gray-500"></span>;
+    }
+  };
   useEffect(() => {
     fetchClassNamesForAllotSubject();
   }, []);
@@ -481,7 +514,7 @@ function NoticeAndSmsforStaff() {
       // Show message from API response
       toast.success(
         response.data.message ||
-          `${currestSubjectNameForDelete} published successfully!`
+        `${currestSubjectNameForDelete} published successfully!`
       );
     } catch (error) {
       if (error.response && error.response.data) {
@@ -537,7 +570,7 @@ function NoticeAndSmsforStaff() {
       // setSubjects([]);
       toast.success(
         response.data.message ||
-          `${currestSubjectNameForDelete} deleted successfully!`
+        `${currestSubjectNameForDelete} deleted successfully!`
       );
     } catch (error) {
       if (error.response && error.response.data) {
@@ -656,7 +689,7 @@ function NoticeAndSmsforStaff() {
       if (response.status === 200 && response.data.success) {
         toast.success(
           response?.data?.message ||
-            `Message sent successfully for Unique ID: ${uniqueId}`
+          `Message sent successfully for Unique ID: ${uniqueId}`
         );
         handleSearch();
       } else {
@@ -709,9 +742,8 @@ function NoticeAndSmsforStaff() {
           {tabs.map(({ id, label }) => (
             <li
               key={id}
-              className={`md:-ml-7 shadow-md ${
-                activeTab === id ? "text-blue-500 font-bold" : ""
-              }`}
+              className={`md:-ml-7 shadow-md ${activeTab === id ? "text-blue-500 font-bold" : ""
+                }`}
             >
               <button
                 onClick={() => handleTabChange(id)}
@@ -805,7 +837,14 @@ function NoticeAndSmsforStaff() {
                             <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                               Created by
                             </th>
-                            <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+
+                            <th className="px-2 py-2 text-center  border border-gray-300 text-sm font-semibold">
+                              Message Status
+                            </th>
+
+                            <th className="px-2 py-2 text-center  border border-gray-300 text-sm font-semibold">
+                              WhatsApp Status
+                            </th> <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                               Edit/View
                             </th>
                             <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
@@ -845,6 +884,32 @@ function NoticeAndSmsforStaff() {
 
                                 <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                   {subject?.name}
+                                </td>
+                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                  {/* Show Send button if published and messages pending */}
+                                  {
+                                    subject.sms_sent === "Y" &&
+                                      subject?.whatsapp_status === "failed" ? (
+                                      <div className="flex flex-col items-center gap-1">
+                                        <span className="text-green-600 font-semibold text-sm">
+                                          Message sent
+                                        </span>
+                                      </div>
+                                    ) : subject?.sms_sent === "Y" &&
+                                      (subject?.whatsapp_status === "sent" ||
+                                        subject?.whatsapp_status === "read" ||
+                                        subject?.whatsapp_status === "delivered") ? (
+                                      // Show 'S' when published and no pending messages
+                                      <div className="flex flex-col items-center">
+                                        <div className="group relative flex items-center justify-center gap-1 text-green-600 font-semibold text-sm cursor-default">
+                                          Whatsapp Sent {/* Tooltip */}
+                                        </div>
+                                      </div>
+                                    ) : subject.sms_sent === "N" ? null : null // Show Publish button when not published
+                                  }
+                                </td>
+                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                  {renderWhatsAppStatus(subject?.whatsapp_status)}
                                 </td>
 
                                 <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
@@ -911,7 +976,7 @@ function NoticeAndSmsforStaff() {
                                 </td> */}
                                 <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                   {subject.publish === "Y" &&
-                                  subject.failed_sms_count > 0 ? (
+                                    subject.failed_sms_count > 0 ? (
                                     <div className="flex flex-col items-center gap-1">
                                       <span className="text-red-600 font-semibold text-sm">
                                         {subject.failed_sms_count}
@@ -925,11 +990,10 @@ function NoticeAndSmsforStaff() {
                                         onClick={() =>
                                           handleSend(subject.unq_id)
                                         }
-                                        className={`flex items-center justify-center px-3 py-1 gap-1 text-xs md:text-sm font-medium rounded-md transition-all duration-200 ${
-                                          sendingSMS[subject.unq_id]
+                                        className={`flex items-center justify-center px-3 py-1 gap-1 text-xs md:text-sm font-medium rounded-md transition-all duration-200 ${sendingSMS[subject.unq_id]
                                             ? "bg-blue-300 cursor-not-allowed"
                                             : "bg-blue-500 hover:bg-blue-600 text-white"
-                                        }`}
+                                          }`}
                                       >
                                         {sendingSMS[subject.unq_id] ? (
                                           <>
@@ -982,6 +1046,7 @@ function NoticeAndSmsforStaff() {
                                     </button>
                                   ) : null}
                                 </td>
+
                               </tr>
                             ))
                           ) : (

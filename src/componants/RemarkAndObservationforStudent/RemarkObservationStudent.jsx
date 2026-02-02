@@ -18,7 +18,7 @@ import CreateRemarkObservation from "./CreateRemarkObservation";
 import CreateRemarkObservationStudent from "./CreateRemarkObservationStudent";
 // import { PiCertificateBold } from "react-icons/pi";
 import { MdOutlineRemoveRedEye } from "react-icons/md";
-import { FaCheck, FaCheckCircle } from "react-icons/fa";
+import { FaCheck, FaCheckCircle, FaCheckDouble } from "react-icons/fa";
 import { ImDownload } from "react-icons/im";
 import { Navigate, useNavigate } from "react-router-dom";
 import { IoMdSend } from "react-icons/io";
@@ -52,7 +52,40 @@ function RemarkObservationStudent() {
   const navigate = useNavigate();
   const [showModal, setShowModal] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
+  const renderWhatsAppStatus = (status) => {
+    if (!status) return <span className="text-gray-500">-</span>;
 
+    switch (status) {
+      case "sent":
+        return (
+          <span className="flex items-center justify-center gap-1 text-blue-600 font-medium">
+            <FaCheck className="text-blue-600" />
+            Sent
+          </span>
+        );
+
+      case "delivered":
+        return (
+          <span className="flex items-center justify-center gap-1 text-gray-800 font-semibold">
+            <FaCheckDouble className="text-gray-700" />
+            Delivered
+          </span>
+        );
+
+      case "read":
+        return (
+          <span className="flex items-center justify-center gap-1 text-blue-800 font-semibold">
+            <FaCheckDouble className="text-blue-600" />
+            Read
+          </span>
+        );
+
+
+
+      default:
+        return <span className="text-gray-500"></span>;
+    }
+  };
   const openModal = (file) => {
     setSelectedFile(file);
     setShowModal(true);
@@ -688,7 +721,20 @@ function RemarkObservationStudent() {
                             <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                               Subject of Remark
                             </th>
+
                             <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                              Acknowledge
+                            </th>
+                            <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                              Viewed
+                            </th>
+                            <th className="px-2 py-2 text-center  border border-gray-300 text-sm font-semibold">
+                              Message Status
+                            </th>
+
+                            <th className="px-2 py-2 text-center  border border-gray-300 text-sm font-semibold">
+                              WhatsApp Status
+                            </th> <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                               Edit/View
                             </th>
                             <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
@@ -696,12 +742,6 @@ function RemarkObservationStudent() {
                             </th>
                             <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                               Publish
-                            </th>
-                            <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                              Acknowledge
-                            </th>
-                            <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                              Viewed
                             </th>
                           </tr>
                         </thead>
@@ -749,6 +789,51 @@ function RemarkObservationStudent() {
                                 </td>
                                 <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                   {subject?.remark_subject}
+                                </td>
+
+
+                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                  {subject.acknowledge == "Y" && (
+                                    <FontAwesomeIcon
+                                      icon={faThumbsUp}
+                                      className="text-black text-base"
+                                    />
+                                  )}
+                                </td>
+                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                  {subject.read_status == 1 && (
+                                    <FontAwesomeIcon
+                                      icon={faBookReader}
+                                      style={{ color: "#C03078" }}
+                                      className="text-base"
+                                    />
+                                  )}
+                                </td>
+                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                  {/* Show Send button if published and messages pending */}
+                                  {
+                                    subject.sms_sent === "Y" &&
+                                      subject?.whatsapp_status === "failed" ? (
+                                      <div className="flex flex-col items-center gap-1">
+                                        <span className="text-green-600 font-semibold text-sm">
+                                          Message sent
+                                        </span>
+                                      </div>
+                                    ) : subject?.sms_sent === "Y" &&
+                                      (subject?.whatsapp_status === "sent" ||
+                                        subject?.whatsapp_status === "read" ||
+                                        subject?.whatsapp_status === "delivered") ? (
+                                      // Show 'S' when published and no pending messages
+                                      <div className="flex flex-col items-center">
+                                        <div className="group relative flex items-center justify-center gap-1 text-green-600 font-semibold text-sm cursor-default">
+                                          Whatsapp Sent {/* Tooltip */}
+                                        </div>
+                                      </div>
+                                    ) : subject.sms_sent === "N" ? null : null // Show Publish button when not published
+                                  }
+                                </td>
+                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                  {renderWhatsAppStatus(subject?.whatsapp_status)}
                                 </td>
                                 <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
                                   {subject.publish === "Y" ? (
@@ -865,8 +950,8 @@ function RemarkObservationStudent() {
                                           sendingSMS[subject?.remark_id]
                                         }
                                         className={`flex items-center justify-center px-3 py-1 gap-1 text-xs md:text-sm font-medium rounded-md transition duration-200 ${sendingSMS[subject?.remark_id]
-                                            ? "bg-blue-300 cursor-not-allowed"
-                                            : "bg-blue-500 hover:bg-blue-600 text-white"
+                                          ? "bg-blue-300 cursor-not-allowed"
+                                          : "bg-blue-500 hover:bg-blue-600 text-white"
                                           }`}
                                         onClick={() =>
                                           handleSend(subject?.remark_id)
@@ -925,24 +1010,6 @@ function RemarkObservationStudent() {
                                       <FaCheck className="text-lg md:text-xl" />
                                     </button>
                                   ) : null}
-                                </td>
-
-                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                  {subject.acknowledge == "Y" && (
-                                    <FontAwesomeIcon
-                                      icon={faThumbsUp}
-                                      className="text-black text-base"
-                                    />
-                                  )}
-                                </td>
-                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                  {subject.read_status == 1 && (
-                                    <FontAwesomeIcon
-                                      icon={faBookReader}
-                                      style={{ color: "#C03078" }}
-                                      className="text-base"
-                                    />
-                                  )}
                                 </td>
                               </tr>
                             ))

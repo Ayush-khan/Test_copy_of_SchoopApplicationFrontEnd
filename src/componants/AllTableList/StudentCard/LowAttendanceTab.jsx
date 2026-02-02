@@ -6,6 +6,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom";
 import { RxCross1 } from "react-icons/rx";
 import LoaderStyle from "../../common/LoaderFinal/LoaderStyle";
+import { FaCheck, FaCheckDouble } from "react-icons/fa";
 
 const LowAttendanceTab = () => {
   const API_URL = import.meta.env.VITE_API_URL;
@@ -118,7 +119,40 @@ const LowAttendanceTab = () => {
   const [selectedSectionId, setSelectedSectionId] = useState("");
   const [studentError, setStudentError] = useState("");
   const [selectedTeacherClass, setSelectedTeacherClass] = useState(null);
+  const renderWhatsAppStatus = (status) => {
+    if (!status) return <span className="text-gray-500">-</span>;
 
+    switch (status) {
+      case "sent":
+        return (
+          <span className="flex items-center justify-center gap-1 text-blue-600 font-medium">
+            <FaCheck className="text-blue-600" />
+            Sent
+          </span>
+        );
+
+      case "delivered":
+        return (
+          <span className="flex items-center justify-center gap-1 text-gray-800 font-semibold">
+            <FaCheckDouble className="text-gray-700" />
+            Delivered
+          </span>
+        );
+
+      case "read":
+        return (
+          <span className="flex items-center justify-center gap-1 text-blue-800 font-semibold">
+            <FaCheckDouble className="text-blue-600" />
+            Read
+          </span>
+        );
+
+
+
+      default:
+        return <span className="text-gray-500"></span>;
+    }
+  };
   useEffect(() => {
     const init = async () => {
       try {
@@ -707,105 +741,143 @@ const LowAttendanceTab = () => {
                           <LoaderStyle />
                         </div>
                       ) : (
-                        <table className="min-w-full leading-normal table-auto">
-                          <thead className=" ">
-                            <tr className="bg-gray-200 ">
-                              <th className="px-2 text-center w-full md:w-[4%] lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                                Sr. No
-                              </th>
+                        <div
+                          className="max-h-96 overflow-y-auto relative"
+                        >
+                          <table className="min-w-full table-fixed ">
 
-                              {roleId !== "T" && (
-                                <>
-                                  <th className="px-2 text-center w-full md:w-[4%]  lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                                    <input
-                                      type="checkbox"
-                                      checked={selectAll}
-                                      onChange={handleSelectAll}
-                                      className="cursor-pointer"
-                                    />{" "}
-                                    All
-                                  </th>
-                                </>
-                              )}
+                            <thead className=" sticky top-0 " style={{ zIndex: 2 }}>
+                              <tr className="bg-gray-200 ">
+                                <th className="px-2 text-center w-full md:w-[4%] lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                                  Sr. No
+                                </th>
 
-                              <th className="px-2 w-full md:w-[20%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                                Student Name
-                              </th>
-                              <th className="px-2 w-full md:w-[8%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                                Class
-                              </th>
-                              <th className="px-2 w-full md:w-[10%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                                Attendance
-                              </th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {filteredParents.length ? (
-                              filteredParents.map((student, index) => (
-                                <tr
-                                  key={student.student_id}
-                                  className={`${index % 2 === 0 ? "bg-white" : "bg-gray-100"
-                                    } hover:bg-gray-50`}
-                                >
-                                  <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                                    <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                                      {index + 1}
-                                    </p>
-                                  </td>
+                                {roleId !== "T" && (
+                                  <>
+                                    <th className="px-2 text-center w-full md:w-[4%]  lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                                      <input
+                                        type="checkbox"
+                                        checked={selectAll}
+                                        onChange={handleSelectAll}
+                                        className="cursor-pointer"
+                                      />{" "}
+                                      All
+                                    </th>
+                                  </>
+                                )}
 
-                                  {roleId !== "T" && (
-                                    <>
-                                      <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                                        <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                                          <input
-                                            type="checkbox"
-                                            checked={selectedStudents.includes(
-                                              student.student_id,
-                                            )}
-                                            onChange={() =>
-                                              handleCheckboxChange(
+                                <th className="px-2 w-full md:w-[20%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                                  Student Name
+                                </th>
+                                <th className="px-2 w-full md:w-[8%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                                  Class
+                                </th>
+                                <th className="px-2 w-full md:w-[10%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                                  Attendance
+                                </th>
+                                <th className="px-2 py-2 text-center md:w-[10%] border border-gray-300 text-sm font-semibold">
+                                  Message Status
+                                </th>
+
+                                <th className="px-2 py-2 text-center md:w-[10%] border border-gray-300 text-sm font-semibold">
+                                  WhatsApp Status
+                                </th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {filteredParents.length ? (
+                                filteredParents.map((student, index) => (
+                                  <tr
+                                    key={student.student_id}
+                                    className={`${index % 2 === 0 ? "bg-white" : "bg-gray-100"
+                                      } hover:bg-gray-50`}
+                                  >
+                                    <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                                      <p className="text-gray-900 whitespace-no-wrap relative top-2">
+                                        {index + 1}
+                                      </p>
+                                    </td>
+
+                                    {roleId !== "T" && (
+                                      <>
+                                        <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                                          <p className="text-gray-900 whitespace-no-wrap relative top-2">
+                                            <input
+                                              type="checkbox"
+                                              checked={selectedStudents.includes(
                                                 student.student_id,
-                                              )
-                                            }
-                                            className="cursor-pointer"
-                                          />
-                                        </p>
-                                      </td>
-                                    </>
-                                  )}
+                                              )}
+                                              onChange={() =>
+                                                handleCheckboxChange(
+                                                  student.student_id,
+                                                )
+                                              }
+                                              className="cursor-pointer"
+                                            />
+                                          </p>
+                                        </td>
+                                      </>
+                                    )}
 
-                                  <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                                    <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                                      {toTitleCase(
-                                        `${student.first_name || ""} ${student.mid_name || ""
-                                        } ${student.last_name || ""}`,
-                                      )}
-                                    </p>
-                                  </td>
+                                    <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                                      <p className="text-gray-900 whitespace-no-wrap relative top-2">
+                                        {toTitleCase(
+                                          `${student.first_name || ""} ${student.mid_name || ""
+                                          } ${student.last_name || ""}`,
+                                        )}
+                                      </p>
+                                    </td>
 
-                                  <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                                    <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                                      {student.classname} {student.sectionname}
-                                    </p>
-                                  </td>
+                                    <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                                      <p className="text-gray-900 whitespace-no-wrap relative top-2">
+                                        {student.classname} {student.sectionname}
+                                      </p>
+                                    </td>
 
-                                  <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                                    <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                                      {student?.attendance_percentage || ""}
-                                      {" %"}
-                                    </p>
-                                  </td>
-                                </tr>
-                              ))
-                            ) : (
-                              <div className=" absolute left-[1%] w-[100%]  text-center flex justify-center items-center mt-14">
-                                <div className=" text-center text-xl text-red-700">
-                                  Oops! No data found..
+                                    <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                                      <p className="text-gray-900 whitespace-no-wrap relative top-2">
+                                        {student?.attendance_percentage || ""}
+                                        {" %"}
+                                      </p>
+                                    </td>
+                                    <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                      {/* Show Send button if published and messages pending */}
+                                      {
+                                        student.sms_sent === "Y" &&
+                                          student?.whatsapp_status === "failed" ? (
+                                          <div className="flex flex-col items-center gap-1">
+                                            <span className="text-green-600 font-semibold text-sm">
+                                              Message sent
+                                            </span>
+                                          </div>
+                                        ) : student?.sms_sent === "Y" &&
+                                          (student?.whatsapp_status === "sent" ||
+                                            student?.whatsapp_status === "read" ||
+                                            student?.whatsapp_status === "delivered") ? (
+                                          // Show 'S' when published and no pending messages
+                                          <div className="flex flex-col items-center">
+                                            <div className="group relative flex items-center justify-center gap-1 text-green-600 font-semibold text-sm cursor-default">
+                                              Whatsapp Sent {/* Tooltip */}
+                                            </div>
+                                          </div>
+                                        ) : student.sms_sent === "N" ? null : null // Show Publish button when not published
+                                      }
+                                    </td>
+                                    <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                      {renderWhatsAppStatus(student?.whatsapp_status)}
+                                    </td>
+                                  </tr>
+                                ))
+                              ) : (
+                                <div className=" absolute left-[1%] w-[100%]  text-center flex justify-center items-center mt-14">
+                                  <div className=" text-center text-xl text-red-700">
+                                    Oops! No data found..
+                                  </div>
                                 </div>
-                              </div>
-                            )}
-                          </tbody>
-                        </table>
+                              )}
+                            </tbody>
+                          </table>
+                        </div>
                       )}
                     </div>
                   </div>{" "}
