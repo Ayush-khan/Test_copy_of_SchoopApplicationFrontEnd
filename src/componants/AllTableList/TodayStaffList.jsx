@@ -936,7 +936,8 @@ function TodayStaffList() {
                             colSpan={11}
                             className="py-16 text-center text-xl font-semibold text-red-600"
                           >
-                            No Teachers are present Today.
+                            {/* No Teachers are present Today. */}
+                            Oops! No data found..
                           </td>
                         </tr>
                       )}
@@ -1043,7 +1044,8 @@ function TodayStaffList() {
                                   colSpan="5"
                                   className="text-center py-6 text-red-700 text-xl"
                                 >
-                                  No Teachers are Leave Today..
+                                  {/* No Teachers are Leave Today.. */}
+                                  Oops! No data found..
                                 </td>
                               </tr>
                             )}
@@ -1053,7 +1055,8 @@ function TodayStaffList() {
                     ))
                   ) : (
                     <div className="text-center py-6 text-red-700 text-xl">
-                      No staff is on leave today.
+                      {/* No staff is on leave today. */}
+                      Oops! No data found..
                     </div>
                   )}
                 </div>
@@ -1268,7 +1271,8 @@ function TodayStaffList() {
                             colSpan={11}
                             className="py-16 text-center text-xl font-semibold text-red-600"
                           >
-                            No Staff are present Today.
+                            {/* No Staff are present Today. */}
+                            Oops! No data found..
                           </td>
                         </tr>
 
@@ -1375,7 +1379,8 @@ function TodayStaffList() {
                             ) : (
                               <div className=" absolute left-[1%] w-[100%]  text-center flex justify-center items-center mt-14">
                                 <div className=" text-center text-xl text-red-700">
-                                  No staff is on leave today.{" "}
+                                  {/* No staff is on leave today.{" "} */}
+                                  Oops! No data found..
                                 </div>
                               </div>
                             )}
@@ -1386,7 +1391,8 @@ function TodayStaffList() {
                   ) : (
                     <div className=" absolute left-[1%] w-[100%]  text-center flex justify-center items-center mt-14">
                       <div className=" text-center text-xl text-red-700">
-                        No Staff are Leave Today..
+                        {/* No Staff are Leave Today.. */}
+                        Oops! No data found..
                       </div>
                     </div>
                   )}
