@@ -301,6 +301,13 @@ const ClassWiseAcademicPerformance = () => {
     }));
   };
 
+  const hasValidMarks = data?.some(
+    (item) =>
+      item.averageMarks !== null &&
+      item.averageMarks !== undefined &&
+      Number(item.averageMarks) > 0,
+  );
+
   const fetchTeachersCardData = async (class_id, section_id) => {
     const token = localStorage.getItem("authToken");
 
@@ -495,7 +502,7 @@ const ClassWiseAcademicPerformance = () => {
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm pl-4 pr-4 pt-2 pb-1">
+          {/* <div className="bg-white rounded-xl shadow-sm pl-4 pr-4 pt-2 pb-1">
             {data?.length > 0 ? (
               <ResponsiveContainer width="100%" height={280}>
                 <BarChart data={data} barCategoryGap={30}>
@@ -545,19 +552,6 @@ const ClassWiseAcademicPerformance = () => {
                     />
                   </YAxis>
 
-                  {/* <ReferenceLine
-                    y={35}
-                    stroke="#EF4444"
-                    strokeDasharray="4 4"
-                    label={{
-                      value: "Pass Mark (35%)",
-                      position: "right",
-                      fill: "#EF4444",
-                      fontSize: 11,
-                      fontWeight: "600",
-                    }}
-                  /> */}
-
                   <Tooltip
                     cursor={{ fill: "rgba(99,102,241,0.08)" }}
                     content={({ payload }) => {
@@ -575,12 +569,6 @@ const ClassWiseAcademicPerformance = () => {
                           <p>
                             👨‍🎓 Students: <b>{d.studentCount}</b>
                           </p>
-                          {/* <p>
-                            📝 Total:{" "}
-                            <b>
-                              {d.totalMarks}/{d.outOfTotal}
-                            </b>
-                          </p> */}
                         </div>
                       );
                     }}
@@ -590,8 +578,114 @@ const ClassWiseAcademicPerformance = () => {
                     fill="#6366F1"
                     radius={[10, 10, 0, 0]}
                   />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="h-[280px] flex items-center justify-center text-gray-400 text-sm">
+                Select a class to view performance data
+              </div>
+            )}
+          </div> */}
 
-                  {/* <Bar dataKey="averageMarks" radius={[10, 10, 0, 0]}>
+          <div className="bg-white rounded-xl shadow-sm pl-4 pr-4 pt-2 pb-1">
+            {data?.length > 0 && hasValidMarks ? (
+              <div className="bg-white rounded-xl shadow-sm pl-4 pr-4 pt-2 pb-1">
+                {data?.length > 0 ? (
+                  <ResponsiveContainer width="100%" height={280}>
+                    <BarChart data={data} barCategoryGap={30}>
+                      <CartesianGrid
+                        strokeDasharray="3 3"
+                        vertical={false}
+                        stroke="#E5E7EB"
+                      />
+                      <XAxis
+                        dataKey="subject"
+                        tick={{ fontSize: 12 }}
+                        axisLine={{ stroke: "#9CA3AF" }}
+                        tickLine={{ stroke: "#9CA3AF" }}
+                      >
+                        <Label
+                          value="Subjects"
+                          position="insideBottom"
+                          offset={-1}
+                          style={{
+                            textAnchor: "middle",
+                            fill: "#EC4899",
+                            fontSize: 14,
+                            fontWeight: "700",
+                            fontFamily: "Inter, sans-serif",
+                          }}
+                        />
+                      </XAxis>
+
+                      <YAxis
+                        domain={[0, 100]}
+                        ticks={[0, 20, 40, 60, 80, 100]}
+                        axisLine={{ stroke: "#9CA3AF" }}
+                        tickLine={{ stroke: "#9CA3AF" }}
+                        allowDecimals={false}
+                      >
+                        <Label
+                          value="Average Percentage (%)"
+                          angle={-90}
+                          position="insideLeft"
+                          style={{
+                            textAnchor: "middle",
+                            fill: "#EC4899",
+                            fontSize: 14,
+                            fontWeight: "700",
+                            fontFamily: "Inter, sans-serif",
+                          }}
+                        />
+                      </YAxis>
+
+                      {/* <ReferenceLine
+                    y={35}
+                    stroke="#EF4444"
+                    strokeDasharray="4 4"
+                    label={{
+                      value: "Pass Mark (35%)",
+                      position: "right",
+                      fill: "#EF4444",
+                      fontSize: 11,
+                      fontWeight: "600",
+                    }}
+                  /> */}
+
+                      <Tooltip
+                        cursor={{ fill: "rgba(99,102,241,0.08)" }}
+                        content={({ payload }) => {
+                          if (!payload || !payload.length) return null;
+                          const d = payload[0].payload;
+
+                          return (
+                            <div className="bg-white border rounded-lg p-2 text-xs space-y-0 shadow">
+                              <p className="font-bold mb-0 text-pink-500">
+                                {d.subject}
+                              </p>
+                              <p>
+                                📊 Avg Percentage: <b>{d.averageMarks}</b>
+                              </p>
+                              <p>
+                                👨‍🎓 Students: <b>{d.studentCount}</b>
+                              </p>
+                              {/* <p>
+                            📝 Total:{" "}
+                            <b>
+                              {d.totalMarks}/{d.outOfTotal}
+                            </b>
+                          </p> */}
+                            </div>
+                          );
+                        }}
+                      />
+                      <Bar
+                        dataKey="averageMarks"
+                        fill="#6366F1"
+                        radius={[10, 10, 0, 0]}
+                      />
+
+                      {/* <Bar dataKey="averageMarks" radius={[10, 10, 0, 0]}>
                     {data.map((entry, index) => (
                       <Cell
                         key={`cell-${index}`}
@@ -605,8 +699,20 @@ const ClassWiseAcademicPerformance = () => {
                       />
                     ))}
                   </Bar> */}
-                </BarChart>
-              </ResponsiveContainer>
+                    </BarChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="h-[280px] flex items-center justify-center text-gray-400 text-sm">
+                    Select a class to view performance data
+                  </div>
+                )}
+              </div>
+            ) : data?.length > 0 ? (
+              <div className="flex flex-col justify-center items-center h-[230px]">
+                <p className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500">
+                  Upload marks to view the graph.
+                </p>
+              </div>
             ) : (
               <div className="h-[280px] flex items-center justify-center text-gray-400 text-sm">
                 Select a class to view performance data

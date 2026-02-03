@@ -18,7 +18,7 @@ import CreateRemarkObservation from "./CreateRemarkObservation";
 import CreateRemarkObservationStudent from "./CreateRemarkObservationStudent";
 // import { PiCertificateBold } from "react-icons/pi";
 import { MdOutlineRemoveRedEye } from "react-icons/md";
-import { FaCheck, FaCheckCircle } from "react-icons/fa";
+import { FaCheck, FaCheckCircle, FaCheckDouble } from "react-icons/fa";
 import { ImDownload } from "react-icons/im";
 import { Navigate, useNavigate } from "react-router-dom";
 import { IoMdSend } from "react-icons/io";
@@ -52,7 +52,40 @@ function RemarkObservationStudent() {
   const navigate = useNavigate();
   const [showModal, setShowModal] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
+  const renderWhatsAppStatus = (status) => {
+    if (!status) return <span className="text-gray-500">-</span>;
 
+    switch (status) {
+      case "sent":
+        return (
+          <span className="flex items-center justify-center gap-1 text-blue-600 font-medium">
+            <FaCheck className="text-blue-600" />
+            Sent
+          </span>
+        );
+
+      case "delivered":
+        return (
+          <span className="flex items-center justify-center gap-1 text-gray-800 font-semibold">
+            <FaCheckDouble className="text-gray-700" />
+            Delivered
+          </span>
+        );
+
+      case "read":
+        return (
+          <span className="flex items-center justify-center gap-1 text-blue-800 font-semibold">
+            <FaCheckDouble className="text-blue-600" />
+            Read
+          </span>
+        );
+
+
+
+      default:
+        return <span className="text-gray-500"></span>;
+    }
+  };
   const openModal = (file) => {
     setSelectedFile(file);
     setShowModal(true);
@@ -131,7 +164,7 @@ function RemarkObservationStudent() {
         `${API_URL}/api/get_remarklistforstudents`,
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
 
       const remarkList = response?.data?.data || [];
@@ -186,7 +219,7 @@ function RemarkObservationStudent() {
       studentName: [subject.first_name, subject.mid_name, subject.last_name]
         .filter(Boolean) // removes null, undefined, ""
         .map(
-          (name) => name.charAt(0).toUpperCase() + name.slice(1).toLowerCase()
+          (name) => name.charAt(0).toUpperCase() + name.slice(1).toLowerCase(),
         ) // optional: capitalize
         .join(" "),
       classDivision: `${subject?.classname || ""} - ${subject?.sectionname || ""
@@ -253,7 +286,7 @@ function RemarkObservationStudent() {
     // Set teacher name immediately from classToDelete
     setCurrestSubjectNameForDelete(
       `${classToDelete?.first_name || ""} ${classToDelete?.mid_name || ""} ${classToDelete?.last_name || ""
-        }`.trim()
+        }`.trim(),
     );
     setShowDeleteModal(true);
   };
@@ -330,7 +363,7 @@ function RemarkObservationStudent() {
             "Content-Type": "multipart/form-data",
           },
           withCredentials: true,
-        }
+        },
       );
 
       toast.success("Notice updated successfully!");
@@ -371,7 +404,7 @@ function RemarkObservationStudent() {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       if (response.status === 200) {
@@ -410,23 +443,23 @@ function RemarkObservationStudent() {
             Authorization: `Bearer ${token}`,
           },
           withCredentials: true,
-        }
+        },
       );
 
       handleSearch();
       setShowDeleteModal(false);
 
       toast.success(
-        `${currestSubjectNameForDelete} Remark Deleted successfully!`
+        `${currestSubjectNameForDelete} Remark Deleted successfully!`,
       );
     } catch (error) {
       if (error.response && error.response.data) {
         toast.error(
-          `Error In Deleting ${currestSubjectNameForDelete}: ${error.response.data.message}`
+          `Error In Deleting ${currestSubjectNameForDelete}: ${error.response.data.message}`,
         );
       } else {
         toast.error(
-          `Error In Deleting ${currestSubjectNameForDelete}: ${error.message}`
+          `Error In Deleting ${currestSubjectNameForDelete}: ${error.message}`,
         );
       }
       console.error("Error In Deleting:", error);
@@ -458,14 +491,14 @@ function RemarkObservationStudent() {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       // Handle success response
       if (response.status === 200 && response.data.success) {
         toast.success(
           response?.data?.message ||
-          `Message sent successfully for Unique ID: ${uniqueId}`
+          `Message sent successfully for Unique ID: ${uniqueId}`,
         );
         handleSearch();
       } else {
@@ -530,7 +563,7 @@ function RemarkObservationStudent() {
 
   const displayedSections = filteredSections.slice(
     currentPage * pageSize,
-    (currentPage + 1) * pageSize
+    (currentPage + 1) * pageSize,
   );
 
   console.log("disply section", displayedSections);
@@ -688,7 +721,20 @@ function RemarkObservationStudent() {
                             <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                               Subject of Remark
                             </th>
+
                             <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                              Acknowledge
+                            </th>
+                            <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                              Viewed
+                            </th>
+                            <th className="px-2 py-2 text-center  border border-gray-300 text-sm font-semibold">
+                              Message Status
+                            </th>
+
+                            <th className="px-2 py-2 text-center  border border-gray-300 text-sm font-semibold">
+                              WhatsApp Status
+                            </th> <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                               Edit/View
                             </th>
                             <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
@@ -696,12 +742,6 @@ function RemarkObservationStudent() {
                             </th>
                             <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                               Publish
-                            </th>
-                            <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                              Acknowledge
-                            </th>
-                            <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                              Viewed
                             </th>
                           </tr>
                         </thead>
@@ -726,7 +766,7 @@ function RemarkObservationStudent() {
                                       word
                                         ? word.charAt(0).toUpperCase() +
                                         word.slice(1).toLowerCase()
-                                        : ""
+                                        : "",
                                     )
                                     .join(" ")
                                     .trim()}{" "}
@@ -740,7 +780,7 @@ function RemarkObservationStudent() {
                                   {subject?.publish_date &&
                                     subject.publish_date !== "0000-00-00"
                                     ? new Date(
-                                      subject.publish_date
+                                      subject.publish_date,
                                     ).toLocaleDateString("en-GB")
                                     : ""}
                                 </td>
@@ -749,6 +789,51 @@ function RemarkObservationStudent() {
                                 </td>
                                 <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                   {subject?.remark_subject}
+                                </td>
+
+
+                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                  {subject.acknowledge == "Y" && (
+                                    <FontAwesomeIcon
+                                      icon={faThumbsUp}
+                                      className="text-black text-base"
+                                    />
+                                  )}
+                                </td>
+                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                  {subject.read_status == 1 && (
+                                    <FontAwesomeIcon
+                                      icon={faBookReader}
+                                      style={{ color: "#C03078" }}
+                                      className="text-base"
+                                    />
+                                  )}
+                                </td>
+                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                  {/* Show Send button if published and messages pending */}
+                                  {
+                                    subject.sms_sent === "Y" &&
+                                      subject?.whatsapp_status === "failed" ? (
+                                      <div className="flex flex-col items-center gap-1">
+                                        <span className="text-green-600 font-semibold text-sm">
+                                          Message sent
+                                        </span>
+                                      </div>
+                                    ) : subject?.sms_sent === "Y" &&
+                                      (subject?.whatsapp_status === "sent" ||
+                                        subject?.whatsapp_status === "read" ||
+                                        subject?.whatsapp_status === "delivered") ? (
+                                      // Show 'S' when published and no pending messages
+                                      <div className="flex flex-col items-center">
+                                        <div className="group relative flex items-center justify-center gap-1 text-green-600 font-semibold text-sm cursor-default">
+                                          Whatsapp Sent {/* Tooltip */}
+                                        </div>
+                                      </div>
+                                    ) : subject.sms_sent === "N" ? null : null // Show Publish button when not published
+                                  }
+                                </td>
+                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                  {renderWhatsAppStatus(subject?.whatsapp_status)}
                                 </td>
                                 <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
                                   {subject.publish === "Y" ? (
@@ -865,8 +950,8 @@ function RemarkObservationStudent() {
                                           sendingSMS[subject?.remark_id]
                                         }
                                         className={`flex items-center justify-center px-3 py-1 gap-1 text-xs md:text-sm font-medium rounded-md transition duration-200 ${sendingSMS[subject?.remark_id]
-                                            ? "bg-blue-300 cursor-not-allowed"
-                                            : "bg-blue-500 hover:bg-blue-600 text-white"
+                                          ? "bg-blue-300 cursor-not-allowed"
+                                          : "bg-blue-500 hover:bg-blue-600 text-white"
                                           }`}
                                         onClick={() =>
                                           handleSend(subject?.remark_id)
@@ -926,33 +1011,24 @@ function RemarkObservationStudent() {
                                     </button>
                                   ) : null}
                                 </td>
-
-                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                  {subject.acknowledge == "Y" && (
-                                    <FontAwesomeIcon
-                                      icon={faThumbsUp}
-                                      className="text-black text-base"
-                                    />
-                                  )}
-                                </td>
-                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                  {subject.read_status == 1 && (
-                                    <FontAwesomeIcon
-                                      icon={faBookReader}
-                                      style={{ color: "#C03078" }}
-                                      className="text-base"
-                                    />
-                                  )}
-                                </td>
                               </tr>
                             ))
+                          ) : notices.length === 0 ? (
+                            <tr>
+                              <td
+                                colSpan="11"
+                                className="text-center py-6 text-red-700 text-lg"
+                              >
+                                Please create remark for student to view.
+                              </td>
+                            </tr>
                           ) : (
                             <tr>
                               <td
                                 colSpan="11"
                                 className="text-center py-6 text-red-700 text-lg"
                               >
-                                Oops! No data found..
+                                Result not found!
                               </td>
                             </tr>
                           )}
@@ -1077,7 +1153,7 @@ function RemarkObservationStudent() {
                           const cursorPos = e.target.selectionStart; // Current cursor position
                           const textBeforeCursor = noticeDesc.slice(
                             0,
-                            cursorPos
+                            cursorPos,
                           ); // Text before the cursor is:
 
                           const textAfterCursor = noticeDesc.slice(cursorPos); // Text after the cursor
@@ -1138,7 +1214,7 @@ function RemarkObservationStudent() {
                           <div>
                             {preselectedFiles.map((url, index) => {
                               const fileName = url.substring(
-                                url.lastIndexOf("/") + 1
+                                url.lastIndexOf("/") + 1,
                               );
                               return (
                                 <div
@@ -1197,7 +1273,7 @@ function RemarkObservationStudent() {
                   />
                   {console.log(
                     "the currecnt section inside delete of the managesubjhect",
-                    currentSection
+                    currentSection,
                   )}
                 </div>
                 <div
@@ -1243,7 +1319,7 @@ function RemarkObservationStudent() {
                   />
                   {console.log(
                     "the currecnt section inside delete of the managesubjhect",
-                    currentSection
+                    currentSection,
                   )}
                 </div>
                 <div
@@ -1379,7 +1455,7 @@ function RemarkObservationStudent() {
                           // Files that should NOT be previewable (only download)
                           const isNonPreviewable =
                             /\.(pdf|csv|docx?|xlsx?|pptx?|txt|zip|json)$/i.test(
-                              fileUrl
+                              fileUrl,
                             );
 
                           return (
@@ -1484,12 +1560,12 @@ function RemarkObservationStudent() {
                               selectedFile.file_name ||
                               fileUrl.split("/").pop();
                             const isImage = /\.(jpe?g|png|gif|bmp|webp)$/i.test(
-                              fileUrl
+                              fileUrl,
                             );
                             const isPDF = /\.pdf$/i.test(fileUrl);
                             const isDownloadOnly =
                               /\.(csv|docx?|xlsx?|zip|txt|pptx?|json)$/i.test(
-                                fileUrl
+                                fileUrl,
                               );
 
                             if (isImage) {
