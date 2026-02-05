@@ -1,220 +1,178 @@
 import Select from "react-select";
 import ReactPaginate from "react-paginate";
 import axios from "axios";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { RxCross1 } from "react-icons/rx";
 import { useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEdit, faRightToBracket } from "@fortawesome/free-solid-svg-icons";
+import {  faRightToBracket } from "@fortawesome/free-solid-svg-icons";
 
 function ImpersonateListing() {
     const API_URL = import.meta.env.VITE_API_URL;
-    const [roles  , setRoles] = useState([]);
-    const [selectedRole , setSelectedRole] = useState("");
-    const [isSearching , setIsSearching] = useState(false);
-    const [isImpersonating , setIsImpersonating] = useState(false);
-    const [users , setUsers] = useState([]);
-    const [filteredUsers , setFilteredUsers] = useState([]);
+    const [roles, setRoles] = useState([]);
+    const [selectedRole, setSelectedRole] = useState(null);
+    const [isLoading, setIsLoading] = useState(false); 
+    const [isImpersonating, setIsImpersonating] = useState(false); // For impersonation
+    const [users, setUsers] = useState([]);
     const [currentPage, setCurrentPage] = useState(0);
-    const [pageCount, setPageCount] = useState(0);
-    const [searchTerm , setSearchTerm] = useState('');
+    const [searchTerm, setSearchTerm] = useState('');
     const pageSize = 10;
     const previousPageRef = useRef(0);
     const prevSearchTermRef = useRef("");
-
     const navigate = useNavigate();
 
-    const fetchAllRoles = async () => {
-        const token = localStorage.getItem("authToken");
-
-        if (!token) {
-            console.error("No authentication token found");
-            navigate("/login");
-            return;
-        }
-
-        try {
-            const response = await axios.get(
-                `${API_URL}/api/impersonate/get_roles`,
-                {
-                    headers: { Authorization: `Bearer ${token}` },
-                }
-            );
-
-            console.log(response.data.data);
-
-            setRoles(response.data.data);
-        } catch (error) {
-            console.error("Error fetching data:", error);
-        }
-    };
-
-    const fetchallUsers = async () => {
-        setIsSearching(true);
-        const token = localStorage.getItem("authToken");
-
-        if (!token) {
-            console.error("No authentication token found");
-            navigate("/login");
-            return;
-        }
-
-        try {
-            console.log(selectedRole);
-            const response = await axios.get(
-                `${API_URL}/api/impersonate/get_users?role_id=${selectedRole?.value || ''}`,
-                {
-                    headers: { Authorization: `Bearer ${token}` },
-                }
-            );
-
-            console.log(response.data.data);
-
-            setUsers(response.data.data);
-            setPageCount(Math.ceil((response.data.data?.length || 0) / pageSize));
-        } catch (error) {
-            console.error("Error fetching data:", error);
-        }
-        setIsSearching(false);
-    }
-
-    const handelSearch = async () => {
-        setIsSearching(true);
+    // Get token once with error handling
+    const getAuthToken = useCallback(() => {
         const token = localStorage.getItem("authToken");
         if (!token) {
-            console.error("No authentication token found");
             navigate("/login");
-            return;
+            return null;
         }
-        try {
-            console.log(selectedRole);
-            const response = await axios.get(
-                `${API_URL}/api/impersonate/get_users?role_id=${selectedRole?.value ?? ''}`,
-                {
-                    headers: { Authorization: `Bearer ${token}` },
-                }
-            );
+        return token;
+    }, [navigate]);
 
-            setUsers(response.data.data);
-            console.log(response.data.data);
-            setPageCount(Math.ceil((response.data.data?.length || 0) / pageSize));
-        } catch (error) {
-            toast.error("Error fetching chapters data.");
-            console.error("Error fetching data:", error);
-        }
-        setIsSearching(false);
-    }
+    // Fetch roles only once
+    useEffect(() => {
+        const fetchRoles = async () => {
+            const token = getAuthToken();
+            if (!token) return;
 
-    const handlePageClick = (data) => {
-        setCurrentPage(data.selected);
-    };
-
-    const handelImpersonate = async (user_id) => {
-        setIsImpersonating(true);
-        toast.info(`Impersonating: ${user_id}`);
-        try {
-            // 1. call the api to get new token
-            const token = localStorage.getItem("authToken");
-            if (!token) {
-                setIsImpersonating(false);
-                return;
+            try {
+                const response = await axios.get(
+                    `${API_URL}/api/impersonate/get_roles`,
+                    { headers: { Authorization: `Bearer ${token}` } }
+                );
+                setRoles(response.data.data);
+            } catch (error) {
+                console.error("Error fetching roles:", error);
+                toast.error("Failed to load roles");
             }
+        };
+
+        fetchRoles();
+    }, [API_URL, getAuthToken]);
+
+    // Single unified fetch function
+    const fetchUsers = useCallback(async (roleId) => {
+        const token = getAuthToken();
+        if (!token) return;
+
+        setIsLoading(true);
+        try {
+            const response = await axios.get(
+                `${API_URL}/api/impersonate/get_users?role_id=${roleId || ''}`,
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+            setUsers(response.data.data || []);
+        } catch (error) {
+            console.error("Error fetching users:", error);
+            toast.error("Failed to load users");
+            setUsers([]);
+        } finally {
+            setIsLoading(false);
+        }
+    }, [API_URL, getAuthToken]);
+
+    // Fetch users when role changes
+    useEffect(() => {
+        fetchUsers(selectedRole?.value);
+    }, [selectedRole, fetchUsers]);
+
+    // Memoized filtered users (derived state)
+    const filteredUsers = useMemo(() => {
+        if (!searchTerm.trim()) return users;
+        
+        const searchLower = searchTerm.toLowerCase().trim();
+        return users.filter(user => 
+            user?.name?.toLowerCase().trim().includes(searchLower)
+        );
+    }, [users, searchTerm]);
+
+    // Memoized page count
+    const pageCount = useMemo(() => 
+        Math.ceil(filteredUsers.length / pageSize),
+        [filteredUsers.length, pageSize]
+    );
+
+    // Memoized displayed users
+    const displayedUsers = useMemo(() => 
+        filteredUsers.slice(
+            currentPage * pageSize,
+            (currentPage + 1) * pageSize
+        ),
+        [filteredUsers, currentPage, pageSize]
+    );
+
+    // Handle search term changes with page reset
+    useEffect(() => {
+        const trimmedSearch = searchTerm.trim();
+        const prevSearch = prevSearchTermRef.current;
+
+        if (trimmedSearch && !prevSearch) {
+            previousPageRef.current = currentPage;
+            setCurrentPage(0);
+        } else if (!trimmedSearch && prevSearch) {
+            setCurrentPage(previousPageRef.current);
+        }
+
+        prevSearchTermRef.current = trimmedSearch;
+    }, [searchTerm, currentPage]);
+
+    // Impersonate handler with proper error handling
+    const handleImpersonate = useCallback(async (userId) => {
+        const token = getAuthToken();
+        if (!token) return;
+
+        setIsImpersonating(true);
+        toast.info(`Impersonating user...`);
+
+        try {
             const response = await axios.post(
                 `${API_URL}/api/impersonate`,
-                { user_id }, // 👈 request body
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                }
+                { user_id: userId },
+                { headers: { Authorization: `Bearer ${token}` } }
             );
 
             const { success, token: newToken } = response.data;
 
             if (!success || !newToken) {
                 toast.error("Impersonation failed");
-                setIsImpersonating(false);
                 return;
             }
 
-            // 2. store old token
             localStorage.setItem("authTokenOld", token);
-
-            // 3. replace with new impersonated token
             localStorage.setItem("authToken", newToken);
-
-            // 4. redirect to /dashboard 
             window.location.href = "/dashboard";
-
-        } catch(e) {
-            console.error(e);
-            toast.error('Something went wrong');
+        } catch (error) {
+            console.error("Impersonation error:", error);
+            toast.error(error.response?.data?.message || 'Impersonation failed');
+        } finally {
+            setIsImpersonating(false);
         }
-        setIsImpersonating(false);
-    }
+    }, [API_URL, getAuthToken]);
 
-    useEffect(() => {
-        // fetchsessionData();
-        fetchAllRoles();
-        fetchallUsers();
+    const handlePageClick = useCallback((data) => {
+        setCurrentPage(data.selected);
     }, []);
 
-    useEffect(() => {
-        const trimmedSearch = searchTerm.trim().toLowerCase();
-        if (trimmedSearch !== "" && prevSearchTermRef.current === "") {
-            previousPageRef.current = currentPage; // Save current page before search
-            setCurrentPage(0); // Jump to first page when searching
-        }
-        if (trimmedSearch === "" && prevSearchTermRef.current !== "") {
-            setCurrentPage(previousPageRef.current); // Restore saved page when clearing search
-        }
-        prevSearchTermRef.current = trimmedSearch;
-    }, [searchTerm]);
-
-    useEffect(() => {
-        const filtered = (Array.isArray(users) ? users : []).filter(
-          (user) => {
-            if (!searchTerm) return true;
-    
-            const searchLower = searchTerm.toLowerCase().trim();
-            const userName = user?.name?.toLowerCase().trim()
-    
-            return (
-              userName.includes(searchLower)
-            );
-          },
-        );
-    
-        setFilteredUsers(filtered);
-    }, [users, searchTerm]);
-
-    useEffect(() => {
-        if (selectedRole) {
-            handelSearch();
-        }
-    }, [selectedRole]);
-
-    useEffect(() => {
-        setPageCount(Math.ceil(filteredUsers.length / pageSize));
-    }, [filteredUsers, pageSize]);
-
-    const displayedUsers = filteredUsers.slice(
-        currentPage * pageSize,
-        (currentPage + 1) * pageSize,
+    // Utility function
+    const toTitleCase = useCallback((name = "") =>
+        name.toLowerCase().trim()
+            .split(/\s+/)
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(" "),
+        []
     );
 
-    const toTitleCaseName = (name = "") =>
-        name
-            .toLowerCase()
-            .trim()
-            .split(/\s+/)
-            .map(
-            word => word.charAt(0).toUpperCase() + word.slice(1)
-            )
-            .join(" ");
-
-
+    // Role options memoized
+    const roleOptions = useMemo(() => 
+        roles.map(role => ({
+            value: role.role_id,
+            label: role.name,
+        })),
+        [roles]
+    );
 
     return (
         <>
@@ -276,15 +234,12 @@ function ImpersonateListing() {
                                         id="studentSelect"
                                         value={selectedRole}
                                         onChange={(option) => setSelectedRole(option)}
-                                        options={roles.map(role => ({
-                                        value: role.role_id,
-                                        label: role.name,
-                                        }))}
+                                        options={roleOptions}
                                         placeholder="Select a role"
                                         isSearchable
                                         isClearable
                                         className="text-sm"
-                                        isDisabled={isSearching}
+                                        isDisabled={isLoading}
                                     />
                                     </div>
 
@@ -319,7 +274,7 @@ function ImpersonateListing() {
                                 </tr>
                                 </thead>
                                 <tbody>
-                                    {isSearching ? (
+                                    {isLoading? (
                                         <tr>
                                             <td colSpan={4}>
                                                 <div className="absolute left-[1%] w-[100%]  text-center flex justify-center items-center mt-14">
@@ -339,7 +294,7 @@ function ImpersonateListing() {
                                                 {currentPage * pageSize + index + 1}
                                             </td>
                                             <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                                {toTitleCaseName(user.name)}
+                                                {toTitleCase(user.name)}
                                             </td>
                                             <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm break-words">
                                                 {user.user_id}
@@ -347,7 +302,7 @@ function ImpersonateListing() {
                                             <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                                 <button
                                                     type="button"
-                                                    onClick={() => handelImpersonate(user.user_id)}
+                                                    onClick={() => handleImpersonate(user.user_id)}
                                                     disabled={isImpersonating}
                                                     className="
                                                         inline-flex items-center gap-2
