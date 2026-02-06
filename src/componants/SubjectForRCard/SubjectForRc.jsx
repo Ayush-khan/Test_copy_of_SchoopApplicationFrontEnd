@@ -4,10 +4,11 @@ import ReactPaginate from "react-paginate";
 // import NavBar from "../../../Layouts/NavBar";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEdit, faTrash, faPlus } from "@fortawesome/free-solid-svg-icons";
+import { faEdit, faTrash, faPlus, faCircleInfo, faXmark } from "@fortawesome/free-solid-svg-icons";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { RxCross1 } from "react-icons/rx";
+import InfoCard from "../InfoCards/InfoCard";
 
 function SubjectForRc() {
   const API_URL = import.meta.env.VITE_API_URL; // url for host
@@ -33,6 +34,7 @@ function SubjectForRc() {
   const [backendErrors, setBackendErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [nameErrorforName, setNameErrorforName] = useState("");
+  const [open, setOpen] = useState(false);
 
   const previousPageRef = useRef(0);
   const prevSearchTermRef = useRef("");
@@ -470,6 +472,50 @@ function SubjectForRc() {
   // if (loading) return <p>Loading...</p>;
   // if (error) return <p>Error: {error}</p>;
 
+  const slides = [
+      {
+        title: "What is Subject for Report Card?",
+        content: (
+          <div className="space-y-2 text-sm text-gray-600">
+            <p>
+              This section allows you to create subjects that will appear on the report card.
+            </p>
+            <p>
+              Use the Add button on the right
+              to create a new subject.
+            </p>
+          </div>
+        )
+      },
+      {
+        title: "Add New Subjects",
+        content: (
+          <div className="space-y-3">
+            <ul className="list-disc list-inside text-sm text-gray-600">
+              <li>Add subjects</li>
+              <li>Edit existing subjects</li>
+              <li>Remove unused subjects</li>
+            </ul>
+
+            {/* Example component */}
+            <button className="px-3 py-1 text-xs bg-blue-600 text-white rounded">
+              + Add Subject
+            </button>
+          </div>
+        )
+      },
+      {
+        title: "Validation Rules",
+        content: (
+          <div className="space-y-2 text-sm text-gray-600">
+            <p>✔ Subjects must be unique</p>
+            <p>✔ Must be mapped correctly</p>
+            <p className="text-red-500">✖ Duplicate subjects are not allowed</p>
+          </div>
+        )
+      }
+  ];
+
   return (
     <>
       {/* <NavBar /> */}
@@ -478,8 +524,22 @@ function SubjectForRc() {
       <div className="container mt-4">
         <div className="card mx-auto lg:w-3/4 shadow-lg">
           <div className="p-2 px-3 bg-gray-100 flex justify-between items-center">
-            <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
-              Subject for report card
+            <h3 className="flex items-center gap-2 text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
+              Subject For Report Card
+              <button
+                onClick={() => setOpen(true)}
+                aria-label="Info"
+                className="
+                  text-black-600
+                  hover:text-gray-100
+                  active:text-blue-800
+                  focus:text-blue-600
+                  focus:outline-none
+                  focus:ring-0
+                "
+              >
+                <FontAwesomeIcon icon={faCircleInfo} />
+              </button>
             </h3>
             <div className="box-border flex md:gap-x-2 justify-end md:h-10">
               <div className=" w-1/2 md:w-fit mr-1">
@@ -894,6 +954,10 @@ function SubjectForRc() {
             </div>
           </div>
         </div>
+      )}
+
+      {open && (
+        <InfoCard slides={slides} setOpen={setOpen} />
       )}
     </>
   );
