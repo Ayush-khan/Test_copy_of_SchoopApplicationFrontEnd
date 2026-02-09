@@ -3,20 +3,26 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { faEdit, faTrash } from "@fortawesome/free-solid-svg-icons";
+import { faCircleInfo, faEdit, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import ReactPaginate from "react-paginate";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { RxCross1 } from "react-icons/rx";
 import AllotSubjectTab from "./AllotSubjectTab.jsx";
 import Select from "react-select";
+import { useLocation, useNavigate } from "react-router-dom";
+import HelpInfoButton from "../Buttons/HelpInfoButton.jsx";
+import InfoCard from "../InfoCards/InfoCard.jsx";
 function SubjectAllotmentForReportCard() {
+  
+  const location = useLocation();
   const API_URL = import.meta.env.VITE_API_URL; // URL for host
-  const [activeTab, setActiveTab] = useState("Manage");
+  const [activeTab, setActiveTab] = useState(location.state?.activeTab ?? "Manage");
   const [classes, setClasses] = useState([]);
   const [classesforsubjectallot, setclassesforsubjectallot] = useState([]);
   const [subjects, setSubjects] = useState([]);
   // for allot subject tab
+
 
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -38,6 +44,7 @@ function SubjectAllotmentForReportCard() {
   const [pageCount, setPageCount] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmittingForSearch, setIsSubmittingForSearch] = useState(false);
+  const [open, setOpen] = useState(false);
 
   const dropdownRef = useRef(null);
 
@@ -72,9 +79,7 @@ function SubjectAllotmentForReportCard() {
 
   const handleTeacherSelect = (selectedOption) => {
     setSelectedTeacher(selectedOption);
-    console.log("selectedTeacher", selectedTeacher);
     setNewDepartmentId(selectedOption.value); // Assuming value is the teacher's ID
-    console.log("setNewDepartmentId", newDepartmentId);
   };
 
   const handleClassSelect = (selectedOption) => {
@@ -87,7 +92,6 @@ function SubjectAllotmentForReportCard() {
     value: dept.reg_id,
     label: dept.name,
   }));
-  console.log("teacherOptions", teacherOptions);
   const classOptions = classes.map((cls) => ({
     value: cls.class_id,
     label: `${cls?.name}  `,
@@ -103,7 +107,6 @@ function SubjectAllotmentForReportCard() {
       });
       if (Array.isArray(response.data)) {
         setClasses(response.data);
-        console.log("the name and section", response.data);
       } else {
         setError("Unexpected data format");
       }
@@ -120,10 +123,6 @@ function SubjectAllotmentForReportCard() {
       });
       if (Array.isArray(response.data)) {
         setclassesforsubjectallot(response.data);
-        console.log(
-          "this is the dropdown of the allot subject tab for class",
-          response.data
-        );
       } else {
         setError("Unexpected data format");
       }
@@ -150,10 +149,6 @@ function SubjectAllotmentForReportCard() {
       });
 
       setDepartments(response.data);
-      console.log(
-        "888888888888888888888888 this is the edit of get_teacher list in the subject allotement tab",
-        response.data
-      );
     } catch (error) {
       setError(error.message);
     }
@@ -195,50 +190,6 @@ function SubjectAllotmentForReportCard() {
     }
   }, [API_URL, classIdForManage, pageSize]);
 
-  // Listing tabs data for diffrente tabs
-  // const handleSearch = async () => {
-  //   if (isSubmittingForSearch) return; // Prevent re-submitting
-  //   setIsSubmittingForSearch(true);
-  //   if (!classIdForManage) {
-  //     setIsSubmittingForSearch(false);
-  //     setNameError("Please select the class.");
-
-  //     return;
-  //   }
-  //   setSearchTerm("");
-  //   try {
-  //     console.log(
-  //       "for this sectiong id in seaching inside subjectallotment",
-  //       classIdForManage
-  //     );
-  //     const token = localStorage.getItem("authToken");
-  //     const response = await axios.get(
-  //       `${API_URL}/api/get_subject_Alloted_for_report_card/${classIdForManage}`,
-  //       {
-  //         headers: { Authorization: `Bearer ${token}` },
-  //         // params: { section_id: classSection },
-  //         //   params: { class_id: classIdForManage },
-  //       }
-  //     );
-  //     console.log(
-  //       "the response of the subjectallotment is *******",
-  //       response.data?.subjectAllotments
-  //     );
-  //     if (response?.data?.subjectAllotments.length > 0) {
-  //       setSubjects(response.data?.subjectAllotments);
-  //       setPageCount(Math.ceil(response?.data?.subjectAllotments.length / 10)); // Example pagination logic
-  //     } else {
-  //       setSubjects([]);
-  //       toast.error("No subjects found for the selected class.");
-  //     }
-  //   } catch (error) {
-  //     console.error("Error fetching subjects:", error);
-  //     setError("Error fetching subjects");
-  //   } finally {
-  //     setIsSubmittingForSearch(false); // Re-enable the button after the operation
-  //   }
-  // };
-
   // Handle division checkbox change
 
   const handlePageClick = (data) => {
@@ -248,7 +199,6 @@ function SubjectAllotmentForReportCard() {
 
   const handleEdit = (section) => {
     setCurrentSection(section);
-    console.log("curentedit", section);
     setnewclassnames(section?.get_clases?.name);
     setnewSubjectnName(section?.get_subjects_for_report_card?.name);
     setTeacherNameIs(section?.subject_type || ""); // Ensure subject_type is set
@@ -346,10 +296,8 @@ function SubjectAllotmentForReportCard() {
       );
 
       // Handle successful deletion
-      console.log("responsedata", response.data);
       if (response.data && response.data.status == 400) {
         const errorMessage = response.data.message || "Delete failed.";
-        console.log("inside the delete", response.data);
         toast.error(errorMessage);
       } else {
         toast.success("Subject deleted successfully!");
@@ -421,12 +369,130 @@ function SubjectAllotmentForReportCard() {
     setActiveTab(tab); // useEffect will call handleSearch automatically
   };
 
+  const navigate = useNavigate();
+
+  const slides = [
+    {
+      title: "Subjects",
+      content: (
+        <div className="space-y-4 text-sm">
+          <div className="bg-blue-50 border border-blue-100 rounded-md p-3">
+            <p className="font-medium text-gray-800">Overview</p>
+            <p className="text-gray-600">
+              This section is used to create subjects for the school
+            </p>
+          </div>
+
+          <div>
+            <p className="font-medium text-gray-800 mb-1">How to use</p>
+            <ul className="list-disc list-inside text-gray-600 space-y-1">
+              <li>Click the <span className="font-medium">Add</span> button on the right</li>
+              <li>Enter the subject details</li>
+              <li>Save to create the subject.</li>
+            </ul>
+          </div>
+
+          <div className="pt-2">
+            <a
+              onClick={() => navigate("/subjects")}
+              className="inline-flex items-center gap-2 text-blue-600 font-medium hover:underline cursor-pointer"
+            >
+              Go to Subjects
+            </a>
+          </div>
+        </div>
+      )
+    },
+    {
+      title: "Subject for Report Card",
+      content: (
+        <div className="space-y-4 text-sm">
+          <div className="bg-blue-50 border border-blue-100 rounded-md p-3">
+            <p className="font-medium text-gray-800">Overview</p>
+            <p className="text-gray-600">
+              Create and manage subjects that appear on student report cards.
+            </p>
+          </div>
+
+          <div>
+            <p className="font-medium text-gray-800 mb-1">How it works</p>
+            <ul className="list-disc list-inside text-gray-600 space-y-1">
+              <li>Add subjects like Math, Science, English</li>
+              <li>These subjects are later assigned to classes by Subject Allotment For Report Card</li>
+            </ul>
+          </div>
+
+          <div className="pt-2">
+            <a
+              onClick={() => navigate("/subjectforReportcard")}
+              className="inline-flex items-center gap-2 text-blue-600 font-medium hover:underline cursor-pointer"
+            >
+              Go to Subjects for Report Card
+            </a>
+          </div>
+        </div>
+      )
+    },
+    {
+      title: "Subject Allotment for Report Card",
+      content: (
+        <div className="space-y-4 text-sm">
+          <div className="bg-green-50 border border-green-100 rounded-md p-3">
+            <p className="font-medium text-gray-800">Overview</p>
+            <p className="text-gray-600">
+              Once subjects are created, they need to be allotted to classes.
+            </p>
+          </div>
+
+          <div>
+            <p className="font-medium text-gray-800 mb-1">Purpose</p>
+            <p className="text-gray-600">
+              In this module, you can assign subjects to specific classes so they appear correctly on report cards.
+            </p>
+          </div>
+        </div>
+      )
+    },
+    {
+      title: "Subject Mapping",
+      content: (
+        <div className="space-y-4 text-sm">
+          <div className="bg-green-50 border border-green-100 rounded-md p-3">
+            <p className="font-medium text-gray-800">Purpose</p>
+            <p className="text-gray-600">
+              Map school subjects to report card subject
+            </p>
+          </div>
+
+          <div>
+            <p className="font-medium text-gray-800 mb-1">Adding new mapping</p>
+            <ul className="list-disc list-inside text-gray-600 space-y-1">
+              <li>Click on Add button</li>
+              <li>Select Subject</li>
+              <li>Select Report card subject</li>
+              <li>Submit the form</li>
+            </ul>
+          </div>
+
+          <div className="pt-2">
+            <a
+              onClick={() => navigate("/subjetMappinig")}
+              className="inline-flex items-center gap-2 text-blue-600 font-medium hover:underline cursor-pointer"
+            >
+              Go to Subject Mapping
+            </a>
+          </div>
+        </div>
+      )
+    }
+  ];
+
   return (
     <>
       {/* <ToastContainer /> */}
       <div className="md:mx-auto md:w-3/4 p-4 bg-white mt-4 ">
         <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
-          Subject Allotment For Report Card
+          Subject Allotment For Report Card <HelpInfoButton setOpen={setOpen} />
         </h3>
         <div
           className=" relative  mb-8   h-1  mx-auto bg-red-700"
@@ -743,10 +809,6 @@ function SubjectAllotmentForReportCard() {
                     // className="btn-close text-red-600"
                     onClick={handleCloseModal}
                   />
-                  {console.log(
-                    "the currecnt section inside delete of the managesubjhect",
-                    currentSection
-                  )}
                 </div>
                 <div
                   className=" relative  mb-3 h-1 w-[97%] mx-auto bg-red-700"
@@ -772,6 +834,10 @@ function SubjectAllotmentForReportCard() {
             </div>
           </div>
         </div>
+      )}
+
+      {open && (
+        <InfoCard stepp={2} slides={slides} setOpen={setOpen} />
       )}
     </>
   );

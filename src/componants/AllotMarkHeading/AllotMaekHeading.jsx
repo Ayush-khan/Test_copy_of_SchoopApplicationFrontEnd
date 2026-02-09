@@ -9,6 +9,9 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import { RxCross1 } from "react-icons/rx";
 import AllotSubjectTab from "./AllotMarksHeadingTab";
 import Select from "react-select";
+import { useNavigate } from "react-router-dom";
+import HelpInfoButton from "../Buttons/HelpInfoButton";
+import InfoCard from "../InfoCards/InfoCard";
 function AllotMarksHeading() {
   const API_URL = import.meta.env.VITE_API_URL; // URL for host
   const [activeTab, setActiveTab] = useState("Manage");
@@ -405,12 +408,156 @@ function AllotMarksHeading() {
       handleSearch();
     }
   };
+
+  const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
+  const slides = [
+    {
+      title: "Exams",
+      content: (
+        <div className="space-y-4 text-sm">
+          <div className="bg-blue-50 border border-blue-100 rounded-md p-3">
+            <p className="font-medium text-gray-800">Overview</p>
+            <p className="text-gray-600">
+              Create and manage exams that will be used for marks entry and report cards.
+            </p>
+          </div>
+
+          <div>
+            <p className="font-medium text-gray-800 mb-1">What you can define</p>
+            <ul className="list-disc list-inside text-gray-600 space-y-1">
+              <li>Exam name and term (Term 1 / Term 2)</li>
+              <li>Start date, end date, and open day date</li>
+              <li>Optional comments for internal reference</li>
+            </ul>
+          </div>
+
+          <div>
+            <p className="font-medium text-gray-800 mb-1">Management</p>
+            <p className="text-gray-600">
+              All exams are listed with edit and delete options for easy updates.
+            </p>
+          </div>
+
+          <div className="pt-2">
+            <a
+              onClick={() => navigate("/Exams")}
+              className="inline-flex items-center gap-2 text-blue-600 font-medium hover:underline cursor-pointer"
+            >
+              Go to Exams
+            </a>
+          </div>
+        </div>
+      )
+    },
+    {
+      title: "Grades",
+      content: (
+        <div className="space-y-4 text-sm">
+          <div className="bg-green-50 border border-green-100 rounded-md p-3">
+            <p className="font-medium text-gray-800">Overview</p>
+            <p className="text-gray-600">
+              Define grading rules based on marks range for scholastic and co-scholastic subjects.
+            </p>
+          </div>
+
+          <div>
+            <p className="font-medium text-gray-800 mb-1">Grade setup includes</p>
+            <ul className="list-disc list-inside text-gray-600 space-y-1">
+              <li>Grade name (A, B, C, etc.)</li>
+              <li>Subject type: Scholastic or Co-Scholastic</li>
+              <li>Marks range (from – up to)</li>
+              <li>Applicable classes (multiple selection)</li>
+              <li>Optional comments</li>
+            </ul>
+          </div>
+
+          <div>
+            <p className="font-medium text-gray-800 mb-1">Why this matters</p>
+            <p className="text-gray-600">
+              Grades are automatically applied when marks fall within the defined range.
+            </p>
+          </div>
+
+          <div className="pt-2">
+            <a
+              onClick={() => navigate("/grades")}
+              className="inline-flex items-center gap-2 text-blue-600 font-medium hover:underline cursor-pointer"
+            >
+              Go to Grades
+            </a>
+          </div>
+        </div>
+      )
+    },
+    {
+      title: "Marks Headings",
+      content: (
+        <div className="space-y-4 text-sm">
+          <div className="bg-purple-50 border border-purple-100 rounded-md p-3">
+            <p className="font-medium text-gray-800">Overview</p>
+            <p className="text-gray-600">
+              Create headings under which marks will be entered for exams.
+            </p>
+          </div>
+
+          <div>
+            <p className="font-medium text-gray-800 mb-1">Each marks heading includes</p>
+            <ul className="list-disc list-inside text-gray-600 space-y-1">
+              <li>Marks heading name (e.g., Theory, Practical)</li>
+              <li>Sequence (order of appearance)</li>
+              <li>Written exam flag (Yes / No)</li>
+            </ul>
+          </div>
+
+          <div>
+            <p className="font-medium text-gray-800 mb-1">Usage</p>
+            <p className="text-gray-600">
+              These headings are later mapped to exams and used during marks entry.
+            </p>
+          </div>
+        </div>
+      )
+    },
+    {
+      title: "Allot Marks Headings",
+      content: (
+        <div className="space-y-4 text-sm">
+          <div className="bg-orange-50 border border-orange-100 rounded-md p-3">
+            <p className="font-medium text-gray-800">Overview</p>
+            <p className="text-gray-600">
+              Map marks headings to exams based on class and subject.
+            </p>
+          </div>
+
+          <div>
+            <p className="font-medium text-gray-800 mb-1">Step-by-step process</p>
+            <ul className="list-disc list-inside text-gray-600 space-y-1">
+              <li>Select the class</li>
+              <li>Select the subject</li>
+              <li>Select the exam</li>
+              <li>Define marks heading with maximum marks</li>
+              <li>Set highest marks shown on the report card</li>
+            </ul>
+          </div>
+
+          <div>
+            <p className="font-medium text-gray-800 mb-1">Listing</p>
+            <p className="text-gray-600">
+              Select a class to view all allotted marks headings for that class.
+            </p>
+          </div>
+        </div>
+      )
+    }
+  ];  
+
   return (
     <>
       {/* <ToastContainer /> */}
       <div className="md:mx-auto md:w-3/4 p-4 bg-white mt-4 ">
         <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
-          Allot Marks Headings
+          Allot Marks Headings  <HelpInfoButton setOpen={setOpen} />
         </h3>
         <div
           className=" relative  mb-8   h-1  mx-auto bg-red-700"
@@ -789,6 +936,10 @@ function AllotMarksHeading() {
             </div>
           </div>
         </div>
+      )}
+
+      {open && (
+        <InfoCard stepp={3} slides={slides} setOpen={setOpen} />
       )}
     </>
   );

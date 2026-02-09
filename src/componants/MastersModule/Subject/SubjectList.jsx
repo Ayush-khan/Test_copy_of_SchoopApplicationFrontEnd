@@ -7,6 +7,9 @@ import { faEdit, faTrash, faPlus } from "@fortawesome/free-solid-svg-icons";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { RxCross1 } from "react-icons/rx";
+import { useNavigate } from "react-router-dom";
+import HelpInfoButton from "../../Buttons/HelpInfoButton";
+import InfoCard from "../../InfoCards/InfoCard";
 
 function SubjectList() {
   const API_URL = import.meta.env.VITE_API_URL; // URL for host
@@ -398,6 +401,130 @@ function SubjectList() {
 
   // if (loading) return <p>Loading...</p>;
   // if (error) return <p>Error: {error}</p>;
+  const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
+
+  const slides = [
+    {
+      title: "Subjects",
+      content: (
+        <div className="space-y-4 text-sm">
+          <div className="bg-blue-50 border border-blue-100 rounded-md p-3">
+            <p className="font-medium text-gray-800">Overview</p>
+            <p className="text-gray-600">
+              This section is used to create subjects for the school
+            </p>
+          </div>
+
+          <div>
+            <p className="font-medium text-gray-800 mb-1">How to use</p>
+            <ul className="list-disc list-inside text-gray-600 space-y-1">
+              <li>Click the <span className="font-medium">Add</span> button on the right</li>
+              <li>Enter the subject details</li>
+              <li>Save to create the subject.</li>
+            </ul>
+          </div>
+        </div>
+      )
+    },
+    {
+      title: "Subject for Report Card",
+      content: (
+        <div className="space-y-4 text-sm">
+          <div className="bg-blue-50 border border-blue-100 rounded-md p-3">
+            <p className="font-medium text-gray-800">What is this?</p>
+            <p className="text-gray-600">
+              Create and manage subjects that appear on student report cards.
+            </p>
+          </div>
+
+          <div>
+            <p className="font-medium text-gray-800 mb-1">How it works</p>
+            <ul className="list-disc list-inside text-gray-600 space-y-1">
+              <li>Add subjects like Math, Science, English</li>
+              <li>These subjects are later assigned to classes by Subject Allotment For Report Card</li>
+            </ul>
+          </div>
+
+          <div className="pt-2">
+            <a
+              onClick={() => navigate("/subjectforReportcard")}
+              className="inline-flex items-center gap-2 text-blue-600 font-medium hover:underline cursor-pointer"
+            >
+              Go to Subject for Report Card
+            </a>
+          </div>
+        </div>
+      )
+    },
+    {
+      title: "Subject Allotment for Report Card",
+      content: (
+        <div className="space-y-4 text-sm">
+          <div className="bg-green-50 border border-green-100 rounded-md p-3">
+            <p className="font-medium text-gray-800">Overview</p>
+            <p className="text-gray-600">
+              Once subjects are created, they need to be allotted to classes.
+            </p>
+          </div>
+
+          <div>
+            <p className="font-medium text-gray-800 mb-1">Purpose</p>
+            <p className="text-gray-600">
+              In this module, you can assign subjects to specific classes so they appear correctly on report cards.
+            </p>
+          </div>
+
+          <div>
+            <span
+              onClick={() =>
+                navigate("/managesubjectforreportcard", {
+                  state: { activeTab: "AllotSubject" }
+                })
+              }
+              className="inline-flex items-center gap-2 text-blue-600 font-medium underline cursor-pointer"
+            >
+              Go to Subject Allotment for Report Card
+            </span>
+          </div>
+        </div>
+
+        
+      )
+    },
+    {
+      title: "Subject Mapping",
+      content: (
+        <div className="space-y-4 text-sm">
+          <div className="bg-green-50 border border-green-100 rounded-md p-3">
+            <p className="font-medium text-gray-800">Purpose</p>
+            <p className="text-gray-600">
+              Map school subjects to report card subject
+            </p>
+          </div>
+
+          <div>
+            <p className="font-medium text-gray-800 mb-1">Adding new mapping</p>
+            <ul className="list-disc list-inside text-gray-600 space-y-1">
+              <li>Click on Add button</li>
+              <li>Select Subject</li>
+              <li>Select Report card subject</li>
+              <li>Submit the form</li>
+            </ul>
+          </div>
+
+          <div className="pt-2">
+            <a
+              onClick={() => navigate("/subjetMappinig")}
+              className="inline-flex items-center gap-2 text-blue-600 font-medium hover:underline cursor-pointer"
+            >
+              Go to Subject Mapping
+            </a>
+          </div>
+        </div>
+      )
+    }
+  ];
 
   return (
     // <h1 className="text-center text-white mt-[15%]">This is coming soon...</h1>
@@ -408,7 +535,7 @@ function SubjectList() {
         <div className="card mx-auto lg:w-3/4 shadow-lg">
           <div className="p-2 px-3 bg-gray-100 flex justify-between items-center">
             <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
-              Subject
+              Subjects <HelpInfoButton setOpen={setOpen} />
             </h3>{" "}
             <div className="box-border flex md:gap-x-2 justify-end md:h-10">
               <div className=" w-1/2 md:w-fit mr-1">
@@ -837,6 +964,10 @@ function SubjectList() {
           </div>
         )}
       </div>
+
+      {open && (
+        <InfoCard slides={slides} setOpen={setOpen} />
+      )}
     </>
   );
 }

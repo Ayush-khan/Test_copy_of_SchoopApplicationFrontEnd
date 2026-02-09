@@ -358,6 +358,7 @@ const AllotSubjectTab = ({ onSaveSuccess }) => {
   const API_URL = import.meta.env.VITE_API_URL;
   const [classes, setClasses] = useState([]);
   const [selectedClass, setSelectedClass] = useState(null);
+  const [loadingClass , setLoadingClass] = useState(false);
   const [selectedSubjectType, setSelectedSubjectType] = useState("");
   const [subjectTypeError, setSubjectTypeError] = useState(null);
   const [subjectsIs, setSubjectsIs] = useState([]); // All subjects
@@ -380,6 +381,7 @@ const AllotSubjectTab = ({ onSaveSuccess }) => {
   }, []);
 
   const fetchClassNames = async () => {
+    setLoadingClass(true);
     try {
       const token = localStorage.getItem("authToken");
       const response = await axios.get(`${API_URL}/api/getClassList`, {
@@ -389,6 +391,7 @@ const AllotSubjectTab = ({ onSaveSuccess }) => {
     } catch (error) {
       toast.error("Error fetching class names");
     }
+    setLoadingClass(false);
   };
 
   const fetchAllSubjects = async () => {
@@ -407,8 +410,6 @@ const AllotSubjectTab = ({ onSaveSuccess }) => {
       setSubjectsIs(subjects);
       setInitialSubjectsIs(subjects);
 
-      console.log("setSubjectsIs", subjects);
-      console.log("setInitialSubjectsIs", subjects);
     } catch (error) {
       toast.error("Error fetching subjects");
     }
@@ -417,26 +418,19 @@ const AllotSubjectTab = ({ onSaveSuccess }) => {
   // Fetch pre-selected subjects based on class and subject type
   const fetchPreSelectedSubjects = async (classId, subjectType) => {
     if (!classId || !subjectType) return;
-    console.log("classId:", classId, "subjectType:", subjectType.value);
     try {
       const token = localStorage.getItem("authToken");
       const response = await axios.get(
         `${API_URL}/api/get_sub_report_allotted/${classId}/${subjectType.value}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      console.log(
-        "without maching preselected subject come form api",
-        response?.data?.subjectAllotments
-      );
       const fetchedPreCheckedSubjects = response?.data?.subjectAllotments.map(
         (subject) => subject.get_subjects_for_report_card.sub_rc_master_id
       );
 
       setPreCheckedSubjects(fetchedPreCheckedSubjects);
-      console.log("setPreCheckedSubjects", response?.data?.subjectAllotments);
     } catch (error) {
       toast.error(error?.response?.data?.error);
-      console.log("error", error);
     }
   };
 
@@ -498,12 +492,6 @@ const AllotSubjectTab = ({ onSaveSuccess }) => {
 
     try {
       const token = localStorage.getItem("authToken");
-      console.log(
-        "subjects",
-        preCheckedSubjects,
-        "subject_type",
-        selectedSubjectType.value
-      );
 
       // Make the API request to save the subject allotment
       const response = await axios.post(
@@ -522,7 +510,6 @@ const AllotSubjectTab = ({ onSaveSuccess }) => {
         toast.success("Subjects allotted successfully");
 
         setLoading(false);
-        console.log("API Response:", response.data); // Log the response for debugging
 
         // Clear fields after successful submission
         setSelectedClass(null);
@@ -583,9 +570,10 @@ const AllotSubjectTab = ({ onSaveSuccess }) => {
                     <Select
                       value={selectedClass}
                       onChange={handleClassChange}
-                      placeholder="Select"
+                      placeholder={loadingClass ? "Loading..." : 'Select'}
                       className="w-full md:w-[50%] mb-3"
                       isClearable
+                      isDisabled={loadingClass}
                       options={classes.map((classObj) => ({
                         value: classObj.class_id,
                         label: classObj.name,
@@ -626,7 +614,7 @@ const AllotSubjectTab = ({ onSaveSuccess }) => {
                 </div>
 
                 {/* Display subjects with checkboxes */}
-                <div className="form-group flex justify-center gap-x-1 md:gap-x-6 mt-4">
+                {<div className="form-group flex justify-center gap-x-1 md:gap-x-6 mt-4">
                   <label className="w-1/4 pt-2 items-center text-center px-2 lg:px-3 py-2 font-semibold text-[1em] text-gray-700 ">
                     Select Subjects <span className="text-red-500">*</span>
                   </label>
@@ -665,7 +653,7 @@ const AllotSubjectTab = ({ onSaveSuccess }) => {
                       </p>
                     )}
                   </div>
-                </div>
+                </div>}
 
                 {/* Save button */}
 

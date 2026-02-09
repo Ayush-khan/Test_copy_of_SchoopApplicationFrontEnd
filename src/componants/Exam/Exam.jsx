@@ -7,6 +7,9 @@ import { faEdit, faTrash, faPlus } from "@fortawesome/free-solid-svg-icons";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { RxCross1 } from "react-icons/rx";
+import { useNavigate } from "react-router-dom";
+import InfoCard from "../InfoCards/InfoCard";
+import HelpInfoButton from "../Buttons/HelpInfoButton";
 
 // The is the divisionlist module
 function Exam() {
@@ -37,6 +40,160 @@ function Exam() {
 
   const previousPageRef = useRef(0);
   const prevSearchTermRef = useRef("");
+
+  const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
+
+  const slides = [
+    {
+      title: "Exams",
+      content: (
+        <div className="space-y-4 text-sm">
+          <div className="bg-blue-50 border border-blue-100 rounded-md p-3">
+            <p className="font-medium text-gray-800">Overview</p>
+            <p className="text-gray-600">
+              Create and manage exams that will be used for marks entry and report cards.
+            </p>
+          </div>
+
+          <div>
+            <p className="font-medium text-gray-800 mb-1">What you can define</p>
+            <ul className="list-disc list-inside text-gray-600 space-y-1">
+              <li>Exam name and term (Term 1 / Term 2)</li>
+              <li>Start date, end date, and open day date</li>
+              <li>Optional comments for internal reference</li>
+            </ul>
+          </div>
+
+          <div>
+            <p className="font-medium text-gray-800 mb-1">Management</p>
+            <p className="text-gray-600">
+              All exams are listed with edit and delete options for easy updates.
+            </p>
+          </div>
+        </div>
+      )
+    },
+    {
+      title: "Grades",
+      content: (
+        <div className="space-y-4 text-sm">
+          <div className="bg-green-50 border border-green-100 rounded-md p-3">
+            <p className="font-medium text-gray-800">Overview</p>
+            <p className="text-gray-600">
+              Define grading rules based on marks range for scholastic and co-scholastic subjects.
+            </p>
+          </div>
+
+          <div>
+            <p className="font-medium text-gray-800 mb-1">Grade setup includes</p>
+            <ul className="list-disc list-inside text-gray-600 space-y-1">
+              <li>Grade name (A, B, C, etc.)</li>
+              <li>Subject type: Scholastic or Co-Scholastic</li>
+              <li>Marks range (from – up to)</li>
+              <li>Applicable classes (multiple selection)</li>
+              <li>Optional comments</li>
+            </ul>
+          </div>
+
+          <div>
+            <p className="font-medium text-gray-800 mb-1">Why this matters</p>
+            <p className="text-gray-600">
+              Grades are automatically applied when marks fall within the defined range.
+            </p>
+          </div>
+
+          <div className="pt-2">
+            <a
+              onClick={() => navigate("/grades")}
+              className="inline-flex items-center gap-2 text-blue-600 font-medium hover:underline cursor-pointer"
+            >
+              Go to Grades
+            </a>
+          </div>
+        </div>
+      )
+    },
+    {
+      title: "Marks Headings",
+      content: (
+        <div className="space-y-4 text-sm">
+          <div className="bg-purple-50 border border-purple-100 rounded-md p-3">
+            <p className="font-medium text-gray-800">Overview</p>
+            <p className="text-gray-600">
+              Create headings under which marks will be entered for exams.
+            </p>
+          </div>
+
+          <div>
+            <p className="font-medium text-gray-800 mb-1">Each marks heading includes</p>
+            <ul className="list-disc list-inside text-gray-600 space-y-1">
+              <li>Marks heading name (e.g., Theory, Practical)</li>
+              <li>Sequence (order of appearance)</li>
+              <li>Written exam flag (Yes / No)</li>
+            </ul>
+          </div>
+
+          <div>
+            <p className="font-medium text-gray-800 mb-1">Usage</p>
+            <p className="text-gray-600">
+              These headings are later mapped to exams and used during marks entry.
+            </p>
+          </div>
+
+          <div className="pt-2">
+            <a
+              onClick={() => navigate("/marksHeading")}
+              className="inline-flex items-center gap-2 text-blue-600 font-medium hover:underline cursor-pointer"
+            >
+              Go to Marks Headings
+            </a>
+          </div>
+        </div>
+      )
+    },
+    {
+      title: "Allot Marks Headings",
+      content: (
+        <div className="space-y-4 text-sm">
+          <div className="bg-orange-50 border border-orange-100 rounded-md p-3">
+            <p className="font-medium text-gray-800">Overview</p>
+            <p className="text-gray-600">
+              Map marks headings to exams based on class and subject.
+            </p>
+          </div>
+
+          <div>
+            <p className="font-medium text-gray-800 mb-1">Step-by-step process</p>
+            <ul className="list-disc list-inside text-gray-600 space-y-1">
+              <li>Select the class</li>
+              <li>Select the subject</li>
+              <li>Select the exam</li>
+              <li>Define marks heading with maximum marks</li>
+              <li>Set highest marks shown on the report card</li>
+            </ul>
+          </div>
+
+          <div>
+            <p className="font-medium text-gray-800 mb-1">Listing</p>
+            <p className="text-gray-600">
+              Select a class to view all allotted marks headings for that class.
+            </p>
+          </div>
+
+          <div className="pt-2">
+            <a
+              onClick={() => navigate("/allot_Marks_Heading")}
+              className="inline-flex items-center gap-2 text-blue-600 font-medium hover:underline cursor-pointer"
+            >
+              Go to Allot Marks Headings
+            </a>
+          </div>
+        </div>
+      )
+    }
+  ];
+
 
   const pageSize = 10;
 
@@ -419,7 +576,7 @@ function Exam() {
         <div className="card mx-auto lg:w-3/4 shadow-lg">
           <div className="p-2 px-3 bg-gray-100 flex justify-between items-center">
             <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
-              Exams
+              Exams <HelpInfoButton setOpen={setOpen} />
             </h3>{" "}
             <div className="box-border flex md:gap-x-2 justify-end md:h-10">
               <div className=" w-1/2 md:w-fit mr-1">
@@ -1030,6 +1187,10 @@ function Exam() {
           </div>
         )}
       </div>
+
+      {open && (
+        <InfoCard stepp={0} slides={slides} setOpen={setOpen} />
+      )}
     </>
   );
 }
