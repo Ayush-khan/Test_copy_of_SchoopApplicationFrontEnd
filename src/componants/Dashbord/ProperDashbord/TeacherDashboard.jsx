@@ -23,7 +23,7 @@
 //     return children;
 // };
 
-// const TeacherDashboard = ({ dashboard,roleId, sortName }) => {
+// const TeacherDashboard = ({ dashboard, roleId, sortName }) => {
 //     /* ================= READY CHECK ================= */
 //     const isReady = Boolean(dashboard && dashboard.data);
 //     const data = isReady ? dashboard.data : null;
@@ -65,8 +65,8 @@
 //                                     TotalValue={mapped.student.total}
 //                                     presentValue={mapped.student.present}
 //                                     color="#4CAF50"
-// roleId = { roleId }
-// sortName = { sortName }
+//                                     roleId={roleId}
+//                                     sortName={sortName}
 //                                     icon={
 //                                         <FaUsersLine
 //                                             style={{
@@ -85,8 +85,8 @@
 //                                     title="Substitution Class"
 //                                     value={mapped.substituteCount}
 //                                     color="#2196F3"
-// roleId = { roleId }
-// sortName = { sortName }
+//                                     roleId={roleId}
+//                                     sortName={sortName}
 //                                     icon={
 //                                         <HiOutlineDocumentText
 //                                             style={{
@@ -104,8 +104,8 @@
 //                                     title="Homework Due"
 //                                     value={mapped.homeworkCount}
 //                                     color="#FF9800"
-// roleId = { roleId }
-// sortName = { sortName }
+//                                     roleId={roleId}
+//                                     sortName={sortName}
 //                                     icon={
 //                                         <TfiWrite
 //                                             style={{
@@ -124,8 +124,8 @@
 //                                     value={mapped.defaulter.count}
 //                                     valuePendingFee={mapped.defaulter.pendingAmount}
 //                                     color="#FF5733"
-// roleId = { roleId }
-// sortName = { sortName }
+//                                     roleId={roleId}
+//                                     sortName={sortName}
 //                                     icon={
 //                                         <HiCollection
 //                                             style={{
@@ -143,8 +143,8 @@
 //                                 title="Assessment"
 //                                 value="Coming Soon"
 //                                 color="#4CAF50"
-// roleId = { roleId }
-// sortName = { sortName }
+//                                 roleId={roleId}
+//                                 sortName={sortName}
 //                                 icon={
 //                                     <MdAssessment
 //                                         style={{
@@ -161,8 +161,8 @@
 //                                     title="Birthdays"
 //                                     value={mapped.birthdayCount}
 //                                     color="#2196F3"
-// roleId = { roleId }
-// sortName = { sortName }
+//                                     roleId={roleId}
+//                                     sortName={sortName}
 //                                     icon={
 //                                         <FaBirthdayCake
 //                                             style={{
