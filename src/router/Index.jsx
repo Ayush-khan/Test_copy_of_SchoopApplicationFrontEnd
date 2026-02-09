@@ -304,6 +304,7 @@ import DynamicMailer from "../componants/AdmissionAdminModule/DynamicMailer/Dyna
 import LessonPlanData from "../componants/Dashbord/PrinciplalDashboardSACS/LessonPlanData.jsx";
 import TodayStaffList from "../componants/AllTableList/TodayStaffList.jsx";
 // import Menus from "../c";../componants/Dashbord/PrinciplalDashboardSACS/LessonPlanData.jsx
+import ImpersonateListing from "../componants/SuperAdmin/Impersonate/ImpersonateListing.jsx";
 function Index() {
   return (
     <Routes>
@@ -1660,6 +1661,10 @@ function Index() {
         <Route
           path="/todayStaffList"
           element={<PrivateRoute element={<TodayStaffList />} />}
+        />
+        <Route
+          path="/superadmin/impersonate"
+          element={<PrivateRoute element={<ImpersonateListing />} />}
         />
       </Route>
 
