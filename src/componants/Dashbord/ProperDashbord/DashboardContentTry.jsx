@@ -105,7 +105,6 @@
 // };
 
 // export default DashboardContainerTry;
-// uper workin weel now try for fast
 import { useEffect, useState } from "react";
 import api from "../api";
 
@@ -113,6 +112,7 @@ import AdminDashboard from "./AdminDashboard.jsx";
 import PrincipalDashboardSACS from "../PrincipalDashboardSACS.jsx";
 import TeacherDashboard from "./TeacherDashboard.jsx";
 import PrincipalDashboard from "./PrincipalDashboard.jsx";
+import ComingSoonDashboard from "./ComingSoonDashboard.jsx";
 
 const DashboardContainerTry = () => {
     const [roleId, setRoleId] = useState(null);
@@ -127,12 +127,13 @@ const DashboardContainerTry = () => {
     }, []);
 
     useEffect(() => {
-        if (!loading && dashboard) {
+        if (!loading) {
             requestAnimationFrame(() => {
                 setReady(true);
             });
         }
-    }, [loading, dashboard]);
+    }, [loading]);
+
 
     const initDashboard = async () => {
         try {
@@ -146,20 +147,28 @@ const DashboardContainerTry = () => {
             setRegId(reg_id);
             setSortName(shortName);
 
-            let res;
-            if (role_id === "T") {
-                res = await api.get(`/api/teachers/${reg_id}/dashboard/summary`);
-            } else if (role_id === "M") {
+            // ❌ Teacher & Unknown roles → NO dashboard API
+            if (role_id === "T" || !["A", "M"].includes(role_id)) {
+                setDashboard(null);
+                return;
+            }
+
+            let res = null;
+
+            if (role_id === "M") {
                 res = await api.get("/api/principal/dashboard/summary");
-            } else {
+            }
+            else if (role_id === "A") {
                 res = await api.get("/api/admin/dashboard/summary");
             }
 
-            setDashboard(res.data);
+            setDashboard(res?.data ?? null);
+
         } finally {
             setLoading(false);
         }
     };
+
 
     // 🔒 Global blocking loader (only once)
     if (!ready) {
@@ -202,21 +211,136 @@ const DashboardContainerTry = () => {
     }
 
     if (roleId === "M") {
-        return sortName === "SACS" ? (
-            <PrincipalDashboardSACS dashboard={dashboard} ready={ready} roleId={roleId}
-                sortName={sortName} />
-        ) : (
-            <PrincipalDashboard dashboard={dashboard} roleId={roleId}
-                sortName={sortName} />
-        );
+        return sortName === "SACS"
+            ? <PrincipalDashboardSACS dashboard={dashboard} roleId={roleId} sortName={sortName} />
+            : <PrincipalDashboard dashboard={dashboard} roleId={roleId} sortName={sortName} />;
     }
 
     if (roleId === "T") {
-        return <TeacherDashboard dashboard={dashboard} roleId={roleId}
-            sortName={sortName} />;
+        return <TeacherDashboard roleId={roleId} sortName={sortName} />;
     }
 
-    return <AdminDashboard data={dashboard} roleId={roleId} sortName={sortName} />;
+    if (roleId === "A") {
+        return <AdminDashboard data={dashboard} roleId={roleId} sortName={sortName} />;
+    }
+
+    return <ComingSoonDashboard roleId={roleId} />;
 };
 
 export default DashboardContainerTry;
+
+// uper workin weel now try for fast apne ismai bs ye nhi hai ki jab koi  user id Parent ho
+// import { useEffect, useState } from "react";
+// import api from "../api";
+
+// import AdminDashboard from "./AdminDashboard.jsx";
+// import PrincipalDashboardSACS from "../PrincipalDashboardSACS.jsx";
+// import TeacherDashboard from "./TeacherDashboard.jsx";
+// import PrincipalDashboard from "./PrincipalDashboard.jsx";
+
+// const DashboardContainerTry = () => {
+//     const [roleId, setRoleId] = useState(null);
+//     const [sortName, setSortName] = useState("");
+//     const [regId, setRegId] = useState(null);
+//     const [dashboard, setDashboard] = useState(null);
+//     const [loading, setLoading] = useState(true);
+//     const [ready, setReady] = useState(false);
+
+//     useEffect(() => {
+//         initDashboard();
+//     }, []);
+
+//     useEffect(() => {
+//         if (!loading && dashboard) {
+//             requestAnimationFrame(() => {
+//                 setReady(true);
+//             });
+//         }
+//     }, [loading, dashboard]);
+
+//     const initDashboard = async () => {
+//         try {
+//             setLoading(true);
+
+//             const sessionRes = await api.get("/api/sessionData");
+//             const { role_id, reg_id } = sessionRes.data.user;
+//             const shortName = sessionRes.data.custom_claims.short_name;
+
+//             setRoleId(role_id);
+//             setRegId(reg_id);
+//             setSortName(shortName);
+
+//             let res;
+//             if (role_id === "T") {
+//                 res = await api.get(`/api/teachers/${reg_id}/dashboard/summary`);
+//             } else if (role_id === "M") {
+//                 res = await api.get("/api/principal/dashboard/summary");
+//             } else {
+//                 res = await api.get("/api/admin/dashboard/summary");
+//             }
+
+//             setDashboard(res.data);
+//         } finally {
+//             setLoading(false);
+//         }
+//     };
+
+//     // 🔒 Global blocking loader (only once)
+//     if (!ready) {
+
+//         return (
+//             <div className="w-screen h-screen flex items-center justify-center bg-white relative -top-[10%]">
+//                 {/* Overlay with blur */}
+//                 <div className="fixed top-0 left-0 w-full h-full bg-white bg-opacity-80 backdrop-blur-sm z-40"></div>
+
+//                 {/* Loader content */}
+//                 <div className="z-50 flex flex-col items-center space-y-6 px-6">
+//                     {/* Google Meet style minimal avatar / icon animation */}
+//                     <div className="relative w-24 h-24 rounded-full border-4 border-blue-600 border-t-transparent animate-spin"></div>
+
+//                     {/* Animated dots like Google Meet waiting */}
+//                     <div className="flex space-x-2">
+//                         {[...Array(3)].map((_, i) => (
+//                             <span
+//                                 key={i}
+//                                 className="w-4 h-4 bg-blue-600 rounded-full animate-bounce"
+//                                 style={{ animationDelay: `${i * 0.2}s` }}
+//                             ></span>
+//                         ))}
+//                     </div>
+
+//                     {/* Engaging Text */}
+//                     <p className="text-center text-blue-800 text-lg font-semibold animate-pulse">
+//                         🚀 Just a moment... Your dashboard is launching!
+//                     </p>
+
+//                     {/* Optional fun tip/message */}
+//                     <p className="text-sm text-gray-500 text-center max-w-xs">
+//                         Meanwhile, stretch your neck or blink your eyes 👀 — healthy habits
+//                         matter!
+//                     </p>
+//                 </div>
+//             </div>
+//         );
+
+//     }
+
+//     if (roleId === "M") {
+//         return sortName === "SACS" ? (
+//             <PrincipalDashboardSACS dashboard={dashboard} ready={ready} roleId={roleId}
+//                 sortName={sortName} />
+//         ) : (
+//             <PrincipalDashboard dashboard={dashboard} roleId={roleId}
+//                 sortName={sortName} />
+//         );
+//     }
+
+//     if (roleId === "T") {
+//         return <TeacherDashboard dashboard={dashboard} roleId={roleId}
+//             sortName={sortName} />;
+//     }
+
+//     return <AdminDashboard data={dashboard} roleId={roleId} sortName={sortName} />;
+// };
+
+// export default DashboardContainerTry;
