@@ -305,6 +305,19 @@ import LessonPlanData from "../componants/Dashbord/PrinciplalDashboardSACS/Lesso
 import TodayStaffList from "../componants/AllTableList/TodayStaffList.jsx";
 // import Menus from "../c";../componants/Dashbord/PrinciplalDashboardSACS/LessonPlanData.jsx
 import ImpersonateListing from "../componants/SuperAdmin/Impersonate/ImpersonateListing.jsx";
+import SendRemainderRemark from "../componants/MasterModuleLibrarian/SendRemainderRemark/SendRemainderRemark.jsx";
+import Periodicals from "../componants/MasterModuleLibrarian/Periodicals/Periodicals/Periodicals.jsx";
+import Subscription from "../componants/MasterModuleLibrarian/Periodicals/Subscription/Subscription.jsx";
+import ChangePeriodicalsStatus from "../componants/MasterModuleLibrarian/Periodicals/ChangePeriodicalsStatus/ChangePeriodicalsStatus.jsx";
+import PeriodicalsNotReceivedReport from "../componants/MasterModuleLibrarian/Periodicals/PeriodicalsReport/PeriodicalsNotReceivedReport.jsx";
+import PeriodicalsReport from "../componants/MasterModuleLibrarian/Periodicals/PeriodicalsReport/PeriodicalsReport.jsx";
+import BooksReport from "../componants/MasterModuleLibrarian/LibraryReports/BooksReport.jsx";
+import LocationwiseBookReport from "../componants/MasterModuleLibrarian/LibraryReports/LocationwiseBookReport.jsx";
+import BooksAddedInLibraryReport from "../componants/MasterModuleLibrarian/LibraryReports/BooksAddedInLibraryReport.jsx";
+import BooksIssuedHistoryReport from "../componants/MasterModuleLibrarian/LibraryReports/BookIssuedHistoryReport.jsx";
+import BookIssuedReport from "../componants/MasterModuleLibrarian/LibraryReports/BooksIssuedReport.jsx";
+import BooksNonReturnReport from "../componants/MasterModuleLibrarian/LibraryReports/BooksNonReturnReport.jsx";
+import MonthlyBookIssueReport from "../componants/MasterModuleLibrarian/LibraryReports/MonthlyBookIssueReport.jsx";
 function Index() {
   return (
     <Routes>
@@ -1665,6 +1678,61 @@ function Index() {
         <Route
           path="/superadmin/impersonate"
           element={<PrivateRoute element={<ImpersonateListing />} />}
+        />
+
+        {/* Librabry modules of mahima */}
+        <Route
+          path="/send_reminder_remark_non_returned_book"
+          element={<PrivateRoute element={<SendRemainderRemark />} />}
+        />
+        {/* Periodicals */}
+        <Route
+          path="/periodic_details"
+          element={<PrivateRoute element={<Periodicals />} />}
+        />
+        <Route
+          path="/subscription"
+          element={<PrivateRoute element={<Subscription />} />}
+        />
+        <Route
+          path="/change_periodical_status"
+          element={<PrivateRoute element={<ChangePeriodicalsStatus />} />}
+        />
+        <Route
+          path="/periodicalsNotReceivedReport"
+          element={<PrivateRoute element={<PeriodicalsNotReceivedReport />} />}
+        />
+        <Route
+          path="/periodicalsReport"
+          element={<PrivateRoute element={<PeriodicalsReport />} />}
+        />
+        <Route
+          path="/booksReport"
+          element={<PrivateRoute element={<BooksReport />} />}
+        />
+        <Route
+          path="/locationwiseBookReport"
+          element={<PrivateRoute element={<LocationwiseBookReport />} />}
+        />
+        <Route
+          path="/booksAddedInLibraryReport"
+          element={<PrivateRoute element={<BooksAddedInLibraryReport />} />}
+        />
+        <Route
+          path="/bookIssuedHistoryReport"
+          element={<PrivateRoute element={<BooksIssuedHistoryReport />} />}
+        />
+        <Route
+          path="/booksIssuedReport"
+          element={<PrivateRoute element={<BookIssuedReport />} />}
+        />
+        <Route
+          path="/booksNonReturnReport"
+          element={<PrivateRoute element={<BooksNonReturnReport />} />}
+        />
+        <Route
+          path="/monthlyBookIssuedReport"
+          element={<PrivateRoute element={<MonthlyBookIssueReport />} />}
         />
       </Route>
 

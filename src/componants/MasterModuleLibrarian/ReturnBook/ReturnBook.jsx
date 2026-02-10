@@ -67,6 +67,8 @@ const ReturnBook = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  const [autoSelectedCopy, setAutoSelectedCopy] = useState(null);
+
   const camelCase = (str) =>
     str
       ?.toLowerCase()
@@ -123,7 +125,7 @@ const ReturnBook = () => {
         `${API_URL}/api/get_teacherclasseswithclassteacher?teacher_id=${regId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
 
       // console.log("response", response.data.data);
@@ -221,7 +223,7 @@ const ReturnBook = () => {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       setStafflist(response.data);
@@ -275,9 +277,6 @@ const ReturnBook = () => {
   }, [selectedType]);
 
   const handleSearch = async () => {
-    // setStudentError("");
-    // setStaffError("");
-    // setClassError("");
     setTimetable([]);
     setMissingStudentData([]);
     setShowStudentReport(false);
@@ -296,179 +295,86 @@ const ReturnBook = () => {
         toast.error("Please enter at least one search criteria.");
         return;
       }
-      // Search BY accession no.
-      if (isAccessionEntered) {
-        const accessionUrl = `${API_URL}/api/issue_book_details?type=accession&copy_id=${accessionNo}`;
 
-        const accessionRes = await axios.get(accessionUrl, {
+      /* ----------------------------------
+       🔍 ACCESSION / GRN SEARCH
+    ---------------------------------- */
+      if (isAccessionEntered || isGrnNo) {
+        const url = isAccessionEntered
+          ? `${API_URL}/api/issue_book_details?type=accession&copy_id=${accessionNo}`
+          : `${API_URL}/api/issue_book_details?type=grno&grn_no=${grn_no}&reg_no=${grn_no}`;
+
+        const res = await axios.get(url, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
-        let issuedInfo = accessionRes.data;
+        const books = res.data?.data?.book || [];
+        const member = res.data?.data?.member;
 
-        if (!Array.isArray(issuedInfo)) {
-          issuedInfo = [issuedInfo];
-        }
+        // console.log("GRN BOOKS:", books);
 
-        if (issuedInfo.length === 0 || !issuedInfo[0]?.member_id) {
-          toast.error("This book is not issued !!!");
+        if (books.length === 0) {
+          toast.error("No issued books found!");
           return;
         }
 
-        const memberId = issuedInfo[0].member_id;
+        finalResults = books;
+        setMemberDetails(member);
+        setShowMemberType(member?.member_type);
+      } else if (selectedType && selectedStaffId) {
+        /* ----------------------------------
+       🔍 MEMBER SEARCH
+    ---------------------------------- */
+        const mType = selectedType === "student" ? "S" : "T";
 
-        // 🔹 FETCH RECORDS
-        const recordsUrl = `${API_URL}/api/issue_book_details?type=records&member_id=${memberId}`;
+        const issuedUrl = `${API_URL}/api/issue_book_details?type=records&member_id=${selectedStaffId}&m_type=${mType}`;
 
-        const recordsRes = await axios.get(recordsUrl, {
+        const res = await axios.get(issuedUrl, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
-        const recordsData = Array.isArray(recordsRes.data)
-          ? recordsRes.data
-          : [];
+        const books = res.data?.data?.book || [];
+        const member = res.data?.data?.member;
 
-        finalResults = recordsData;
+        // console.log("MEMBER BOOKS:", books);
 
-        if (recordsData.length === 0) {
-          toast.error("No records found!");
-          return;
-        }
-
-        const { member_type, copy_id } = recordsData[0];
-
-        const detailsUrl =
-          member_type === "T"
-            ? `${API_URL}/api/issue/staff_data?copy_id=${copy_id}&acd_yr=${academicYear}`
-            : `${API_URL}/api/issue/student_data?copy_id=${copy_id}&acd_yr=${academicYear}`;
-
-        setShowMemberType(member_type);
-
-        const detailsRes = await axios.get(detailsUrl, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
-        const fetchedDetails = Array.isArray(detailsRes.data)
-          ? detailsRes.data[0]
-          : detailsRes.data;
-
-        // Save 2 things separately:
-        setMemberDetails(fetchedDetails); // ONLY ONE RECORD
-      }
-
-      //  Search by member type
-      else if (selectedType && selectedStaffId) {
-        // Determine which member ID to use
-        const memberId = selectedType === "student" ? "S" : "T";
-
-        // Fetch issued books for this member
-        const issuedUrl = `${API_URL}/api/issue_book_details?type=records&member_id=${selectedStaffId}&m_type=${memberId}`;
-        const issuedRes = await axios.get(issuedUrl, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
-        const issuedBooks = Array.isArray(issuedRes.data) ? issuedRes.data : [];
-
-        if (issuedBooks.length === 0) {
+        if (books.length === 0) {
           toast.error("No issued books found.");
           return;
         }
 
-        finalResults = issuedBooks;
-
-        const { member_type, copy_id } = issuedBooks[0];
-
-        // Determine API for member details
-        const detailsUrl =
-          member_type === "T"
-            ? `${API_URL}/api/issue/staff_data?copy_id=${copy_id}&acd_yr=${academicYear}`
-            : `${API_URL}/api/issue/student_data?copy_id=${copy_id}&acd_yr=${academicYear}`;
-
-        // Set member type for JSX rendering
-        setShowMemberType(member_type);
-
-        // Fetch member details
-        const detailsRes = await axios.get(detailsUrl, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
-        const fetchedDetails = Array.isArray(detailsRes.data)
-          ? detailsRes.data[0]
-          : detailsRes.data;
-
-        setMemberDetails(fetchedDetails);
+        finalResults = books;
+        setMemberDetails(member);
+        setShowMemberType(member?.member_type);
       }
 
-      // Search by Grn NO
-      else if (isGrnNo) {
-        const grnUrl = `${API_URL}/api/issue_book_details?type=grno&reg_no=${grn_no}`;
-
-        const accessionRes = await axios.get(grnUrl, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
-        let issuedInfo = accessionRes.data;
-
-        if (!Array.isArray(issuedInfo)) {
-          issuedInfo = [issuedInfo];
-        }
-
-        if (issuedInfo.length === 0 || !issuedInfo[0]?.member_id) {
-          toast.error("This book is not issued !!!");
-          return;
-        }
-
-        const memberId = issuedInfo[0].member_id;
-
-        const recordsUrl = `${API_URL}/api/issue_book_details?type=records&member_id=${memberId}`;
-
-        const recordsRes = await axios.get(recordsUrl, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
-        const recordsData = Array.isArray(recordsRes.data)
-          ? recordsRes.data
-          : [];
-
-        finalResults = recordsData;
-
-        if (recordsData.length === 0) {
-          toast.error("No records found!");
-          return;
-        }
-
-        const { member_type, copy_id } = recordsData[0];
-
-        const detailsUrl =
-          member_type === "T"
-            ? `${API_URL}/api/issue/staff_data?copy_id=${copy_id}&acd_yr=${academicYear}`
-            : `${API_URL}/api/issue/student_data?copy_id=${copy_id}&acd_yr=${academicYear}`;
-
-        setShowMemberType(member_type);
-
-        const detailsRes = await axios.get(detailsUrl, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
-        const fetchedDetails = Array.isArray(detailsRes.data)
-          ? detailsRes.data[0]
-          : detailsRes.data;
-
-        // Save 2 things separately:
-        setMemberDetails(fetchedDetails); // ONLY ONE RECORD
-      }
-
-      // -------------------------------------------------------
-      //  SET FINAL DATA
-      // -------------------------------------------------------
+      /* ----------------------------------
+       ✅ FINAL SET
+    ---------------------------------- */
       setTimetable(finalResults);
       setPageCount(Math.ceil(finalResults.length / pageSize));
       setShowStudentReport(true);
-      setAccessionNo("");
-      setGrnNo("");
-    } catch (err) {
-      console.error("Search error:", err);
-      toast.error("Failed to fetch data.");
+
+      // setAccessionNo("");
+      // setGrnNo("");
+    } catch (error) {
+      console.error("Search error:", error);
+
+      // Axios error with response (backend replied)
+      if (error.response) {
+        const { status, data } = error.response;
+
+        // 404 from backend
+        if (status === 404 && data?.message) {
+          toast.error(data.message);
+        } else {
+          toast.error(data?.message || "Failed to fetch data.");
+        }
+      }
+      // No response (network / server down)
+      else {
+        toast.error("Server not reachable. Please try again.");
+      }
     } finally {
       setLoadingForSearch(false);
       setIsSubmitting(false);
@@ -482,28 +388,27 @@ const ReturnBook = () => {
       const accessionNo = student?.copy_id || "";
 
       return accessionNo.includes(searchLower);
-    }
+    },
   );
 
   const displayedSections = filteredSections.slice(currentPage * pageSize);
 
   const handleCheckboxChange = (copy_id) => {
-    let updated;
-
-    if (selectedCopies.includes(copy_id)) {
-      updated = selectedCopies.filter((x) => x !== copy_id);
-    } else {
-      updated = [...selectedCopies, copy_id];
-    }
-
-    setSelectedCopies(updated);
+    setAutoSelectedCopy(null);
+    setSelectedCopies((prev) => {
+      if (prev.includes(copy_id)) {
+        return prev.filter((x) => x !== copy_id); // unselect
+      } else {
+        return [...prev, copy_id]; // select
+      }
+    });
   };
 
   const handleSelectAll = () => {
     if (selectedCopies.length === displayedSections.length) {
       setSelectedCopies([]); // unselect all
     } else {
-      setSelectedCopies(displayedSections.map((item) => item.copy_id)); // select all by copy_id
+      setSelectedCopies(displayedSections.map((item) => item.copy_id)); // select all
     }
   };
 
@@ -511,51 +416,100 @@ const ReturnBook = () => {
     displayedSections.length > 0 &&
     selectedCopies.length === displayedSections.length;
 
+  // useEffect(() => {
+  //   if (!accessionNo) return;
+
+  //   const exists = displayedSections.some(
+  //     (item) => item.copy_id === accessionNo,
+  //   );
+
+  //   if (!exists) return;
+
+  //   setSelectedCopies((prev) => {
+  //     // 🚨 THIS LINE STOPS INFINITE LOOP
+  //     if (prev.length === 1 && prev[0] === accessionNo) {
+  //       return prev; // no state update
+  //     }
+  //     return [accessionNo];
+  //   });
+  // }, [accessionNo, displayedSections]);
+
+  useEffect(() => {
+    if (!accessionNo) {
+      // 🔥 clear ONLY auto-selection
+      setAutoSelectedCopy(null);
+      return;
+    }
+
+    const matched = displayedSections.find(
+      (item) => String(item.copy_id) === String(accessionNo),
+    );
+
+    if (!matched) return;
+
+    setAutoSelectedCopy(matched.copy_id);
+
+    setSelectedCopies((prev) => {
+      // prevent infinite loop & override
+      if (prev.length === 1 && prev[0] === matched.copy_id) {
+        return prev;
+      }
+      return [matched.copy_id];
+    });
+  }, [accessionNo, displayedSections]);
+
   const handleReturnBook = async ({
     selectedCopyIds,
     memberId,
     memberType,
     dateOfReturn,
   }) => {
-    setError("");
+    // validation
+    if (!selectedCopyIds || selectedCopyIds.length === 0) {
+      // console.log("NO BOOKS SELECTED");
+      toast.error("Please select at least one book");
+      return;
+    }
+
+    if (!memberId || !memberType) {
+      // console.log("MEMBER MISSING");
+      toast.error("Member information is missing");
+      return;
+    }
+
+    if (!dateOfReturn) {
+      // console.log("DATE MISSING");
+      toast.error("Date of return is required");
+      return;
+    }
+
+    // console.log("VALIDATION PASSED");
+
     setLoading(true);
 
-    const token = localStorage.getItem("authToken");
-
     try {
-      if (!selectedCopyIds || selectedCopyIds.length === 0) {
-        throw new Error("Please select at least one book");
-      }
-      if (!memberId || !memberType) {
-        throw new Error("Member information is missing");
-      }
-      if (!dateOfReturn) {
-        throw new Error("Date of return is required");
-      }
+      const token = localStorage.getItem("authToken");
 
       const payload = {
         operation: "return",
         selector: selectedCopyIds,
         member_id: memberId,
-        member_type: memberType,
+        member_type: memberType, // "S" for student, "T" for teacher/staff
         dateofreturn: dateOfReturn,
       };
 
       const response = await axios.post(
-        `${API_URL}/api/library/book_return_reissue`,
+        `${API_URL}/api/library/return_book`,
         payload,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
 
-      console.log("API Response:", response.data);
-      toast.success("Book Return Successfully..");
+      // console.log("response", response);
+      toast.success("Book Returned Successfully");
       setShowStudentReport(false);
-      return response.data;
+      setSelectedCopies([]); // reset selections
     } catch (err) {
-      console.error(err);
-      setError(err.response?.data?.message || err.message);
+      toast.error(err.response?.data?.message || err.message);
     } finally {
       setLoading(false);
     }
@@ -563,44 +517,60 @@ const ReturnBook = () => {
 
   const handleReissueBook = async ({
     selectedCopyIds,
+    bookIds, // <-- new array
     memberId,
     memberType,
     dateOfReturn,
   }) => {
+    if (!selectedCopyIds || selectedCopyIds.length === 0) {
+      // console.log("NO BOOKS SELECTED");
+      toast.error("Please select at least one book");
+      return;
+    }
+
+    if (!bookIds || bookIds.length !== selectedCopyIds.length) {
+      // console.log("BOOK IDS MISSING OR MISMATCHED");
+      toast.error("Book IDs are missing or do not match selected copies");
+      return;
+    }
+
+    if (!memberId || !memberType) {
+      // console.log("MEMBER MISSING");
+      toast.error("Member information is missing");
+      return;
+    }
+
+    if (!dateOfReturn) {
+      // console.log("DATE MISSING");
+      toast.error("Date of return is required");
+      return;
+    }
+
     setError("");
     setLoading(true);
 
-    const token = localStorage.getItem("authToken");
-
     try {
-      if (!selectedCopyIds || selectedCopyIds.length === 0) {
-        throw new Error("Please select at least one book");
-      }
-      if (!memberId || !memberType) {
-        throw new Error("Member information is missing");
-      }
-      if (!dateOfReturn) {
-        throw new Error("Date of return is required");
-      }
+      const token = localStorage.getItem("authToken");
 
       const payload = {
         operation: "reissue",
         selector: selectedCopyIds,
+        book_id: bookIds, // <-- send the book IDs array
         member_id: memberId,
         member_type: memberType,
         dateofreturn: dateOfReturn,
       };
 
       const response = await axios.post(
-        `${API_URL}/api/library/book_return_reissue`,
+        `${API_URL}/api/library/reissue_book`,
         payload,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
 
-      console.log("API Response:", response.data);
+      // console.log("API Response:", response.data);
       toast.success("Book Reissue Successfully..");
+
+      setSelectedCopies([]);
       setShowStudentReport(false);
       return response.data;
     } catch (err) {
@@ -794,297 +764,164 @@ const ReturnBook = () => {
               </form>
             )}
 
-            {/* {!showStudentReport && (
-              <div className="w-full px-6 py-2">
-                <div className="w-full flex flex-col md:flex-row md:items-start gap-6">
-                 
-
-                  <div className="flex flex-col w-full md:w-auto">
-                    <label className="text-md mb-1">Accession No.</label>
-                    <input
-                      type="text"
-                      value={accessionNo}
-                      onChange={(e) => setAccessionNo(e.target.value)}
-                      placeholder="Enter"
-                      className="border border-gray-300 rounded px-3 py-2 w-[160px]"
-                      maxLength={8}
-                    />
-                  </div>
-                  <div className="flex flex-col w-full md:w-auto">
-                    <label className="text-red-500 font-semibold mt-4">
-                      OR
-                    </label>
-                  </div>
-                  <div className="flex flex-col w-full md:w-auto">
-                    <label className="text-md mb-1">
-                      Member Type <span className="text-red-500">*</span>
-                    </label>
-
-                    <div className="flex items-center border border-gray-300 rounded-md px-4 py-2 bg-white">
-                      <label className="flex items-center gap-1 cursor-pointer">
-                        <input
-                          type="radio"
-                          name="userType"
-                          value="student"
-                          checked={selectedType === "student"}
-                          onChange={() => setSelectedType("student")}
-                          className="accent-pink-600"
-                        />
-                        <span>Student</span>
-                      </label>
-
-                      <label className="flex items-center gap-1 ml-4 cursor-pointer">
-                        <input
-                          type="radio"
-                          name="userType"
-                          value="staff"
-                          checked={selectedType === "staff"}
-                          onChange={() => setSelectedType("staff")}
-                          className="accent-pink-600"
-                        />
-                        <span>Staff</span>
-                      </label>
-                    </div>
-                  </div>
-
-                  {selectedType === "student" && (
-                    <>
-                      <div className="flex flex-col w-full md:w-auto">
-                        <label className="text-md mb-1">
-                          Select Class <span className="text-red-500">*</span>
-                        </label>
-
-                        <div className="w-[160px]">
-                          <Select
-                            menuPortalTarget={document.body}
-                            menuPosition="fixed"
-                            value={selectedStudent}
-                            onChange={handleStudentSelect}
-                            options={studentOptions}
-                            placeholder="Select"
-                            isClearable
-                            isSearchable
-                          />
-                        </div>
-                      </div>
-
-                      <div className="flex flex-col w-full md:w-auto">
-                        <label className="text-md mb-1">
-                          Member Name <span className="text-red-500">*</span>
-                        </label>
-
-                        <div className="w-[230px]">
-                          <Select
-                            menuPortalTarget={document.body}
-                            menuPosition="fixed"
-                            value={selectedStaff}
-                            onChange={handleMemberSelect}
-                            options={staffOptions}
-                            placeholder="Select"
-                            isSearchable
-                            isClearable
-                          />
-                        </div>
-                      </div>
-
-                      <div className="flex flex-col w-full md:w-auto">
-                        <label className="text-md mb-1">
-                          Enter/Scan GRN No.
-                        </label>
-                        <input
-                          type="text"
-                          value={grn_no}
-                          onChange={(e) => setGrnNo(e.target.value)}
-                          placeholder="Enter"
-                          className="border border-gray-300 rounded px-3 py-2 w-[160px]"
-                          maxLength={8}
-                        />
-                      </div>
-                    </>
-                  )}
-
-                  {selectedType === "staff" && (
-                    <>
-                      <div className="flex flex-col w-full md:w-auto">
-                        <label className="text-md mb-1">
-                          Member Name <span className="text-red-500">*</span>
-                        </label>
-
-                        <div className="w-[250px]">
-                          <Select
-                            menuPortalTarget={document.body}
-                            menuPosition="fixed"
-                            value={selectedStaff}
-                            onChange={handleMemberSelect}
-                            options={staffOptions}
-                            placeholder="Select"
-                            isSearchable
-                            isClearable
-                          />
-                        </div>
-                      </div>
-                    </>
-                  )}
-
-                  <div
-                    className="flex flex-col justify-end h-full mt-6 md:mt-6"
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        handleSearch();
-                      }
-                    }}
-                  >
-                    <button
-                      type="button"
-                      onClick={handleSearch}
-                      className="h-10 px-6 text-white rounded font-semibold"
-                      style={{ backgroundColor: "#2196F3" }}
-                    >
-                      {loadingForSearch ? "Browsing.." : "Browse"}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )} */}
-
             {showStudentReport && (
               <>
                 <div className="w-full">
                   <div className="card mx-auto lg:w-full shadow-lg">
                     <div className="p-2 px-3 bg-gray-100 border-none flex items-center justify-between">
                       <div className="w-full flex flex-row items-center justify-between ">
-                        <h3 className="text-gray-700 mt-1 text-[1.1em] mr-4">
+                        <h3 className="text-gray-700 mt-1 text-[1.1em] lg:text-xl text-nowrap mr-2">
                           Return Book
                         </h3>
-
                         <div
-                          className="bg-blue-50 border-l-2 border-r-2 text-[0.9em] border-pink-500 rounded-md shadow-md px-3 py-1"
-                          style={{ overflowX: "auto", whiteSpace: "nowrap" }}
+                          className="flex items-center w-full"
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              e.preventDefault();
+                              handleSearch();
+                            }
+                          }}
                         >
-                          <div className="flex items-center gap-x-4 flex-wrap">
-                            <div className="flex items-center gap-x-1">
-                              <label className="text-sm whitespace-nowrap">
-                                Accession No.
-                              </label>
-                              <input
-                                type="text"
-                                maxLength={8}
-                                value={accessionNo}
-                                onChange={(e) => setAccessionNo(e.target.value)}
-                                className="border border-gray-300 rounded px-1 py-2 text-sm w-[80px]"
-                                placeholder="Enter"
-                              />
-                            </div>
-                            <div className="flex flex-col w-full md:w-auto">
-                              <label className="text-red-500 font-semibold mt-1">
-                                OR
-                              </label>
-                            </div>
-
-                            <div className="flex items-center gap-x-1">
-                              <label className="text-sm whitespace-nowrap">
-                                Member Type{" "}
-                                <span className="text-red-500">*</span>
-                              </label>
-
-                              <div className="flex items-center border border-gray-300 rounded-md px-2 py-2 bg-white text-sm">
-                                <label className="flex items-center gap-1 cursor-pointer">
-                                  <input
-                                    type="radio"
-                                    name="userType"
-                                    value="student"
-                                    checked={selectedType === "student"}
-                                    onChange={() => setSelectedType("student")}
-                                    className="accent-pink-600"
-                                  />
-                                  <span>Student</span>
+                          <div
+                            className="bg-blue-50 border-l-2 border-r-2 text-[0.9em] border-pink-500 rounded-md shadow-md mx-auto px-6 py-2"
+                            style={{
+                              overflowX: "auto",
+                              whiteSpace: "nowrap",
+                            }}
+                          >
+                            <div
+                              className="flex items-center gap-x-1 text-blue-800 font-medium"
+                              style={{ flexWrap: "nowrap" }}
+                            ></div>
+                            <div className="flex items-center gap-x-4 flex-wrap">
+                              <div className="flex items-center gap-x-1">
+                                <label className="text-sm whitespace-nowrap">
+                                  Accession No.
                                 </label>
-
-                                <label className="flex items-center gap-1 ml-3 cursor-pointer">
-                                  <input
-                                    type="radio"
-                                    name="userType"
-                                    value="staff"
-                                    checked={selectedType === "staff"}
-                                    onChange={() => setSelectedType("staff")}
-                                    className="accent-pink-600"
-                                  />
-                                  <span>Staff</span>
-                                </label>
-                              </div>
-                            </div>
-
-                            {selectedType === "student" && (
-                              <>
-                                <div className="flex items-center gap-x-1">
-                                  <label className="text-sm whitespace-nowrap">
-                                    Class{" "}
-                                    <span className="text-red-500">*</span>
-                                  </label>
-
-                                  <div className="w-[100px]">
-                                    <Select
-                                      menuPortalTarget={document.body}
-                                      menuPosition="fixed"
-                                      value={selectedStudent}
-                                      onChange={handleStudentSelect}
-                                      options={studentOptions}
-                                      placeholder="Select"
-                                      isClearable
-                                      isSearchable
-                                      className="text-sm"
-                                    />
-                                  </div>
-                                </div>
-                              </>
-                            )}
-
-                            <div className="flex items-center gap-x-1">
-                              <label className="text-sm whitespace-nowrap">
-                                Name <span className="text-red-500">*</span>
-                              </label>
-
-                              <div className="w-[100px]">
-                                <Select
-                                  menuPortalTarget={document.body}
-                                  menuPosition="fixed"
-                                  value={selectedStaff}
-                                  onChange={handleMemberSelect}
-                                  options={staffOptions}
-                                  placeholder="Select"
-                                  isClearable
-                                  isSearchable
-                                  className="text-sm"
+                                <input
+                                  type="text"
+                                  maxLength={8}
+                                  value={accessionNo}
+                                  onChange={(e) =>
+                                    setAccessionNo(e.target.value)
+                                  }
+                                  className="border border-gray-300 rounded px-1 py-2 text-sm w-[80px]"
+                                  placeholder="Enter"
                                 />
                               </div>
-                            </div>
+                              <div className="flex flex-col w-full md:w-auto">
+                                <label className="text-red-500 font-semibold mt-1">
+                                  OR
+                                </label>
+                              </div>
 
-                            {selectedType === "student" && (
-                              <>
-                                <div className="flex items-center gap-x-1">
-                                  <label className="text-sm whitespace-nowrap">
-                                    GRN No.
+                              <div className="flex items-center gap-x-1">
+                                <label className="text-sm whitespace-nowrap">
+                                  Member Type{" "}
+                                  <span className="text-red-500">*</span>
+                                </label>
+
+                                <div className="flex items-center border border-gray-300 rounded-md px-2 py-2 bg-white text-sm">
+                                  <label className="flex items-center gap-1 cursor-pointer">
+                                    <input
+                                      type="radio"
+                                      name="userType"
+                                      value="student"
+                                      checked={selectedType === "student"}
+                                      onChange={() =>
+                                        setSelectedType("student")
+                                      }
+                                      className="accent-pink-600"
+                                    />
+                                    <span>Student</span>
                                   </label>
-                                  <input
-                                    type="text"
-                                    maxLength={8}
-                                    value={grn_no}
-                                    onChange={(e) => setGrnNo(e.target.value)}
-                                    className="border border-gray-300 rounded px-1 py-2 text-sm w-[80px]"
-                                    placeholder="Enter"
+
+                                  <label className="flex items-center gap-1 ml-3 cursor-pointer">
+                                    <input
+                                      type="radio"
+                                      name="userType"
+                                      value="staff"
+                                      checked={selectedType === "staff"}
+                                      onChange={() => setSelectedType("staff")}
+                                      className="accent-pink-600"
+                                    />
+                                    <span>Staff</span>
+                                  </label>
+                                </div>
+                              </div>
+
+                              {selectedType === "student" && (
+                                <>
+                                  <div className="flex items-center gap-x-1">
+                                    <label className="text-sm whitespace-nowrap">
+                                      Class{" "}
+                                      <span className="text-red-500">*</span>
+                                    </label>
+
+                                    <div className="w-[100px]">
+                                      <Select
+                                        menuPortalTarget={document.body}
+                                        menuPosition="fixed"
+                                        value={selectedStudent}
+                                        onChange={handleStudentSelect}
+                                        options={studentOptions}
+                                        placeholder="Select"
+                                        isClearable
+                                        isSearchable
+                                        className="text-sm"
+                                      />
+                                    </div>
+                                  </div>
+                                </>
+                              )}
+
+                              <div className="flex items-center gap-x-1">
+                                <label className="text-sm whitespace-nowrap">
+                                  Name <span className="text-red-500">*</span>
+                                </label>
+
+                                <div className="w-[100px]">
+                                  <Select
+                                    menuPortalTarget={document.body}
+                                    menuPosition="fixed"
+                                    value={selectedStaff}
+                                    onChange={handleMemberSelect}
+                                    options={staffOptions}
+                                    placeholder="Select"
+                                    isClearable
+                                    isSearchable
+                                    className="text-sm"
                                   />
                                 </div>
-                              </>
-                            )}
+                              </div>
 
-                            <button
-                              type="button"
-                              onClick={handleSearch}
-                              className="h-8 text-white px-1 rounded font-medium text-sm"
-                              style={{ backgroundColor: "#2196F3" }}
-                            >
-                              {loadingForSearch ? "Browsing.." : "Browse"}
-                            </button>
+                              {selectedType === "student" && (
+                                <>
+                                  <div className="flex items-center gap-x-1">
+                                    <label className="text-sm whitespace-nowrap">
+                                      GRN No.
+                                    </label>
+                                    <input
+                                      type="text"
+                                      maxLength={8}
+                                      value={grn_no}
+                                      onChange={(e) => setGrnNo(e.target.value)}
+                                      className="border border-gray-300 rounded px-1 py-2 text-sm w-[80px]"
+                                      placeholder="Enter"
+                                    />
+                                  </div>
+                                </>
+                              )}
+
+                              <button
+                                type="button"
+                                onClick={handleSearch}
+                                className="h-8 text-white px-1 rounded font-medium text-sm"
+                                style={{ backgroundColor: "#2196F3" }}
+                              >
+                                {loadingForSearch ? "Browsing.." : "Browse"}
+                              </button>
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -1143,8 +980,8 @@ const ReturnBook = () => {
                                     `${memberDetails.first_name || ""} ${
                                       memberDetails.mid_name || ""
                                     } ${memberDetails.last_name || ""} ${
-                                      memberDetails.teacher_name || ""
-                                    }`.trim()
+                                      memberDetails.name || ""
+                                    }`.trim(),
                                   )}
                                 </td>
 
@@ -1203,11 +1040,11 @@ const ReturnBook = () => {
                         <table className="min-w-full leading-normal table-auto mb-2">
                           <thead>
                             <tr className="bg-gray-100">
-                              <th className="px-2 text-center lg:px-3 py-2 border text-sm font-semibold">
+                              <th className="px-2 w-[7%] text-center lg:px-3 py-2 border text-sm font-semibold">
                                 Sr No.
                               </th>
 
-                              <th className="px-2 text-center lg:px-3 py-2 border text-sm font-semibold">
+                              <th className="px-2 w-[7%] text-center lg:px-3 py-2 border text-sm font-semibold">
                                 <input
                                   type="checkbox"
                                   checked={isAllSelected}
@@ -1216,16 +1053,16 @@ const ReturnBook = () => {
                                 Select All
                               </th>
 
-                              <th className="px-2 text-center lg:px-3 py-2 border text-sm font-semibold">
+                              <th className="px-2 w-[7%] text-center lg:px-3 py-2 border text-sm font-semibold">
                                 Accession No.
                               </th>
-                              <th className="px-2 text-center lg:px-3 py-2 border text-sm font-semibold">
+                              <th className="px-2 w-[25%]  text-center lg:px-3 py-2 border text-sm font-semibold">
                                 Book Title
                               </th>
-                              <th className="px-2 text-center lg:px-3 py-2 border text-sm font-semibold">
+                              <th className="px-2 w-[8%] text-center lg:px-3 py-2 border text-sm font-semibold">
                                 Issue Date
                               </th>
-                              <th className="px-2 text-center lg:px-3 py-2 border text-sm font-semibold">
+                              <th className="px-2 w-[8%] text-center lg:px-3 py-2 border text-sm font-semibold">
                                 Due Date
                               </th>
                             </tr>
@@ -1242,7 +1079,7 @@ const ReturnBook = () => {
                                   <input
                                     type="checkbox"
                                     checked={selectedCopies.includes(
-                                      item.copy_id
+                                      item.copy_id,
                                     )}
                                     onChange={() =>
                                       handleCheckboxChange(item.copy_id)
@@ -1254,19 +1091,19 @@ const ReturnBook = () => {
                                   {item.copy_id}
                                 </td>
                                 <td className="px-2 py-1 text-center border">
-                                  {item.book_title}
+                                  {item.book_title || "-"}
                                 </td>
                                 <td className="px-2 py-1 text-center border">
                                   {item.issue_date
                                     ? new Date(
-                                        item.issue_date
+                                        item.issue_date,
                                       ).toLocaleDateString("en-GB")
                                     : "-"}
                                 </td>
                                 <td className="px-2 py-1 text-center border">
                                   {item.due_date
                                     ? new Date(
-                                        item.due_date
+                                        item.due_date,
                                       ).toLocaleDateString("en-GB")
                                     : "-"}
                                 </td>
@@ -1279,18 +1116,28 @@ const ReturnBook = () => {
                           <button
                             type="button"
                             className="bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-2 rounded mr-2"
-                            onClick={() =>
+                            onClick={() => {
+                              // console.log("Return button clicked");
+                              // console.log(
+                              //   "selectedCopies state:",
+                              //   selectedCopies,
+                              // );
+                              // console.log(
+                              //   "selectedStaffId:",
+                              //   memberDetails.member_id,
+                              // );
+                              // console.log("selectedType:", selectedType);
+                              // console.log("issuedDate:", issuedDate);
+
                               handleReturnBook({
                                 selectedCopyIds: selectedCopies,
-                                memberId: selectedStaffId,
+                                memberId:
+                                  selectedStaffId || memberDetails.member_id,
                                 memberType:
                                   selectedType === "student" ? "S" : "T",
                                 dateOfReturn: issuedDate,
-                              })
-                            }
-                            disabled={
-                              selectedCopies.length === 0 || !issuedDate
-                            }
+                              });
+                            }}
                           >
                             Return Book
                           </button>
@@ -1298,18 +1145,24 @@ const ReturnBook = () => {
                           <button
                             type="button"
                             className="bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-2 rounded mr-2"
-                            onClick={() =>
+                            onClick={() => {
+                              // Map selected copy IDs to their corresponding book IDs
+                              const selectedBookIds = displayedSections
+                                .filter((item) =>
+                                  selectedCopies.includes(item.copy_id),
+                                )
+                                .map((item) => item.book_id);
+
                               handleReissueBook({
                                 selectedCopyIds: selectedCopies,
-                                memberId: selectedStaffId,
+                                bookIds: selectedBookIds, // <-- send matching book IDs
+                                memberId:
+                                  selectedStaffId || memberDetails?.member_id,
                                 memberType:
                                   selectedType === "student" ? "S" : "T",
                                 dateOfReturn: issuedDate,
-                              })
-                            }
-                            disabled={
-                              selectedCopies.length === 0 || !issuedDate
-                            }
+                              });
+                            }}
                           >
                             Re-Issue Book
                           </button>
@@ -1328,40 +1181,3 @@ const ReturnBook = () => {
 };
 
 export default ReturnBook;
-
-// Process issued books with accession/record data
-// const processedBooks = [];
-// const missingStudents = [];
-
-// for (const book of issuedBooks) {
-//   try {
-//     const recordUrl = `${API_URL}/api/issue_book_details?type=accession&copy_id=${book.copy_id}`;
-//     const recordRes = await axios.get(recordUrl, {
-//       headers: { Authorization: `Bearer ${token}` },
-//     });
-//     const record = recordRes.data?.[0] ?? null;
-
-//     if (!record) {
-//       missingStudents.push({
-//         ...book,
-//         record: null,
-//         studentDetails: fetchedDetails,
-//       });
-//     } else {
-//       processedBooks.push({
-//         ...book,
-//         record,
-//         studentDetails: fetchedDetails,
-//       });
-//     }
-//   } catch {
-//     missingStudents.push({
-//       ...book,
-//       record: null,
-//       studentDetails: fetchedDetails,
-//     });
-//   }
-// }
-
-// setMissingStudentData(missingStudents);
-// finalResults = processedBooks;

@@ -50,6 +50,7 @@ const GenerateBarcode = () => {
       }
 
       if (!fromDate && !toDate) {
+        toast.error("Please select at least one to generate barcode.");
         setFromError("Please enter Accession No. From");
         setToError("Please enter Accession No. To");
         setLoadingForSearch(false);
@@ -69,10 +70,10 @@ const GenerateBarcode = () => {
         const response = await axios.post(
           `${API_URL}/api/generate_barcode`,
           params,
-          { headers: { Authorization: `Bearer ${token}` } }
+          { headers: { Authorization: `Bearer ${token}` } },
         );
 
-        console.log("testing");
+        // console.log("testing");
         handleResult(response.data.data);
         return;
       }
@@ -83,7 +84,7 @@ const GenerateBarcode = () => {
         const response = await axios.post(
           `${API_URL}/api/generate_barcode`,
           params,
-          { headers: { Authorization: `Bearer ${token}` } }
+          { headers: { Authorization: `Bearer ${token}` } },
         );
 
         handleResult(response.data.data);
@@ -93,7 +94,7 @@ const GenerateBarcode = () => {
       if (fromDate && toDate) {
         if (Number(fromDate) > Number(toDate)) {
           toast.error(
-            "Accession No. To must be greater than Accession No. From"
+            "Accession No. To must be greater than Accession No. From",
           );
           setLoadingForSearch(false);
           setIsSubmitting(false);
@@ -113,7 +114,7 @@ const GenerateBarcode = () => {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       handleResult(response.data.data);
@@ -121,7 +122,7 @@ const GenerateBarcode = () => {
       console.error("Error fetching Accession no.:", error);
       toast.error(
         error?.response?.data?.message ||
-          "Error fetching accession no. Please try again."
+          "Error fetching accession no. Please try again.",
       );
     } finally {
       setIsSubmitting(false);
@@ -216,7 +217,7 @@ const GenerateBarcode = () => {
     };
   };
 
-  console.log("row", timetable);
+  // console.log("row", timetable);
 
   const filteredSections = (Array.isArray(timetable) ? timetable : []).filter(
     (student) => {
@@ -225,7 +226,7 @@ const GenerateBarcode = () => {
       const accessionNo = student?.copy_id || "";
 
       return accessionNo.includes(searchLower);
-    }
+    },
   );
 
   const displayedSections = filteredSections.slice(currentPage * pageSize);
@@ -278,7 +279,7 @@ const GenerateBarcode = () => {
                       className="ml-0 md:ml-4 w-full md:w-[80%] text-md mt-1.5"
                       htmlFor="fromDate"
                     >
-                      Accession No. From
+                      Accession No. From <span className="text-red-500">*</span>
                     </label>
 
                     <div className="w-[80%]">
@@ -305,7 +306,7 @@ const GenerateBarcode = () => {
                       className="ml-0 md:ml-4 w-full md:w-[70%] text-md mt-1.5"
                       htmlFor="toDate"
                     >
-                      Accession No. To
+                      Accession No. To <span className="text-red-500">*</span>
                     </label>
 
                     <div className="w-[80%]">

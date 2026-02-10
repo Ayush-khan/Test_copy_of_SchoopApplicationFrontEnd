@@ -16,15 +16,25 @@ import {
 const CreateBook = () => {
   const API_URL = import.meta.env.VITE_API_URL;
   const [loading, setLoading] = useState(false);
+  // const [formData, setFormData] = useState({
+  //   staff_id: "",
+  //   leave_type_id: "",
+  //   leave_start_date: "",
+  //   leave_end_date: "",
+  //   no_of_days: "",
+  //   reason: "",
+  //   approverscomment: "",
+  // });
   const [formData, setFormData] = useState({
-    staff_id: "",
-    leave_type_id: "",
-    leave_start_date: "",
-    leave_end_date: "",
-    no_of_days: "",
-    reason: "",
-    approverscomment: "",
+    book_title: "",
+    category_id: "", // Call / Category (from Select)
+    author: "",
+    publisher: "",
+    days_borrow: "",
+    location_of_book: "",
+    issue_type: "", // Issued Type (from Select)
   });
+
   const [studentNameWithClassId, setStudentNameWithClassId] = useState([]);
   const [errors, setErrors] = useState({});
   const [leaveType, setLeaveType] = useState([]);
@@ -57,7 +67,7 @@ const CreateBook = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      console.log("last accession no:", response.data.max_copy_id);
+      // console.log("last accession no:", response.data.max_copy_id);
 
       if (response.data) {
         setLastAccessionNo(response.data.max_copy_id);
@@ -84,6 +94,7 @@ const CreateBook = () => {
       option: "",
     },
   ]);
+
   useEffect(() => {
     if (lastAccessionNo) {
       setRows([
@@ -184,50 +195,118 @@ const CreateBook = () => {
     return newErrors;
   };
 
-  const validateRows = () => {
+  // const validateRows = () => {
+  //   const newErrors = rows.map(() => ({}));
+
+  //   // Accession numbers excluding empty ones
+  //   const accessionNumbers = rows
+  //     .map((r) => r.accessionNo?.trim())
+  //     .filter(Boolean);
+
+  //   rows.forEach((row, index) => {
+  //     const accNo = row.accessionNo?.trim();
+
+  //     // Accession No Required
+  //     if (!accNo) {
+  //       newErrors[index].accessionNo = "Accession No. is required";
+  //     } else {
+  //       // Duplicate check
+  //       const duplicates = accessionNumbers.filter((n) => n === accNo);
+  //       if (duplicates.length > 1) {
+  //         newErrors[index].accessionNo = "Accession No. is already present";
+  //       }
+
+  //       // Compare with last accession number
+  //       if (lastAccessionNo && parseInt(accNo) <= parseInt(lastAccessionNo)) {
+  //         newErrors[index].accessionNo = "Accession No. is already present";
+  //       }
+  //     }
+
+  //     // Pages Required + Number Only
+  //     if (!row.pages || row.pages.trim() === "") {
+  //       newErrors[index].pages = "No. of pages is required";
+  //     } else if (isNaN(row.pages)) {
+  //       newErrors[index].pages = "Pages must be a number";
+  //     }
+
+  //     // Price Required + Valid Decimal
+  //     if (!row.price || row.price.trim() === "") {
+  //       newErrors[index].price = "Price is required";
+  //     } else if (!/^\d+(\.\d{1,2})?$/.test(row.price)) {
+  //       newErrors[index].price = "Please enter a valid amount (max 2 decimals)";
+  //     }
+  //   });
+
+  //   setRowErrors(newErrors);
+  //   return newErrors;
+  // };
+
+  const checkAccessionNoAPI = async (accNo) => {
+    try {
+      const token = localStorage.getItem("authToken");
+
+      const res = await axios.get(`${API_URL}/api/library/check_accession_no`, {
+        params: { accesion_no: accNo }, // backend spelling
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      // Expected:
+      // { status: true, available: true/false, message: "" }
+
+      return {
+        exists: res.data?.available === false,
+        message: res.data?.message || "Accession No already exists",
+      };
+    } catch (err) {
+      console.error("Accession check failed", err);
+      return {
+        exists: false,
+        message: "",
+      };
+    }
+  };
+
+  const validateRows = async () => {
     const newErrors = rows.map(() => ({}));
 
-    // Accession numbers excluding empty ones
-    const accessionNumbers = rows
-      .map((r) => r.accessionNo?.trim())
-      .filter(Boolean);
-
-    rows.forEach((row, index) => {
+    for (let index = 0; index < rows.length; index++) {
+      const row = rows[index];
       const accNo = row.accessionNo?.trim();
 
-      // Accession No Required
+      // ---- Accession No Required ----
       if (!accNo) {
         newErrors[index].accessionNo = "Accession No. is required";
       } else {
-        // Duplicate check
-        const duplicates = accessionNumbers.filter((n) => n === accNo);
-        if (duplicates.length > 1) {
-          newErrors[index].accessionNo = "Accession No. is already present";
-        }
-
-        // Compare with last accession number
-        if (lastAccessionNo && parseInt(accNo) <= parseInt(lastAccessionNo)) {
-          newErrors[index].accessionNo = "Accession No. is already present";
+        // Call API to check duplication
+        try {
+          const { exists, message } = await checkAccessionNoAPI(accNo);
+          if (exists) {
+            newErrors[index].accessionNo = message;
+          }
+        } catch (err) {
+          newErrors[index].accessionNo = "Error checking Accession No.";
         }
       }
 
-      // Pages Required + Number Only
+      // ---- Pages Validation ----
       if (!row.pages || row.pages.trim() === "") {
         newErrors[index].pages = "No. of pages is required";
       } else if (isNaN(row.pages)) {
         newErrors[index].pages = "Pages must be a number";
       }
 
-      // Price Required + Valid Decimal
+      // ---- Price Validation ----
       if (!row.price || row.price.trim() === "") {
         newErrors[index].price = "Price is required";
       } else if (!/^\d+(\.\d{1,2})?$/.test(row.price)) {
         newErrors[index].price = "Please enter a valid amount (max 2 decimals)";
       }
-    });
+    }
 
     setRowErrors(newErrors);
-    return newErrors;
+    return newErrors; // ✅ MUST return array
   };
 
   useEffect(() => {
@@ -242,7 +321,7 @@ const CreateBook = () => {
       const response = await axios.get(`${API_URL}/api/get_librarycategory`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      console.log("call category", response);
+      // console.log("call category", response);
       let data =
         response?.data?.CallCategory ||
         response?.data?.data ||
@@ -253,11 +332,11 @@ const CreateBook = () => {
         data = Object.values(data);
       }
 
-      console.log(" Cleaned Data:", data);
+      // console.log(" Cleaned Data:", data);
       setStudentNameWithClassId(data);
     } catch (error) {
-      toast.error("Error fetching Staff");
-      console.error("Error fetching Staff:", error);
+      toast.error("Error fetching call Category");
+      console.error("Error fetching Call Category:", error);
     } finally {
       setLoadingExams(false);
     }
@@ -269,19 +348,18 @@ const CreateBook = () => {
 
     setFormData((prev) => ({
       ...prev,
-      staff_name: selectedOption?.label || "",
+      category_id: selectedOption?.label || "",
       selectedStudent: selectedOption,
-      leave_type_id: "",
     }));
 
     setErrors((prev) => {
       const newErrors = { ...prev };
       if (selectedOption?.value) {
-        delete newErrors.staff_name;
+        delete newErrors.category_id;
       } else {
-        newErrors.staff_name = "Staff is required";
+        newErrors.category_id = "Call/Category is required";
       }
-      newErrors.leave_type_id = "Leave type is required";
+
       return newErrors;
     });
   };
@@ -294,18 +372,19 @@ const CreateBook = () => {
             label: cls?.label || "",
           }))
         : [],
-    [studentNameWithClassId]
+    [studentNameWithClassId],
   );
 
   const handleChange = (event) => {
+    if (!event?.target) return; // 🛡️ IMPORTANT SAFETY GUARD
+
     const { name, value } = event.target;
 
     setFormData((prev) => ({
       ...prev,
-      [name]: value.trim(),
+      [name]: value,
     }));
 
-    // Clear error for this field
     setErrors((prevErr) => {
       if (!prevErr[name]) return prevErr;
       const newErr = { ...prevErr };
@@ -314,16 +393,108 @@ const CreateBook = () => {
     });
   };
 
+  // const handleSubmit = async (event) => {
+  //   event.preventDefault();
+  //   setSubmitted(true);
+
+  //   const validationErrors = validate();
+  //   const rowValidationErrors = validateRows();
+
+  //   const hasFormErrors = Object.keys(validationErrors).length > 0;
+  //   const hasRowErrors = rowValidationErrors.some(
+  //     (rowErr) => Object.keys(rowErr).length > 0,
+  //   );
+
+  //   if (hasFormErrors || hasRowErrors) {
+  //     setErrors(validationErrors);
+  //     toast.error("Please fix the validation errors before submitting.");
+  //     return;
+  //   }
+
+  //   // Convert empty string to null
+  //   const normalize = (v) => {
+  //     if (!v || String(v).trim() === "") return null;
+  //     return String(v).trim();
+  //   };
+
+  //   // Convert → ALWAYS return an array (backend safe)
+  //   const convert = (arr) => {
+  //     return arr.map((v) => normalize(v));
+  //   };
+
+  //   // Build row arrays
+  //   const bill_no = convert(rows.map((r) => r.billNo));
+  //   const edition = convert(rows.map((r) => r.edition));
+  //   const source = convert(rows.map((r) => r.source));
+  //   const year = convert(rows.map((r) => r.year));
+  //   const no_of_pages = convert(rows.map((r) => r.pages));
+  //   const price = convert(rows.map((r) => r.price));
+  //   const copy = convert(rows.map((r) => r.accessionNo));
+  //   const isbn = convert(rows.map((r) => r.isbn));
+
+  //   // Final payload
+  //   const payload = {
+  //     operation: "create",
+  //     book_title: formData.book_title,
+  //     category_id: selectedStudentId,
+  //     author: formData.author,
+  //     publisher: formData.publisher,
+  //     location_of_book: formData.location_of_book,
+  //     days_borrow: formData.days_borrow,
+  //     issue_type: formData.issue_type,
+
+  //     bill_no,
+  //     edition,
+  //     source,
+  //     year,
+  //     no_of_pages,
+  //     price,
+  //     copy,
+  //     isbn,
+  //   };
+
+  //   try {
+  //     setLoading(true);
+  //     const token = localStorage.getItem("authToken");
+
+  //     const response = await axios.post(
+  //       `${API_URL}/api/books/create`,
+  //       payload,
+  //       {
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //       },
+  //     );
+
+  //     if (response.data?.success) {
+  //       toast.success("Book Created Successfully!");
+  //       setTimeout(() => navigate("/bookDetails"), 600);
+  //     } else {
+  //       toast.error(response.data?.message);
+  //     }
+  //   } catch (error) {
+  //     console.error("Error:", error);
+  //     toast.error(
+  //       error.response?.data?.message ||
+  //         "An error occurred while submitting the form.",
+  //     );
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     setSubmitted(true);
 
     const validationErrors = validate();
-    const rowValidationErrors = validateRows();
+    const rowValidationErrors = await validateRows(); // ✅ fixed
 
     const hasFormErrors = Object.keys(validationErrors).length > 0;
     const hasRowErrors = rowValidationErrors.some(
-      (rowErr) => Object.keys(rowErr).length > 0
+      (rowErr) => Object.keys(rowErr).length > 0,
     );
 
     if (hasFormErrors || hasRowErrors) {
@@ -333,17 +504,10 @@ const CreateBook = () => {
     }
 
     // Convert empty string to null
-    const normalize = (v) => {
-      if (!v || String(v).trim() === "") return null;
-      return String(v).trim();
-    };
+    const normalize = (v) =>
+      !v || String(v).trim() === "" ? null : String(v).trim();
+    const convert = (arr) => arr.map((v) => normalize(v));
 
-    // Convert → ALWAYS return an array (backend safe)
-    const convert = (arr) => {
-      return arr.map((v) => normalize(v));
-    };
-
-    // Build row arrays
     const bill_no = convert(rows.map((r) => r.billNo));
     const edition = convert(rows.map((r) => r.edition));
     const source = convert(rows.map((r) => r.source));
@@ -353,7 +517,6 @@ const CreateBook = () => {
     const copy = convert(rows.map((r) => r.accessionNo));
     const isbn = convert(rows.map((r) => r.isbn));
 
-    // Final payload
     const payload = {
       operation: "create",
       book_title: formData.book_title,
@@ -363,7 +526,6 @@ const CreateBook = () => {
       location_of_book: formData.location_of_book,
       days_borrow: formData.days_borrow,
       issue_type: formData.issue_type,
-
       bill_no,
       edition,
       source,
@@ -386,7 +548,7 @@ const CreateBook = () => {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       if (response.data?.success) {
@@ -399,7 +561,7 @@ const CreateBook = () => {
       console.error("Error:", error);
       toast.error(
         error.response?.data?.message ||
-          "An error occurred while submitting the form."
+          "An error occurred while submitting the form.",
       );
     } finally {
       setLoading(false);
@@ -460,183 +622,6 @@ const CreateBook = () => {
                 </h2>
               </div>
             </div>
-
-            {/* <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-              <div className="flex flex-col">
-                <label htmlFor="title" className="mb-1">
-                  Book Title<span className="text-red-500">*</span>
-                </label>
-                <input
-                  maxLength={100}
-                  id="title"
-                  name="title"
-                  value={formData.title}
-                  onChange={handleChange}
-                  rows="2"
-                  className="form-control shadow-md"
-                />
-                {errors.title && (
-                  <span className="text-danger text-xs mt-1">
-                    {errors.title}
-                  </span>
-                )}
-              </div>
-
-              <div className="flex flex-col">
-                <label htmlFor="sectionName" className="mb-1">
-                  Call/Category <span className="text-red-500">*</span>
-                </label>
-                <Select
-                  menuPortalTarget={document.body}
-                  menuPosition="fixed"
-                  id="studentSelect"
-                  value={selectedStudent}
-                  onChange={handleStudentSelect}
-                  options={studentOptions}
-                  placeholder={loadingExams ? "Loading..." : "Select"}
-                  isSearchable
-                  isClearable
-                  isDisabled={loadingExams}
-                  styles={{
-                    control: (provided) => ({
-                      ...provided,
-                      fontSize: ".9em",
-                      minHeight: "30px",
-                    }),
-                    menu: (provided) => ({
-                      ...provided,
-                      fontSize: "1em",
-                    }),
-                    option: (provided) => ({
-                      ...provided,
-                      fontSize: ".9em",
-                    }),
-                  }}
-                />
-
-                {errors.staff_name && (
-                  <span className="text-danger text-xs mt-1">
-                    {errors.staff_name}
-                  </span>
-                )}
-              </div>
-
-              <div className="flex flex-col">
-                <label htmlFor="author" className="mb-1">
-                  Author<span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  id="author"
-                  name="author"
-                  maxLength={100}
-                  value={formData.author}
-                  onChange={handleChange}
-                  className="form-control shadow-md"
-                />
-                {errors.author && (
-                  <span className="text-danger text-xs mt-1">
-                    {errors.author}
-                  </span>
-                )}
-              </div>
-
-              <div className="flex flex-col">
-                <label htmlFor="publisher" className="mb-1">
-                  Publisher <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  id="publisher"
-                  name="publisher"
-                  maxLength={100}
-                  value={formData.publisher}
-                  onChange={handleChange}
-                  className="form-control shadow-md"
-                />
-                {errors.publisher && (
-                  <span className="text-danger text-xs mt-1">
-                    {errors.publisher}
-                  </span>
-                )}
-              </div>
-
-              <div className="flex flex-col">
-                <label htmlFor="no_of_days" className="mb-1">
-                  No. of days borrow
-                </label>
-                <input
-                  type="text"
-                  id="no_of_days"
-                  name="no_of_days"
-                  maxLength={2}
-                  value={formData.no_of_days}
-                  onChange={handleChange}
-                  className="form-control shadow-md"
-                />
-                {errors.no_of_days && (
-                  <span className="text-danger text-xs mt-1">
-                    {errors.no_of_days}
-                  </span>
-                )}
-              </div>
-
-              <div className="flex flex-col">
-                <label htmlFor="location" className="mb-1">
-                  Location of Book <span className="text-red-500">*</span>
-                </label>
-                <input
-                  maxLength={50}
-                  id="location"
-                  name="location"
-                  value={formData.location}
-                  onChange={handleChange}
-                  rows="2"
-                  className="form-control shadow-md"
-                />
-                {errors.location && (
-                  <span className="text-danger text-xs mt-1">
-                    {errors.location}
-                  </span>
-                )}
-              </div>
-
-              <div className="flex flex-col">
-                <label htmlFor="issuetype" className="mb-1">
-                  Issued Type <span className="text-red-500">*</span>
-                </label>
-
-                <Select
-                  id="issuetype"
-                  value={selectedIssueType}
-                  onChange={(selected) => setSelectedIssueType(selected)}
-                  options={issueTypeOptions}
-                  placeholder="Select"
-                  isSearchable={false}
-                  isClearable
-                  styles={{
-                    control: (provided) => ({
-                      ...provided,
-                      fontSize: ".9em",
-                      minHeight: "30px",
-                    }),
-                    menu: (provided) => ({
-                      ...provided,
-                      fontSize: "1em",
-                    }),
-                    option: (provided) => ({
-                      ...provided,
-                      fontSize: ".9em",
-                    }),
-                  }}
-                />
-                {errors.issueType && (
-                  <span className="text-danger text-xs mt-1">
-                    {errors.issueType}
-                  </span>
-                )}
-              </div>
-            </div> */}
 
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
               {/* Book Title */}
@@ -850,7 +835,7 @@ const CreateBook = () => {
                             handleInputChange(
                               index,
                               "accessionNo",
-                              e.target.value
+                              e.target.value,
                             )
                           }
                           maxLength={8}

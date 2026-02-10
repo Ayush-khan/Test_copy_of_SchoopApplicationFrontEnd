@@ -29,8 +29,8 @@ const EditCallCategory = () => {
 
   const { state } = useLocation();
   const { id } = useParams();
-  console.log("id", id);
-  console.log("state", state);
+  // console.log("id", id);
+  // console.log("state", state);
 
   useEffect(() => {
     fetchAllSubjects();
@@ -48,8 +48,8 @@ const EditCallCategory = () => {
       setSubjectsIs(subjects);
       setInitialSubjectsIs(subjects);
 
-      console.log("setSubjectsIs", subjects);
-      console.log("setInitialSubjectsIs", subjects);
+      // console.log("setSubjectsIs", subjects);
+      // console.log("setInitialSubjectsIs", subjects);
     } catch (error) {
       toast.error("Error fetching subjects");
     }
@@ -104,11 +104,11 @@ const EditCallCategory = () => {
           `${API_URL}/api/librarycategory/${id}`,
           {
             headers: { Authorization: `Bearer ${token}` },
-          }
+          },
         );
 
         const data = response?.data;
-        console.log("Fetched category:", data);
+        // console.log("Fetched category:", data);
 
         setSelectedClass(data.category_name || "");
         setSelectedSubjectType(data.call_no || "");
@@ -132,7 +132,7 @@ const EditCallCategory = () => {
     setSubjectError("");
     if (preCheckedSubjects.includes(subjectId)) {
       setPreCheckedSubjects(
-        preCheckedSubjects.filter((id) => id !== subjectId)
+        preCheckedSubjects.filter((id) => id !== subjectId),
       );
     } else {
       setPreCheckedSubjects([...preCheckedSubjects, subjectId]);
@@ -176,7 +176,7 @@ const EditCallCategory = () => {
         category_group_ids: preCheckedSubjects,
       };
 
-      console.log("📦 Payload:", payload);
+      // console.log("📦 Payload:", payload);
 
       const response = await axios.put(
         `${API_URL}/api/update_librarycategory/${id}`,
@@ -186,15 +186,16 @@ const EditCallCategory = () => {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
-        }
+        },
       );
 
-      console.log(" API Response:", response.data);
+      // console.log(" API Response:", response.data);
 
       if (response.status === 200) {
-        toast.success(
-          response.data.message || "Category updated successfully!"
-        );
+        // toast.success(
+        //   response.data.message || "Category updated successfully!"
+        // );
+        toast.success("Category updated successfully!");
 
         setTimeout(() => {
           navigate("/callCategory");
@@ -242,13 +243,13 @@ const EditCallCategory = () => {
             style={{ backgroundColor: "#C03078" }}
           ></div>
           <div className="card-body w-full  mx-auto">
-            {loading ? (
+            {/* {loading ? (
               <div className="absolute inset-0 flex items-center justify-center bg-gray-50  z-10">
                 <Loader />
               </div>
-            ) : (
-              <>
-                {/* <div className="space-y-4 w-full max-w-3xl mx-auto pl-6">
+            ) : ( */}
+            <>
+              {/* <div className="space-y-4 w-full max-w-3xl mx-auto pl-6">
                
                   <div className="flex flex-col">
                     <div className="flex items-center">
@@ -337,65 +338,65 @@ const EditCallCategory = () => {
                   </div>
                 </div> */}
 
-                <div className="space-y-4 w-full max-w-3xl mx-auto pl-6">
-                  {/* Category Name */}
-                  <div className="flex flex-col">
-                    <div className="flex items-center">
-                      <label className="w-[30%] text-left font-semibold text-gray-700">
-                        Category Name <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        value={selectedClass}
-                        onChange={(e) => {
-                          setSelectedClass(e.target.value);
-                          if (classError) setClassError("");
-                        }}
-                        placeholder="Enter Category Name"
-                        className="w-[40%] border border-gray-400 rounded-md px-3 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      />
-                    </div>
-                    {classError && (
-                      <p className="text-red-500 text-sm ml-[30%] mt-1">
-                        {classError}
-                      </p>
-                    )}
+              <div className="space-y-4 w-full max-w-3xl mx-auto pl-6">
+                {/* Category Name */}
+                <div className="flex flex-col">
+                  <div className="flex items-center">
+                    <label className="w-[30%] text-left font-semibold text-gray-700">
+                      Category Name <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={selectedClass}
+                      onChange={(e) => {
+                        setSelectedClass(e.target.value);
+                        if (classError) setClassError("");
+                      }}
+                      placeholder="Enter Category Name"
+                      className="w-[40%] border border-gray-400 rounded-md px-3 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
                   </div>
+                  {classError && (
+                    <p className="text-red-500 text-sm ml-[30%] mt-1">
+                      {classError}
+                    </p>
+                  )}
+                </div>
 
-                  {/* Call No */}
-                  <div className="flex flex-col">
-                    <div className="flex items-center">
-                      <label className="w-[30%] text-left font-semibold text-gray-700">
-                        Call No. <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        value={selectedSubjectType}
-                        onChange={(e) => {
-                          setSelectedSubjectType(e.target.value);
-                          if (subjectTypeError) setSubjectTypeError("");
-                        }}
-                        placeholder="Enter Call No."
-                        className="w-[40%] border border-gray-400 rounded-md px-3 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      />
-                    </div>
-                    {subjectTypeError && (
-                      <p className="text-red-500 text-sm ml-[30%] mt-1">
-                        {subjectTypeError}
-                      </p>
-                    )}
+                {/* Call No */}
+                <div className="flex flex-col">
+                  <div className="flex items-center">
+                    <label className="w-[30%] text-left font-semibold text-gray-700">
+                      Call No. <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={selectedSubjectType}
+                      onChange={(e) => {
+                        setSelectedSubjectType(e.target.value);
+                        if (subjectTypeError) setSubjectTypeError("");
+                      }}
+                      placeholder="Enter Call No."
+                      className="w-[40%] border border-gray-400 rounded-md px-3 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
                   </div>
+                  {subjectTypeError && (
+                    <p className="text-red-500 text-sm ml-[30%] mt-1">
+                      {subjectTypeError}
+                    </p>
+                  )}
+                </div>
 
-                  {/* Category Group Name */}
-                  <div className="flex flex-col">
-                    <div className="flex items-start">
-                      <label className="w-[28%] text-left font-semibold text-gray-700 pt-1">
-                        Category Group Name
-                      </label>
-                      <div className="w-[70%] rounded-md px-3 py-2">
-                        {subjectsIs.length > 0 ? (
-                          <div className="grid grid-cols-2 gap-y-2">
-                            {/* {subjectsIs.map((subject) => (
+                {/* Category Group Name */}
+                <div className="flex flex-col">
+                  <div className="flex items-start">
+                    <label className="w-[28%] text-left font-semibold text-gray-700 pt-1">
+                      Category Group Name
+                    </label>
+                    <div className="w-[70%] rounded-md px-3 py-2">
+                      {subjectsIs.length > 0 ? (
+                        <div className="grid grid-cols-2 gap-y-2">
+                          {/* {subjectsIs.map((subject) => (
                               <label
                                 key={subject.category_group_id}
                                 className="flex items-center space-x-2"
@@ -418,58 +419,58 @@ const EditCallCategory = () => {
                                 </span>
                               </label>
                             ))} */}
-                            {subjectsIs.map((subject) => (
-                              <label
-                                key={subject.category_group_id}
-                                className="flex items-center space-x-2"
-                              >
-                                <input
-                                  type="checkbox"
-                                  checked={preCheckedSubjects.includes(
-                                    subject.category_group_id
-                                  )}
-                                  onChange={() =>
-                                    handleCheckboxChange(
-                                      subject.category_group_id
-                                    )
-                                  }
-                                />
-                                <span className="text-sm">
-                                  {subject.category_group_name}
-                                </span>
-                              </label>
-                            ))}
-                          </div>
-                        ) : (
-                          <p className="text-blue-700">
-                            Please wait while category groups are loading...
-                          </p>
-                        )}
-                      </div>
+                          {subjectsIs.map((subject) => (
+                            <label
+                              key={subject.category_group_id}
+                              className="flex items-center space-x-2"
+                            >
+                              <input
+                                type="checkbox"
+                                checked={preCheckedSubjects.includes(
+                                  subject.category_group_id,
+                                )}
+                                onChange={() =>
+                                  handleCheckboxChange(
+                                    subject.category_group_id,
+                                  )
+                                }
+                              />
+                              <span className="text-sm">
+                                {subject.category_group_name}
+                              </span>
+                            </label>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-blue-700">
+                          Please wait while category groups are loading...
+                        </p>
+                      )}
                     </div>
                   </div>
                 </div>
+              </div>
 
-                {/* Save button */}
-                <div className="form-group flex justify-end mt-4">
-                  <button
-                    type="button"
-                    onClick={handleUpdate}
-                    className="btn btn-primary mr-2"
-                    disabled={isSubmitting}
-                  >
-                    {isSubmitting ? "Updating" : "Update Category"}
-                  </button>
-                  <button
-                    type="button"
-                    className="btn btn-danger"
-                    disabled={isSubmitting}
-                  >
-                    Reset
-                  </button>
-                </div>
-              </>
-            )}
+              {/* Save button */}
+              <div className="form-group flex justify-end mt-4">
+                <button
+                  type="button"
+                  onClick={handleUpdate}
+                  className="btn btn-primary mr-2"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? "Updating" : "Update Category"}
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-danger"
+                  disabled={isSubmitting}
+                >
+                  Reset
+                </button>
+              </div>
+            </>
+            {/* )} */}
           </div>
         </div>
       </div>

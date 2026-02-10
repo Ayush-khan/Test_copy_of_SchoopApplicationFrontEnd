@@ -19,6 +19,7 @@ const CreateMember = () => {
   const [selectedStudentIds, setSelectedStudentIds] = useState([]);
   const [selectedTeacherIds, setSelectedTeacherIds] = useState([]);
 
+  const [showCreateModal, setShowCreateModal] = useState(false);
   const navigate = useNavigate();
   const [loadingExams, setLoadingExams] = useState(false);
   const [studentError, setStudentError] = useState("");
@@ -77,9 +78,9 @@ const CreateMember = () => {
       setRegId(reg_id);
       setAcademicYear(academicyr);
 
-      console.log("roleIDis:", role_id);
-      console.log("reg id:", reg_id);
-      console.log("academic year", academicyr);
+      // console.log("roleIDis:", role_id);
+      // console.log("reg id:", reg_id);
+      // console.log("academic year", academicyr);
 
       return { roleId, regId };
     } catch (error) {
@@ -96,10 +97,10 @@ const CreateMember = () => {
         `${API_URL}/api/get_teacherclasseswithclassteacher?teacher_id=${regId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
 
-      console.log("response", response.data.data);
+      // console.log("response", response.data.data);
 
       const mappedData = (response.data.data || [])
         .filter((item) => item.class_id && item.section_id)
@@ -192,15 +193,15 @@ const CreateMember = () => {
       const params =
         selectedType === "student"
           ? {
-              m_type: "S",
-              class_id: selectedStudentId,
-              section_id: selectedSectionId,
-              acd_yr: academicYear,
-            }
+            m_type: "S",
+            class_id: selectedStudentId,
+            section_id: selectedSectionId,
+            acd_yr: academicYear,
+          }
           : {
-              m_type: "T",
-              acd_yr: academicYear,
-            };
+            m_type: "T",
+            acd_yr: academicYear,
+          };
 
       const response = await axios.get(`${API_URL}/api/get-not-members`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -214,7 +215,7 @@ const CreateMember = () => {
         return;
       }
 
-      console.log("Fetched Data:", data);
+      // console.log("Fetched Data:", data);
 
       // ✅ Prefill selected IDs based on type
       if (selectedType === "student") {
@@ -267,7 +268,7 @@ const CreateMember = () => {
         type: selectedType === "student" ? "Student" : "Teacher",
       };
 
-      console.log("Final Payload:", payload);
+      // console.log("Final Payload:", payload);
 
       const response = await axios.post(
         `${API_URL}/api/create-member`,
@@ -277,7 +278,7 @@ const CreateMember = () => {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
-        }
+        },
       );
 
       if (response.status === 200 || response.status === 201) {
@@ -310,9 +311,8 @@ const CreateMember = () => {
   return (
     <>
       <div
-        className={` transition-all duration-500 w-[85%]  mx-auto p-4 ${
-          showStudentReport ? "w-[85%] " : "w-[85%] "
-        }`}
+        className={` transition-all duration-500 w-[65%]  mx-auto p-4 ${showStudentReport ? "w-[65%] " : "w-[85%] "
+          }`}
       >
         <ToastContainer />
         <div className="card  rounded-md ">
@@ -378,7 +378,7 @@ const CreateMember = () => {
                     </div>
 
                     {selectedType === "student" && (
-                      <div className="w-full md:w-[60%] gap-x-2 justify-around my-1 md:my-4 flex md:flex-row">
+                      <div className="w-full md:w-[40%] gap-x-2 justify-around my-1 md:my-4 flex md:flex-row">
                         <label
                           className="w-full md:w-[30%] text-md pl-0 md:pl-5 mt-1.5"
                           htmlFor="studentSelect"
@@ -428,11 +428,10 @@ const CreateMember = () => {
                         type="search"
                         onClick={handleSearch}
                         style={{ backgroundColor: "#2196F3" }}
-                        className={`btn h-10 w-18 md:w-auto btn-primary text-white font-bold py-1 border-1 border-blue-500 px-4 rounded ${
-                          loadingForSearch
+                        className={`btn h-10 w-18 md:w-auto btn-primary text-white font-bold py-1 border-1 border-blue-500 px-4 rounded ${loadingForSearch
                             ? "opacity-50 cursor-not-allowed"
                             : ""
-                        }`}
+                          }`}
                         disabled={loadingForSearch}
                       >
                         {loadingForSearch ? (
@@ -630,7 +629,7 @@ const CreateMember = () => {
                         }}
                       ></div>
 
-                      <div className="card-body w-full">
+                      <div className="card-body w-[85%] ml-24 ">
                         <div
                           className="h-96 lg:h-96 overflow-y-scroll overflow-x-scroll"
                           style={{
@@ -641,21 +640,21 @@ const CreateMember = () => {
                           <table className="min-w-full leading-normal table-auto">
                             <thead>
                               <tr className="bg-gray-100">
-                                <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                                <th className="px-2 w-[12%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                                   Sr No.
                                 </th>
 
-                                <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                                <th className="px-2 w-[12%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                                   Select
                                 </th>
 
                                 {selectedType === "student" && (
-                                  <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                                  <th className="px-2 w-[12%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                                     Roll No
                                   </th>
                                 )}
 
-                                <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                                <th className="px-2 w-[30%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                                   Name
                                 </th>
                               </tr>
@@ -689,11 +688,11 @@ const CreateMember = () => {
                                           checked={
                                             selectedType === "student"
                                               ? selectedStudentIds.includes(
-                                                  personId
-                                                )
+                                                personId,
+                                              )
                                               : selectedTeacherIds.includes(
-                                                  personId
-                                                )
+                                                personId,
+                                              )
                                           }
                                           onChange={(e) => {
                                             const checked = e.target.checked;
@@ -704,8 +703,8 @@ const CreateMember = () => {
                                                   checked
                                                     ? [...prev, personId] // add
                                                     : prev.filter(
-                                                        (id) => id !== personId
-                                                      ) // remove
+                                                      (id) => id !== personId,
+                                                    ), // remove
                                               );
                                             } else if (
                                               selectedType === "staff"
@@ -714,8 +713,8 @@ const CreateMember = () => {
                                                 checked
                                                   ? [...prev, personId]
                                                   : prev.filter(
-                                                      (id) => id !== personId
-                                                    )
+                                                    (id) => id !== personId,
+                                                  ),
                                               );
                                             }
                                           }}
@@ -731,10 +730,9 @@ const CreateMember = () => {
                                       <td className="px-2 py-2 text-center border border-gray-300">
                                         {selectedType === "student"
                                           ? camelCase(
-                                              `${person?.first_name || ""} ${
-                                                person?.mid_name || ""
-                                              } ${person?.last_name || ""}`
-                                            )
+                                            `${person?.first_name || ""} ${person?.mid_name || ""
+                                            } ${person?.last_name || ""}`,
+                                          )
                                           : camelCase(person?.name) || ""}
                                       </td>
                                     </tr>
@@ -759,12 +757,19 @@ const CreateMember = () => {
                           </table>
                         </div>
                         <div className="flex justify-end gap-3 mt-4 mr-4">
-                          <button
+                          {/* <button
                             type="button"
                             onClick={handleSubmit}
                             className={`bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-lg shadow-md`}
                           >
                             {isSubmitting ? "Creating" : "Create"}
+                          </button> */}
+                          <button
+                            type="button"
+                            onClick={() => setShowCreateModal(true)}
+                            className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-lg shadow-md"
+                          >
+                            Create
                           </button>
 
                           <button
@@ -783,6 +788,58 @@ const CreateMember = () => {
             )}
           </>
         </div>
+        {showCreateModal && (
+          <div
+            className="modal"
+            style={{ display: "block", backgroundColor: "rgba(0, 0, 0, 0.5)" }}
+          >
+            <div className="modal-dialog modal-dialog-centered">
+              <div className="modal-content">
+                {/* Header */}
+                <div className="flex justify-between p-3">
+                  <h5 className="modal-title">Confirm Creation</h5>
+                  <RxCross1
+                    className="text-xl text-red-600 cursor-pointer hover:bg-red-100"
+                    onClick={() => setShowCreateModal(false)}
+                  />
+                </div>
+
+                <div className="h-1 w-[97%] mx-auto bg-red-700"></div>
+
+                {/* Body */}
+                <div className="modal-body">
+                  <p>
+                    Are you sure you want to create selected{" "}
+                    <strong>{selectedType}</strong> members for library?
+                  </p>
+                </div>
+
+                {/* Footer */}
+                <div className="flex justify-end gap-2 p-3">
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={() => setShowCreateModal(false)}
+                  >
+                    Cancel
+                  </button>
+
+                  <button
+                    type="button"
+                    className="btn btn-primary"
+                    disabled={isSubmitting}
+                    onClick={() => {
+                      setShowCreateModal(false); // close modal
+                      handleSubmit(); // 🔥 now call submit
+                    }}
+                  >
+                    {isSubmitting ? "Creating..." : "Submit"}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </>
   );
