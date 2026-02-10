@@ -264,7 +264,7 @@ function NavBar() {
           return;
         }
       } catch (error) {
-        toast.error(error.response.data.message);
+        // toast.error(error.response.data.message);
         console.error(
           "Error fetching profile data inside navbar component:",
           error
@@ -281,7 +281,7 @@ function NavBar() {
         }
 
         // Other error handling
-        toast.error(errorMsg || "Something went wrong.");
+        // toast.error(errorMsg || "Something went wrong.");
         console.error("Error fetching profile:", error);
       }
     };
