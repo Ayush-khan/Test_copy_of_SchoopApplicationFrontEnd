@@ -823,7 +823,7 @@ function NavBar() {
                 </div>
               </NavDropdown.Item>
 
-              {roleId === "A" || roleId === "M" ? (
+              {roleId === "A" || roleId === "M" || roleId === "U" ? (
                 <NavDropdown.Item>
                   <div
                     className="flex items-center gap-2"
