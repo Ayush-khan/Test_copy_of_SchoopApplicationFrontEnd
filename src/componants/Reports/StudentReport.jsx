@@ -244,6 +244,8 @@ const StudentReport = () => {
       "Emergency Address",
       "Emergency Contact",
       "Student Aadhaar No.",
+      "Student Id No.",
+      "Apaar Id",
       "Father Name",
       "Father Mobile No.",
       "Father Email-Id",
@@ -344,6 +346,12 @@ const StudentReport = () => {
             <td style="border: 1px solid #ccc; padding: 6px;">${
               student.stu_aadhaar_no || ""
             }</td>
+             <td style="border: 1px solid #ccc; padding: 6px;">${
+               student.student_id || ""
+             }</td>
+             <td style="border: 1px solid #ccc; padding: 6px;">${
+               student.apaar_id || ""
+             }</td>
             <td style="border: 1px solid #ccc; padding: 6px;">${capitalize(
               student.father_name,
             )}</td>
@@ -412,6 +420,50 @@ const StudentReport = () => {
     };
   };
 
+  //   printWindow.document.write(`
+  // <html>
+  //   <head>
+  //     <title>${title}</title>
+  //     <style>
+  //       @page {
+  //         size: A4 landscape;
+  //         margin: 10mm;
+  //       }
+
+  //       body {
+  //         font-family: Arial, sans-serif;
+  //       }
+
+  //       table {
+  //         width: 100%;
+  //         table-layout: fixed;
+  //       }
+
+  //       th, td {
+  //         border: 1px solid #333;
+  //         padding: 4px;
+  //         font-size: 9px;
+  //         text-align: center;
+  //         word-break: break-word;
+  //       }
+
+  //       th {
+  //         background: #f3f4f6;
+  //       }
+
+  //       @media print {
+  //         body {
+  //           zoom: 0.8;
+  //         }
+  //       }
+  //     </style>
+  //   </head>
+  //   <body>
+  //     ${tableHTML}
+  //   </body>
+  // </html>
+  // `);
+
   const handleDownloadEXL = () => {
     if (!displayedSections || displayedSections.length === 0) {
       toast.error("No data available to download the Excel sheet.");
@@ -442,6 +494,8 @@ const StudentReport = () => {
       "Emergency Address",
       "Emergency Contact",
       "Student Aadhaar No.",
+      "Student Id No.",
+      "Apaar Id",
       "Father Name",
       "Father Mobile No.",
       "Father Email-Id",
@@ -498,6 +552,8 @@ const StudentReport = () => {
       capitalizeFirst(student?.emergency_add) || " ",
       student?.emergency_contact || " ",
       student?.stu_aadhaar_no || " ",
+      student?.student_id || " ",
+      student?.apaar_id || " ",
       capitalizeFirst(student?.father_name) || " ",
       student?.f_mobile || " ",
       student?.f_email || " ",
