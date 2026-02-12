@@ -318,6 +318,7 @@ import BooksIssuedHistoryReport from "../componants/MasterModuleLibrarian/Librar
 import BookIssuedReport from "../componants/MasterModuleLibrarian/LibraryReports/BooksIssuedReport.jsx";
 import BooksNonReturnReport from "../componants/MasterModuleLibrarian/LibraryReports/BooksNonReturnReport.jsx";
 import MonthlyBookIssueReport from "../componants/MasterModuleLibrarian/LibraryReports/MonthlyBookIssueReport.jsx";
+import HSCSStudentSubjectGroupReport from "../componants/Reports/HSCSStudentSubjectGroupReport.jsx";
 function Index() {
   return (
     <Routes>
@@ -1197,6 +1198,11 @@ function Index() {
         <Route
           path="/hSCStudSubjectsRepo"
           element={<PrivateRoute element={<HSCStudentsSubjectsReport />} />}
+        />
+        {/* {HSCS Student Subject Group Report } */}
+        <Route
+          path="/hSCStudentSubjectGroupRepo"
+          element={<PrivateRoute element={<HSCSStudentSubjectGroupReport />} />}
         />
         {/* Fee payment report module */}
         <Route
