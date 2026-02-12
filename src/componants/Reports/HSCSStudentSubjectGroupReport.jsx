@@ -214,7 +214,7 @@ const HSCSStudentSubjectGroupReport = () => {
                     (subject, index) => `
                 <tr>
                   <td>${index + 1}</td>
-                 <td>${subject?.roll_no || "-"}</td>
+                 <td>${subject?.roll_no || " "}</td>
 
 <td>
 ${[subject?.first_name, subject?.mid_name, subject?.last_name]
@@ -223,11 +223,11 @@ ${[subject?.first_name, subject?.mid_name, subject?.last_name]
 </td>
 
 <td>
-${subject?.subjects?.map(s => s.subject_name).join(", ") || "-"}
+${subject?.subjects?.map(s => s.subject_name).join(", ") || " "}
 </td>
 
 <td>
-${subject?.optional_subjects?.map(s => s.subject_name).join(", ") || "-"}
+${subject?.optional_subjects?.map(s => s.subject_name).join(", ") || " "}
 </td>
 
                 </tr>`
@@ -307,11 +307,54 @@ ${subject?.optional_subjects?.map(s => s.subject_name).join(", ") || "-"}
         };
     };
 
+    // const handleDownloadEXL = () => {
+    //     if (!displayedSections || displayedSections.length === 0) {
+    //         toast.error("No data available to download the Excel sheet.");
+    //         return;
+    //     }
+
+    //     // Define headers matching the print table
+    //     const headers = [
+    //         "Sr No.",
+    //         "Roll No.",
+    //         "Name",
+    //         "Subject Group",
+    //         "Optional Subject"
+    //     ]
+    //         ;
+    //     // Convert displayedSections data to array format for Excel
+    //     const data = displayedSections.map((student, index) => [
+    //         index + 1,
+    //         student?.roll_no || "-",
+    //         `${student?.first_name || ""} ${student?.mid_name || ""} ${student?.last_name || ""}`,
+    //         student?.subjects?.map(sub => sub.subject_name).join(", ") || "-",
+    //         student?.optional_subjects?.map(sub => sub.subject_name).join(", ") || "-",
+    //     ]);
+
+    //     // Create a worksheet
+    //     const worksheet = XLSX.utils.aoa_to_sheet([headers, ...data]);
+
+    //     // Auto-adjust column width
+    //     const columnWidths = headers.map(() => ({ wch: 20 })); // Approx. width of 20 characters per column
+    //     worksheet["!cols"] = columnWidths;
+
+    //     // Create a workbook and append the worksheet
+    //     const workbook = XLSX.utils.book_new();
+    //     XLSX.utils.book_append_sheet(workbook, worksheet, "Admission Form Data");
+
+    //     // Generate and download the Excel file
+
+    //     const fileName = `${buildReportFileName()}.xlsx`;
+    //     XLSX.writeFile(workbook, fileName);
+    // };
+
     const handleDownloadEXL = () => {
         if (!displayedSections || displayedSections.length === 0) {
             toast.error("No data available to download the Excel sheet.");
             return;
         }
+
+        const reportTitle = buildReportFileName(); // same as print title
 
         // Define headers matching the print table
         const headers = [
@@ -320,34 +363,50 @@ ${subject?.optional_subjects?.map(s => s.subject_name).join(", ") || "-"}
             "Name",
             "Subject Group",
             "Optional Subject"
-        ]
-            ;
+        ];
+
         // Convert displayedSections data to array format for Excel
         const data = displayedSections.map((student, index) => [
             index + 1,
-            student?.roll_no || "-",
-            `${student?.first_name || ""} ${student?.mid_name || ""} ${student?.last_name || ""}`,
-            student?.subjects?.map(sub => sub.subject_name).join(", ") || "-",
-            student?.optional_subjects?.map(sub => sub.subject_name).join(", ") || "-",
+            student?.roll_no || " ",
+            [student?.first_name, student?.mid_name, student?.last_name].filter(Boolean).join(" "),
+            student?.subjects?.map(sub => sub.subject_name).join(", ") || " ",
+            student?.optional_subjects?.map(sub => sub.subject_name).join(", ") || " "
         ]);
 
-        // Create a worksheet
-        const worksheet = XLSX.utils.aoa_to_sheet([headers, ...data]);
+        // Add the report title as first row, then a blank row
+        const worksheetData = [
+            [reportTitle],   // title row
+            [],              // blank row
+            headers,         // headers row
+            ...data          // actual data
+        ];
+
+        // Create worksheet
+        const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
+
+        // Merge the first row for title (so it spans all columns)
+        const merge = [{ s: { r: 0, c: 0 }, e: { r: 0, c: headers.length - 1 } }];
+        worksheet["!merges"] = merge;
+
+        // Optional: Center the title (Excel style)
+        worksheet["A1"].s = {
+            alignment: { horizontal: "center", vertical: "center" },
+            font: { bold: true, sz: 14 }
+        };
 
         // Auto-adjust column width
-        const columnWidths = headers.map(() => ({ wch: 20 })); // Approx. width of 20 characters per column
+        const columnWidths = headers.map(() => ({ wch: 20 }));
         worksheet["!cols"] = columnWidths;
 
-        // Create a workbook and append the worksheet
+        // Create workbook and append worksheet
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, "Admission Form Data");
 
         // Generate and download the Excel file
-
-        const fileName = `${buildReportFileName()}.xlsx`;
+        const fileName = `${reportTitle}.xlsx`;
         XLSX.writeFile(workbook, fileName);
     };
-
 
     const filteredSections = timetable.filter((student) => {
         const searchLower = searchTerm.toLowerCase();
@@ -384,15 +443,26 @@ ${subject?.optional_subjects?.map(s => s.subject_name).join(", ") || "-"}
     });
 
 
+    // const buildReportFileName = () => {
+    //     const parts = [
+    //         "HSC_Subject_Group_Report_",
+    //         selectedClass?.label && `Class: ${selectedClass.label}`,
+    //         subjectGroup?.label && `Subject Group: ${subjectGroup.label}`,
+    //         optionalSubject?.label && `Optional Subject: ${optionalSubject.label}`
+    //     ].filter(Boolean);
+
+    //     return parts;
+    // };
     const buildReportFileName = () => {
         const parts = [
-            "HSC_Subject_Group_Report_",
-            selectedClass?.label && `Class: ${selectedClass.label}`,
-            subjectGroup?.label && `Subject Group: ${subjectGroup.label}`,
-            optionalSubject?.label && `Optional Subject: ${optionalSubject.label}`
-        ].filter(Boolean);
+            "HSC_Subject_Group",                     // static part
+            selectedClass?.label || null,           // optional
+            subjectGroup?.label || null,            // optional
+            optionalSubject?.label || null,         // optional
+            "Report"                                // static part
+        ].filter(Boolean); // remove null/undefined
 
-        return parts;
+        return parts.join("_"); // join with underscores
     };
 
     const displayedSections = filteredSections.slice(currentPage * pageSize);
@@ -601,10 +671,7 @@ ${subject?.optional_subjects?.map(s => s.subject_name).join(", ") || "-"}
                                         <div className="p-2 px-3 bg-gray-100 border-none flex justify-between items-center">
                                             <div className="w-full flex flex-row justify-between mr-0 md:mr-4 ">
                                                 <h3 className="text-gray-700 text-lg font-semibold">
-                                                    Total Students:
-                                                    <span className="ml-2 px-3 py-1 bg-blue-100 text-blue-700 rounded-full font-bold">
-                                                        {filteredSections.length}
-                                                    </span>
+
                                                 </h3>
 
                                                 <div className="w-1/2 md:w-[18%] mr-1 ">
@@ -683,7 +750,7 @@ ${subject?.optional_subjects?.map(s => s.subject_name).join(", ") || "-"}
                                                                     <td className="px-2 py-2 text-center border border-gray-300">{index + 1}</td>
 
                                                                     <td className="px-2 py-2 text-center border border-gray-300">
-                                                                        {student?.roll_no || "-"}
+                                                                        {student?.roll_no || " "}
                                                                     </td>
 
                                                                     <td className="px-2 py-2 text-center border border-gray-300">
@@ -699,14 +766,14 @@ ${subject?.optional_subjects?.map(s => s.subject_name).join(", ") || "-"}
                                                                     <td className="px-2 py-2 text-center border border-gray-300">
                                                                         {student?.subjects
                                                                             ?.map(sub => sub.subject_name)
-                                                                            .join(", ") || "-"}
+                                                                            .join(", ") || " "}
                                                                     </td>
 
                                                                     {/* Optional Subject */}
                                                                     <td className="px-2 py-2 text-center border border-gray-300">
                                                                         {student?.optional_subjects
                                                                             ?.map(sub => sub.subject_name)
-                                                                            .join(", ") || "-"}
+                                                                            .join(", ") || " "}
                                                                     </td>
                                                                 </tr>
                                                             ))
@@ -720,7 +787,14 @@ ${subject?.optional_subjects?.map(s => s.subject_name).join(", ") || "-"}
                                                     </tbody>
 
                                                 </table>
+
                                             </div>
+                                            <h3 className=" w-full pt-2 border-t-2 border-r-4 border-l-4 rounded-lg border-blue-400 text-center text-gray-700 text-lg font-semibold">
+                                                Total Students:
+                                                <span className="ml-2 px-3 py-1 bg-blue-100 text-blue-700 rounded-full font-bold">
+                                                    {filteredSections.length}
+                                                </span>
+                                            </h3>
                                         </div>
                                     </div>
                                 </div>
