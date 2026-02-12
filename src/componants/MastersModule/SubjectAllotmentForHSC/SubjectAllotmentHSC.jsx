@@ -99,13 +99,13 @@ const SubjectAllotmentHSC = () => {
 
       // Fetch classes and students concurrently
       const [classResponse] = await Promise.all([
-        axios.get(`${API_URL}/api/getClassList`, {
+        axios.get(`${API_URL}/api/get_hsc_classes_of_a_department`, {
           headers: { Authorization: `Bearer ${token}` },
         }),
       ]);
 
       // Set the fetched data
-      setClassesforForm(classResponse.data || []);
+      setClassesforForm(classResponse.data.data || []);
       //   setStudentNameWithClassId(studentResponse?.data?.data || []);
     } catch (error) {
       toast.error("Error fetching Class data.");
@@ -171,16 +171,11 @@ const SubjectAllotmentHSC = () => {
   // );
   const classOptions = useMemo(
     () =>
-      classesforForm
-        .filter((cls) => {
-          const classNumber = parseInt(cls.name); // Extract numeric part from "11 - Science"
-          return classNumber > 10; // Only show classes greater than 10
-        })
-        .map((cls) => ({
-          value: cls.class_id,
-          label: `${cls.name}`,
-          key: `${cls.class_id}`,
-        })),
+      classesforForm.map((cls) => ({
+        value: cls.class_id,
+        label: `${cls.name}`,
+        key: `${cls.class_id}`,
+      })),
     [classesforForm]
   );
 
@@ -450,12 +445,11 @@ const SubjectAllotmentHSC = () => {
 
   const filteredStudents = studentsData
     ? studentsData.filter((student) =>
-        `${student.first_name || ""} ${student.mid_name || ""} ${
-          student.last_name || ""
+      `${student.first_name || ""} ${student.mid_name || ""} ${student.last_name || ""
         }`
-          .toLowerCase()
-          .includes(searchTerm.toLowerCase())
-      )
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase())
+    )
     : [];
 
   const handleApplySubjectGroup = () => {
@@ -614,9 +608,8 @@ const SubjectAllotmentHSC = () => {
                   type="search"
                   onClick={handleSearch}
                   style={{ backgroundColor: "#2196F3" }}
-                  className={`my-1 md:my-4 btn h-10 w-18 md:w-auto btn-primary text-white font-bold py-1 border-1 border-blue-500 px-4 rounded ${
-                    loadingForSearch ? "opacity-50 cursor-not-allowed" : ""
-                  }`}
+                  className={`my-1 md:my-4 btn h-10 w-18 md:w-auto btn-primary text-white font-bold py-1 border-1 border-blue-500 px-4 rounded ${loadingForSearch ? "opacity-50 cursor-not-allowed" : ""
+                    }`}
                   disabled={loadingForSearch}
                 >
                   {loadingForSearch ? (
@@ -819,9 +812,8 @@ const SubjectAllotmentHSC = () => {
                                     {index + 1}
                                   </td>
                                   <td className="text-center px-2 lg:px-3 border text-sm">
-                                    {`${student.first_name} ${
-                                      student.mid_name || ""
-                                    } ${student.last_name}`}
+                                    {`${student.first_name} ${student.mid_name || ""
+                                      } ${student.last_name}`}
                                   </td>
                                   <td className="text-center px-2 lg:px-3 border text-sm">
                                     <select
@@ -894,9 +886,8 @@ const SubjectAllotmentHSC = () => {
                         type="submit"
                         onClick={handleSubmit}
                         style={{ backgroundColor: "#2196F3" }}
-                        className={`text-white font-bold items-center  py-1 border-1 border-blue-500 px-4 rounded ${
-                          loading ? "opacity-50 cursor-not-allowed" : ""
-                        }`}
+                        className={`text-white font-bold items-center  py-1 border-1 border-blue-500 px-4 rounded ${loading ? "opacity-50 cursor-not-allowed" : ""
+                          }`}
                         disabled={loading}
                       >
                         {loading ? (
