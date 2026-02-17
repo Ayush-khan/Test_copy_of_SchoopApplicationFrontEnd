@@ -219,11 +219,11 @@ const StudentAbsent = () => {
   }, [roleId, regId]);
 
   // Preload third tab if Admin or Manager
-  useEffect(() => {
-    if ((roleId === "A" || roleId === "M") && regId) {
-      fetchNotMarkData();
-    }
-  }, [roleId, regId]);
+  // useEffect(() => {
+  //   if ((roleId === "A" || roleId === "M") && regId) {
+  //     fetchNotMarkData();
+  //   }
+  // }, [roleId, regId]);
 
   // Fetch role and regId
   const fetchRoleId = async () => {
@@ -278,24 +278,24 @@ const StudentAbsent = () => {
   };
 
   // Preload third tab data
-  const fetchNotMarkData = async () => {
-    setLoadingNotMark(true);
-    const token = localStorage.getItem("authToken");
-    if (!token) return;
+  // const fetchNotMarkData = async () => {
+  //   setLoadingNotMark(true);
+  //   const token = localStorage.getItem("authToken");
+  //   if (!token) return;
 
-    try {
-      const response = await axios.get(
-        `${API_URL}/api/not_marked_attendance`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+  //   try {
+  //     const response = await axios.get(
+  //       `${API_URL}/api/not_marked_attendance`,
+  //       { headers: { Authorization: `Bearer ${token}` } }
+  //     );
 
-      setNotMarkData(response.data.data || []);
-    } catch (err) {
-      console.error("Error fetching not marked attendance:", err);
-    } finally {
-      setLoadingNotMark(false);
-    }
-  };
+  //     setNotMarkData(response.data.data || []);
+  //   } catch (err) {
+  //     console.error("Error fetching not marked attendance:", err);
+  //   } finally {
+  //     setLoadingNotMark(false);
+  //   }
+  // };
 
   return (
     <div className="md:mx-auto md:w-[85%] px-3 py-2 bg-white mt-4">
@@ -345,7 +345,9 @@ const StudentAbsent = () => {
         {activeTab === "Today's Absent Students" && <IndividualStudentTab />}
         {activeTab === "Student's Attendance Less than 75%" && <LowAttendanceTab />}
         {activeTab === "Today's Attendance not mark classes" && (
-          <NotMarkAbsentees data={notMarkData} loading={loadingNotMark} />
+          // <NotMarkAbsentees data={notMarkData} loading={loadingNotMark} />
+          <NotMarkAbsentees />
+
         )}
       </div>
     </div>
