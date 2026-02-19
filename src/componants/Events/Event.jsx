@@ -592,7 +592,12 @@ function Event() {
       fetchEvents(); // Refresh list
     } catch (error) {
       console.error("Error deleting event:", error);
-      toast.error("Server error. Please try again later.");
+      console.error("Error deleting event:", error.response.data.error_code);
+      if(error.response?.data?.error_code == "IMPERSONATION_READ_ONLY") {
+        toast.warning("This action is disabled during impersonation");
+      } else {
+        toast.error("Server error. Please try again later.");
+      }
     } finally {
       setIsSubmitting(false);
     }
