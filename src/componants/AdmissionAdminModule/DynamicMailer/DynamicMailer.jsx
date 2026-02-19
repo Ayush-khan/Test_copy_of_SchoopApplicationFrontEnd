@@ -48,6 +48,16 @@ function DynamicMailer() {
   const [selectedKey, setSelectedKey] = useState(null);
   const [keyError, setKeyError] = useState("");
 
+  //   const defaultMessage = `
+  // As a part of the admission procedure, your ward's interview has been scheduled on INTERVIEW_DATE from TIME_FROM to TIME_TO.
+  // `;
+
+  //   useEffect(() => {
+  //     setFormFee(defaultMessage);
+  //   }, []);
+
+  // const requiredKeys = ["INTERVIEW_DATE", "TIME_FROM", "TIME_TO"];
+
   useEffect(() => {
     fetchExams();
   }, []);
@@ -60,7 +70,7 @@ function DynamicMailer() {
         `${API_URL}/api/admin/admission-classes`,
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
       console.log("Class", response);
       setClassNameWithClassId(response?.data?.data || []);
@@ -83,7 +93,7 @@ function DynamicMailer() {
         value: cls?.class_id,
         label: `${cls.class_name}`,
       })),
-    [classNameWithClassId]
+    [classNameWithClassId],
   );
 
   const KEY_LIST = [
@@ -186,7 +196,7 @@ function DynamicMailer() {
 
   const displayedSections = filteredSections.slice(
     currentPage * pageSize,
-    (currentPage + 1) * pageSize
+    (currentPage + 1) * pageSize,
   );
 
   useEffect(() => {
@@ -270,45 +280,6 @@ function DynamicMailer() {
     setSelectedKey("");
   };
 
-  //   const handleSubmitAdd = async () => {
-  //     if (!selectedClassId) {
-  //       setClassError("Class is required");
-  //       return;
-  //     }
-
-  //     if (!selectedKey) {
-  //       setKeyError("Key is required");
-  //       return;
-  //     }
-
-  //     if (!formFee) {
-  //       setFormFeeError("Body is required");
-  //       return;
-  //     }
-
-  //     const token = localStorage.getItem("authToken");
-
-  //     try {
-  //       const { data } = await axios.post(
-  //         `${API_URL}/admin/email-templates`,
-  //         {
-  //           key: selectedKey.value,
-  //           body: formFee,
-  //           class_id: selectedClassId,
-  //         },
-  //         {
-  //           headers: {
-  //             Authorization: `Bearer ${token}`,
-  //           },
-  //         }
-  //       );
-
-  //       toast.success(data.message);
-  //     } catch (error) {
-  //       toast.error(error.response?.data?.message || "Error saving template");
-  //     }
-  //   };
-
   const handleSubmitAdd = async () => {
     if (!selectedClassId) {
       setClassError("Class is required");
@@ -342,7 +313,7 @@ function DynamicMailer() {
       });
 
       toast.success(
-        response.data.message || "Eamil Template Create Successfully."
+        response.data.message || "Eamil Template Create Successfully.",
       );
       fetchSections();
       handleCloseModal();
@@ -378,7 +349,7 @@ function DynamicMailer() {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
-        }
+        },
       );
 
       toast.success(data.message || "Email Template updated successfully");
@@ -389,7 +360,7 @@ function DynamicMailer() {
       handleCloseModal();
     } catch (error) {
       toast.error(
-        error.response?.data?.message || "Error updating email template"
+        error.response?.data?.message || "Error updating email template",
       );
     }
   };
@@ -419,7 +390,7 @@ function DynamicMailer() {
             Authorization: `Bearer ${token}`,
           },
           withCredentials: true,
-        }
+        },
       );
       console.log("The response of the delete api ", response.data);
       if (response.data.status) {
@@ -427,11 +398,11 @@ function DynamicMailer() {
         setShowDeleteModal(false); // close modal
         setCurrentSection(null); // reset current selection
         toast.success(
-          response.data.message || "Email template deleted successfully."
+          response.data.message || "Email template deleted successfully.",
         );
       } else {
         toast.error(
-          response.data.message || "Failed to delete email template!"
+          response.data.message || "Failed to delete email template!",
         );
       }
     } catch (error) {
@@ -579,7 +550,7 @@ function DynamicMailer() {
                     ) : (
                       <div className=" absolute left-[1%] w-[100%]  text-center flex justify-center items-center mt-14">
                         <div className=" text-center text-xl text-red-700">
-                          Oops! No data found..
+                          No data available.
                         </div>
                       </div>
                     )}
@@ -702,6 +673,35 @@ function DynamicMailer() {
                     </div>
                     {/* Body below */}
 
+                    {/* <div className="relative mb-3 mx-4">
+                      <label className="block mb-2">
+                        Body <span className="text-red-500">*</span>
+                      </label>
+
+                      <MarkDropdownEditor
+                        id="formFee"
+                        value={formFee}
+                        onChange={(value) => {
+                          setFormFee(value);
+
+                          if (
+                            value &&
+                            value.replace(/<(.|\n)*?>/g, "").trim()
+                          ) {
+                            setFormFeeError("");
+                          }
+                        }}
+                        maxlength={255}
+                      />
+
+                      {formFeeError && (
+                        <div className="mt-1 text-red-500 text-xs">
+                          {formFeeError}
+                        </div>
+                      )}
+
+                     
+                    </div> */}
                     <div className="relative mb-3 mx-4">
                       <label className="block mb-2">
                         Body <span className="text-red-500">*</span>
@@ -728,6 +728,14 @@ function DynamicMailer() {
                           {formFeeError}
                         </div>
                       )}
+                    </div>
+                  </div>
+                  <div className="mt-2 px-4 py-3 ml-8 mr-8 rounded-lg bg-yellow-50 border-l-4 border-yellow-500 text-yellow-900 text-sm leading-relaxed shadow-sm">
+                    <span className="font-semibold">Instruction:</span> Please
+                    include the following keys in the body to send interview
+                    mail:
+                    <div className="mt-1 font-semibold tracking-wide">
+                      INTERVIEW_DATE, TIME_FROM, TIME_TO
                     </div>
                   </div>
 
@@ -816,8 +824,27 @@ function DynamicMailer() {
                     <MarkDropdownEditor
                       id="formFee"
                       value={formFee}
-                      readOnly={true} // make editor read-only
+                      onChange={(value) => {
+                        setFormFee(value);
+
+                        if (value && value.replace(/<(.|\n)*?>/g, "").trim()) {
+                          setFormFeeError("");
+                        }
+                      }}
+                      maxlength={255}
                     />
+                    {formFeeError && (
+                      <div className="mt-1 text-red-500 text-xs">
+                        {formFeeError}
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <div className="mt-2 px-4 py-3 ml-8 mr-8 rounded-lg bg-yellow-50 border-l-4 border-yellow-500 text-yellow-900 text-sm leading-relaxed shadow-sm">
+                  <span className="font-semibold">Instruction:</span> Please
+                  include the following keys in the body to send interview mail:
+                  <div className="mt-1 font-semibold tracking-wide">
+                    INTERVIEW_DATE, TIME_FROM, TIME_TO
                   </div>
                 </div>
 
