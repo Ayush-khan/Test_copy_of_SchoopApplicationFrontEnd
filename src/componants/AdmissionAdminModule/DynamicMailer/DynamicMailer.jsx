@@ -97,8 +97,9 @@ function DynamicMailer() {
   );
 
   const KEY_LIST = [
-    "INTERVIEW_SCHEDULING_11",
-    "INTERVIEW_SCHEDULING_NUR",
+    // "INTERVIEW_SCHEDULING_11",
+    // "INTERVIEW_SCHEDULING_NUR",
+    "INTERVIEW_SCHEDULING",
     "VERIFICATION_SUCCESSFULL",
     "ADDMISSION_APPROVED",
   ];
@@ -455,7 +456,7 @@ function DynamicMailer() {
           ></div>
 
           <div className="card-body w-full">
-            <div className="h-96 lg:h-96 w-full md:w-[100%] mx-auto w-overflow-y-scroll lg:overflow-x-hidden">
+            <div className="lg:h-96 w-full mx-auto w-overflow-y-scroll lg:overflow-x-scroll">
               <div className="bg-white rounded-lg shadow-xs">
                 <table className="min-w-full leading-normal table-auto">
                   <thead>
