@@ -347,7 +347,7 @@ const StudentReport = () => {
               student.stu_aadhaar_no || ""
             }</td>
              <td style="border: 1px solid #ccc; padding: 6px;">${
-               student.student_id || ""
+               student.stud_id_no || ""
              }</td>
              <td style="border: 1px solid #ccc; padding: 6px;">${
                student.apaar_id || ""
@@ -552,7 +552,7 @@ const StudentReport = () => {
       capitalizeFirst(student?.emergency_add) || " ",
       student?.emergency_contact || " ",
       student?.stu_aadhaar_no || " ",
-      student?.student_id || " ",
+      student?.stud_id_no || " ",
       student?.apaar_id || " ",
       capitalizeFirst(student?.father_name) || " ",
       student?.f_mobile || " ",
@@ -975,7 +975,7 @@ const StudentReport = () => {
                                     {student.stu_aadhaar_no || " "}
                                   </td>
                                   <td className="px-2 py-2 text-center text-nowrap border border-gray-300">
-                                    {student.student_id || " "}
+                                    {student.stud_id_no || " "}
                                   </td>
                                   <td className="px-2 py-2 text-center text-nowrap border border-gray-300">
                                     {student.apaar_id || " "}
