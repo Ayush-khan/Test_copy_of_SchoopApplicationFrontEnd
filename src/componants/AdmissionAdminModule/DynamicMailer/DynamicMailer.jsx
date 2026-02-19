@@ -731,14 +731,16 @@ function DynamicMailer() {
                       )}
                     </div>
                   </div>
-                  <div className="mt-2 px-4 py-3 ml-8 mr-8 rounded-lg bg-yellow-50 border-l-4 border-yellow-500 text-yellow-900 text-sm leading-relaxed shadow-sm">
-                    <span className="font-semibold">Instruction:</span> Please
-                    include the following keys in the body to send interview
-                    mail:
-                    <div className="mt-1 font-semibold tracking-wide">
-                      INTERVIEW_DATE, TIME_FROM, TIME_TO
+                  {selectedKey?.value === "INTERVIEW_SCHEDULING" && (
+                    <div className="mt-2 px-4 py-3 ml-8 mr-8 rounded-lg bg-yellow-50 border-l-4 border-yellow-500 text-yellow-900 text-sm leading-relaxed shadow-sm">
+                      <span className="font-semibold">Instruction:</span> Please
+                      include the following keys in the body to send interview
+                      mail:
+                      <div className="mt-1 font-semibold tracking-wide">
+                        INTERVIEW_DATE, TIME_FROM, TIME_TO
+                      </div>
                     </div>
-                  </div>
+                  )}
 
                   <div className="flex justify-end pr-10 mt-2">
                     <button
@@ -841,13 +843,16 @@ function DynamicMailer() {
                     )}
                   </div>
                 </div>
-                <div className="mt-2 px-4 py-3 ml-8 mr-8 rounded-lg bg-yellow-50 border-l-4 border-yellow-500 text-yellow-900 text-sm leading-relaxed shadow-sm">
-                  <span className="font-semibold">Instruction:</span> Please
-                  include the following keys in the body to send interview mail:
-                  <div className="mt-1 font-semibold tracking-wide">
-                    INTERVIEW_DATE, TIME_FROM, TIME_TO
+                {selectedKey?.value === "INTERVIEW_SCHEDULING" && (
+                  <div className="mt-2 px-4 py-3 ml-8 mr-8 rounded-lg bg-yellow-50 border-l-4 border-yellow-500 text-yellow-900 text-sm leading-relaxed shadow-sm">
+                    <span className="font-semibold">Instruction:</span> Please
+                    include the following keys in the body to send interview
+                    mail:
+                    <div className="mt-1 font-semibold tracking-wide">
+                      INTERVIEW_DATE, TIME_FROM, TIME_TO
+                    </div>
                   </div>
-                </div>
+                )}
 
                 <div className=" flex justify-end pr-10 mt-2">
                   <button
