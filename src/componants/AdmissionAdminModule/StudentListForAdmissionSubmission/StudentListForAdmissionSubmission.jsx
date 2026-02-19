@@ -76,7 +76,7 @@ const StudentListForAdmissionSubmission = () => {
         `${API_URL}/api/admin/admission-classes`,
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
       console.log("Class", response);
       setStudentNameWithClassId(response?.data?.data || []);
@@ -88,19 +88,56 @@ const StudentListForAdmissionSubmission = () => {
     }
   };
 
-  const handleSearch = async () => {
-    // if (!selectedStudentId) {
-    //   setStudentError("Please select class.");
-    //   return;
-    // }
+  // const handleSearch = async () => {
+  //   // if (!selectedStudentId) {
+  //   //   setStudentError("Please select class.");
+  //   //   return;
+  //   // }
 
+  //   setLoadingForSearch(true);
+  //   setLoading(true);
+  //   setTimetable([]);
+
+  //   const token = localStorage.getItem("authToken");
+
+  //   //  Now reset UI fields
+  //   setSearchTerm("");
+  //   setFormId("");
+  //   setShowSearch(false);
+
+  //   try {
+  //     const response = await axios.get(
+  //       `${API_URL}/api/admin/applications/document-submission`,
+  //       {
+  //         headers: { Authorization: `Bearer ${token}` },
+  //       },
+  //     );
+
+  //     if (!response?.data?.data?.length) {
+  //       toast.error("Admission forms data not found.");
+  //       setTimetable([]);
+  //     } else {
+  //       setTimetable(response.data.data);
+  //       setPageCount(Math.ceil(response.data.data.length / pageSize));
+  //       // setShowStudentReport(true);
+  //     }
+  //   } catch (error) {
+  //     console.error("Error fetching Admission forms:", error);
+  //     toast.error("Error fetching Admission forms. Please try again.");
+  //   } finally {
+  //     setLoadingForSearch(false);
+  //     setIsSubmitting(false);
+  //     setLoading(false);
+  //   }
+  // };
+
+  const handleSearch = async () => {
     setLoadingForSearch(true);
     setLoading(true);
-    setTimetable([]);
 
     const token = localStorage.getItem("authToken");
 
-    //  Now reset UI fields
+    // Reset only UI fields (not table data)
     setSearchTerm("");
     setFormId("");
     setShowSearch(false);
@@ -110,34 +147,27 @@ const StudentListForAdmissionSubmission = () => {
         `${API_URL}/api/admin/applications/document-submission`,
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
 
-      if (!response?.data?.data?.length) {
+      const data = response?.data?.data || [];
+
+      setTimetable(data);
+      setPageCount(Math.ceil(data.length / pageSize));
+
+      if (data.length === 0) {
         toast.error("Admission forms data not found.");
-        setTimetable([]);
-      } else {
-        setTimetable(response.data.data);
-        setPageCount(Math.ceil(response.data.data.length / pageSize));
-        // setShowStudentReport(true);
       }
     } catch (error) {
       console.error("Error fetching Admission forms:", error);
       toast.error("Error fetching Admission forms. Please try again.");
+      setTimetable([]); // clear only on error
     } finally {
       setLoadingForSearch(false);
       setIsSubmitting(false);
       setLoading(false);
     }
   };
-
-  // const handleView = (student) => {
-  //   console.log("HandleView -->", student);
-
-  //   navigate(
-  //     `/viewAdmissionForm/${student.form_id}?class_id=${selectedStudentId}`
-  //   );
-  // };
 
   const handleView = (student) => {
     console.log("HandleView -->", student);
@@ -146,9 +176,10 @@ const StudentListForAdmissionSubmission = () => {
       `/viewAdmissionForm/${student.form_id}?class_id=${selectedStudentId}`,
       {
         state: { from: "  listOfStudentsForDocumentSubmission" },
-      }
+      },
     );
   };
+
   const camelCase = (str) =>
     str
       ?.toLowerCase()
@@ -159,10 +190,10 @@ const StudentListForAdmissionSubmission = () => {
   const formatDate = (dateStr) =>
     dateStr
       ? new Date(dateStr).toLocaleDateString("en-GB", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "2-digit",
-      })
+          day: "2-digit",
+          month: "2-digit",
+          year: "2-digit",
+        })
       : "";
 
   const filteredSections = timetable.filter((section) => {
@@ -212,7 +243,7 @@ const StudentListForAdmissionSubmission = () => {
 
   const handleRowSelect = (id) => {
     setSelectedRows((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
     );
   };
 
@@ -239,7 +270,7 @@ const StudentListForAdmissionSubmission = () => {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       toast.success("Documents submitted successfully.");
@@ -380,7 +411,10 @@ const StudentListForAdmissionSubmission = () => {
                               </th>
 
                               <th className="min-w-[180px] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
-                                Email Id
+                                Father Email Id
+                              </th>
+                              <th className="min-w-[180px] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
+                                Mother Email Id
                               </th>
 
                               <th className="min-w-[140px] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
@@ -397,7 +431,7 @@ const StudentListForAdmissionSubmission = () => {
                             </tr>
                           </thead>
 
-                          <tbody>
+                          {/* <tbody>
                             {loading ? (
                               <tr>
                                 <td
@@ -422,7 +456,7 @@ const StudentListForAdmissionSubmission = () => {
                                       <input
                                         type="checkbox"
                                         checked={selectedRows.includes(
-                                          student.form_id
+                                          student.form_id,
                                         )}
                                         onChange={() =>
                                           handleRowSelect(student.form_id)
@@ -437,7 +471,7 @@ const StudentListForAdmissionSubmission = () => {
 
                                     <td className="px-2 py-2 text-center border border-gray-300">
                                       {camelCase(
-                                        `${student.first_name} ${student.mid_name} ${student.last_name}`
+                                        `${student.first_name} ${student.mid_name} ${student.last_name}`,
                                       )}
                                     </td>
 
@@ -472,7 +506,6 @@ const StudentListForAdmissionSubmission = () => {
                                   </tr>
                                 ))}
 
-                                {/* ✅ SUMMARY ROW */}
                                 <tr className="bg-gray-100 font-semibold">
                                   <td
                                     colSpan={10}
@@ -498,7 +531,117 @@ const StudentListForAdmissionSubmission = () => {
                                   colSpan={10}
                                   className="text-center py-6 text-red-700 text-lg"
                                 >
-                                  Oops! No data found..
+                                  No data available.
+                                </td>
+                              </tr>
+                            )}
+                          </tbody> */}
+
+                          <tbody>
+                            {loading ? (
+                              <tr>
+                                <td
+                                  colSpan={10}
+                                  className="text-center py-6 text-blue-700 text-lg"
+                                >
+                                  Please wait while data is loading...
+                                </td>
+                              </tr>
+                            ) : displayedSections &&
+                              displayedSections.length > 0 ? (
+                              <>
+                                {displayedSections.map((student, index) => (
+                                  <tr
+                                    key={student.adm_form_pk}
+                                    className="border border-gray-300"
+                                  >
+                                    <td className="px-2 py-2 text-center border border-gray-300">
+                                      {index + 1}
+                                    </td>
+
+                                    <td className="px-2 py-2 text-center border border-gray-300">
+                                      <input
+                                        type="checkbox"
+                                        checked={selectedRows.includes(
+                                          student.form_id,
+                                        )}
+                                        onChange={() =>
+                                          handleRowSelect(student.form_id)
+                                        }
+                                        className="w-3 h-3 cursor-pointer accent-blue-500"
+                                      />
+                                    </td>
+
+                                    <td className="px-2 py-2 text-center border border-gray-300">
+                                      {student.form_id}
+                                    </td>
+
+                                    <td className="px-2 py-2 text-center border border-gray-300">
+                                      {camelCase(
+                                        `${student.first_name} ${student.mid_name} ${student.last_name}`,
+                                      )}
+                                    </td>
+
+                                    <td className="px-2 py-2 text-center border border-gray-300">
+                                      {camelCase(student.father_name)}
+                                    </td>
+
+                                    <td className="px-2 py-2 text-center border border-gray-300">
+                                      {student.class_name}
+                                    </td>
+
+                                    <td className="px-2 py-2 text-center border border-gray-300">
+                                      {student.f_mobile}
+                                    </td>
+
+                                    <td className="px-2 py-2 text-center border border-gray-300">
+                                      {student.f_email}
+                                    </td>
+
+                                    <td className="px-2 py-2 text-center border border-gray-300">
+                                      {student.m_emailid}
+                                    </td>
+
+                                    <td className="px-2 py-2 text-center border border-gray-300">
+                                      {formatDate(student.application_date)}
+                                    </td>
+
+                                    <td className="px-2 py-2 text-center border border-gray-300">
+                                      <button
+                                        onClick={() => handleView(student)}
+                                        className="text-blue-600 hover:text-blue-800"
+                                      >
+                                        <MdOutlineRemoveRedEye className="text-xl" />
+                                      </button>
+                                    </td>
+                                  </tr>
+                                ))}
+
+                                <tr className="bg-gray-100 font-semibold">
+                                  <td
+                                    colSpan={10}
+                                    className="border border-gray-950"
+                                  >
+                                    <div className="flex justify-center items-center gap-2 px-4 py-2">
+                                      <span>
+                                        <span className="text-blue-800 ml-1">
+                                          Total Count :
+                                        </span>
+                                        <span className="text-pink-600 ml-1">
+                                          {displayedSections.length}
+                                        </span>
+                                      </span>
+                                    </div>
+                                  </td>
+                                </tr>
+                              </>
+                            ) : (
+                              <tr>
+                                <td
+                                  colSpan={10}
+                                  className="text-center py-6 text-red-700 text-lg"
+                                >
+                                  No data available.
                                 </td>
                               </tr>
                             )}
