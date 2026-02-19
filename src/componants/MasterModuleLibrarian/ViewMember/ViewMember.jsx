@@ -83,9 +83,9 @@ const ViewMember = () => {
       setRegId(reg_id);
       setAcademicYear(academicyr);
 
-      console.log("roleIDis:", role_id);
-      console.log("reg id:", reg_id);
-      console.log("academic year", academicyr);
+      // console.log("roleIDis:", role_id);
+      // console.log("reg id:", reg_id);
+      // console.log("academic year", academicyr);
 
       return { roleId, regId };
     } catch (error) {
@@ -102,10 +102,10 @@ const ViewMember = () => {
         `${API_URL}/api/get_teacherclasseswithclassteacher?teacher_id=${regId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
 
-      console.log("response", response.data.data);
+      // console.log("response", response.data.data);
 
       const mappedData = (response.data.data || [])
         .filter((item) => item.class_id && item.section_id)
@@ -166,7 +166,7 @@ const ViewMember = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      console.log("response staff", response.data);
+      // console.log("response staff", response.data);
 
       setStafflist(response.data);
     } catch (error) {
@@ -261,7 +261,7 @@ const ViewMember = () => {
         return;
       }
 
-      console.log("Fetched Data:", data);
+      // console.log("Fetched Data:", data);
 
       if (selectedType === "student") {
         setSelectedStudentIds(data.map((s) => s.student_id));
@@ -304,7 +304,7 @@ const ViewMember = () => {
         member_type,
       };
 
-      console.log("Final Payload:", payload);
+      // console.log("Final Payload:", payload);
 
       const response = await axios.post(
         `${API_URL}/api/library-member/status`,
@@ -314,7 +314,7 @@ const ViewMember = () => {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
-        }
+        },
       );
 
       if (response.status === 200 || response.status === 201) {
@@ -667,15 +667,19 @@ const ViewMember = () => {
                                           ? camelCase(
                                               `${person?.first_name || ""} ${
                                                 person?.mid_name || ""
-                                              } ${person?.last_name || ""}`
+                                              } ${person?.last_name || ""}`,
                                             )
                                           : camelCase(person?.name) || ""}
                                       </td>
 
                                       {selectedType === "student" && (
                                         <td className="px-2 py-2 text-center border border-gray-300">
-                                          {person?.classname || ""}{" "}
-                                          {person?.sectionname || ""}
+                                          {person?.class_name ||
+                                            person?.classname ||
+                                            ""}{" "}
+                                          {person?.section_name ||
+                                            person.sectionname ||
+                                            ""}
                                         </td>
                                       )}
 
@@ -728,13 +732,13 @@ const ViewMember = () => {
                           </table>
                         </div>
                         <div className="flex justify-end gap-3 mt-4 mr-4">
-                          <button
+                          {/* <button
                             type="button"
                             onClick={handleSubmit}
                             className={`bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-lg shadow-md`}
                           >
                             {isSubmitting ? "Creating" : "Create"}
-                          </button>
+                          </button> */}
 
                           <button
                             type="button"

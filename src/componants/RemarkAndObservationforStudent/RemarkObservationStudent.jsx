@@ -810,7 +810,7 @@ function RemarkObservationStudent() {
                                   )}
                                 </td>
                                 <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                  {/* Show Send button if published and messages pending */}
+                                  {/* Show thi si Send button if published and messages pending */}
                                   {
                                     subject.sms_sent === "Y" &&
                                       subject?.whatsapp_status === "failed" ? (

@@ -42,8 +42,8 @@ const EditBookDetails = () => {
 
   const { state } = useLocation();
   const { id } = useParams();
-  console.log("id", id);
-  console.log("state", state);
+  // console.log("id", id);
+  // console.log("state", state);
 
   useEffect(() => {
     fetchLastAccessionNo();
@@ -58,7 +58,7 @@ const EditBookDetails = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      console.log("last accession no:", response.data.max_copy_id);
+      // console.log("last accession no:", response.data.max_copy_id);
 
       if (response.data) {
         setLastAccessionNo(response.data.max_copy_id);
@@ -109,8 +109,8 @@ const EditBookDetails = () => {
     const nextAccession =
       rows.filter((r) => r.isOld).length > 0
         ? lastAccessionNo +
-          (rows.length - rows.filter((r) => r.isOld).length) +
-          1
+        (rows.length - rows.filter((r) => r.isOld).length) +
+        1
         : lastAccessionNo + 1;
 
     setRows([
@@ -129,6 +129,22 @@ const EditBookDetails = () => {
     ]);
   };
 
+  // const handleInputChange = (index, field, value) => {
+  //   const updatedRows = [...rows];
+  //   updatedRows[index] = { ...updatedRows[index], [field]: value };
+  //   setRows(updatedRows);
+
+  //   // ✅ Clear specific field error on typing
+  //   setRowErrors((prev) => {
+  //     if (!prev[index]?.[field]) return prev;
+
+  //     const copy = [...prev];
+  //     copy[index] = { ...copy[index] };
+  //     delete copy[index][field];
+  //     return copy;
+  //   });
+  // };
+
   const handleInputChange = (index, field, value) => {
     const updatedRows = [...rows];
     updatedRows[index][field] = value;
@@ -143,6 +159,56 @@ const EditBookDetails = () => {
       return newErrors;
     });
   };
+
+  // const handleInputChange = (index, field, value) => {
+  //   const updatedRows = [...rows];
+  //   updatedRows[index] = { ...updatedRows[index], [field]: value };
+  //   setRows(updatedRows);
+
+  //   // ✅ Clear specific field error on typing
+  //   setRowErrors((prev) => {
+  //     const copy = [...prev];
+  //     copy[index] = { ...copy[index] };
+  //     delete copy[index][field];
+  //     return copy;
+  //   });
+
+  //   // ---------------- ACCESSION NO API CHECK ----------------
+  //   if (field === "accessionNo" && value?.trim()) {
+  //     // Call API after small delay (optional: debounce)
+  //     const checkAccessionNo = async () => {
+  //       try {
+  //         const token = localStorage.getItem("authToken");
+  //         const response = await axios.get(
+  //           `${API_URL}/api/library/check_accession_no`,
+  //           {
+  //             params: { accesion_no: value.trim() },
+  //             headers: { Authorization: `Bearer ${token}` },
+  //           },
+  //         );
+
+  //         const isAvailable = response.data?.available;
+
+  //         // Update rowErrors state
+  //         setRowErrors((prev) => {
+  //           const copy = [...prev];
+  //           copy[index] = { ...copy[index] }; // ensure object exists
+  //           if (!isAvailable) {
+  //             copy[index].accessionNo =
+  //               "Accession No. is already present in system";
+  //           } else {
+  //             delete copy[index].accessionNo;
+  //           }
+  //           return copy;
+  //         });
+  //       } catch (err) {
+  //         console.error("❌ Accession No API Error:", err);
+  //       }
+  //     };
+
+  //     checkAccessionNo();
+  //   }
+  // };
 
   const handleDeleteRow = (index) => {
     const updatedRows = rows.filter((_, i) => i !== index);
@@ -196,34 +262,116 @@ const EditBookDetails = () => {
     return newErrors;
   };
 
-  const validateRows = () => {
-    return rows.map((row, index) => {
-      const errors = {};
+  // const validateRows = () => {
+  //   const accessionNumbers = rows.map((r) => r.accessionNo?.toString().trim());
 
-      if (!row.isOld) {
-        const isDuplicate = rows.some(
-          (r, i) => r.accessionNo === row.accessionNo && i !== index && !r.isOld // compare only with NEW rows
+  //   return rows.map((row, index) => {
+  //     const errors = {};
+  //     const accNo = row.accessionNo?.toString().trim();
+
+  //     /* 1️⃣ Required */
+  //     if (!accNo) {
+  //       errors.accessionNo = "Accession No. is required";
+  //     } else if (!row.isOld) {
+  //       /* 2️⃣ Duplicate check (NEW rows only) */
+  //       const duplicateIndex = accessionNumbers.findIndex(
+  //         (n, i) => n === accNo && i !== index && !rows[i].isOld
+  //       );
+
+  //       if (duplicateIndex !== -1) {
+  //         errors.accessionNo = "Accession No. is already present";
+  //       }
+  //     }
+
+  //     /* 3️⃣ Compare with last accession number */
+
+  //     if (!row.isOld) {
+  //       if (!accNo) {
+  //         errors.accessionNo = "Accession No. is required";
+  //       } else {
+  //         // Duplicate check (NEW rows only)
+  //         const duplicateIndex = accessionNumbers.findIndex(
+  //           (n, i) => n === accNo && i !== index && !rows[i].isOld
+  //         );
+
+  //         if (duplicateIndex !== -1) {
+  //           errors.accessionNo = "Accession No. is already present";
+  //         }
+
+  //         // Must be greater than last accession no
+  //         if (
+  //           lastAccessionNo &&
+  //           !isNaN(accNo) &&
+  //           parseInt(accNo) <= parseInt(lastAccessionNo)
+  //         ) {
+  //           errors.accessionNo =
+  //             "Accession No. must be greater than last accession no";
+  //         }
+  //       }
+  //     }
+
+  //     /* Pages */
+  //     if (!row.pages || row.pages.toString().trim() === "") {
+  //       errors.pages = "Pages are required";
+  //     }
+
+  //     /* Price */
+  //     if (!row.price || row.price.toString().trim() === "") {
+  //       errors.price = "Price is required";
+  //     }
+
+  //     return errors;
+  //   });
+  // };
+
+  const validateRows = async () => {
+    const newErrors = rows.map(() => ({}));
+
+    const checkAccessionNoAPI = async (accNo) => {
+      try {
+        const token = localStorage.getItem("authToken");
+        const response = await axios.get(
+          `${API_URL}/api/library/check_accession_no`,
+          {
+            params: { accesion_no: accNo },
+            headers: { Authorization: `Bearer ${token}` },
+          },
         );
+        return response.data?.available; // true if available
+      } catch (err) {
+        console.error("❌ Accession No API Error:", err);
+        return false;
+      }
+    };
 
-        if (isDuplicate) {
-          errors.accessionNo = "Accession No. is already present";
-        }
+    // Run all validations
+    for (let i = 0; i < rows.length; i++) {
+      const row = rows[i];
+      const accNo = row.accessionNo?.trim();
+
+      // ---------------- ACCESSSION NO ----------------
+      if (!row.isOld && !accNo) {
+        newErrors[i].accessionNo = "Accession No. is required";
+      } else if (!row.isOld && accNo) {
+        // Duplicate check against backend
+        const isAvailable = await checkAccessionNoAPI(accNo);
+        if (!isAvailable)
+          newErrors[i].accessionNo = "Accession No. is already present";
       }
 
-      if (!row.accessionNo || row.accessionNo.toString().trim() === "") {
-        errors.accessionNo = "Accession No. is required";
-      }
-
+      // ---------------- PAGES ----------------
       if (!row.pages || row.pages.toString().trim() === "") {
-        errors.pages = "Pages are required";
+        newErrors[i].pages = "Pages are required";
       }
 
+      // ---------------- PRICE ----------------
       if (!row.price || row.price.toString().trim() === "") {
-        errors.price = "Price is required";
+        newErrors[i].price = "Price is required";
       }
+    }
 
-      return errors;
-    });
+    setRowErrors([...newErrors]);
+    return newErrors;
   };
 
   useEffect(() => {
@@ -238,7 +386,7 @@ const EditBookDetails = () => {
       const response = await axios.get(`${API_URL}/api/get_librarycategory`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      console.log("call category", response);
+      // console.log("call category", response);
       let data =
         response?.data?.CallCategory ||
         response?.data?.data ||
@@ -249,7 +397,7 @@ const EditBookDetails = () => {
         data = Object.values(data);
       }
 
-      console.log(" Cleaned Data:", data);
+      // console.log(" Cleaned Data:", data);
       setStudentNameWithClassId(data);
     } catch (error) {
       toast.error("Error fetching Staff");
@@ -267,28 +415,52 @@ const EditBookDetails = () => {
       ...prev,
       selectedStudent: selectedOption,
     }));
+
+    setErrors((prev) => {
+      const newErrors = { ...prev };
+      if (selectedOption?.value) {
+        delete newErrors.category_id;
+      }
+      return newErrors;
+    });
   };
 
   const categoryOptions = useMemo(
     () =>
       Array.isArray(studentNameWithClassId)
         ? studentNameWithClassId.map((cls) => ({
-            value: cls?.value,
-            label: cls?.label || "",
-          }))
+          value: cls?.value,
+          label: cls?.label || "",
+        }))
         : [],
-    [studentNameWithClassId]
+    [studentNameWithClassId],
   );
+
+  // const handleChange = (event) => {
+  //   const { name, value } = event.target;
+
+  //   setFormData((prev) => ({
+  //     ...prev,
+  //     [name]: value.trim(),
+  //   }));
+
+  //   // Clear error for this field
+  //   setErrors((prevErr) => {
+  //     if (!prevErr[name]) return prevErr;
+  //     const newErr = { ...prevErr };
+  //     delete newErr[name];
+  //     return newErr;
+  //   });
+  // };
 
   const handleChange = (event) => {
     const { name, value } = event.target;
 
     setFormData((prev) => ({
       ...prev,
-      [name]: value.trim(),
+      [name]: value,
     }));
 
-    // Clear error for this field
     setErrors((prevErr) => {
       if (!prevErr[name]) return prevErr;
       const newErr = { ...prevErr };
@@ -317,17 +489,19 @@ const EditBookDetails = () => {
       try {
         const token = localStorage.getItem("authToken");
 
-        const response = await axios.post(
-          `${API_URL}/api/get-book-details`,
-          { book_id: id },
-          { headers: { Authorization: `Bearer ${token}` } }
+        const response = await axios.get(
+          `${API_URL}/api/get-book-details?book_id=${id}`,
+          { headers: { Authorization: `Bearer ${token}` } },
         );
 
-        const books = response?.data?.data || [];
-        const book = books[0]; // main book info
+        const data = response?.data || {};
+        const bookDetails = data["book-details"] || [];
+        const copyDetails = data["book-copy-details"] || [];
+
+        const book = bookDetails[0];
 
         if (book) {
-          // Book-level fields
+          // 🔹 Book-level fields
           setFormData({
             book_title: book.book_title ?? "",
             author: book.author ?? "",
@@ -335,43 +509,40 @@ const EditBookDetails = () => {
             days_borrow: book.days_borrow ?? "",
             location_of_book: book.location_of_book ?? "",
             category_id: book.category_id ?? "",
-            // issueType: book.issue_type ?? "",
             issue_type: book.issue_type ?? "",
           });
 
-          // Issue Type
+          // 🔹 Issue Type dropdown
           const selectedIssue = issueTypeOptions.find(
-            (opt) => opt.value === book.issue_type
+            (opt) => opt.value === book.issue_type,
           );
           setSelectedIssueType(selectedIssue || null);
 
-          // Category
+          // 🔹 Category dropdown
           const selectedCategory = categoryOptions.find(
-            (opt) => opt.value == book.category_id
+            (opt) => opt.value == book.category_id,
           );
+
           if (selectedCategory) {
             setSelectedStudent(selectedCategory);
             setSelectedStudentId(selectedCategory.value);
-
-            setFormData((prev) => ({
-              ...prev,
-              selectedStudent: selectedCategory,
-            }));
           }
 
+          // 🔹 Copy rows
           setRows(
-            books.map((bk) => ({
-              accessionNo: bk.copy_id,
-              billNo: bk.bill_no,
-              source: bk.source_of_book,
-              isbnno: bk.isbn,
-              year: bk.year,
-              edition: bk.edition,
-              pages: bk.no_of_pages,
-              price: bk.price,
-              option: bk.status,
-              isOld: true, // mark as read-only row
-            }))
+            copyDetails.map((cp) => ({
+              accessionNo: cp.copy_id,
+              billNo: cp.bill_no,
+              source: cp.source_of_book,
+              isbnno: cp.isbn,
+              year: cp.year,
+              edition: cp.edition,
+              pages: cp.no_of_pages,
+              price: cp.price,
+              option: cp.status,
+              isOld: true,
+              book_copies_id: cp.book_copies_id,
+            })),
           );
         }
       } catch (error) {
@@ -381,149 +552,213 @@ const EditBookDetails = () => {
       }
     };
 
-    if (id) fetchBookDetails();
+    if (id && categoryOptions.length) fetchBookDetails();
   }, [id, categoryOptions]);
 
-  // useEffect(() => {
-  //   const fetchBookDetails = async () => {
-  //     setLoading(true);
+  // const handleUpdate = async (event) => {
+  //   event.preventDefault();
+  //   setSubmitted(true);
+
+  //   /* ---------------- FORM LEVEL VALIDATION ---------------- */
+  //   const validationErrors = validate();
+  //   setErrors(validationErrors);
+
+  //   /* ---------------- ROW LEVEL VALIDATION ---------------- */
+  //   const rowValidationErrors = rows.map((row) => {
+  //     const errors = {};
+  //     const accNo = row.accessionNo?.toString().trim();
+
+  //     /* 1️⃣ Accession No required (NEW rows only) */
+  //     if (!row.isOld && !accNo) {
+  //       errors.accessionNo = "Accession No. is required";
+  //     }
+
+  //     /* Pages */
+  //     if (!row.pages || row.pages.toString().trim() === "") {
+  //       errors.pages = "Pages are required";
+  //     }
+
+  //     /* Price */
+  //     if (!row.price || row.price.toString().trim() === "") {
+  //       errors.price = "Price is required";
+  //     }
+
+  //     return errors;
+  //   });
+
+  //   /* ---------------- STOP IF INITIAL ERRORS ---------------- */
+  //   const hasFormErrors = Object.keys(validationErrors).length > 0;
+  //   const hasRowErrors = rowValidationErrors.some(
+  //     (err) => Object.keys(err).length > 0,
+  //   );
+
+  //   if (hasFormErrors || hasRowErrors) {
+  //     setRowErrors(rowValidationErrors);
+  //     toast.error("Please fix the validation errors before submitting.");
+  //     return;
+  //   }
+
+  //   /* ---------------- ASYNC ACCESSION NO CHECK ---------------- */
+  //   const checkAccessionNo = async (accessionNo) => {
   //     try {
   //       const token = localStorage.getItem("authToken");
-
-  //       const response = await axios.post(
-  //         `${API_URL}/api/get-book-details`,
-  //         { book_id: id },
-  //         { headers: { Authorization: `Bearer ${token}` } }
+  //       const response = await axios.get(
+  //         `${API_URL}/api/library/check_accession_no`,
+  //         {
+  //           params: { accesion_no: accessionNo },
+  //           headers: { Authorization: `Bearer ${token}` },
+  //         },
   //       );
-
-  //       const books = response?.data?.data || [];
-  //       const book = books[0];
-
-  //       if (book) {
-  //         // Set form fields
-  //         setFormData({
-  //           book_title: book.book_title ?? "",
-  //           author: book.author ?? "",
-  //           publisher: book.publisher ?? "",
-  //           days_borrow: book.days_borrow ?? "",
-  //           location_of_book: book.location_of_book ?? "",
-  //           category_id: book.category_id ?? "",
-  //           issue_type: book.issue_type ?? "",
-  //         });
-
-  //         // Set issue type
-  //         const selectedIssue = issueTypeOptions.find(
-  //           (opt) => opt.value === book.issue_type
-  //         );
-  //         setSelectedIssueType(selectedIssue || null);
-
-  //         // Set category
-  //         const selectedCategory = categoryOptions.find(
-  //           (opt) => opt.value == book.category_id
-  //         );
-  //         if (selectedCategory) {
-  //           setSelectedStudent(selectedCategory);
-  //           setSelectedStudentId(selectedCategory.value);
-  //         }
-
-  //         // Rows
-  //         setRows(
-  //           books.map((bk) => ({
-  //             accessionNo: bk.copy_id,
-  //             billNo: bk.bill_no,
-  //             source: bk.source_of_book,
-  //             isbnno: bk.isbn,
-  //             year: bk.year,
-  //             edition: bk.edition,
-  //             pages: bk.no_of_pages,
-  //             price: bk.price,
-  //             option: bk.status,
-  //             isOld: true,
-  //           }))
-  //         );
-  //       }
-  //     } catch (error) {
-  //       console.error("Error fetching book details:", error);
-  //     } finally {
-  //       setLoading(false);
+  //       return response.data?.available; // API should return { available: true/false }
+  //     } catch (err) {
+  //       console.error("❌ Accession No API Error:", err);
+  //       return false;
   //     }
   //   };
 
-  //   if (id) fetchBookDetails();
-  // }, [id]);
+  //   // Check all new rows asynchronously
+  //   for (let i = 0; i < rows.length; i++) {
+  //     const row = rows[i];
+  //     const accNo = row.accessionNo?.trim();
+  //     if (!row.isOld && accNo) {
+  //       const isAvailable = await checkAccessionNo(accNo);
+  //       if (!isAvailable) {
+  //         rowValidationErrors[i].accessionNo =
+  //           "Accession No. is already present";
+  //       }
+  //     }
+  //   }
+
+  //   // Update row errors after API check
+  //   setRowErrors([...rowValidationErrors]);
+
+  //   // Stop if there are errors after API validation
+  //   const hasApiErrors = rowValidationErrors.some(
+  //     (err) => Object.keys(err).length > 0,
+  //   );
+  //   if (hasApiErrors) {
+  //     toast.error("Please fix the validation errors before submitting.");
+  //     return;
+  //   }
+
+  //   console.log("✅ Validation Passed");
+
+  //   /* ---------------- NORMALIZERS ---------------- */
+  //   const normalize = (v) => {
+  //     if (v === undefined || v === null || String(v).trim() === "") return null;
+  //     return String(v).trim();
+  //   };
+
+  //   /* ---------------- NORMALIZE ROWS ---------------- */
+  //   const normalizedRows = rows.map((r) => ({
+  //     copyedit: normalize(r.accessionNo), // accession no
+  //     book_copies_id: r.isOld ? r.book_copies_id : 0, // OLD → id, NEW → 0
+  //     source: normalize(r.source),
+  //     bill_no: normalize(r.billNo),
+  //     isbn: normalize(r.isbnno),
+  //     edition: normalize(r.edition),
+  //     no_of_pages: Number(r.pages) || 0,
+  //     price: normalize(r.price),
+  //     year: normalize(r.year),
+  //     status: normalize(r.option),
+  //   }));
+
+  //   /* ---------------- FINAL PAYLOAD ---------------- */
+  //   const payload = {
+  //     operation: "edit",
+  //     book_title: normalize(formData.book_title),
+  //     category_id: selectedStudentId,
+  //     author: normalize(formData.author),
+  //     publisher: normalize(formData.publisher),
+  //     location_of_book: normalize(formData.location_of_book),
+  //     days_borrow: normalize(formData.days_borrow),
+  //     issue_type: normalize(formData.issue_type),
+
+  //     copyedit: normalizedRows.map((r) => r.copyedit),
+  //     book_copies_id: normalizedRows.map((r) => r.book_copies_id),
+  //     source: normalizedRows.map((r) => r.source),
+  //     bill_no: normalizedRows.map((r) => r.bill_no),
+  //     isbn: normalizedRows.map((r) => r.isbn),
+  //     edition: normalizedRows.map((r) => r.edition),
+  //     no_of_pages: normalizedRows.map((r) => r.no_of_pages),
+  //     price: normalizedRows.map((r) => r.price),
+  //     year: normalizedRows.map((r) => r.year),
+  //     status: normalizedRows.map((r) => r.status),
+  //   };
+
+  //   console.log("📦 FINAL PAYLOAD", payload);
+
+  //   /* ---------------- API CALL ---------------- */
+  //   try {
+  //     setLoading(true);
+  //     const token = localStorage.getItem("authToken");
+
+  //     const response = await axios.post(
+  //       `${API_URL}/api/books/edit/${id}`,
+  //       payload,
+  //       {
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //       },
+  //     );
+
+  //     if (response.data?.success) {
+  //       toast.success("Book Updated Successfully!");
+  //       setTimeout(() => navigate("/bookDetails"), 600);
+  //     } else {
+  //       toast.error(response.data?.message || "Update failed");
+  //     }
+  //   } catch (error) {
+  //     console.error("❌ API ERROR:", error);
+  //     toast.error(
+  //       error.response?.data?.message ||
+  //         "An error occurred while updating the book.",
+  //     );
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   const handleUpdate = async (event) => {
     event.preventDefault();
     setSubmitted(true);
 
-    // Run validations
-    const validationErrors = validate();
-    const rowValidationErrors = validateRows();
+    const validationErrors = validate(); // form-level validation
+    setErrors(validationErrors);
 
-    console.log("=== FORM VALIDATION ERRORS ===");
-    console.log(validationErrors);
-
-    console.log("=== ROW VALIDATION ERRORS ===");
-    rowValidationErrors.forEach((err, index) => {
-      if (Object.keys(err).length > 0) {
-        console.log(`Row ${index + 1} Errors:`, err);
-      }
-    });
+    const rowValidationErrors = await validateRows(); // row-level async validation
 
     const hasFormErrors = Object.keys(validationErrors).length > 0;
     const hasRowErrors = rowValidationErrors.some(
-      (rowErr) => Object.keys(rowErr).length > 0
+      (err) => Object.keys(err).length > 0,
     );
 
     if (hasFormErrors || hasRowErrors) {
-      console.warn("❌ VALIDATION FAILED — FIX ERRORS BEFORE SUBMITTING");
-      setErrors(validationErrors);
       toast.error("Please fix the validation errors before submitting.");
       return;
     }
 
-    console.log("✅ Validation Passed");
+    // ---------------- NORMALIZE ROWS ----------------
+    const normalize = (v) =>
+      v === undefined || v === null || String(v).trim() === ""
+        ? null
+        : String(v).trim();
+    const normalizedRows = rows.map((r) => ({
+      copyedit: normalize(r.accessionNo),
+      book_copies_id: r.isOld ? r.book_copies_id : 0,
+      source: normalize(r.source),
+      bill_no: normalize(r.billNo),
+      isbn: normalize(r.isbnno),
+      edition: normalize(r.edition),
+      no_of_pages: Number(r.pages) || 0,
+      price: normalize(r.price),
+      year: normalize(r.year),
+      status: normalize(r.option),
+    }));
 
-    // Normalizer
-    const normalize = (v) => {
-      if (v === undefined || v === null || String(v).trim() === "") return null;
-      return String(v).trim();
-    };
-
-    const convert = (arr) => arr.map((v) => normalize(v));
-
-    // Arrays
-    // const bill_no = convert(rows.map((r) => r.billNo));
-    // const edition = convert(rows.map((r) => r.edition));
-    // const source = convert(rows.map((r) => r.source));
-    // const year = convert(rows.map((r) => r.year));
-    // const no_of_pages = convert(rows.map((r) => r.pages));
-    // const price = convert(rows.map((r) => r.price));
-    // const copy = convert(rows.map((r) => r.accessionNo));
-    // const isbn = convert(rows.map((r) => r.isbnno));
-
-    // Final Payload
-    // const payload = {
-    //   operation: "edit",
-    //   book_title: normalize(formData.book_title),
-    //   category_id: selectedStudentId,
-    //   author: normalize(formData.author),
-    //   publisher: normalize(formData.publisher),
-    //   location_of_book: normalize(formData.location_of_book),
-    //   days_borrow: normalize(formData.days_borrow),
-    //   issue_type: normalize(formData.issue_type),
-
-    //   bill_no,
-    //   edition,
-    //   source,
-    //   year,
-    //   no_of_pages,
-    //   price,
-    //   copy,
-    //   isbn,
-    // };
-    const arr = Array.isArray(rows) ? rows : [];
-
+    // ---------------- FINAL PAYLOAD ----------------
     const payload = {
       operation: "edit",
       book_title: normalize(formData.book_title),
@@ -533,24 +768,21 @@ const EditBookDetails = () => {
       location_of_book: normalize(formData.location_of_book),
       days_borrow: normalize(formData.days_borrow),
       issue_type: normalize(formData.issue_type),
-
-      bill_no: convert(arr.map((r) => r.billNo)),
-      edition: convert(arr.map((r) => r.edition)),
-      source: convert(arr.map((r) => r.source)),
-      year: convert(arr.map((r) => r.year)),
-      no_of_pages: convert(arr.map((r) => r.pages)),
-      price: convert(arr.map((r) => r.price)),
-      copy: convert(arr.map((r) => r.accessionNo)),
-      isbn: convert(arr.map((r) => r.isbnno)),
+      copyedit: normalizedRows.map((r) => r.copyedit),
+      book_copies_id: normalizedRows.map((r) => r.book_copies_id),
+      source: normalizedRows.map((r) => r.source),
+      bill_no: normalizedRows.map((r) => r.bill_no),
+      isbn: normalizedRows.map((r) => r.isbn),
+      edition: normalizedRows.map((r) => r.edition),
+      no_of_pages: normalizedRows.map((r) => r.no_of_pages),
+      price: normalizedRows.map((r) => r.price),
+      year: normalizedRows.map((r) => r.year),
+      status: normalizedRows.map((r) => r.status),
     };
-
-    console.log("=== FINAL PAYLOAD SENT TO BACKEND ===");
-    console.log(payload);
 
     try {
       setLoading(true);
       const token = localStorage.getItem("authToken");
-
       const response = await axios.post(
         `${API_URL}/api/books/edit/${id}`,
         payload,
@@ -559,22 +791,20 @@ const EditBookDetails = () => {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
-
-      console.log("=== API RESPONSE ===", response.data);
 
       if (response.data?.success) {
         toast.success("Book Updated Successfully!");
         setTimeout(() => navigate("/bookDetails"), 600);
       } else {
-        toast.error(response.data?.message);
+        toast.error(response.data?.message || "Update failed");
       }
     } catch (error) {
       console.error("❌ API ERROR:", error);
       toast.error(
         error.response?.data?.message ||
-          "An error occurred while updating the form."
+        "An error occurred while updating the book.",
       );
     } finally {
       setLoading(false);
@@ -629,183 +859,6 @@ const EditBookDetails = () => {
                 </h2>
               </div>
             </div>
-
-            {/* <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-              <div className="flex flex-col">
-                <label htmlFor="title" className="mb-1">
-                  Book Title<span className="text-red-500">*</span>
-                </label>
-                <input
-                  maxLength={100}
-                  id="title"
-                  name="title"
-                  value={formData.title}
-                  onChange={handleChange}
-                  rows="2"
-                  className="form-control shadow-md"
-                />
-                {errors.title && (
-                  <span className="text-danger text-xs mt-1">
-                    {errors.title}
-                  </span>
-                )}
-              </div>
-
-              <div className="flex flex-col">
-                <label htmlFor="sectionName" className="mb-1">
-                  Call/Category <span className="text-red-500">*</span>
-                </label>
-                <Select
-                  menuPortalTarget={document.body}
-                  menuPosition="fixed"
-                  id="studentSelect"
-                  value={selectedStudent}
-                  onChange={handleCategorySelect}
-                  options={categoryOptions}
-                  placeholder={loadingExams ? "Loading..." : "Select"}
-                  isSearchable
-                  isClearable
-                  isDisabled={loadingExams}
-                  styles={{
-                    control: (provided) => ({
-                      ...provided,
-                      fontSize: ".9em",
-                      minHeight: "30px",
-                    }),
-                    menu: (provided) => ({
-                      ...provided,
-                      fontSize: "1em",
-                    }),
-                    option: (provided) => ({
-                      ...provided,
-                      fontSize: ".9em",
-                    }),
-                  }}
-                />
-
-                {errors.staff_name && (
-                  <span className="text-danger text-xs mt-1">
-                    {errors.staff_name}
-                  </span>
-                )}
-              </div>
-
-              <div className="flex flex-col">
-                <label htmlFor="author" className="mb-1">
-                  Author<span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  id="author"
-                  name="author"
-                  maxLength={100}
-                  value={formData.author}
-                  onChange={handleChange}
-                  className="form-control shadow-md"
-                />
-                {errors.author && (
-                  <span className="text-danger text-xs mt-1">
-                    {errors.author}
-                  </span>
-                )}
-              </div>
-
-              <div className="flex flex-col">
-                <label htmlFor="publisher" className="mb-1">
-                  Publisher <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  id="publisher"
-                  name="publisher"
-                  maxLength={100}
-                  value={formData.publisher}
-                  onChange={handleChange}
-                  className="form-control shadow-md"
-                />
-                {errors.publisher && (
-                  <span className="text-danger text-xs mt-1">
-                    {errors.publisher}
-                  </span>
-                )}
-              </div>
-
-              <div className="flex flex-col">
-                <label htmlFor="no_of_days" className="mb-1">
-                  No. of days borrow
-                </label>
-                <input
-                  type="text"
-                  id="no_of_days"
-                  name="no_of_days"
-                  maxLength={2}
-                  value={formData.no_of_days}
-                  onChange={handleChange}
-                  className="form-control shadow-md"
-                />
-                {errors.no_of_days && (
-                  <span className="text-danger text-xs mt-1">
-                    {errors.no_of_days}
-                  </span>
-                )}
-              </div>
-
-              <div className="flex flex-col">
-                <label htmlFor="location" className="mb-1">
-                  Location of Book <span className="text-red-500">*</span>
-                </label>
-                <input
-                  maxLength={50}
-                  id="location"
-                  name="location"
-                  value={formData.location}
-                  onChange={handleChange}
-                  rows="2"
-                  className="form-control shadow-md"
-                />
-                {errors.location && (
-                  <span className="text-danger text-xs mt-1">
-                    {errors.location}
-                  </span>
-                )}
-              </div>
-
-              <div className="flex flex-col">
-                <label htmlFor="issuetype" className="mb-1">
-                  Issued Type <span className="text-red-500">*</span>
-                </label>
-
-                <Select
-                  id="issuetype"
-                  value={selectedIssueType}
-                  onChange={(selected) => setSelectedIssueType(selected)}
-                  options={issueTypeOptions}
-                  placeholder="Select"
-                  isSearchable={false}
-                  isClearable
-                  styles={{
-                    control: (provided) => ({
-                      ...provided,
-                      fontSize: ".9em",
-                      minHeight: "30px",
-                    }),
-                    menu: (provided) => ({
-                      ...provided,
-                      fontSize: "1em",
-                    }),
-                    option: (provided) => ({
-                      ...provided,
-                      fontSize: ".9em",
-                    }),
-                  }}
-                />
-                {errors.issueType && (
-                  <span className="text-danger text-xs mt-1">
-                    {errors.issueType}
-                  </span>
-                )}
-              </div>
-            </div> */}
 
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
               {/* Book Title */}
@@ -988,23 +1041,6 @@ const EditBookDetails = () => {
             <div className="overflow-x-auto shadow-md rounded-xl border border-gray-200">
               <table className="min-w-full divide-y divide-gray-200 text-sm text-center">
                 <thead className="bg-gray-200 text-gray-700 text-xs font-normal">
-                  {/* <tr>
-                    <th className="px-3 py-2 border">
-                      Accession No<span className="text-red-500">*</span>
-                    </th>
-                    <th className="px-3 py-2 border">Bill No</th>
-                    <th className="px-3 py-2 border">Source of Book</th>
-                    <th className="px-3 py-2 border">ISBN No.</th>
-                    <th className="px-3 py-2 border">Year of Publication</th>
-                    <th className="px-3 py-2 border">Edition</th>
-                    <th className="px-3 py-2 border">
-                      No. of Pages<span className="text-red-500">*</span>
-                    </th>
-                    <th className="px-3 py-2 border">
-                      Price<span className="text-red-500">*</span>
-                    </th>
-                    <th className="px-3 py-2 border">Status</th>
-                  </tr> */}
                   <tr>
                     <th className="px-3 py-2 border w-[120px]">
                       Accession No<span className="text-red-500">*</span>
@@ -1048,14 +1084,25 @@ const EditBookDetails = () => {
                             handleInputChange(
                               index,
                               "accessionNo",
-                              e.target.value
+                              e.target.value,
                             )
                           }
                           readOnly={row.isOld}
-                          className={`w-full border rounded-md text-sm p-1 ${
-                            row.isOld ? "bg-gray-100 cursor-not-allowed" : ""
-                          }`}
+                          className={`w-full border rounded-md text-sm p-1 ${row.isOld ? "bg-gray-100 cursor-not-allowed" : ""
+                            }`}
                         />
+                        {/* {submitted && rowErrors[index]?.accessionNo && (
+                          <p className="text-red-500 text-xs mt-1">
+                            {rowErrors[index].accessionNo}
+                          </p>
+                        )} */}
+                        {!row.isOld &&
+                          submitted &&
+                          rowErrors[index]?.accessionNo && (
+                            <p className="text-red-500 text-xs mt-1">
+                              {rowErrors[index].accessionNo}
+                            </p>
+                          )}
                       </td>
 
                       {/* Bill No */}

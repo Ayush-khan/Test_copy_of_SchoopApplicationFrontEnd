@@ -49,7 +49,7 @@ function CategoryGroup() {
 
       const data = response.data || [];
       setSections(data);
-      console.log("section", sections);
+      // console.log("section", sections);
       setPageCount(Math.ceil(data.length / pageSize));
     } catch (error) {
       setError(error.message || "Error fetching data");
@@ -113,7 +113,7 @@ function CategoryGroup() {
 
   const displayedSections = filteredSections.slice(
     currentPage * pageSize,
-    (currentPage + 1) * pageSize
+    (currentPage + 1) * pageSize,
   );
 
   const validateSectionName = (name) => {
@@ -132,7 +132,7 @@ function CategoryGroup() {
 
   const handleEdit = (leave) => {
     setCurrentSection(leave);
-    console.log("category_group_id", leave);
+    // console.log("category_group_id", leave);
     setNewLeaveType(leave.category_group_name);
     setShowEditModal(true);
   };
@@ -177,7 +177,7 @@ function CategoryGroup() {
         {
           headers: { Authorization: `Bearer ${token}` },
           withCredentials: true,
-        }
+        },
       );
 
       console.log("response", response);
@@ -229,7 +229,7 @@ function CategoryGroup() {
         {
           headers: { Authorization: `Bearer ${token}` },
           withCredentials: true,
-        }
+        },
       );
 
       console.log("response", response);
@@ -266,10 +266,10 @@ function CategoryGroup() {
   };
 
   const handleDelete = (id) => {
-    console.log("id", id);
+    // console.log("id", id);
     setCurrentSection("");
     const sectionToDelete = sections.find(
-      (leave) => leave.category_group_id === id
+      (leave) => leave.category_group_id === id,
     );
 
     setCurrentSection(sectionToDelete);
@@ -294,7 +294,7 @@ function CategoryGroup() {
             Authorization: `Bearer ${token}`,
           },
           withCredentials: true,
-        }
+        },
       );
       fetchSections();
       if (response.status === 200) {
@@ -318,7 +318,7 @@ function CategoryGroup() {
   };
 
   const handleChangeSectionName = (e) => {
-    console.log(setNewLeaveType);
+    // console.log(setNewLeaveType);
     const { value } = e.target;
 
     setNewLeaveType(value);

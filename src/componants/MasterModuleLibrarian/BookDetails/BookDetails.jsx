@@ -64,10 +64,10 @@ const BookDetails = () => {
         `${API_URL}/api/get_category_group_name`,
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
 
-      console.log("group name:", response.data);
+      // console.log("group name:", response.data);
 
       // Ensure response is an array before setting state
       if (Array.isArray(response.data)) {
@@ -99,7 +99,7 @@ const BookDetails = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      console.log("all category name:", response.data.data);
+      // console.log("all category name:", response.data.data);
 
       if (Array.isArray(response.data.data)) {
         setCategoryName(response.data.data);
@@ -213,7 +213,7 @@ const BookDetails = () => {
       if (selectedCategory) params.category_id = selectedCategory.value;
       if (isNewArrival) params.is_new = true;
 
-      console.log("Search Params:", params);
+      // console.log("Search Params:", params);
 
       const response = await axios.get(`${API_URL}/api/books/search`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -223,7 +223,7 @@ const BookDetails = () => {
         },
       });
 
-      console.log("API Response:", response?.data);
+      // console.log("API Response:", response?.data);
 
       if (!response?.data?.data || response?.data?.data?.length === 0) {
         setTimetable([]);
@@ -251,10 +251,10 @@ const BookDetails = () => {
     });
   };
 
-  console.log("row", timetable);
+  // console.log("row", timetable);
 
   const handleDelete = (id) => {
-    console.log("id", id);
+    // console.log("id", id);
     setCurrentSection("");
     const sectionToDelete = timetable.find((leave) => leave.book_id === id);
 
@@ -279,7 +279,7 @@ const BookDetails = () => {
             Authorization: `Bearer ${token}`,
           },
           withCredentials: true,
-        }
+        },
       );
       // fetchSections();
       if (response.data.success) {
@@ -291,9 +291,19 @@ const BookDetails = () => {
       }
     } catch (error) {
       console.error("Error deleting Book:", error);
-      if (error.response && error.response.data && error.response.data.error) {
-        toast.error(error.response.data.error);
+
+      if (error.response) {
+        // Backend sent a response
+        const { status, data } = error.response;
+
+        if (status === 409) {
+          // Business logic error (book already issued)
+          toast.error(data?.message || "This book cannot be deleted.");
+        } else {
+          toast.error(data?.message || "Something went wrong.");
+        }
       } else {
+        // Network / server down
         toast.error("Server error. Please try again later.");
       }
     } finally {
@@ -341,7 +351,7 @@ const BookDetails = () => {
     const amount = normalize(student?.copy_id);
     const receiptNo = normalize(student?.location_of_book);
     const combined = normalize(
-      `${student?.call_no || ""} / ${student?.category_name || ""}`
+      `${student?.call_no || ""} / ${student?.category_name || ""}`,
     );
 
     // Check if the search term is present in any of the specified fields
@@ -362,7 +372,7 @@ const BookDetails = () => {
 
   const displayedSections = filteredSections.slice(
     currentPage * pageSize,
-    (currentPage + 1) * pageSize
+    (currentPage + 1) * pageSize,
   );
 
   return (
@@ -646,7 +656,7 @@ const BookDetails = () => {
                                     {currentPage * pageSize + index + 1}
                                   </td>
                                   <td className="px-2 py-2 text-center border border-gray-300">
-                                    {student?.copy_id || " "}
+                                    {student?.accession_no || " "}
                                   </td>
                                   <td className="px-2 py-2 text-center border border-gray-300">
                                     {student?.book_title || " "}
@@ -663,7 +673,7 @@ const BookDetails = () => {
                                           .map(
                                             (word) =>
                                               word.charAt(0).toUpperCase() +
-                                              word.slice(1)
+                                              word.slice(1),
                                           )
                                           .join(" ")
                                       : " "}
@@ -676,7 +686,7 @@ const BookDetails = () => {
                                           .map(
                                             (word) =>
                                               word.charAt(0).toUpperCase() +
-                                              word.slice(1)
+                                              word.slice(1),
                                           )
                                           .join(" ")
                                       : " "}

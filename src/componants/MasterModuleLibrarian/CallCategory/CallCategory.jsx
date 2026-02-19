@@ -61,7 +61,7 @@ function CallCategory() {
         data = Object.values(data);
       }
 
-      console.log("✅ Cleaned Data:", data);
+      // console.log("✅ Cleaned Data:", data);
 
       setSections(data);
       setPageCount(Math.ceil(data.length / pageSize));
@@ -122,12 +122,12 @@ function CallCategory() {
 
   const filteredSections = Array.isArray(sections)
     ? sections.filter((leave) => {
-        const searchLower = searchTerm.trim().toLowerCase();
-        return leave.label?.toLowerCase().includes(searchLower);
-      })
+      const searchLower = searchTerm.trim().toLowerCase();
+      return leave.label?.toLowerCase().includes(searchLower);
+    })
     : [];
 
-  console.log("filtered", filteredSections);
+  // console.log("filtered", filteredSections);
 
   useEffect(() => {
     setPageCount(Math.ceil(filteredSections.length / pageSize));
@@ -135,10 +135,10 @@ function CallCategory() {
 
   const displayedSections = filteredSections.slice(
     currentPage * pageSize,
-    (currentPage + 1) * pageSize
+    (currentPage + 1) * pageSize,
   );
 
-  console.log("displayedsection", displayedSections);
+  // console.log("displayedsection", displayedSections);
 
   const validateSectionName = (name) => {
     const errors = {};
@@ -162,7 +162,6 @@ function CallCategory() {
   };
 
   const handleAdd = () => {
-    // setShowAddModal(true);
     navigate("/CreateCallCategory");
   };
 
@@ -178,147 +177,8 @@ function CallCategory() {
     setNameError("");
   };
 
-  const handleSubmitAdd = async () => {
-    if (isSubmitting) return;
-    setIsSubmitting(true);
-    const validationErrors = validateSectionName(newLeaveType);
-    if (Object.keys(validationErrors).length > 0) {
-      setFieldErrors(validationErrors);
-      setIsSubmitting(false);
-      return;
-    }
-    console.log("newCategory Group", newLeaveType);
-
-    try {
-      const token = localStorage.getItem("authToken");
-      if (!token) {
-        console.error("No authentication token found");
-        return;
-      }
-
-      const checkleaveType = await axios.post(
-        `${API_URL}/api/save_leavetype`,
-        { name: newLeaveType },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-          withCredentials: true,
-        }
-      );
-
-      console.log("API Response (checkSetLateTime):", checkleaveType);
-      const { data } = checkleaveType;
-
-      console.log("API Response Data:", data);
-
-      if (!data.success) {
-        console.error(
-          "Error: The Name field must contain a unique value.",
-          data
-        );
-        setNameError("The Name field must contain a unique value..");
-        toast.error("The Name field must contain a unique value..");
-        setNameAvailable(false);
-        setIsSubmitting(false);
-        return;
-      }
-
-      console.log("Data saved successfully.", data);
-      setNameError("");
-      toast.success("Category Group added successfully!");
-      setNameAvailable(true);
-
-      fetchSections(); // Fetch updated data
-      handleCloseModal(); // Close the modal
-    } catch (error) {
-      console.error("Error adding Category Group:", error);
-      toast.error("Server error. Please try again later.");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleSubmitEdit = async () => {
-    if (isSubmitting) return; // Prevent re-submitting
-    setIsSubmitting(true);
-
-    const validationErrors = validateSectionName(newLeaveType);
-
-    if (Object.keys(validationErrors).length > 0) {
-      setFieldErrors(validationErrors);
-      setIsSubmitting(false); // Reset submitting state if validation fails
-      return;
-    }
-
-    console.log("Current Section:", currentSection);
-    console.log(
-      "Current Section ID (Category Group id):",
-      currentSection ? currentSection.leave_type_id : null
-    );
-
-    try {
-      const token = localStorage.getItem("authToken");
-      console.log("Token:", token);
-
-      if (!token || !currentSection) {
-        throw new Error("No authentication token or Category Group ID found.");
-      }
-      console.log("Current Section:", currentSection);
-
-      const response = await axios.put(
-        `${API_URL}/api/update_leavetype/${currentSection.leave_type_id}`,
-        { name: newLeaveType },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-          withCredentials: true,
-        }
-      );
-
-      // Validate the response success field
-      console.log("response.data.success", response.data.success);
-      if (response.data.success === false) {
-        toast.error(
-          "Category Group name already exists for another Category Group"
-        );
-      } else {
-        toast.success("Category Group updated successfully!");
-      }
-
-      fetchSections();
-      handleCloseModal();
-    } catch (error) {
-      if (error.response) {
-        if (error.response) {
-          console.error("Error Response:", error.response);
-          console.error("Error Response Data:", error.response.data);
-        }
-
-        const { status, message } = error.res;
-
-        if (
-          status === 400 &&
-          message ===
-            "Category Group name already exists for another Category Group."
-        ) {
-          toast.error(message);
-          setFieldErrors((prevErrors) => ({
-            ...prevErrors,
-            name: message,
-          }));
-        } else {
-          toast.error("Server error. Please try again later.");
-        }
-      } else {
-        // Handle unexpected errors (network or other issues)
-        console.error("Unexpected Error:", error);
-        toast.error("An unexpected error occurred. Please try again.");
-      }
-    } finally {
-      setIsSubmitting(false); // Reset submitting state
-    }
-  };
-
   const handleDelete = (id) => {
-    console.log("id", id);
+    // console.log("id", id);
     setCurrentSection("");
     const sectionToDelete = sections.find((leave) => leave.value === id);
 
@@ -344,7 +204,7 @@ function CallCategory() {
             Authorization: `Bearer ${token}`,
           },
           withCredentials: true,
-        }
+        },
       );
       fetchSections();
       if (response.data.success) {
@@ -368,7 +228,7 @@ function CallCategory() {
   };
 
   const handleChangeSectionName = (e) => {
-    console.log(setNewLeaveType);
+    // console.log(setNewLeaveType);
     const { value } = e.target;
 
     setNewLeaveType(value); //
@@ -452,9 +312,8 @@ function CallCategory() {
                       displayedSections.map((leave, index) => (
                         <tr
                           key={leave.section_id}
-                          className={`${
-                            index % 2 === 0 ? "bg-white" : "bg-gray-100"
-                          } hover:bg-gray-50 `}
+                          className={`${index % 2 === 0 ? "bg-white" : "bg-gray-100"
+                            } hover:bg-gray-50 `}
                         >
                           <td className="text-center px-2 py-2  lg:px-3 border border-gray-950 text-sm">
                             {currentPage * pageSize + index + 1}
@@ -573,28 +432,6 @@ function CallCategory() {
                       </div>
                     </div>
                   </div>
-
-                  <div className=" flex justify-end">
-                    <button
-                      type="button"
-                      className="btn btn-primary px-3 mb-2 mr-2 "
-                      style={{}}
-                      onClick={handleSubmitAdd}
-                      disabled={isSubmitting}
-                    >
-                      {isSubmitting ? "Saving..." : "Add"}
-                    </button>
-
-                    {/* <button
-                      type="button"
-                      className="btn btn-danger px-3 mb-2 "
-                      style={{}}
-                    //   onClick={handleSubmitAdd}
-                    //   disabled={isSubmitting}
-                    >
-                      {isSubmitting ? "Saving..." : "Reset"}
-                    </button> */}
-                  </div>
                 </div>
               </div>
             </div>
@@ -643,17 +480,6 @@ function CallCategory() {
                       )}
                     </div>
                   </div>
-                </div>
-                <div className=" flex justify-end ">
-                  <button
-                    type="button"
-                    className="btn btn-primary px-3 mb-2 "
-                    style={{}}
-                    onClick={handleSubmitEdit}
-                    disabled={isSubmitting}
-                  >
-                    {isSubmitting ? "Updating..." : "Update"}
-                  </button>
                 </div>
               </div>
             </div>
