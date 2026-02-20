@@ -319,6 +319,10 @@ import BookIssuedReport from "../componants/MasterModuleLibrarian/LibraryReports
 import BooksNonReturnReport from "../componants/MasterModuleLibrarian/LibraryReports/BooksNonReturnReport.jsx";
 import MonthlyBookIssueReport from "../componants/MasterModuleLibrarian/LibraryReports/MonthlyBookIssueReport.jsx";
 import HSCSStudentSubjectGroupReport from "../componants/Reports/HSCSStudentSubjectGroupReport.jsx";
+import GuideNavigation from "../componants/SuperAdmin/guideNavigation/GuideNavigation.jsx";
+import GuideNavigationCreate from "../componants/SuperAdmin/guideNavigation/GuideNavigationCreate.jsx";
+
+
 function Index() {
   return (
     <Routes>
@@ -1739,6 +1743,15 @@ function Index() {
         <Route
           path="/monthlyBookIssuedReport"
           element={<PrivateRoute element={<MonthlyBookIssueReport />} />}
+        />
+
+        <Route
+          path="/guideNavigations"
+          element={<PrivateRoute element={<GuideNavigation />} />}
+        />
+        <Route
+          path="/guideNavigations/create"
+          element={<PrivateRoute element={<GuideNavigationCreate />} />}
         />
       </Route>
 
