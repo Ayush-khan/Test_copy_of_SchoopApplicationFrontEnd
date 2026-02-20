@@ -83,7 +83,7 @@ const StudentListForSchedulingInterview = () => {
         `${API_URL}/api/admin/admission-classes`,
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
       console.log("Class", response);
       setStudentNameWithClassId(response?.data?.data || []);
@@ -111,53 +111,9 @@ const StudentListForSchedulingInterview = () => {
     { value: "N", label: "No" },
   ];
 
-  //   const handleSearch = async () => {
-  //     // if (!selectedStudentId) {
-  //     //   setStudentError("Please select class.");
-  //     //   return;
-  //     // }
-
-  //     setLoadingForSearch(true);
-  //     setLoading(true);
-  //     setTimetable([]);
-
-  //     const token = localStorage.getItem("authToken");
-
-  //     //  Now reset UI fields
-  //     setSearchTerm("");
-  //     setFormId("");
-  //     setShowSearch(false);
-
-  //     try {
-  //       const response = await axios.get(
-  //         `${API_URL}/api/admin/applications/interview-scheduling`,
-  //         {
-  //           headers: { Authorization: `Bearer ${token}` },
-  //         }
-  //       );
-
-  //       if (!response?.data?.data?.length) {
-  //         toast.error("Admission forms data not found.");
-  //         setTimetable([]);
-  //       } else {
-  //         setTimetable(response.data.data);
-  //         setPageCount(Math.ceil(response.data.data.length / pageSize));
-  //         // setShowStudentReport(true);
-  //       }
-  //     } catch (error) {
-  //       console.error("Error fetching Admission forms:", error);
-  //       toast.error("Error fetching Admission forms. Please try again.");
-  //     } finally {
-  //       setLoadingForSearch(false);
-  //       setIsSubmitting(false);
-  //       setLoading(false);
-  //     }
-  //   };
-
   const handleSearch = async () => {
     setLoadingForSearch(true);
     setLoading(true);
-    setTimetable([]);
 
     const token = localStorage.getItem("authToken");
 
@@ -165,7 +121,7 @@ const StudentListForSchedulingInterview = () => {
       const params = {};
 
       if (religion?.value) {
-        params.religion = religion.value; // Hindu
+        params.religion = religion.value;
       }
 
       if (sibling?.value) {
@@ -181,33 +137,27 @@ const StudentListForSchedulingInterview = () => {
         {
           headers: { Authorization: `Bearer ${token}` },
           params,
-        }
+        },
       );
 
-      if (!response?.data?.data?.length) {
+      const data = response?.data?.data || [];
+
+      setTimetable(data);
+      setPageCount(Math.ceil(data.length / pageSize));
+
+      if (data.length === 0) {
         toast.error("Admission forms data not found.");
-        setTimetable([]);
-      } else {
-        setTimetable(response.data.data);
-        setPageCount(Math.ceil(response.data.data.length / pageSize));
       }
     } catch (error) {
       console.error("Error fetching Admission forms:", error);
       toast.error("Error fetching Admission forms. Please try again.");
+      setTimetable([]); // clear only if error
     } finally {
       setLoadingForSearch(false);
       setIsSubmitting(false);
       setLoading(false);
     }
   };
-
-  // const handleView = (student) => {
-  //   console.log("HandleView -->", student);
-
-  //   navigate(
-  //     `/viewAdmissionForm/${student.form_id}?class_id=${selectedStudentId}`
-  //   );
-  // };
 
   const handleView = (student) => {
     console.log("HandleView -->", student);
@@ -216,7 +166,7 @@ const StudentListForSchedulingInterview = () => {
       `/viewAdmissionForm/${student.form_id}?class_id=${selectedStudentId}`,
       {
         state: { from: "listOfStudentForSchedulingInterview" },
-      }
+      },
     );
   };
   const camelCase = (str) =>
@@ -229,10 +179,10 @@ const StudentListForSchedulingInterview = () => {
   const formatDate = (dateStr) =>
     dateStr
       ? new Date(dateStr).toLocaleDateString("en-GB", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "2-digit",
-      })
+          day: "2-digit",
+          month: "2-digit",
+          year: "2-digit",
+        })
       : "";
 
   const filteredSections = timetable.filter((section) => {
@@ -278,73 +228,13 @@ const StudentListForSchedulingInterview = () => {
 
   const handleRowSelect = (id) => {
     setSelectedRows((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
     );
   };
   const formatDateDMY = (dateStr) => {
     const [yyyy, mm, dd] = dateStr.split("-");
     return `${dd}-${mm}-${yyyy}`;
   };
-
-  //   const handleSubmit = async () => {
-  //     const newErrors = {};
-
-  //     if (!interviewDate)
-  //       newErrors.interviewDate = "Verification date is required";
-  //     if (!timeFrom) newErrors.timeFrom = "Time From is required";
-  //     if (!timeTo) newErrors.timeTo = "Time To is required";
-
-  //     if (timeFrom && timeTo && timeFrom >= timeTo) {
-  //       newErrors.timeTo = "Time To must be greater than Time From";
-  //     }
-
-  //     if (selectedRows.length === 0) {
-  //       toast.error("Please select at least one form.");
-  //       return;
-  //     }
-
-  //     if (Object.keys(newErrors).length > 0) {
-  //       setErrors(newErrors);
-  //       toast.error("Please fill all required interview details.");
-  //       return;
-  //     }
-
-  //     const token = localStorage.getItem("authToken");
-  //     setLoading(true);
-
-  //     try {
-  //       const formData = new FormData();
-
-  //       selectedRows.forEach((id) => {
-  //         formData.append("form_ids[]", id);
-  //       });
-
-  //       formData.append("interview_date", formatDateDMY(interviewDate));
-  //       formData.append("interview_time_from", timeFrom);
-  //       formData.append("interview_time_to", timeTo);
-
-  //       await axios.post(
-  //         `${API_URL}/api/admin/applications/interview-scheduling`,
-  //         formData,
-  //         {
-  //           headers: {
-  //             Authorization: `Bearer ${token}`,
-  //           },
-  //         }
-  //       );
-
-  //       toast.success("Interview scheduled successfully.");
-  //       handleSearch();
-  //       setInterviewDate("");
-  //       setTimeFrom("");
-  //       setTimeTo("");
-  //     } catch (error) {
-  //       console.error(error);
-  //       toast.error("Submission failed.");
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
 
   const handleSubmit = async () => {
     const newErrors = {};
@@ -370,7 +260,7 @@ const StudentListForSchedulingInterview = () => {
     // 🔔 Native confirmation
     if (isInterviewDetailsMissing) {
       const confirmSubmit = window.confirm(
-        "Interview date or time is not selected. Please note email will not be sent to parents."
+        "Interview date or time is not selected. Please note email will not be sent to parents.",
       );
 
       if (!confirmSubmit) return; // ❌ Cancel
@@ -396,7 +286,7 @@ const StudentListForSchedulingInterview = () => {
         formData,
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
 
       toast.success("Interview scheduled successfully.");
@@ -546,8 +436,9 @@ const StudentListForSchedulingInterview = () => {
                     type="search"
                     onClick={handleSearch}
                     style={{ backgroundColor: "#2196F3" }}
-                    className={` btn h-10 w-18 md:w-auto btn-primary text-white font-bold py-1 border-1 border-blue-500 px-4 rounded ${loadingForSearch ? "opacity-50 cursor-not-allowed" : ""
-                      }`}
+                    className={` btn h-10 w-18 md:w-auto btn-primary text-white font-bold py-1 border-1 border-blue-500 px-4 rounded ${
+                      loadingForSearch ? "opacity-50 cursor-not-allowed" : ""
+                    }`}
                     disabled={loadingForSearch}
                   >
                     {loadingForSearch ? (
@@ -658,16 +549,15 @@ const StudentListForSchedulingInterview = () => {
                               </th>
 
                               <th className="min-w-[180px] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
-                                Email Id
+                                Father Email Id
+                              </th>
+                              <th className="min-w-[180px] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
+                                Mother Email Id
                               </th>
 
                               <th className="min-w-[140px] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
                                 Application Date (DD-MM-YY)
                               </th>
-
-                              {/* <th className="min-w-[180px] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold whitespace-nowrap">
-                                Status
-                              </th> */}
 
                               <th className="min-w-[50px] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
                                 View
@@ -679,7 +569,7 @@ const StudentListForSchedulingInterview = () => {
                             {loading ? (
                               <tr>
                                 <td
-                                  colSpan={10}
+                                  colSpan={11}
                                   className="text-center py-6 text-blue-700 text-lg"
                                 >
                                   Please wait while data is loading...
@@ -700,7 +590,7 @@ const StudentListForSchedulingInterview = () => {
                                       <input
                                         type="checkbox"
                                         checked={selectedRows.includes(
-                                          student.form_id
+                                          student.form_id,
                                         )}
                                         onChange={() =>
                                           handleRowSelect(student.form_id)
@@ -715,7 +605,7 @@ const StudentListForSchedulingInterview = () => {
 
                                     <td className="px-2 py-2 text-center border border-gray-300">
                                       {camelCase(
-                                        `${student.first_name} ${student.mid_name} ${student.last_name}`
+                                        `${student.first_name} ${student.mid_name} ${student.last_name}`,
                                       )}
                                     </td>
 
@@ -736,6 +626,10 @@ const StudentListForSchedulingInterview = () => {
                                     </td>
 
                                     <td className="px-2 py-2 text-center border border-gray-300">
+                                      {student.m_emailid}
+                                    </td>
+
+                                    <td className="px-2 py-2 text-center border border-gray-300">
                                       {formatDate(student.application_date)}
                                     </td>
 
@@ -750,10 +644,9 @@ const StudentListForSchedulingInterview = () => {
                                   </tr>
                                 ))}
 
-                                {/* ✅ SUMMARY ROW */}
                                 <tr className="bg-gray-100 font-semibold">
                                   <td
-                                    colSpan={10}
+                                    colSpan={11}
                                     className="border border-gray-950"
                                   >
                                     <div className="flex justify-center items-center gap-2 px-4 py-2">
@@ -773,10 +666,10 @@ const StudentListForSchedulingInterview = () => {
                             ) : (
                               <tr>
                                 <td
-                                  colSpan={10}
+                                  colSpan={11}
                                   className="text-center py-6 text-red-700 text-lg"
                                 >
-                                  Oops! No data found..
+                                  No data available.
                                 </td>
                               </tr>
                             )}

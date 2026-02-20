@@ -83,7 +83,7 @@ const StudentListForVerification = () => {
         `${API_URL}/api/admin/admission-classes`,
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
       console.log("Class", response);
       setStudentNameWithClassId(response?.data?.data || []);
@@ -181,7 +181,7 @@ const StudentListForVerification = () => {
         {
           headers: { Authorization: `Bearer ${token}` },
           params,
-        }
+        },
       );
 
       if (!response?.data?.data?.length) {
@@ -216,7 +216,7 @@ const StudentListForVerification = () => {
       `/viewAdmissionForm/${student.form_id}?class_id=${selectedStudentId}`,
       {
         state: { from: "listOfStudentForVerification" },
-      }
+      },
     );
   };
   const camelCase = (str) =>
@@ -229,10 +229,10 @@ const StudentListForVerification = () => {
   const formatDate = (dateStr) =>
     dateStr
       ? new Date(dateStr).toLocaleDateString("en-GB", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "2-digit",
-      })
+          day: "2-digit",
+          month: "2-digit",
+          year: "2-digit",
+        })
       : "";
 
   const filteredSections = timetable.filter((section) => {
@@ -278,7 +278,7 @@ const StudentListForVerification = () => {
 
   const handleRowSelect = (id) => {
     setSelectedRows((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
     );
   };
   const formatDateDMY = (dateStr) => {
@@ -375,7 +375,7 @@ const StudentListForVerification = () => {
         formData,
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
 
       toast.success("Admission Form Successfully Verified.");
@@ -522,8 +522,9 @@ const StudentListForVerification = () => {
                     type="search"
                     onClick={handleSearch}
                     style={{ backgroundColor: "#2196F3" }}
-                    className={` btn h-10 w-18 md:w-auto btn-primary text-white font-bold py-1 border-1 border-blue-500 px-4 rounded ${loadingForSearch ? "opacity-50 cursor-not-allowed" : ""
-                      }`}
+                    className={` btn h-10 w-18 md:w-auto btn-primary text-white font-bold py-1 border-1 border-blue-500 px-4 rounded ${
+                      loadingForSearch ? "opacity-50 cursor-not-allowed" : ""
+                    }`}
                     disabled={loadingForSearch}
                   >
                     {loadingForSearch ? (
@@ -676,7 +677,7 @@ const StudentListForVerification = () => {
                                       <input
                                         type="checkbox"
                                         checked={selectedRows.includes(
-                                          student.form_id
+                                          student.form_id,
                                         )}
                                         onChange={() =>
                                           handleRowSelect(student.form_id)
@@ -691,7 +692,7 @@ const StudentListForVerification = () => {
 
                                     <td className="px-2 py-2 text-center border border-gray-300">
                                       {camelCase(
-                                        `${student.first_name} ${student.mid_name} ${student.last_name}`
+                                        `${student.first_name} ${student.mid_name} ${student.last_name}`,
                                       )}
                                     </td>
 
@@ -752,7 +753,7 @@ const StudentListForVerification = () => {
                                   colSpan={10}
                                   className="text-center py-6 text-red-700 text-lg"
                                 >
-                                  Oops! No data found..
+                                  No data available.
                                 </td>
                               </tr>
                             )}

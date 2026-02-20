@@ -605,7 +605,6 @@ const HSCStudentsSubjectsReport = () => {
                                 "Sr No.",
                                 "Roll No.",
                                 "Student Name",
-
                                 "Stream",
                                 "Subjects",
                               ].map((header, index) => (
