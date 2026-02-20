@@ -59,13 +59,14 @@ function GuideNavigationCreate() {
 
         try {
             setLoading(true);
-            const response = await axios.get(`${API_URL}/menus`, {
+            const response = await axios.get(`${API_URL}/api/menus`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
 
-            if (response.data.status) {
+            if (response.data) {
                 // Format menus for react-select
-                const formattedMenus = formatMenusForSelect(response.data.data);
+                const formattedMenus = formatMenusForSelect(response.data);
+                console.log(formattedMenus);
                 setMenus(formattedMenus);
             }
         } catch (error) {
@@ -77,7 +78,7 @@ function GuideNavigationCreate() {
     };
 
     // Format menus hierarchically for select dropdown
-    const formatMenusForSelect = (menus, parentId = null, level = 0) => {
+    const formatMenusForSelect = (menus, parentId = 0, level = 0) => {
         const filteredMenus = menus.filter(menu => menu.parent_id === parentId);
         let options = [];
 
@@ -223,7 +224,7 @@ function GuideNavigationCreate() {
             };
 
             const response = await axios.post(
-                `${API_URL}/help-guides/create`,
+                `${API_URL}/api/help-guides/create`,
                 guideData,
                 {
                     headers: { 
