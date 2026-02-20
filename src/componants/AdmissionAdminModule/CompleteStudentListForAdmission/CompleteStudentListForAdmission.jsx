@@ -190,7 +190,7 @@ const CompleteStudentListForAdmission = () => {
     const enteredFormId = formId;
 
     setSearchTerm("");
-    setFormId("");
+    // setFormId("");
     setShowSearch(false);
 
     try {
@@ -621,9 +621,16 @@ const CompleteStudentListForAdmission = () => {
                             </div>
                           )}
 
-                          <div className="card-body w-full">
-                            <div
+                          <div className="card-body">
+                            {/* <div
                               className="  h-96 lg:h-96  overflow-y-scroll overflow-x-scroll"
+                              style={{
+                                scrollbarWidth: "thin",
+                                scrollbarColor: "#C03178 transparent",
+                              }}
+                            > */}
+                            <div
+                              className="relative h-96 overflow-auto"
                               style={{
                                 scrollbarWidth: "thin",
                                 scrollbarColor: "#C03178 transparent",
@@ -632,47 +639,44 @@ const CompleteStudentListForAdmission = () => {
                               <table className="min-w-full leading-normal table-auto">
                                 <thead>
                                   <tr className="bg-gray-100">
-                                    <th className="min-w-[50px] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
-                                      Sr No.
+                                    <th className="text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold whitespace-nowrap">
+                                      Sr <br /> No.
                                     </th>
 
-                                    <th className="min-w-[180px] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
+                                    <th className=" text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold whitespace-nowrap">
                                       Form Id.
                                     </th>
 
-                                    <th className="min-w-[230px] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
+                                    <th className="text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold whitespace-nowrap">
                                       Student Name
                                     </th>
 
-                                    <th className="min-w-[180px] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
+                                    <th className=" text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold whitespace-nowrap">
                                       Parent Name
                                     </th>
 
-                                    {/* <th className="min-w-[100px] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
-                                      Class
-                                    </th> */}
-
-                                    <th className="min-w-[80px] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
+                                    <th className="text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold whitespace-nowrap">
                                       Phone No.
                                     </th>
 
-                                    <th className="min-w-[180px] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
+                                    <th className=" text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold whitespace-nowrap">
                                       Email Id
                                     </th>
 
-                                    <th className="min-w-[140px] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
-                                      Application Date (DD-MM-YY)
+                                    <th className=" text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold whitespace-nowrap">
+                                      Application Date <br />
+                                      (DD-MM-YY)
                                     </th>
 
-                                    <th className="min-w-[120px] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
+                                    <th className=" text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold whitespace-nowrap">
                                       Actual Status
                                     </th>
 
-                                    <th className="min-w-[120px] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
+                                    <th className=" text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold whitespace-nowrap">
                                       Change Status
                                     </th>
 
-                                    <th className="min-w-[50px] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
+                                    <th className=" text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold whitespace-nowrap">
                                       View
                                     </th>
                                   </tr>
@@ -680,8 +684,8 @@ const CompleteStudentListForAdmission = () => {
 
                                 <tbody>
                                   {loading ? (
-                                    <div className=" absolute left-[4%] w-[100%]  text-center flex justify-center items-center mt-14">
-                                      <div className=" text-center text-xl text-blue-700">
+                                    <div className="absolute inset-0 flex items-center justify-center  z-10">
+                                      <div className="text-xl text-blue-700">
                                         Please wait while data is loading...
                                       </div>
                                     </div>
@@ -694,22 +698,18 @@ const CompleteStudentListForAdmission = () => {
                                         <td className="px-2 py-2 text-center border border-gray-300">
                                           {index + 1}
                                         </td>
-                                        <td className="px-2 py-2 text-center border border-gray-300">
+                                        <td className="px-2 py-2 text-center border border-gray-300 whitespace-nowrap">
                                           {student.form_id}
                                         </td>
-                                        <td className="px-2 py-2 text-center border border-gray-300">
+                                        <td className="px-2 py-2 text-center border border-gray-300 whitespace-nowrap">
                                           {camelCase(
                                             `${student.first_name} ${student.mid_name} ${student.last_name}`,
                                           )}
                                         </td>
 
-                                        <td className="px-2 py-2 text-center border border-gray-300">
+                                        <td className="px-2 py-2 text-center border border-gray-300 whitespace-nowrap">
                                           {camelCase(student.father_name)}
                                         </td>
-
-                                        {/* <td className="px-2 py-2 text-center border border-gray-300">
-                                          {student.class_name}
-                                        </td> */}
 
                                         <td className="px-2 py-2 text-center border border-gray-300">
                                           {student.f_mobile}
@@ -767,8 +767,8 @@ const CompleteStudentListForAdmission = () => {
                                       </tr>
                                     ))
                                   ) : (
-                                    <div className=" absolute left-[1%] w-[100%]  text-center flex justify-center items-center mt-14">
-                                      <div className=" text-center text-xl text-red-700">
+                                    <div className="absolute inset-0 flex items-center justify-center z-10">
+                                      <div className="text-xl text-red-700 text-center">
                                         No data available.
                                       </div>
                                     </div>

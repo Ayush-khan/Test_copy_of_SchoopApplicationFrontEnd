@@ -48,6 +48,8 @@ function DynamicMailer() {
   const [selectedKey, setSelectedKey] = useState(null);
   const [keyError, setKeyError] = useState("");
 
+  const academicYear = localStorage.getItem("academicYr");
+
   //   const defaultMessage = `
   // As a part of the admission procedure, your ward's interview has been scheduled on INTERVIEW_DATE from TIME_FROM to TIME_TO.
   // `;
@@ -128,12 +130,18 @@ function DynamicMailer() {
         throw new Error("No authentication token found");
       }
 
-      const response = await axios.get(`${API_URL}/api/admin/email-templates`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
+      const response = await axios.get(
+        `${API_URL}/api/admin/email-templates/`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          withCredentials: true,
+          params: {
+            academic_year: academicYear,
+          },
         },
-        withCredentials: true,
-      });
+      );
       console.log("the data of ", response.data.data);
 
       setSections(response.data.data);

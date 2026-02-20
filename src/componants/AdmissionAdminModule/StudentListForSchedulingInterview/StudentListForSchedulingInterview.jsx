@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { RxCross1 } from "react-icons/rx";
 import { MdOutlineRemoveRedEye } from "react-icons/md";
 import { FiSearch } from "react-icons/fi";
+import Swal from "sweetalert2";
 
 const StudentListForSchedulingInterview = () => {
   const API_URL = import.meta.env.VITE_API_URL;
@@ -43,6 +44,8 @@ const StudentListForSchedulingInterview = () => {
   const [timeTo, setTimeTo] = useState("");
 
   const [errors, setErrors] = useState({});
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [pendingSubmit, setPendingSubmit] = useState(false);
 
   useEffect(() => {
     fetchExams();
@@ -114,6 +117,7 @@ const StudentListForSchedulingInterview = () => {
   const handleSearch = async () => {
     setLoadingForSearch(true);
     setLoading(true);
+    setSelectedRows(""); // add 20-02-2026
 
     const token = localStorage.getItem("authToken");
 
@@ -231,6 +235,7 @@ const StudentListForSchedulingInterview = () => {
       prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
     );
   };
+
   const formatDateDMY = (dateStr) => {
     const [yyyy, mm, dd] = dateStr.split("-");
     return `${dd}-${mm}-${yyyy}`;
@@ -257,13 +262,41 @@ const StudentListForSchedulingInterview = () => {
 
     const isInterviewDetailsMissing = !interviewDate || !timeFrom || !timeTo;
 
-    // 🔔 Native confirmation
-    if (isInterviewDetailsMissing) {
-      const confirmSubmit = window.confirm(
-        "Interview date or time is not selected. Please note email will not be sent to parents.",
-      );
+    //  Native confirmation
+    // if (isInterviewDetailsMissing) {
+    //   const confirmSubmit = window.confirm(
+    //     "Interview date or time is not selected. Please note email will not be sent to parents.",
+    //   );
 
-      if (!confirmSubmit) return; // ❌ Cancel
+    //   if (!confirmSubmit) return;
+    // }
+    if (isInterviewDetailsMissing) {
+      const result = await Swal.fire({
+        toast: true,
+        position: "top-end",
+        icon: "warning",
+        title:
+          "Interview date or time is not selected. Please note email will not be sent to parents.",
+        showCancelButton: true,
+        showConfirmButton: true,
+        confirmButtonText: "OK",
+        cancelButtonText: "Cancel",
+        timer: 10000,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+          // toast.style.fontSize = "13px";
+          toast.style.padding = "5px 5px";
+
+          const icon = toast.querySelector(".swal2-icon");
+          if (icon) {
+            icon.style.width = "1.5em";
+            icon.style.height = "1.5em";
+            icon.style.margin = "0 2px 0 0";
+          }
+        },
+      });
+
+      if (!result.isConfirmed) return;
     }
 
     const token = localStorage.getItem("authToken");
@@ -497,6 +530,13 @@ const StudentListForSchedulingInterview = () => {
                     )}
 
                     <div className="card-body w-full">
+                      {/* <div
+                        className="relative h-96 overflow-auto"
+                        style={{
+                          scrollbarWidth: "thin",
+                          scrollbarColor: "#C03178 transparent",
+                        }}
+                      > */}
                       <div
                         className=" overflow-y-scroll overflow-x-auto"
                         // h-96 lg:h-96
@@ -511,13 +551,13 @@ const StudentListForSchedulingInterview = () => {
                         <table className="min-w-full leading-normal table-auto">
                           <thead className="">
                             <tr className="bg-gray-100">
-                              <th className="min-w-[20px] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
-                                Sr No.
+                              <th className="text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
+                                Sr <br /> No.
                               </th>
 
-                              <th className="min-w-[20px] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
+                              <th className=" text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
                                 <span className="mr-2 whitespace-nowrap">
-                                  Select All
+                                  Select All <br />
                                 </span>
                                 <input
                                   type="checkbox"
@@ -528,38 +568,38 @@ const StudentListForSchedulingInterview = () => {
                                 />
                               </th>
 
-                              <th className="min-w-[200px] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold whitespace-nowrap">
+                              <th className=" text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold whitespace-nowrap">
                                 Form Id.
                               </th>
 
-                              <th className="min-w-[230px] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold whitespace-nowrap">
+                              <th className="text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold whitespace-nowrap">
                                 Student Name
                               </th>
 
-                              <th className="min-w-[200px] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold whitespace-nowrap">
+                              <th className=" text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold whitespace-nowrap">
                                 Parent Name
                               </th>
 
-                              <th className="min-w-[80px] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
+                              <th className=" text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold whitespace-nowrap">
                                 Class
                               </th>
 
-                              <th className="min-w-[100px] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
+                              <th className=" text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold whitespace-nowrap">
                                 Phone No.
                               </th>
 
-                              <th className="min-w-[180px] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
+                              <th className=" text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold whitespace-nowrap">
                                 Father Email Id
                               </th>
-                              <th className="min-w-[180px] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
+                              <th className="text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold whitespace-nowrap">
                                 Mother Email Id
                               </th>
 
-                              <th className="min-w-[140px] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
-                                Application Date (DD-MM-YY)
+                              <th className="text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold whitespace-nowrap">
+                                Application Date <br /> (DD-MM-YY)
                               </th>
 
-                              <th className="min-w-[50px] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
+                              <th className="text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold whitespace-nowrap">
                                 View
                               </th>
                             </tr>
@@ -569,7 +609,7 @@ const StudentListForSchedulingInterview = () => {
                             {loading ? (
                               <tr>
                                 <td
-                                  colSpan={11}
+                                  colSpan={10}
                                   className="text-center py-6 text-blue-700 text-lg"
                                 >
                                   Please wait while data is loading...
@@ -599,17 +639,17 @@ const StudentListForSchedulingInterview = () => {
                                       />
                                     </td>
 
-                                    <td className="px-2 py-2 text-center border border-gray-300">
+                                    <td className="px-2 py-2 text-center border border-gray-300 whitespace-nowrap">
                                       {student.form_id}
                                     </td>
 
-                                    <td className="px-2 py-2 text-center border border-gray-300">
+                                    <td className="px-2 py-2 text-center border border-gray-300 whitespace-nowrap">
                                       {camelCase(
                                         `${student.first_name} ${student.mid_name} ${student.last_name}`,
                                       )}
                                     </td>
 
-                                    <td className="px-2 py-2 text-center border border-gray-300">
+                                    <td className="px-2 py-2 text-center border border-gray-300 whitespace-nowrap">
                                       {camelCase(student.father_name)}
                                     </td>
 
@@ -672,6 +712,11 @@ const StudentListForSchedulingInterview = () => {
                                   No data available.
                                 </td>
                               </tr>
+                              // <div className="absolute inset-0 flex items-center justify-center z-10">
+                              //   <div className="text-xl text-red-700 text-center">
+                              //     No data available.
+                              //   </div>
+                              // </div>
                             )}
                           </tbody>
                         </table>

@@ -652,13 +652,13 @@ const StudentListForApproval = () => {
                           <table className="min-w-full leading-normal table-auto">
                             <thead className="">
                               <tr className="bg-gray-100">
-                                <th className="min-w-[20px] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
-                                  Sr No.
+                                <th className=" text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
+                                  Sr <br /> No.
                                 </th>
 
-                                <th className="min-w-[20px] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
+                                <th className="text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
                                   <span className="mr-2 whitespace-nowrap">
-                                    Select All
+                                    Select All <br />
                                   </span>
                                   <input
                                     type="checkbox"
@@ -669,39 +669,31 @@ const StudentListForApproval = () => {
                                   />
                                 </th>
 
-                                <th className="min-w-[200px] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold whitespace-nowrap">
+                                <th className=" text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold whitespace-nowrap">
                                   Form Id.
                                 </th>
 
-                                <th className="min-w-[230px] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold whitespace-nowrap">
+                                <th className="text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold whitespace-nowrap">
                                   Student Name
                                 </th>
 
-                                <th className="min-w-[200px] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold whitespace-nowrap">
+                                <th className=" text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold whitespace-nowrap">
                                   Parent Name
                                 </th>
 
-                                {/* <th className="min-w-[80px] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
-                                  Class
-                                </th> */}
-
-                                <th className="min-w-[100px] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
+                                <th className="whitespace-nowrap text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
                                   Phone No.
                                 </th>
 
-                                <th className="min-w-[180px] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
+                                <th className="whitespace-nowrap  text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
                                   Email Id
                                 </th>
 
-                                <th className="min-w-[140px] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
-                                  Application Date (DD-MM-YY)
+                                <th className="whitespace-nowrap text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
+                                  Application Date <br /> (DD-MM-YY)
                                 </th>
 
-                                {/* <th className="min-w-[180px] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold whitespace-nowrap">
-                                Status
-                              </th> */}
-
-                                <th className="min-w-[50px] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
+                                <th className="whitespace-nowrap text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
                                   View
                                 </th>
                               </tr>
@@ -741,23 +733,19 @@ const StudentListForApproval = () => {
                                         />
                                       </td>
 
-                                      <td className="px-2 py-2 text-center border border-gray-300">
+                                      <td className="px-2 py-2 text-center border border-gray-300 whitespace-nowrap">
                                         {student.form_id}
                                       </td>
 
-                                      <td className="px-2 py-2 text-center border border-gray-300">
+                                      <td className="px-2 py-2 text-center border border-gray-300 whitespace-nowrap">
                                         {camelCase(
                                           `${student.first_name} ${student.mid_name} ${student.last_name}`,
                                         )}
                                       </td>
 
-                                      <td className="px-2 py-2 text-center border border-gray-300">
+                                      <td className="px-2 py-2 text-center border border-gray-300 whitespace-nowrap">
                                         {camelCase(student.father_name)}
                                       </td>
-
-                                      {/* <td className="px-2 py-2 text-center border border-gray-300">
-                                        {student.class_name}
-                                      </td> */}
 
                                       <td className="px-2 py-2 text-center border border-gray-300">
                                         {student.f_mobile}
@@ -782,7 +770,6 @@ const StudentListForApproval = () => {
                                     </tr>
                                   ))}
 
-                                  {/* ✅ SUMMARY ROW */}
                                   <tr className="bg-gray-100 font-semibold">
                                     <td
                                       colSpan={10}

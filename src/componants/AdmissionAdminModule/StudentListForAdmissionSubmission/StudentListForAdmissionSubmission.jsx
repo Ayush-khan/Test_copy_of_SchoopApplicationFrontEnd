@@ -361,9 +361,9 @@ const StudentListForAdmissionSubmission = () => {
                       </div>
                     )}
 
-                    <div className="card-body w-full">
+                    <div className="card-body">
                       <div
-                        className=" h-96 lg:h-96  overflow-y-scroll overflow-x-scroll"
+                        className="relative h-96 overflow-auto"
                         style={{
                           scrollbarWidth: "thin",
                           scrollbarColor: "#C03178 transparent",
@@ -371,15 +371,14 @@ const StudentListForAdmissionSubmission = () => {
                       >
                         <table className="min-w-full leading-normal table-auto">
                           <thead className="">
-                            {/* bg-gray-100 sticky top-0 z-10 */}
                             <tr className="bg-gray-100">
-                              <th className="min-w-[20px] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
-                                Sr No.
+                              <th className="text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
+                                Sr <br /> No.
                               </th>
 
-                              <th className="min-w-[20px] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
+                              <th className="text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
                                 <span className="mr-2 whitespace-nowrap">
-                                  Select All
+                                  Select All <br />
                                 </span>
                                 <input
                                   type="checkbox"
@@ -390,163 +389,50 @@ const StudentListForAdmissionSubmission = () => {
                                 />
                               </th>
 
-                              <th className="min-w-[200px] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold whitespace-nowrap">
+                              <th className=" text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold whitespace-nowrap">
                                 Form Id.
                               </th>
 
-                              <th className="min-w-[230px] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold whitespace-nowrap">
+                              <th className="text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold whitespace-nowrap">
                                 Student Name
                               </th>
 
-                              <th className="min-w-[200px] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold whitespace-nowrap">
+                              <th className="text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold whitespace-nowrap">
                                 Parent Name
                               </th>
 
-                              <th className="min-w-[80px] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
+                              <th className=" text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold whitespace-nowrap">
                                 Class
                               </th>
 
-                              <th className="min-w-[100px] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
+                              <th className=" text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold whitespace-nowrap">
                                 Phone No.
                               </th>
 
-                              <th className="min-w-[180px] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
+                              <th className="text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold whitespace-nowrap">
                                 Father Email Id
                               </th>
-                              <th className="min-w-[180px] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
+                              <th className="text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold whitespace-nowrap">
                                 Mother Email Id
                               </th>
 
-                              <th className="min-w-[140px] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
-                                Application Date (DD-MM-YY)
+                              <th className=" text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold whitespace-nowrap">
+                                Application Date <br /> (DD-MM-YY)
                               </th>
 
-                              {/* <th className="min-w-[80px] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold whitespace-nowrap">
-                                Status
-                              </th> */}
-
-                              <th className="min-w-[50px] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
+                              <th className=" text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold whitespace-nowrap">
                                 View
                               </th>
                             </tr>
                           </thead>
 
-                          {/* <tbody>
-                            {loading ? (
-                              <tr>
-                                <td
-                                  colSpan={10}
-                                  className="text-center py-6 text-blue-700 text-lg"
-                                >
-                                  Please wait while data is loading...
-                                </td>
-                              </tr>
-                            ) : displayedSections.length ? (
-                              <>
-                                {displayedSections.map((student, index) => (
-                                  <tr
-                                    key={student.adm_form_pk}
-                                    className="border border-gray-300"
-                                  >
-                                    <td className="px-2 py-2 text-center border border-gray-300">
-                                      {index + 1}
-                                    </td>
-
-                                    <td className="px-2 py-2 text-center border border-gray-300">
-                                      <input
-                                        type="checkbox"
-                                        checked={selectedRows.includes(
-                                          student.form_id,
-                                        )}
-                                        onChange={() =>
-                                          handleRowSelect(student.form_id)
-                                        }
-                                        className="w-3 h-3 cursor-pointer accent-blue-500"
-                                      />
-                                    </td>
-
-                                    <td className="px-2 py-2 text-center border border-gray-300">
-                                      {student.form_id}
-                                    </td>
-
-                                    <td className="px-2 py-2 text-center border border-gray-300">
-                                      {camelCase(
-                                        `${student.first_name} ${student.mid_name} ${student.last_name}`,
-                                      )}
-                                    </td>
-
-                                    <td className="px-2 py-2 text-center border border-gray-300">
-                                      {camelCase(student.father_name)}
-                                    </td>
-
-                                    <td className="px-2 py-2 text-center border border-gray-300">
-                                      {student.class_name}
-                                    </td>
-
-                                    <td className="px-2 py-2 text-center border border-gray-300">
-                                      {student.f_mobile}
-                                    </td>
-
-                                    <td className="px-2 py-2 text-center border border-gray-300">
-                                      {student.f_email}
-                                    </td>
-
-                                    <td className="px-2 py-2 text-center border border-gray-300">
-                                      {formatDate(student.application_date)}
-                                    </td>
-
-                                    <td className="px-2 py-2 text-center border border-gray-300">
-                                      <button
-                                        onClick={() => handleView(student)}
-                                        className="text-blue-600 hover:text-blue-800"
-                                      >
-                                        <MdOutlineRemoveRedEye className="text-xl" />
-                                      </button>
-                                    </td>
-                                  </tr>
-                                ))}
-
-                                <tr className="bg-gray-100 font-semibold">
-                                  <td
-                                    colSpan={10}
-                                    className="border border-gray-950"
-                                  >
-                                    <div className="flex justify-center items-center gap-2 px-4 py-2">
-                                      <span>
-                                        <span className="text-blue-800 ml-1">
-                                          Total Count :{" "}
-                                        </span>
-
-                                        <span className="text-pink-600 ml-1">
-                                          {displayedSections.length}
-                                        </span>
-                                      </span>
-                                    </div>
-                                  </td>
-                                </tr>
-                              </>
-                            ) : (
-                              <tr>
-                                <td
-                                  colSpan={10}
-                                  className="text-center py-6 text-red-700 text-lg"
-                                >
-                                  No data available.
-                                </td>
-                              </tr>
-                            )}
-                          </tbody> */}
-
                           <tbody>
                             {loading ? (
-                              <tr>
-                                <td
-                                  colSpan={10}
-                                  className="text-center py-6 text-blue-700 text-lg"
-                                >
+                              <div className="absolute inset-0 flex items-center justify-center  z-10">
+                                <div className="text-xl text-blue-700">
                                   Please wait while data is loading...
-                                </td>
-                              </tr>
+                                </div>
+                              </div>
                             ) : displayedSections &&
                               displayedSections.length > 0 ? (
                               <>
@@ -559,7 +445,7 @@ const StudentListForAdmissionSubmission = () => {
                                       {index + 1}
                                     </td>
 
-                                    <td className="px-2 py-2 text-center border border-gray-300">
+                                    <td className="px-2 py-2 text-center border border-gray-300 whitespace-nowrap">
                                       <input
                                         type="checkbox"
                                         checked={selectedRows.includes(
@@ -572,17 +458,17 @@ const StudentListForAdmissionSubmission = () => {
                                       />
                                     </td>
 
-                                    <td className="px-2 py-2 text-center border border-gray-300">
+                                    <td className="px-2 py-2 text-center border border-gray-300 whitespace-nowrap">
                                       {student.form_id}
                                     </td>
 
-                                    <td className="px-2 py-2 text-center border border-gray-300">
+                                    <td className="px-2 py-2 text-center border border-gray-300 whitespace-nowrap">
                                       {camelCase(
                                         `${student.first_name} ${student.mid_name} ${student.last_name}`,
                                       )}
                                     </td>
 
-                                    <td className="px-2 py-2 text-center border border-gray-300">
+                                    <td className="px-2 py-2 text-center border border-gray-300 whitespace-nowrap">
                                       {camelCase(student.father_name)}
                                     </td>
 
@@ -619,7 +505,7 @@ const StudentListForAdmissionSubmission = () => {
 
                                 <tr className="bg-gray-100 font-semibold">
                                   <td
-                                    colSpan={10}
+                                    colSpan={11}
                                     className="border border-gray-950"
                                   >
                                     <div className="flex justify-center items-center gap-2 px-4 py-2">
@@ -636,14 +522,11 @@ const StudentListForAdmissionSubmission = () => {
                                 </tr>
                               </>
                             ) : (
-                              <tr>
-                                <td
-                                  colSpan={10}
-                                  className="text-center py-6 text-red-700 text-lg"
-                                >
+                              <div className="absolute inset-0 flex items-center justify-center z-10">
+                                <div className="text-xl text-red-700 text-center">
                                   No data available.
-                                </td>
-                              </tr>
+                                </div>
+                              </div>
                             )}
                           </tbody>
                         </table>
