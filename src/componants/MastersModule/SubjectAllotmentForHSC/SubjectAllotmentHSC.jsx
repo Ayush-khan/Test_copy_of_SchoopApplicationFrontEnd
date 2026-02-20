@@ -71,7 +71,7 @@ const SubjectAllotmentHSC = () => {
       });
       setSubjectGroups(response.data.data || []);
     } catch (err) {
-      setError("Error fetching subject groups");
+      toast.error("Error fetching subject groups");
     } finally {
       setLoading(false);
     }
