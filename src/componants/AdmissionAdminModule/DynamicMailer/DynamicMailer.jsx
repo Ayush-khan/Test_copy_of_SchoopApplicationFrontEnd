@@ -130,18 +130,15 @@ function DynamicMailer() {
         throw new Error("No authentication token found");
       }
 
-      const response = await axios.get(
-        `${API_URL}/api/admin/email-templates/`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          withCredentials: true,
-          params: {
-            academic_year: academicYear,
-          },
+      const response = await axios.get(`${API_URL}/api/admin/email-templates`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
         },
-      );
+        withCredentials: true,
+        params: {
+          academic_year: academicYear,
+        },
+      });
       console.log("the data of ", response.data.data);
 
       setSections(response.data.data);
