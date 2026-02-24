@@ -6,6 +6,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom"; // Import the useNavigate hook
 import Loader from "../common/LoaderFinal/LoaderStyle";
 import LoadingSpinner from "../common/LoadingSpinner";
+import { handleApiError } from "../../helpers/impersonateHelper";
 
 const AllotMarksHeadingTab = ({ onSaveSuccess }) => {
   const API_URL = import.meta.env.VITE_API_URL;
@@ -525,7 +526,8 @@ const AllotMarksHeadingTab = ({ onSaveSuccess }) => {
       );
       // navigate("/allotMarksHeading"); // Replace '/your-target-route' with the desired route
     } catch (error) {
-      toast.error("Error Deleting Allot Marks headings");
+      handleApiError(error);
+      // toast.error("Error Deleting Allot Marks headings");
     } finally {
       setIsDeleting(false); // Re-enable the button after the operation
     }

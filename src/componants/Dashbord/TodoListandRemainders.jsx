@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import Loader from "../common/LoaderFinal/DashboardLoadder/Loader";
 import { ToastContainer, toast } from "react-toastify";
 import { FaEdit, FaTrash } from "react-icons/fa";
+import {handleApiError} from "../../helpers/impersonateHelper";
 
 function TodoListandRemainders() {
   const API_URL = import.meta.env.VITE_API_URL; // url for host
@@ -157,7 +158,8 @@ function TodoListandRemainders() {
       setDeleteTodoId(null);
       fetchTodoRemainders();
     } catch (error) {
-      toast.error("Failed to delete todo");
+      // toast.error("Failed to delete todo");
+      handleApiError(error);
     }
   };
 
@@ -224,8 +226,9 @@ function TodoListandRemainders() {
         toast.error("Failed to update status");
       }
     } catch (error) {
-      console.error(error);
-      toast.error("Something went wrong while updating status");
+      // console.error(error);
+      // toast.error("Something went wrong while updating status");
+      handleApiError(error);
     }
   };
 
@@ -296,8 +299,9 @@ function TodoListandRemainders() {
         toast.error("Failed to save todo");
       }
     } catch (error) {
-      console.error(error);
-      toast.error("Something went wrong");
+      // console.error(error);
+      // toast.error("Something went wrong");
+      handleApiError(error);
     }
   };
 

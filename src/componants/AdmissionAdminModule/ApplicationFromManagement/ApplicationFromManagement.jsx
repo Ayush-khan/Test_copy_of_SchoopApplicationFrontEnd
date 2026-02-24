@@ -13,6 +13,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { RxCross1 } from "react-icons/rx";
 import Select from "react-select";
+import { handleApiError } from "../../../helpers/impersonateHelper";
 
 function ApplicationForMangement() {
   const API_URL = import.meta.env.VITE_API_URL; // URL for host
@@ -398,12 +399,13 @@ function ApplicationForMangement() {
       fetchSections(); // refresh list
       handleCloseModal(); // close modal
     } catch (error) {
-      console.error("Update admission error:", error);
+      handleApiError(error);
+      // console.error("Update admission error:", error);
 
-      toast.error(
-        error?.response?.data?.message ||
-          "Something went wrong. Please try again.",
-      );
+      // toast.error(
+      //   error?.response?.data?.message ||
+      //     "Something went wrong. Please try again.",
+      // );
     }
   };
 
@@ -486,16 +488,17 @@ function ApplicationForMangement() {
         );
       }
     } catch (error) {
-      console.error("Error deleting admission class:", error);
+      handleApiError(error);
+      // console.error("Error deleting admission class:", error);
 
-      if (error.response?.status === 409) {
-        toast.error(
-          error.response.data?.message ||
-            "Cannot delete this admission. It is linked with other records.",
-        );
-      } else {
-        toast.error("Server error. Please try again later.");
-      }
+      // if (error.response?.status === 409) {
+      //   toast.error(
+      //     error.response.data?.message ||
+      //       "Cannot delete this admission. It is linked with other records.",
+      //   );
+      // } else {
+      //   toast.error("Server error. Please try again later.");
+      // }
     } finally {
       setIsSubmitting(false);
       setShowDeleteModal(false);

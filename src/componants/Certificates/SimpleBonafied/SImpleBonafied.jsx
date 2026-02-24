@@ -13,6 +13,8 @@ import { RxCross1 } from "react-icons/rx";
 // import AllotSubjectTab from "./AllotMarksHeadingTab";
 import Select from "react-select";
 import CreateSimpleBonafied from "./CreateSimpleBonafied";
+import {handleApiError} from "../../../helpers/impersonateHelper";
+
 function SImpleBonafied() {
   const API_URL = import.meta.env.VITE_API_URL; // URL for host
   const [activeTab, setActiveTab] = useState("Manage");
@@ -374,16 +376,17 @@ function SImpleBonafied() {
       toast.success("Simple Bonafied issue status updated successfully!");
       handleCloseModal(); // Close the modal
     } catch (error) {
-      if (error.response && error.response.data) {
-        toast.error(
-          `Error updating Simple Bonafied issue status: ${error.response.data.error}`
-        );
-      } else {
-        toast.error(
-          `Error updating Simple Bonafied issue status: ${error.message}`
-        );
-      }
-      console.error("Error Simple Bonafied issue status:", error);
+      // if (error.response && error.response.data) {
+      //   toast.error(
+      //     `Error updating Simple Bonafied issue status: ${error.response.data.error}`
+      //   );
+      // } else {
+      //   toast.error(
+      //     `Error updating Simple Bonafied issue status: ${error.message}`
+      //   );
+      // }
+      // console.error("Error Simple Bonafied issue status:", error);
+      handleApiError(error);
     } finally {
       setIsSubmitting(false); // Re-enable the button after the operation
     }
@@ -415,14 +418,15 @@ function SImpleBonafied() {
       setShowDeleteModal(false); // Close the modal
       toast.success("Simple Bonafied deleted successfully!");
     } catch (error) {
-      if (error.response && error.response.data) {
-        toast.error(
-          `Error deleting Simple Bonafied: ${error.response.data.message}`
-        );
-      } else {
-        toast.error(`Error deleting Simple Bonafied: ${error.message}`);
-      }
-      console.error("Error deleting Simple Bonafied:", error);
+      // if (error.response && error.response.data) {
+      //   toast.error(
+      //     `Error deleting Simple Bonafied: ${error.response.data.message}`
+      //   );
+      // } else {
+      //   toast.error(`Error deleting Simple Bonafied: ${error.message}`);
+      // }
+      // console.error("Error deleting Simple Bonafied:", error);
+      handleApiError(error);
     } finally {
       setIsSubmitting(false); // Re-enable the button after the operation
       setShowDeleteModal(false); // Close the modal

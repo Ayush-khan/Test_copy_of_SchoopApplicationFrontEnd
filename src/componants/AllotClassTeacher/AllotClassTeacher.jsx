@@ -8,6 +8,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { RxCross1 } from "react-icons/rx";
 import Select from "react-select";
+import { handleApiError } from "../../helpers/impersonateHelper";
 
 // The Division List component this is
 function AllotClassTeacher() {
@@ -305,7 +306,8 @@ function AllotClassTeacher() {
       handleCloseModal();
       toast.success("Allot class teacher updated successfully!");
     } catch (error) {
-      toast.error("Error updating Class teacher. Please try again.");
+      handleApiError(error);
+      // toast.error("Error updating Class teacher. Please try again.");
     }
   };
 
@@ -338,16 +340,17 @@ function AllotClassTeacher() {
         toast.error(response.data.message || "Failed to delete Division");
       }
     } catch (error) {
-      console.error("Error deleting Allot Class Teacher:", error);
-      if (
-        error.response &&
-        error.response.data &&
-        error.response.data.message
-      ) {
-        toast.error(error.response.data.message);
-      } else {
-        toast.error("Server error. Please try again later.");
-      }
+      handleApiError(error);
+      // console.error("Error deleting Allot Class Teacher:", error);
+      // if (
+      //   error.response &&
+      //   error.response.data &&
+      //   error.response.data.message
+      // ) {
+      //   toast.error(error.response.data.message);
+      // } else {
+      //   toast.error("Server error. Please try again later.");
+      // }
     }
   };
 

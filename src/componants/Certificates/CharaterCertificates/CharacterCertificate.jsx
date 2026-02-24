@@ -12,6 +12,8 @@ import { RxCross1 } from "react-icons/rx";
 // import AllotSubjectTab from "./AllotMarksHeadingTab";
 import Select from "react-select";
 import CreateCharacterCertificate from "./CreateCharacterCertificate";
+import {handleApiError} from "../../../helpers/impersonateHelper";
+
 function CharacterCertificate() {
   const API_URL = import.meta.env.VITE_API_URL; // URL for host
   const [activeTab, setActiveTab] = useState("Manage");
@@ -306,14 +308,15 @@ function CharacterCertificate() {
       toast.success("Character issue status updated successfully!");
       handleCloseModal(); // Close the modal
     } catch (error) {
-      if (error.response && error.response.data) {
-        toast.error(
-          `Error updating Character issue status: ${error.response.data.error}`
-        );
-      } else {
-        toast.error(`Error updating Character issue status: ${error.message}`);
-      }
-      console.error("Error Character issue status:", error);
+      // if (error.response && error.response.data) {
+      //   toast.error(
+      //     `Error updating Character issue status: ${error.response.data.error}`
+      //   );
+      // } else {
+      //   toast.error(`Error updating Character issue status: ${error.message}`);
+      // }
+      // console.error("Error Character issue status:", error);
+      handleApiError(error);
     } finally {
       setIsSubmitting(false); // Re-enable the button after the operation
     }
@@ -345,12 +348,13 @@ function CharacterCertificate() {
       setShowDeleteModal(false); // Close the modal
       toast.success("Character deleted successfully!");
     } catch (error) {
-      if (error.response && error.response.data) {
-        toast.error(`Error deleting Character: ${error.response.data.message}`);
-      } else {
-        toast.error(`Error deleting Character: ${error.message}`);
-      }
-      console.error("Error deleting Character:", error);
+      // if (error.response && error.response.data) {
+      //   toast.error(`Error deleting Character: ${error.response.data.message}`);
+      // } else {
+      //   toast.error(`Error deleting Character: ${error.message}`);
+      // }
+      // console.error("Error deleting Character:", error);
+      handleApiError(error);
     } finally {
       setIsSubmitting(false); // Re-enable the button after the operation
       setShowDeleteModal(false); // Close the modal

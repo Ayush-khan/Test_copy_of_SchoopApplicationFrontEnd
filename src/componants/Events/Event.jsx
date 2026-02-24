@@ -15,6 +15,7 @@ import LoaderStyle from "../common/LoaderFinal/LoaderStyle";
 import MarkDropdownEditor from "./MarkDropdownEditor";
 import { IoMdSend } from "react-icons/io";
 import { FaCheck } from "react-icons/fa";
+import {handleApiError} from "../../helpers/impersonateHelper";
 
 function Event() {
   const API_URL = import.meta.env.VITE_API_URL; // URL for host
@@ -541,13 +542,14 @@ function Event() {
       setShowDeleteModal(false);
       fetchEvents();
     } catch (error) {
-      console.error("Error deleting event:", error);
-      console.error("Error deleting event:", error.response.data.error_code);
-      if(error.response?.data?.error_code == "IMPERSONATION_READ_ONLY") {
-        toast.warning("This action is disabled during impersonation");
-      } else {
-        toast.error("Server error. Please try again later.");
-      }
+      // console.error("Error deleting event:", error);
+      // console.error("Error deleting event:", error.response.data.error_code);
+      // if(error.response?.data?.error_code == "IMPERSONATION_READ_ONLY") {
+      //   toast.warning("This action is disabled during impersonation");
+      // } else {
+      //   toast.error("Server error. Please try again later.");
+      // }
+      handleApiError(error);
     } finally {
       setIsSubmitting(false);
     }

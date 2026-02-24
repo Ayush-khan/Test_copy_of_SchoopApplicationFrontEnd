@@ -7,6 +7,7 @@ import { faEdit, faTrash, faPlus } from "@fortawesome/free-solid-svg-icons";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { RxCross1 } from "react-icons/rx";
+import { handleApiError } from "../../helpers/impersonateHelper";
 
 function BookRequisition() {
   const API_URL = import.meta.env.VITE_API_URL; // URL for host
@@ -392,7 +393,7 @@ function BookRequisition() {
           errors.title.forEach((err) => toast.error(err));
         }
       } else {
-        toast.error("Server error. Please try again later.");
+        handleApiError(error);
       }
     } finally {
       setIsSubmitting(false);
@@ -438,12 +439,13 @@ function BookRequisition() {
         );
       }
     } catch (error) {
-      console.error("Error deleting book:", error);
-      if (error.response && error.response.data && error.response.data.error) {
-        toast.error(error.response.data.error);
-      } else {
-        toast.error("Server error. Please try again later.");
-      }
+      // console.error("Error deleting book:", error);
+      // if (error.response && error.response.data && error.response.data.error) {
+      //   toast.error(error.response.data.error);
+      // } else {
+      //   toast.error("Server error. Please try again later.");
+      // }
+      handleApiError(error);
     } finally {
       setIsSubmitting(false);
       setShowDeleteModal(false);

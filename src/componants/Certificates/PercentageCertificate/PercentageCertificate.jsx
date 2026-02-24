@@ -13,6 +13,8 @@ import { RxCross1 } from "react-icons/rx";
 // import AllotSubjectTab from "./AllotMarksHeadingTab";
 import Select from "react-select";
 import CreatePercentageCertificate from "./CreatePercentageCertificate";
+import {handleApiError} from "../../../helpers/impersonateHelper";
+
 function PercentageCertificate() {
   const API_URL = import.meta.env.VITE_API_URL; // URL for host
   const [activeTab, setActiveTab] = useState("Manage");
@@ -403,14 +405,15 @@ function PercentageCertificate() {
       toast.success("Percentage issue status updated successfully!");
       handleCloseModal(); // Close the modal
     } catch (error) {
-      if (error.response && error.response.data) {
-        toast.error(
-          `Error updating Percentage issue status: ${error.response.data.error}`
-        );
-      } else {
-        toast.error(`Error updating Percentage issue status: ${error.message}`);
-      }
-      console.error("Error Percentage issue status:", error);
+      // if (error.response && error.response.data) {
+      //   toast.error(
+      //     `Error updating Percentage issue status: ${error.response.data.error}`
+      //   );
+      // } else {
+      //   toast.error(`Error updating Percentage issue status: ${error.message}`);
+      // }
+      // console.error("Error Percentage issue status:", error);
+      handleApiError(error);
     } finally {
       setIsSubmitting(false); // Re-enable the button after the operation
     }
@@ -442,14 +445,15 @@ function PercentageCertificate() {
       setShowDeleteModal(false); // Close the modal
       toast.success("Percentage deleted successfully!");
     } catch (error) {
-      if (error.response && error.response.data) {
-        toast.error(
-          `Error deleting Percentage: ${error.response.data.message}`
-        );
-      } else {
-        toast.error(`Error deleting Percentage: ${error.message}`);
-      }
-      console.error("Error deleting Percentage:", error);
+      // if (error.response && error.response.data) {
+      //   toast.error(
+      //     `Error deleting Percentage: ${error.response.data.message}`
+      //   );
+      // } else {
+      //   toast.error(`Error deleting Percentage: ${error.message}`);
+      // }
+      // console.error("Error deleting Percentage:", error);
+      handleApiError(error);
     } finally {
       setIsSubmitting(false); // Re-enable the button after the operation
       setShowDeleteModal(false); // Close the modal

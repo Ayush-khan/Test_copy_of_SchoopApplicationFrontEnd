@@ -9,6 +9,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { MdOutlineRemoveRedEye } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
 import { RxCross1 } from "react-icons/rx";
+import { handleApiError } from "../../helpers/impersonateHelper";
 
 function CareTacker() {
   const API_URL = import.meta.env.VITE_API_URL; // url for host
@@ -159,8 +160,9 @@ function CareTacker() {
         toast.error("Failed to delete CareTacker");
       }
     } catch (error) {
-      console.error("Error deleting CareTacker:", error);
-      toast.error("Failed to delete CareTacker");
+      // console.error("Error deleting CareTacker:", error);
+      // toast.error("Failed to delete CareTacker");
+      handleApiError(error);
     } finally {
       setIsSubmitting(false); // Re-enable the button after the operation
       setShowDeleteModal(false);

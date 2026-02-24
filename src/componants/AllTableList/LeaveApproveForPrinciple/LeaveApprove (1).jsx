@@ -10,6 +10,7 @@ import { MdOutlineRemoveRedEye } from "react-icons/md";
 import { useNavigate, useLocation } from "react-router-dom";
 import { RxCross1 } from "react-icons/rx";
 import LeaveApplicatonForPrincipleTab from "./LeaveApplicatonForPrincipleTab";
+import { handleApiError } from "../../../helpers/impersonateHelper";
 
 function LeaveApprove() {
   const API_URL = import.meta.env.VITE_API_URL; // url for host
@@ -121,9 +122,10 @@ function LeaveApprove() {
         toast.error("Leave Application not found");
       }
     } catch (error) {
-      console.error("Error deleting staff:", error);
-      toast.error("Failed to delete staff");
-      toast.error(error.response.data.error);
+      handleApiError(error);
+      // console.error("Error deleting staff:", error);
+      // toast.error("Failed to delete staff");
+      // toast.error(error.response.data.error);
     } finally {
       setIsSubmitting(false); // Re-enable the button after the operation
       setShowDeleteModal(false);

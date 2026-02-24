@@ -7,6 +7,7 @@ import { faEdit, faTrash, faPlus } from "@fortawesome/free-solid-svg-icons";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { RxCross1 } from "react-icons/rx";
+import {handleApiError} from "../../helpers/impersonateHelper";
 
 // The is the divisionlist module
 function SelfAssessmentMaster() {
@@ -345,7 +346,8 @@ function SelfAssessmentMaster() {
         }
       } else {
         // Handle other errors
-        toast.error("Server error. Please try again later.");
+        // toast.error("Server error. Please try again later.");
+        handleApiError(error);
       }
     } finally {
       setIsSubmitting(false); // Re-enable the button after the operation
@@ -394,7 +396,8 @@ function SelfAssessmentMaster() {
           "Cannot Delete. This self assessment paramter already use in self assessment."
         );
       } else {
-        toast.error("Something went wrong. Please try again.");
+        // toast.error("Something went wrong. Please try again.");
+        handleApiError(error);
       }
     } finally {
       setIsSubmitting(false);

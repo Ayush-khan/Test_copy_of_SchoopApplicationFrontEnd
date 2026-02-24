@@ -14,6 +14,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { MdOutlineRemoveRedEye } from "react-icons/md";
 import { useNavigate, useLocation } from "react-router-dom";
 import { RxCross1, RxCross2 } from "react-icons/rx";
+import { handleApiError } from "../../../helpers/impersonateHelper";
 
 function LeaveApplicatonForPrincipleTab() {
   const API_URL = import.meta.env.VITE_API_URL; // url for host
@@ -148,9 +149,10 @@ function LeaveApplicatonForPrincipleTab() {
         toast.error(`Leave Application for for ${currentLeaveName} not found`);
       }
     } catch (error) {
-      console.error("Error Canceling staff:", error);
-      toast.error("Failed to Cancel staff");
-      toast.error(error.response.data.error);
+      handleApiError(error);
+      // console.error("Error Canceling staff:", error);
+      // toast.error("Failed to Cancel staff");
+      // toast.error(error.response.data.error);
     } finally {
       setIsSubmitting(false); // Re-enable the button after the operation
       setShowCancelModal(false);
@@ -186,9 +188,10 @@ function LeaveApplicatonForPrincipleTab() {
         toast.error("Leave Application not found");
       }
     } catch (error) {
-      console.error("Error deleting staff:", error);
-      toast.error("Failed to delete staff");
-      toast.error(error.response.data.error);
+      handleApiError(error);
+      // console.error("Error deleting staff:", error);
+      // toast.error("Failed to delete staff");
+      // toast.error(error.response.data.error);
     } finally {
       setIsSubmitting(false); // Re-enable the button after the operation
       setShowDeleteModal(false);

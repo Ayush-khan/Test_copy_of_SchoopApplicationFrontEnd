@@ -978,6 +978,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { RxCross1 } from "react-icons/rx";
 import { FaCheck } from "react-icons/fa";
+import {handleApiError} from "../../helpers/impersonateHelper";
 
 function RoleForEvent() {
   const API_URL = import.meta.env.VITE_API_URL; // URL for host
@@ -1177,12 +1178,13 @@ function RoleForEvent() {
       setShowDActiveModal(false);
       toast.success(response?.data?.message);
     } catch (error) {
-      if (error.response && error.response.data) {
-        toast.error(`Error: ${error.response.data.message}`);
-      } else {
-        toast.error(`Error in active or deactive roles: ${error.message}`);
-      }
-      console.error("Error in active or deactive roles:", error);
+      // if (error.response && error.response.data) {
+      //   toast.error(`Error: ${error.response.data.message}`);
+      // } else {
+      //   toast.error(`Error in active or deactive roles: ${error.message}`);
+      // }
+      // console.error("Error in active or deactive roles:", error);
+      handleApiError(error);
     } finally {
       setIsSubmitting(false); // Re-enable the button after the operation
       setShowDActiveModal(false);
@@ -1346,15 +1348,16 @@ function RoleForEvent() {
       setCurrentRole(null);
       toast.success("Role deleted successfully!");
     } catch (error) {
-      console.error("Error deleting role:", error);
+      // console.error("Error deleting role:", error);
 
-      // Prefer backend message if available
-      const backendMessage = error?.response?.data?.message;
-      if (backendMessage) {
-        toast.error(backendMessage);
-      } else {
-        toast.error("Error deleting role.");
-      }
+      // // Prefer backend message if available
+      // const backendMessage = error?.response?.data?.message;
+      // if (backendMessage) {
+      //   toast.error(backendMessage);
+      // } else {
+      //   toast.error("Error deleting role.");
+      // }
+      handleApiError(error);
 
       setError(error.message);
     } finally {

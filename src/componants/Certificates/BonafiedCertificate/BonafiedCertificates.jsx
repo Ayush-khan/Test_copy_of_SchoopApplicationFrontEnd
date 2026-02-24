@@ -11,6 +11,8 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import { RxCross1 } from "react-icons/rx";
 import Select from "react-select";
 import CreateCreateBonafide from "./CreateCreateBonafide";
+import {handleApiError} from "../../../helpers/impersonateHelper";
+
 function BonafiedCertificates() {
   const API_URL = import.meta.env.VITE_API_URL; // URL for host
   const [activeTab, setActiveTab] = useState("Manage");
@@ -389,14 +391,15 @@ function BonafiedCertificates() {
       toast.success("Bonafied issue status updated successfully!");
       handleCloseModal(); // Close the modal
     } catch (error) {
-      if (error.response && error.response.data) {
-        toast.error(
-          `Error updating Bonafied issue status: ${error.response.data.error}`
-        );
-      } else {
-        toast.error(`Error updating Bonafied issue status: ${error.message}`);
-      }
-      console.error("Error Bonafied issue status:", error);
+      handleApiError(error);
+      // if (error.response && error.response.data) {
+      //   toast.error(
+      //     `Error updating Bonafied issue status: ${error.response.data.error}`
+      //   );
+      // } else {
+      //   toast.error(`Error updating Bonafied issue status: ${error.message}`);
+      // }
+      // console.error("Error Bonafied issue status:", error);
     } finally {
       setIsSubmitting(false); // Re-enable the button after the operation
     }
@@ -425,12 +428,13 @@ function BonafiedCertificates() {
       setShowDeleteModal(false); // Close the modal
       toast.success("Bonafied deleted successfully!");
     } catch (error) {
-      if (error.response && error.response.data) {
-        toast.error(`Error deleting Bonafied: ${error.response.data.message}`);
-      } else {
-        toast.error(`Error deleting Bonafied: ${error.message}`);
-      }
-      console.error("Error deleting Bonafied:", error);
+      handleApiError(error);
+      // if (error.response && error.response.data) {
+      //   toast.error(`Error deleting Bonafied: ${error.response.data.message}`);
+      // } else {
+      //   toast.error(`Error deleting Bonafied: ${error.message}`);
+      // }
+      // console.error("Error deleting Bonafied:", error);
     } finally {
       setIsSubmitting(false); // Re-enable the button after the operation
       setShowDeleteModal(false); // Close the modal

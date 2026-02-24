@@ -14,6 +14,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { RxCross1 } from "react-icons/rx";
 import Select from "react-select";
 import MarkDropdownEditor from "../../Events/MarkDropdownEditor";
+import { handleApiError } from "../../../helpers/impersonateHelper";
 
 function DynamicMailer() {
   const API_URL = import.meta.env.VITE_API_URL; // URL for host
@@ -365,9 +366,10 @@ function DynamicMailer() {
       fetchSections();
       handleCloseModal();
     } catch (error) {
-      toast.error(
-        error.response?.data?.message || "Error updating email template",
-      );
+      handleApiError(error);
+      // toast.error(
+      //   error.response?.data?.message || "Error updating email template",
+      // );
     }
   };
 
@@ -412,12 +414,13 @@ function DynamicMailer() {
         );
       }
     } catch (error) {
-      console.error("Error deleting admission class:", error);
-      if (error.response && error.response.data && error.response.data.error) {
-        toast.error(error.response.data.error);
-      } else {
-        toast.error("Server error. Please try again later.");
-      }
+      handleApiError(error);
+      // console.error("Error deleting admission class:", error);
+      // if (error.response && error.response.data && error.response.data.error) {
+      //   toast.error(error.response.data.error);
+      // } else {
+      //   toast.error("Server error. Please try again later.");
+      // }
     } finally {
       setIsSubmitting(false); // Re-enable the button after the operation
       setShowDeleteModal(false);

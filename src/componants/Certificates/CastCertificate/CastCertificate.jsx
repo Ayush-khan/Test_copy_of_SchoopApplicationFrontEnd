@@ -13,6 +13,8 @@ import { RxCross1 } from "react-icons/rx";
 // import AllotSubjectTab from "./AllotMarksHeadingTab";
 import Select from "react-select";
 import CreeateCastCertificate from "./CreeateCastCertificate";
+import {handleApiError} from '../../../helpers/impersonateHelper';
+
 function CastCertificate() {
   const API_URL = import.meta.env.VITE_API_URL; // URL for host
   const [activeTab, setActiveTab] = useState("Manage");
@@ -392,16 +394,17 @@ function CastCertificate() {
       toast.success("Cast certificate issue status updated successfully!");
       handleCloseModal(); // Close the modal
     } catch (error) {
-      if (error.response && error.response.data) {
-        toast.error(
-          `Error updating Cast Certificate issue status: ${error.response.data.error}`
-        );
-      } else {
-        toast.error(
-          `Error updating Cast Certificate issue status: ${error.message}`
-        );
-      }
-      console.error("Error Cast Certificate issue status:", error);
+      // if (error.response && error.response.data) {
+      //   toast.error(
+      //     `Error updating Cast Certificate issue status: ${error.response.data.error}`
+      //   );
+      // } else {
+      //   toast.error(
+      //     `Error updating Cast Certificate issue status: ${error.message}`
+      //   );
+      // }
+      // console.error("Error Cast Certificate issue status:", error);
+      handleApiError(error);
     } finally {
       setIsSubmitting(false); // Re-enable the button after the operation
     }
@@ -433,14 +436,15 @@ function CastCertificate() {
       setShowDeleteModal(false); // Close the modal
       toast.success("Cast Certificate deleted successfully!");
     } catch (error) {
-      if (error.response && error.response.data) {
-        toast.error(
-          `Error deleting Cast Certificate: ${error.response.data.message}`
-        );
-      } else {
-        toast.error(`Error deleting Cast Certificate: ${error.message}`);
-      }
-      console.error("Error deleting Cast Certificate:", error);
+      // if (error.response && error.response.data) {
+      //   toast.error(
+      //     `Error deleting Cast Certificate: ${error.response.data.message}`
+      //   );
+      // } else {
+      //   toast.error(`Error deleting Cast Certificate: ${error.message}`);
+      // }
+      // console.error("Error deleting Cast Certificate:", error);
+      handleApiError(error);
     } finally {
       setIsSubmitting(false); // Re-enable the button after the operation
       setShowDeleteModal(false); // Close the modal
