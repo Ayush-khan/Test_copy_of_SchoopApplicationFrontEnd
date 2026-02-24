@@ -21,6 +21,11 @@ const CompleteStudentListForAdmission = () => {
   const [loading, setLoading] = useState(false);
   const [loadingForSearch, setLoadingForSearch] = useState(false);
 
+  const [showStatusModal, setShowStatusModal] = useState(false);
+  const [pendingStatus, setPendingStatus] = useState(null);
+  const [pendingFormId, setPendingFormId] = useState(null);
+  const [isApprovedMessage, setIsApprovedMessage] = useState(false);
+
   const navigate = useNavigate();
   const location = useLocation();
   const [loadingExams, setLoadingExams] = useState(false);
@@ -37,7 +42,10 @@ const CompleteStudentListForAdmission = () => {
   const [showStudentReport, setShowStudentReport] = useState(false);
 
   const classIdFromState = location.state?.class_id;
-  console.log("class id from navigate ", classIdFromState);
+  console.log(
+    "class id from navigate view addmisision form ",
+    classIdFromState,
+  );
 
   const [isFromNavigation, setIsFromNavigation] = useState(false);
 
@@ -87,9 +95,9 @@ const CompleteStudentListForAdmission = () => {
         `${API_URL}/api/admin/admission-classes`,
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
-      console.log("Class", response);
+      // console.log("Class", response);
       setStudentNameWithClassId(response?.data?.data || []);
     } catch (error) {
       toast.error("Error fetching Classes");
@@ -112,29 +120,53 @@ const CompleteStudentListForAdmission = () => {
         value: cls?.class_id,
         label: `${cls.class_name}`,
       })),
-    [studentNameWithClassId]
+    [studentNameWithClassId],
   );
+
+  // useEffect(() => {
+  //   if (!classIdFromState || studentOptions.length === 0) return;
+
+  //   const matchedClass = studentOptions.find(
+  //     (opt) => opt.value === classIdFromState,
+  //   );
+
+  //   if (matchedClass) {
+  //     setSelectedStudent(matchedClass);
+  //     console.log("matched class from navigation:", matchedClass);
+  //     setSelectedStudentId(matchedClass.value);
+  //     setIsFromNavigation(true);
+  //   }
+  // }, [classIdFromState, studentOptions]);
 
   useEffect(() => {
     if (!classIdFromState || studentOptions.length === 0) return;
 
     const matchedClass = studentOptions.find(
-      (opt) => opt.value === classIdFromState
+      (opt) => String(opt.value) === String(classIdFromState),
     );
 
     if (matchedClass) {
       setSelectedStudent(matchedClass);
-      console.log("matched class from navigation:", matchedClass);
       setSelectedStudentId(matchedClass.value);
       setIsFromNavigation(true);
+      console.log("matched class from navigation:", matchedClass);
+    } else {
+      console.log("No matched class found");
     }
   }, [classIdFromState, studentOptions]);
 
+  // useEffect(() => {
+  //   if (isFromNavigation && selectedStudentId) {
+  //     handleSearch(selectedStudentId);
+  //   }
+  // }, [isFromNavigation, selectedStudentId]);
+
   useEffect(() => {
     if (isFromNavigation && selectedStudentId) {
-      handleSearch(selectedStudentId);
+      handleSearch();
+      setIsFromNavigation(false);
     }
-  }, [isFromNavigation, selectedStudentId]);
+  }, [isFromNavigation]);
 
   const handleSearch = async () => {
     // if (!selectedStudentId) {
@@ -158,7 +190,7 @@ const CompleteStudentListForAdmission = () => {
     const enteredFormId = formId;
 
     setSearchTerm("");
-    setFormId("");
+    // setFormId("");
     setShowSearch(false);
 
     try {
@@ -175,7 +207,7 @@ const CompleteStudentListForAdmission = () => {
         {
           headers: { Authorization: `Bearer ${token}` },
           params,
-        }
+        },
       );
 
       if (!response?.data?.data?.length) {
@@ -196,6 +228,41 @@ const CompleteStudentListForAdmission = () => {
     }
   };
 
+  // const handleStatus = (student, newStatus) => {
+  //   setPendingFormId(student.form_id);
+  //   setPendingStatus(newStatus);
+  //   setShowStatusModal(true);
+  // };
+  // const handleStatus = (student, newStatus) => {
+  //   setPendingFormId(student.form_id);
+  //   setPendingStatus(newStatus);
+
+  //   if (student.admission_form_status === "Approved") {
+  //     setIsApprovedMessage(true);
+  //   } else {
+  //     setIsApprovedMessage(false);
+  //   }
+
+  //   setShowStatusModal(true);
+  // };
+
+  const handleStatus = (student, newStatus) => {
+    setPendingFormId(student.form_id);
+    setPendingStatus(newStatus);
+
+    // Show warning ONLY for Approved ➜ Applied
+    if (
+      student.admission_form_status === "Approved" &&
+      newStatus === "Applied"
+    ) {
+      setIsApprovedMessage(true);
+    } else {
+      setIsApprovedMessage(false);
+    }
+
+    setShowStatusModal(true);
+  };
+
   const handleStatusChange = async (formId, newStatus) => {
     const token = localStorage.getItem("authToken");
 
@@ -208,8 +275,8 @@ const CompleteStudentListForAdmission = () => {
       // Optimistic UI update (optional but recommended)
       setTimetable((prev) =>
         prev.map((item) =>
-          item.form_id === formId ? { ...item, status: newStatus } : item
-        )
+          item.form_id === formId ? { ...item, status: newStatus } : item,
+        ),
       );
 
       await axios.patch(
@@ -221,7 +288,7 @@ const CompleteStudentListForAdmission = () => {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       toast.success("Status updated successfully");
@@ -235,21 +302,14 @@ const CompleteStudentListForAdmission = () => {
   };
 
   const statusOptions = [
-    // { value: "Applied", label: "Applied" },
+    { value: "Applied", label: "Applied" },
+    { value: "Hold", label: "Hold" },
+    { value: "Rejected", label: "Rejected" },
+
     // { value: "Scheduled", label: "Scheduled" },
     // { value: "Verified", label: "Verified" },
     // { value: "Approved", label: "Approved" },
-    { value: "Hold", label: "Hold" },
-    { value: "Rejected", label: "Rejected" },
   ];
-
-  // const handleView = (student) => {
-  //   console.log("HandleView -->", student);
-
-  //   navigate(
-  //     `/viewAdmissionForm/${student.form_id}?class_id=${selectedStudentId}`
-  //   );
-  // };
 
   const handleView = (student) => {
     console.log("HandleView -->", student);
@@ -258,9 +318,10 @@ const CompleteStudentListForAdmission = () => {
       `/viewAdmissionForm/${student.form_id}?class_id=${selectedStudentId}`,
       {
         state: { from: "listofAdmissionSuccessfulPayment" },
-      }
+      },
     );
   };
+
   const camelCase = (str) =>
     str
       ?.toLowerCase()
@@ -271,10 +332,10 @@ const CompleteStudentListForAdmission = () => {
   const formatDate = (dateStr) =>
     dateStr
       ? new Date(dateStr).toLocaleDateString("en-GB", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "2-digit",
-      })
+          day: "2-digit",
+          month: "2-digit",
+          year: "2-digit",
+        })
       : "";
 
   const filteredSections = timetable.filter((section) => {
@@ -308,8 +369,9 @@ const CompleteStudentListForAdmission = () => {
   return (
     <>
       <div
-        className={` transition-all duration-500 w-[80%]  mx-auto p-4 ${showStudentReport ? "w-full " : "w-[80%] "
-          }`}
+        className={` transition-all duration-500 w-[80%]  mx-auto p-4 ${
+          showStudentReport ? "w-full " : "w-[80%] "
+        }`}
       >
         <ToastContainer />
         <div className="card rounded-md ">
@@ -385,10 +447,11 @@ const CompleteStudentListForAdmission = () => {
                         type="search"
                         onClick={handleSearch}
                         style={{ backgroundColor: "#2196F3" }}
-                        className={` btn h-10 w-18 md:w-auto btn-primary text-white font-bold py-1 border-1 border-blue-500 px-4 rounded ${loadingForSearch
+                        className={` btn h-10 w-18 md:w-auto btn-primary text-white font-bold py-1 border-1 border-blue-500 px-4 rounded ${
+                          loadingForSearch
                             ? "opacity-50 cursor-not-allowed"
                             : ""
-                          }`}
+                        }`}
                         disabled={loadingForSearch}
                       >
                         {loadingForSearch ? (
@@ -431,153 +494,6 @@ const CompleteStudentListForAdmission = () => {
               <>
                 <div className="w-full  mx-auto transition-all duration-300">
                   <div className="card mx-auto shadow-lg">
-                    {/* <div className="p-2 px-3 bg-gray-100 border-none flex items-center justify-between">
-                      <div className="w-full flex flex-row items-center justify-between mr-0 md:mr-4 gap-x-1">
-                        <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap mr-6">
-                          Complete List of Students for Admission
-                        </h3>
-                        <div className="flex items-center w-full">
-                          <div
-                            className="bg-blue-50 border-l-2 border-r-2 text-[1em] border-pink-500 rounded-md shadow-md mx-auto px-6 py-2"
-                            style={{
-                              overflowX: "auto",
-                              whiteSpace: "nowrap",
-                            }}
-                          >
-                            <div
-                              className="flex items-center gap-x-4 text-blue-800 font-medium"
-                              style={{ flexWrap: "nowrap" }}
-                            >
-                              <div className="flex items-center gap-2">
-                                <label
-                                  className="text-md whitespace-nowrap"
-                                  htmlFor="studentSelect"
-                                >
-                                  Class <span className="text-red-500">*</span>
-                                </label>
-                                <Select
-                                  menuPortalTarget={document.body}
-                                  menuPosition="fixed"
-                                  id="studentSelect"
-                                  value={selectedStudent}
-                                  onChange={handleStudentSelect}
-                                  options={studentOptions}
-                                  placeholder={
-                                    loadingExams ? "Loading..." : "Select"
-                                  }
-                                  isSearchable
-                                  //   isClearable
-                                  className="text-sm min-w-[180px]"
-                                  isDisabled={loadingExams}
-                                  styles={{
-                                    control: (provided) => ({
-                                      ...provided,
-                                      fontSize: ".9em",
-                                      minHeight: "30px",
-                                    }),
-                                    menu: (provided) => ({
-                                      ...provided,
-                                      fontSize: "1em",
-                                    }),
-                                    option: (provided) => ({
-                                      ...provided,
-                                      fontSize: ".9em",
-                                    }),
-                                  }}
-                                />
-                              </div>
-
-                              <div className="flex items-center gap-3">
-                                <label
-                                  className="text-md whitespace-nowrap"
-                                  htmlFor="monthSelect"
-                                >
-                                  Form Id
-                                </label>
-
-                                <div className="w-full md:w-[65%]">
-                                  <input
-                                    type="text"
-                                    id="formId"
-                                    className=" w-full px-3 py-2 text-sm bg-white border border-gray-300 rounded-md shadow-sm "
-                                    onChange={(e) => setFormId(e.target.value)}
-                                  />
-                                </div>
-                              </div>
-
-                              <div>
-                                <button
-                                  type="search"
-                                  onClick={handleSearch}
-                                  style={{ backgroundColor: "#2196F3" }}
-                                  className={`btn h-8 w-auto btn-primary text-white font-bold py-1 border-1 border-blue-500 px-2 rounded ${
-                                    loadingForSearch
-                                      ? "opacity-50 cursor-not-allowed"
-                                      : ""
-                                  }`}
-                                  disabled={loadingForSearch}
-                                >
-                                  {loadingForSearch ? (
-                                    <span className="flex items-center">
-                                      <svg
-                                        className="animate-spin h-4 w-4 mr-2 text-white"
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                      >
-                                        <circle
-                                          className="opacity-25"
-                                          cx="12"
-                                          cy="12"
-                                          r="10"
-                                          stroke="currentColor"
-                                          strokeWidth="4"
-                                        ></circle>
-                                        <path
-                                          className="opacity-75"
-                                          fill="currentColor"
-                                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                                        ></path>
-                                      </svg>
-                                      Browsing...
-                                    </span>
-                                  ) : (
-                                    "Browse"
-                                  )}
-                                </button>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="flex mb-1.5 flex-col md:flex-row gap-x-6 justify-center md:justify-end ">
-                        <div className="flex items-center gap-3 relative group">
-                          <button
-                            onClick={() => setShowSearch((prev) => !prev)}
-                            className="text-black hover:text-pink-500 transition"
-                          >
-                            <FiSearch size={20} />
-                          </button>
-
-                          <span
-                            className="
-      absolute top-full mt-1 right-0
-      hidden group-hover:block
-      bg-blue-500 text-white text-xs px-2 py-1
-      rounded shadow-md whitespace-nowrap
-    "
-                          >
-                            Search
-                          </span>
-                        </div>
-
-                        <RxCross1
-                          className="text-base text-red-600 cursor-pointer hover:bg-red-100 rounded"
-                          onClick={() => setShowStudentReport(false)}
-                        />
-                      </div>
-                    </div> */}
                     <div className="p-2 px-3 bg-gray-100 flex flex-col lg:flex-row gap-3 justify-between">
                       {/* LEFT SECTION */}
                       <div className="w-full flex flex-col lg:flex-row gap-3 items-start lg:items-center">
@@ -626,10 +542,11 @@ const CompleteStudentListForAdmission = () => {
                               <button
                                 onClick={handleSearch}
                                 disabled={loadingForSearch}
-                                className={`h-8 px-4 rounded text-white font-bold ${loadingForSearch
+                                className={`h-8 px-4 rounded text-white font-bold ${
+                                  loadingForSearch
                                     ? "bg-blue-300 cursor-not-allowed"
                                     : "bg-blue-500 hover:bg-blue-600"
-                                  }`}
+                                }`}
                               >
                                 {loadingForSearch ? "Browsing..." : "Browse"}
                               </button>
@@ -639,7 +556,7 @@ const CompleteStudentListForAdmission = () => {
                       </div>
 
                       {/* RIGHT ICONS */}
-                      <div className="flex flex-row gap-5 items-center justify-end">
+                      <div className="flex flex-row gap-3 items-center justify-end">
                         {/* Search */}
                         <div className="relative group">
                           <button
@@ -656,6 +573,7 @@ const CompleteStudentListForAdmission = () => {
 
                         {/* Close */}
                         <RxCross1
+                          size={20}
                           className="text-red-600 cursor-pointer hover:bg-red-100 rounded"
                           onClick={() => setShowStudentReport(false)}
                         />
@@ -703,9 +621,16 @@ const CompleteStudentListForAdmission = () => {
                             </div>
                           )}
 
-                          <div className="card-body w-full">
-                            <div
+                          <div className="card-body">
+                            {/* <div
                               className="  h-96 lg:h-96  overflow-y-scroll overflow-x-scroll"
+                              style={{
+                                scrollbarWidth: "thin",
+                                scrollbarColor: "#C03178 transparent",
+                              }}
+                            > */}
+                            <div
+                              className="relative h-96 overflow-auto"
                               style={{
                                 scrollbarWidth: "thin",
                                 scrollbarColor: "#C03178 transparent",
@@ -714,47 +639,44 @@ const CompleteStudentListForAdmission = () => {
                               <table className="min-w-full leading-normal table-auto">
                                 <thead>
                                   <tr className="bg-gray-100">
-                                    <th className="min-w-[50px] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
-                                      Sr No.
+                                    <th className="text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold whitespace-nowrap">
+                                      Sr <br /> No.
                                     </th>
 
-                                    <th className="min-w-[180px] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
+                                    <th className=" text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold whitespace-nowrap">
                                       Form Id.
                                     </th>
 
-                                    <th className="min-w-[230px] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
+                                    <th className="text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold whitespace-nowrap">
                                       Student Name
                                     </th>
 
-                                    <th className="min-w-[180px] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
+                                    <th className=" text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold whitespace-nowrap">
                                       Parent Name
                                     </th>
 
-                                    {/* <th className="min-w-[100px] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
-                                      Class
-                                    </th> */}
-
-                                    <th className="min-w-[80px] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
+                                    <th className="text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold whitespace-nowrap">
                                       Phone No.
                                     </th>
 
-                                    <th className="min-w-[180px] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
+                                    <th className=" text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold whitespace-nowrap">
                                       Email Id
                                     </th>
 
-                                    <th className="min-w-[140px] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
-                                      Application Date (DD-MM-YY)
+                                    <th className=" text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold whitespace-nowrap">
+                                      Application Date <br />
+                                      (DD-MM-YY)
                                     </th>
 
-                                    <th className="min-w-[120px] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
+                                    <th className=" text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold whitespace-nowrap">
                                       Actual Status
                                     </th>
 
-                                    <th className="min-w-[120px] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
+                                    <th className=" text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold whitespace-nowrap">
                                       Change Status
                                     </th>
 
-                                    <th className="min-w-[50px] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
+                                    <th className=" text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold whitespace-nowrap">
                                       View
                                     </th>
                                   </tr>
@@ -762,8 +684,8 @@ const CompleteStudentListForAdmission = () => {
 
                                 <tbody>
                                   {loading ? (
-                                    <div className=" absolute left-[4%] w-[100%]  text-center flex justify-center items-center mt-14">
-                                      <div className=" text-center text-xl text-blue-700">
+                                    <div className="absolute inset-0 flex items-center justify-center  z-10">
+                                      <div className="text-xl text-blue-700">
                                         Please wait while data is loading...
                                       </div>
                                     </div>
@@ -776,22 +698,18 @@ const CompleteStudentListForAdmission = () => {
                                         <td className="px-2 py-2 text-center border border-gray-300">
                                           {index + 1}
                                         </td>
-                                        <td className="px-2 py-2 text-center border border-gray-300">
+                                        <td className="px-2 py-2 text-center border border-gray-300 whitespace-nowrap">
                                           {student.form_id}
                                         </td>
-                                        <td className="px-2 py-2 text-center border border-gray-300">
+                                        <td className="px-2 py-2 text-center border border-gray-300 whitespace-nowrap">
                                           {camelCase(
-                                            `${student.first_name} ${student.mid_name} ${student.last_name}`
+                                            `${student.first_name} ${student.mid_name} ${student.last_name}`,
                                           )}
                                         </td>
 
-                                        <td className="px-2 py-2 text-center border border-gray-300">
+                                        <td className="px-2 py-2 text-center border border-gray-300 whitespace-nowrap">
                                           {camelCase(student.father_name)}
                                         </td>
-
-                                        {/* <td className="px-2 py-2 text-center border border-gray-300">
-                                          {student.class_name}
-                                        </td> */}
 
                                         <td className="px-2 py-2 text-center border border-gray-300">
                                           {student.f_mobile}
@@ -810,12 +728,12 @@ const CompleteStudentListForAdmission = () => {
                                             options={statusOptions}
                                             value={statusOptions.find(
                                               (opt) =>
-                                                opt.value === student.status
+                                                opt.value === student.status,
                                             )}
                                             onChange={(selected) =>
-                                              handleStatusChange(
-                                                student.form_id,
-                                                selected.value
+                                              handleStatus(
+                                                student,
+                                                selected.value,
                                               )
                                             }
                                             isSearchable={false}
@@ -849,9 +767,9 @@ const CompleteStudentListForAdmission = () => {
                                       </tr>
                                     ))
                                   ) : (
-                                    <div className=" absolute left-[1%] w-[100%]  text-center flex justify-center items-center mt-14">
-                                      <div className=" text-center text-xl text-red-700">
-                                        Oops! No data found..
+                                    <div className="absolute inset-0 flex items-center justify-center z-10">
+                                      <div className="text-xl text-red-700 text-center">
+                                        No data available.
                                       </div>
                                     </div>
                                   )}
@@ -874,6 +792,72 @@ const CompleteStudentListForAdmission = () => {
                   </div>
                 </div>
               </>
+            )}
+            {showStatusModal && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+                <div className="modal show" style={{ display: "block" }}>
+                  <div className="modal-dialog modal-dialog-centered">
+                    <div className="modal-content">
+                      {/* Header */}
+                      <div className="flex justify-between p-2">
+                        <h5 className="modal-title">Change Status</h5>
+
+                        <RxCross1
+                          className="mt-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
+                          onClick={() => setShowStatusModal(false)}
+                        />
+                      </div>
+
+                      {/* Divider */}
+                      <div
+                        className=" h-1 w-[97%] mx-auto"
+                        style={{ backgroundColor: "#C03078" }}
+                      />
+
+                      {/* Body */}
+                      {/* <div className="modal-body">
+                        <p>
+                          Are you sure you want to change the status to
+                          <strong className="mx-1">{pendingStatus}</strong>
+                          ?
+                        </p>
+                      </div> */}
+                      <div className="modal-body">
+                        {isApprovedMessage ? (
+                          <p className="text-red-600 font-semibold">
+                            This student is already in System delete first.
+                          </p>
+                        ) : (
+                          <p>
+                            Are you sure you want to change the status to
+                            {/* <strong className="mx-1">{pendingStatus}</strong>? */}
+                          </p>
+                        )}
+                      </div>
+
+                      {/* Footer */}
+                      <div className="flex justify-end gap-2 p-3">
+                        <button
+                          className="btn btn-secondary"
+                          onClick={() => setShowStatusModal(false)}
+                        >
+                          Cancel
+                        </button>
+
+                        <button
+                          className="btn btn-primary"
+                          onClick={() => {
+                            handleStatusChange(pendingFormId, pendingStatus);
+                            setShowStatusModal(false);
+                          }}
+                        >
+                          OK
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             )}
           </>
         </div>

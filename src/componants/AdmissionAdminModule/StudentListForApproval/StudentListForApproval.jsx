@@ -98,7 +98,7 @@ const StudentListForApproval = () => {
         `${API_URL}/api/admin/admission-classes`,
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
       console.log("Class", response);
       setClassNameWithClassId(response?.data?.data || []);
@@ -123,14 +123,18 @@ const StudentListForApproval = () => {
         value: cls?.class_id,
         label: `${cls.class_name}`,
       })),
-    [classNameWithClassId]
+    [classNameWithClassId],
   );
 
   useEffect(() => {
     if (!classIdFromState || classOptions.length === 0) return;
 
+    // const matchedClass = classOptions.find(
+    //   (opt) => opt.value === classIdFromState
+    // );
+
     const matchedClass = classOptions.find(
-      (opt) => opt.value === classIdFromState
+      (opt) => String(opt.value) === String(classIdFromState),
     );
 
     if (matchedClass) {
@@ -141,11 +145,18 @@ const StudentListForApproval = () => {
     }
   }, [classIdFromState, classOptions]);
 
+  // useEffect(() => {
+  //   if (isFromNavigation && selectedClassId) {
+  //     handleSearch(selectedClassId);
+  //   }
+  // }, [isFromNavigation, selectedClassId]);
+
   useEffect(() => {
     if (isFromNavigation && selectedClassId) {
-      handleSearch(selectedClassId);
+      handleSearch();
+      setIsFromNavigation(false);
     }
-  }, [isFromNavigation, selectedClassId]);
+  }, [isFromNavigation]);
 
   const fetchDivision = async () => {
     try {
@@ -155,7 +166,7 @@ const StudentListForApproval = () => {
         `${API_URL}/api/admin/classes/${selectedClassId}/sections`,
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
 
       const divisions = response?.data?.data || [];
@@ -191,11 +202,13 @@ const StudentListForApproval = () => {
         value: cls?.section_id,
         label: `${cls.name}`,
       })),
-    [division]
+    [division],
   );
 
-  // const handleSearch = async () => {
-  //   if (!selectedClassId) {
+  // const handleSearch = async (classIdFromState) => {
+  //   const finalClassId = selectedClassId || classIdFromState;
+
+  //   if (!finalClassId) {
   //     setClassError("Please select class.");
   //     return;
   //   }
@@ -206,12 +219,10 @@ const StudentListForApproval = () => {
 
   //   const token = localStorage.getItem("authToken");
 
-  //   //  Capture current values BEFORE resetting
-  //   const selectClass = selectedClassId;
+  //   const selectClass = finalClassId;
   //   const enteredFormId = formId;
   //   const enteredStudent = selectedStudent;
 
-  //   //  Now reset UI fields
   //   setSearchTerm("");
   //   setFormId("");
   //   setSelectedStudent("");
@@ -222,20 +233,15 @@ const StudentListForApproval = () => {
   //       class_id: selectClass,
   //     };
 
-  //     if (enteredFormId) {
-  //       params.form_id = enteredFormId;
-  //     }
-
-  //     if (enteredStudent) {
-  //       params.student_name = enteredStudent;
-  //     }
+  //     if (enteredFormId) params.form_id = enteredFormId;
+  //     if (enteredStudent) params.student_name = enteredStudent;
 
   //     const response = await axios.get(
   //       `${API_URL}/api/admin/applications/approval-list`,
   //       {
   //         headers: { Authorization: `Bearer ${token}` },
   //         params,
-  //       }
+  //       },
   //     );
 
   //     if (!response?.data?.data?.length) {
@@ -265,7 +271,6 @@ const StudentListForApproval = () => {
 
     setLoadingForSearch(true);
     setLoading(true);
-    setTimetable([]);
 
     const token = localStorage.getItem("authToken");
 
@@ -273,6 +278,7 @@ const StudentListForApproval = () => {
     const enteredFormId = formId;
     const enteredStudent = selectedStudent;
 
+    // Reset UI fields only (not table data)
     setSearchTerm("");
     setFormId("");
     setSelectedStudent("");
@@ -291,20 +297,23 @@ const StudentListForApproval = () => {
         {
           headers: { Authorization: `Bearer ${token}` },
           params,
-        }
+        },
       );
 
-      if (!response?.data?.data?.length) {
+      const data = response?.data?.data || [];
+
+      setTimetable(data);
+      setPageCount(Math.ceil(data.length / pageSize));
+
+      if (data.length === 0) {
         toast.error("Admission forms data not found.");
-        setTimetable([]);
       } else {
-        setTimetable(response.data.data);
-        setPageCount(Math.ceil(response.data.data.length / pageSize));
         fetchDivision(selectClass);
       }
     } catch (error) {
       console.error("Error fetching Admission forms:", error);
       toast.error("Error fetching Admission forms. Please try again.");
+      setTimetable([]); // clear only on error
     } finally {
       setLoadingForSearch(false);
       setLoading(false);
@@ -318,7 +327,7 @@ const StudentListForApproval = () => {
       `/viewAdmissionForm/${student.form_id}?class_id=${selectedClassId}`,
       {
         state: { from: "listOfStudentForApproval" },
-      }
+      },
     );
   };
 
@@ -332,10 +341,10 @@ const StudentListForApproval = () => {
   const formatDate = (dateStr) =>
     dateStr
       ? new Date(dateStr).toLocaleDateString("en-GB", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "2-digit",
-      })
+          day: "2-digit",
+          month: "2-digit",
+          year: "2-digit",
+        })
       : "";
 
   const filteredSections = timetable.filter((section) => {
@@ -381,7 +390,7 @@ const StudentListForApproval = () => {
 
   const handleRowSelect = (id) => {
     setSelectedRows((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
     );
   };
 
@@ -421,7 +430,7 @@ const StudentListForApproval = () => {
         formData,
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
 
       toast.success("Admission Form Approved Successfully.");
@@ -568,8 +577,9 @@ const StudentListForApproval = () => {
                     type="search"
                     onClick={handleSearch}
                     style={{ backgroundColor: "#2196F3" }}
-                    className={` btn h-10 w-18 md:w-auto btn-primary text-white font-bold py-1 border-1 border-blue-500 px-4 rounded ${loadingForSearch ? "opacity-50 cursor-not-allowed" : ""
-                      }`}
+                    className={` btn h-10 w-18 md:w-auto btn-primary text-white font-bold py-1 border-1 border-blue-500 px-4 rounded ${
+                      loadingForSearch ? "opacity-50 cursor-not-allowed" : ""
+                    }`}
                     disabled={loadingForSearch}
                   >
                     {loadingForSearch ? (
@@ -642,13 +652,13 @@ const StudentListForApproval = () => {
                           <table className="min-w-full leading-normal table-auto">
                             <thead className="">
                               <tr className="bg-gray-100">
-                                <th className="min-w-[20px] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
-                                  Sr No.
+                                <th className=" text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
+                                  Sr <br /> No.
                                 </th>
 
-                                <th className="min-w-[20px] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
+                                <th className="text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
                                   <span className="mr-2 whitespace-nowrap">
-                                    Select All
+                                    Select All <br />
                                   </span>
                                   <input
                                     type="checkbox"
@@ -659,39 +669,31 @@ const StudentListForApproval = () => {
                                   />
                                 </th>
 
-                                <th className="min-w-[200px] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold whitespace-nowrap">
+                                <th className=" text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold whitespace-nowrap">
                                   Form Id.
                                 </th>
 
-                                <th className="min-w-[230px] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold whitespace-nowrap">
+                                <th className="text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold whitespace-nowrap">
                                   Student Name
                                 </th>
 
-                                <th className="min-w-[200px] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold whitespace-nowrap">
+                                <th className=" text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold whitespace-nowrap">
                                   Parent Name
                                 </th>
 
-                                {/* <th className="min-w-[80px] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
-                                  Class
-                                </th> */}
-
-                                <th className="min-w-[100px] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
+                                <th className="whitespace-nowrap text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
                                   Phone No.
                                 </th>
 
-                                <th className="min-w-[180px] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
+                                <th className="whitespace-nowrap  text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
                                   Email Id
                                 </th>
 
-                                <th className="min-w-[140px] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
-                                  Application Date (DD-MM-YY)
+                                <th className="whitespace-nowrap text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
+                                  Application Date <br /> (DD-MM-YY)
                                 </th>
 
-                                {/* <th className="min-w-[180px] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold whitespace-nowrap">
-                                Status
-                              </th> */}
-
-                                <th className="min-w-[50px] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
+                                <th className="whitespace-nowrap text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
                                   View
                                 </th>
                               </tr>
@@ -722,7 +724,7 @@ const StudentListForApproval = () => {
                                         <input
                                           type="checkbox"
                                           checked={selectedRows.includes(
-                                            student.form_id
+                                            student.form_id,
                                           )}
                                           onChange={() =>
                                             handleRowSelect(student.form_id)
@@ -731,23 +733,19 @@ const StudentListForApproval = () => {
                                         />
                                       </td>
 
-                                      <td className="px-2 py-2 text-center border border-gray-300">
+                                      <td className="px-2 py-2 text-center border border-gray-300 whitespace-nowrap">
                                         {student.form_id}
                                       </td>
 
-                                      <td className="px-2 py-2 text-center border border-gray-300">
+                                      <td className="px-2 py-2 text-center border border-gray-300 whitespace-nowrap">
                                         {camelCase(
-                                          `${student.first_name} ${student.mid_name} ${student.last_name}`
+                                          `${student.first_name} ${student.mid_name} ${student.last_name}`,
                                         )}
                                       </td>
 
-                                      <td className="px-2 py-2 text-center border border-gray-300">
+                                      <td className="px-2 py-2 text-center border border-gray-300 whitespace-nowrap">
                                         {camelCase(student.father_name)}
                                       </td>
-
-                                      {/* <td className="px-2 py-2 text-center border border-gray-300">
-                                        {student.class_name}
-                                      </td> */}
 
                                       <td className="px-2 py-2 text-center border border-gray-300">
                                         {student.f_mobile}
@@ -772,7 +770,6 @@ const StudentListForApproval = () => {
                                     </tr>
                                   ))}
 
-                                  {/* ✅ SUMMARY ROW */}
                                   <tr className="bg-gray-100 font-semibold">
                                     <td
                                       colSpan={10}
@@ -798,7 +795,7 @@ const StudentListForApproval = () => {
                                     colSpan={10}
                                     className="text-center py-6 text-red-700 text-lg"
                                   >
-                                    Oops! No data found..
+                                    No data available.
                                   </td>
                                 </tr>
                               )}

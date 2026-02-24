@@ -83,7 +83,7 @@ const StudentListForVerification = () => {
         `${API_URL}/api/admin/admission-classes`,
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
       console.log("Class", response);
       setStudentNameWithClassId(response?.data?.data || []);
@@ -181,7 +181,7 @@ const StudentListForVerification = () => {
         {
           headers: { Authorization: `Bearer ${token}` },
           params,
-        }
+        },
       );
 
       if (!response?.data?.data?.length) {
@@ -216,7 +216,7 @@ const StudentListForVerification = () => {
       `/viewAdmissionForm/${student.form_id}?class_id=${selectedStudentId}`,
       {
         state: { from: "listOfStudentForVerification" },
-      }
+      },
     );
   };
   const camelCase = (str) =>
@@ -229,10 +229,10 @@ const StudentListForVerification = () => {
   const formatDate = (dateStr) =>
     dateStr
       ? new Date(dateStr).toLocaleDateString("en-GB", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "2-digit",
-      })
+          day: "2-digit",
+          month: "2-digit",
+          year: "2-digit",
+        })
       : "";
 
   const filteredSections = timetable.filter((section) => {
@@ -278,7 +278,7 @@ const StudentListForVerification = () => {
 
   const handleRowSelect = (id) => {
     setSelectedRows((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
     );
   };
   const formatDateDMY = (dateStr) => {
@@ -375,7 +375,7 @@ const StudentListForVerification = () => {
         formData,
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
 
       toast.success("Admission Form Successfully Verified.");
@@ -522,8 +522,9 @@ const StudentListForVerification = () => {
                     type="search"
                     onClick={handleSearch}
                     style={{ backgroundColor: "#2196F3" }}
-                    className={` btn h-10 w-18 md:w-auto btn-primary text-white font-bold py-1 border-1 border-blue-500 px-4 rounded ${loadingForSearch ? "opacity-50 cursor-not-allowed" : ""
-                      }`}
+                    className={` btn h-10 w-18 md:w-auto btn-primary text-white font-bold py-1 border-1 border-blue-500 px-4 rounded ${
+                      loadingForSearch ? "opacity-50 cursor-not-allowed" : ""
+                    }`}
                     disabled={loadingForSearch}
                   >
                     {loadingForSearch ? (
@@ -582,7 +583,7 @@ const StudentListForVerification = () => {
                     )}
 
                     <div className="card-body w-full">
-                      <div
+                      {/* <div
                         className=" overflow-y-scroll overflow-x-auto"
                         // h-96 lg:h-96
                         style={{
@@ -592,17 +593,25 @@ const StudentListForVerification = () => {
                           scrollbarWidth: "none",
                           msOverflowStyle: "none",
                         }}
+                      > */}
+                      <div
+                        className="relative h-96 overflow-auto"
+                        style={{
+                          scrollbarWidth: "thin",
+                          scrollbarColor: "#C03178 transparent",
+                        }}
                       >
                         <table className="min-w-full leading-normal table-auto">
                           <thead className="">
                             <tr className="bg-gray-100">
-                              <th className="min-w-[20px] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
-                                Sr No.
+                              <th className="text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
+                                Sr <br />
+                                No.
                               </th>
 
-                              <th className="min-w-[20px] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
+                              <th className=" text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
                                 <span className="mr-2 whitespace-nowrap">
-                                  Select All
+                                  Select All <br />
                                 </span>
                                 <input
                                   type="checkbox"
@@ -613,39 +622,35 @@ const StudentListForVerification = () => {
                                 />
                               </th>
 
-                              <th className="min-w-[200px] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold whitespace-nowrap">
+                              <th className="text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold whitespace-nowrap">
                                 Form Id.
                               </th>
 
-                              <th className="min-w-[230px] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold whitespace-nowrap">
+                              <th className="text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold whitespace-nowrap">
                                 Student Name
                               </th>
 
-                              <th className="min-w-[200px] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold whitespace-nowrap">
+                              <th className="text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold whitespace-nowrap">
                                 Parent Name
                               </th>
 
-                              <th className="min-w-[80px] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
+                              <th className=" whitespace-nowrap text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
                                 Class
                               </th>
 
-                              <th className="min-w-[100px] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
+                              <th className=" whitespace-nowrap  text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
                                 Phone No.
                               </th>
 
-                              <th className="min-w-[180px] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
+                              <th className=" whitespace-nowrap text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
                                 Email Id
                               </th>
 
-                              <th className="min-w-[140px] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
-                                Application Date (DD-MM-YY)
+                              <th className=" whitespace-nowrap text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
+                                Application Date <br /> (DD-MM-YY)
                               </th>
 
-                              {/* <th className="min-w-[180px] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold whitespace-nowrap">
-                                Status
-                              </th> */}
-
-                              <th className="min-w-[50px] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
+                              <th className=" whitespace-nowrap text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
                                 View
                               </th>
                             </tr>
@@ -676,7 +681,7 @@ const StudentListForVerification = () => {
                                       <input
                                         type="checkbox"
                                         checked={selectedRows.includes(
-                                          student.form_id
+                                          student.form_id,
                                         )}
                                         onChange={() =>
                                           handleRowSelect(student.form_id)
@@ -685,17 +690,17 @@ const StudentListForVerification = () => {
                                       />
                                     </td>
 
-                                    <td className="px-2 py-2 text-center border border-gray-300">
+                                    <td className="px-2 py-2 text-center border border-gray-300  whitespace-nowrap">
                                       {student.form_id}
                                     </td>
 
-                                    <td className="px-2 py-2 text-center border border-gray-300">
+                                    <td className="px-2 py-2 text-center border border-gray-300  whitespace-nowrap">
                                       {camelCase(
-                                        `${student.first_name} ${student.mid_name} ${student.last_name}`
+                                        `${student.first_name} ${student.mid_name} ${student.last_name}`,
                                       )}
                                     </td>
 
-                                    <td className="px-2 py-2 text-center border border-gray-300">
+                                    <td className="px-2 py-2 text-center border border-gray-300 whitespace-nowrap ">
                                       {camelCase(student.father_name)}
                                     </td>
 
@@ -726,7 +731,6 @@ const StudentListForVerification = () => {
                                   </tr>
                                 ))}
 
-                                {/*  SUMMARY ROW */}
                                 <tr className="bg-gray-100 font-semibold">
                                   <td
                                     colSpan={10}
@@ -745,16 +749,23 @@ const StudentListForVerification = () => {
                                     </div>
                                   </td>
                                 </tr>
+                                {/* {!loading && displayedSections.length > 0 && (
+                                  <div className="sticky bottom-0 bg-gray-100 border-t border-gray-400 py-2 text-center font-semibold z-10">
+                                    <span className="text-blue-800">
+                                      Total Count :
+                                    </span>
+                                    <span className="text-pink-600 ml-1">
+                                      {displayedSections.length}
+                                    </span>
+                                  </div>
+                                )} */}
                               </>
                             ) : (
-                              <tr>
-                                <td
-                                  colSpan={10}
-                                  className="text-center py-6 text-red-700 text-lg"
-                                >
-                                  Oops! No data found..
-                                </td>
-                              </tr>
+                              <div className="absolute inset-0 flex items-center justify-center z-10">
+                                <div className="text-xl text-red-700 text-center">
+                                  No data available.
+                                </div>
+                              </div>
                             )}
                           </tbody>
                         </table>

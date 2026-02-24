@@ -164,7 +164,7 @@ function Event() {
         value: item?.class_id,
         label: `${item.name}`,
       })),
-    [classSectionList]
+    [classSectionList],
   );
 
   const fetchSessionData = async () => {
@@ -237,7 +237,7 @@ function Event() {
         value: `${month.value}-${academicYear}`,
         label: month.label,
       })),
-    []
+    [],
   );
 
   const handleMonthSelect = (selectedOption) => {
@@ -408,69 +408,14 @@ function Event() {
     }
   };
 
-  // const handlePublish = async () => {
-  //   if (selectedHolidays.length === 0) {
-  //     toast.warning("Please select at least one Event to publish.");
-  //     return;
-  //   }
-
-  //   setIsSubmitting(true);
-  //   const token = localStorage.getItem("authToken");
-
-  //   if (!token) {
-  //     alert("Authentication required. Please log in.");
-  //     setIsSubmitting(false);
-  //     return;
-  //   }
-
-  //   try {
-  //     const formData = new FormData();
-  //     selectedHolidays.forEach((id) => {
-  //       formData.append("checkbxuniqid[]", id);
-  //     });
-
-  //     const response = await axios.post(
-  //       `${API_URL}/api/update_publishevent`,
-  //       formData,
-  //       {
-  //         headers: {
-  //           Authorization: `Bearer ${token}`,
-  //         },
-  //       }
-  //     );
-
-  //     const data = response.data;
-
-  //     if (data.success) {
-  //       toast.success(data.message || "Event published successfully!");
-  //       setHolidays((prev) =>
-  //         prev.map((holiday) =>
-  //           selectedHolidays.includes(holiday.unq_id)
-  //             ? { ...holiday, publish: "Y" }
-  //             : holiday
-  //         )
-  //       );
-  //       setSelectedHolidays([]);
-  //     } else {
-  //       toast.error(data.message || "Failed to publish events.");
-  //     }
-  //   } catch (error) {
-  //     console.error("Error publishing events:", error);
-  //     toast.error("An error occurred while publishing events.");
-  //   } finally {
-  //     setIsSubmitting(false);
-  // test
-  //   }
-  // };
-
   const handlePublish = async () => {
-    // 1️⃣ Check if there are any events at all
+    //  Check if there are any events at all
     if (!holidays || holidays.length === 0) {
       toast.warning("No events available for publish.");
       return;
     }
 
-    // 2️⃣ Check if the user selected any events
+    //  Check if the user selected any events
     if (!selectedHolidays || selectedHolidays.length === 0) {
       toast.warning("Please select at least one event to publish.");
       return;
@@ -495,7 +440,7 @@ function Event() {
         formData,
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
 
       const data = response.data;
@@ -506,8 +451,8 @@ function Event() {
           prev.map((holiday) =>
             selectedHolidays.includes(holiday.unq_id)
               ? { ...holiday, publish: "Y" }
-              : holiday
-          )
+              : holiday,
+          ),
         );
         setSelectedHolidays([]);
         setSelectAll(false);
@@ -522,6 +467,12 @@ function Event() {
     }
   };
 
+  // useEffect(() => {
+  //   const storedDeletedHolidays =
+  //     JSON.parse(localStorage.getItem("deletedHolidays")) || [];
+  //   setDeletedHolidays(storedDeletedHolidays);
+  // }, []);
+
   useEffect(() => {
     const storedDeletedHolidays =
       JSON.parse(localStorage.getItem("deletedHolidays")) || [];
@@ -535,7 +486,6 @@ function Event() {
     console.log("Event to delete:", holiday);
     console.log("Current Event name for delete:", holiday.title);
 
-    // Show confirmation modal for all holidays (published & unpublished)
     setShowDeleteModal(true);
   };
 
@@ -561,7 +511,7 @@ function Event() {
       // Call API to delete holiday
       const response = await axios.delete(
         `${API_URL}/api/delete_eventbyunqid/${holidayId}`,
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
 
       const { data } = response;
@@ -574,22 +524,22 @@ function Event() {
 
       //Remove holiday from UI (both published & unpublished)
       setHolidays((prevHolidays) =>
-        prevHolidays.filter((h) => h.unq_id !== holidayId)
+        prevHolidays.filter((h) => h.unq_id !== holidayId),
       );
 
       // Track deleted holidays if they were published
       setDeletedHolidays((prev) => {
         const updatedDeletedHolidays = [...prev, holidayId];
         localStorage.setItem(
-          "deletedEvents",
-          JSON.stringify(updatedDeletedHolidays)
+          "deletedHolidays",
+          JSON.stringify(updatedDeletedHolidays),
         );
         return updatedDeletedHolidays;
       });
 
       toast.success("Event deleted successfully!");
-      setShowDeleteModal(false); // Close modal after delete
-      fetchEvents(); // Refresh list
+      setShowDeleteModal(false);
+      fetchEvents();
     } catch (error) {
       console.error("Error deleting event:", error);
       console.error("Error deleting event:", error.response.data.error_code);
@@ -632,7 +582,7 @@ function Event() {
         {
           headers: { Authorization: `Bearer ${token}` },
           responseType: "blob",
-        }
+        },
       );
 
       let filename = "event_template.csv"; // Default fallback
@@ -653,7 +603,6 @@ function Event() {
     }
   };
 
-  // Helper function to trigger file download
   const triggerFileDownload = (blobData, fileName) => {
     const url = window.URL.createObjectURL(new Blob([blobData]));
     const link = document.createElement("a");
@@ -691,7 +640,7 @@ function Event() {
             Authorization: `Bearer ${token}`,
           },
           responseType: "blob", //Correct placement
-        }
+        },
       );
 
       //  Build dynamic filename based on selected classes
@@ -748,7 +697,7 @@ function Event() {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       if (response.status === 200) {
@@ -770,7 +719,7 @@ function Event() {
       setErrorMessage(
         !showErrorForUploading
           ? "Failed to upload file. Please try again..."
-          : `Error: ${showErrorForUploading}.`
+          : `Error: ${showErrorForUploading}.`,
       );
 
       setErrorMessageUrl(`${showErrorForUploadingUrl}`);
@@ -778,7 +727,7 @@ function Event() {
       toast.error(
         !showErrorForUploading
           ? "Error uploading file."
-          : error?.response?.data?.message
+          : error?.response?.data?.message,
       );
     }
   };
@@ -805,14 +754,14 @@ function Event() {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       // Handle success response
       if (response.status === 200 && response.data.success) {
         toast.success(
           response?.data?.message ||
-            `Message sent successfully for Unique ID: ${uniqueId}`
+            `Message sent successfully for Unique ID: ${uniqueId}`,
         );
         fetchEvents();
       } else {
@@ -973,7 +922,7 @@ function Event() {
           holidayStartDate.includes(searchLower) ||
           createdBy.includes(searchLower)
         );
-      }
+      },
     );
 
     setFilteredSections(filtered);
@@ -986,7 +935,7 @@ function Event() {
 
   const displayedSections = filteredSections.slice(
     currentPage * pageSize,
-    (currentPage + 1) * pageSize
+    (currentPage + 1) * pageSize,
   );
 
   console.log("displayted sections", displayedSections);
@@ -1503,7 +1452,7 @@ function Event() {
                                     <input
                                       type="checkbox"
                                       checked={selectedHolidays.includes(
-                                        holiday.unq_id
+                                        holiday.unq_id,
                                       )}
                                       onChange={(e) => {
                                         e.stopPropagation(); // Prevents row click from triggering publish
@@ -1548,7 +1497,8 @@ function Event() {
                               </td>
 
                               <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                {deletedHolidays.includes(holiday.unq_id) ? (
+                                {deletedHolidays.includes(holiday.unq_id) ||
+                                holiday.isDelete == "Y" ? (
                                   <span className="text-red-600 font-semibold">
                                     Deleted
                                   </span>
@@ -1697,7 +1647,7 @@ function Event() {
                   />
                   {console.log(
                     "the currecnt section inside delete of the Holiday",
-                    currentHoliday
+                    currentHoliday,
                   )}
                 </div>
                 <div
@@ -1824,7 +1774,7 @@ function Event() {
                             .map((id) => {
                               if (id === "A") return "Admin"; // static fallback
                               const role = roles.find(
-                                (role) => role.role_id === id
+                                (role) => role.role_id === id,
                               );
                               if (!role) {
                                 console.warn("Missing role for ID:", id);

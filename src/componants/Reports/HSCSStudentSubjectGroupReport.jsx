@@ -203,6 +203,7 @@ const HSCSStudentSubjectGroupReport = () => {
              <th>Sr No.</th>
 <th>Roll No.</th>
 <th>Name</th>
+ <th>Division</th>
 <th>Subject Group</th>
 <th>Optional Subject</th>
 
@@ -221,6 +222,7 @@ ${[subject?.first_name, subject?.mid_name, subject?.last_name]
                             .filter(Boolean)
                             .join(" ")}
 </td>
+                  <td>${subject?.division_name || " "}</td>
 
 <td>
 ${subject?.subjects?.map(s => s.subject_name).join(", ") || " "}
@@ -361,6 +363,7 @@ ${subject?.optional_subjects?.map(s => s.subject_name).join(", ") || " "}
             "Sr No.",
             "Roll No.",
             "Name",
+            "Division",
             "Subject Group",
             "Optional Subject"
         ];
@@ -370,6 +373,7 @@ ${subject?.optional_subjects?.map(s => s.subject_name).join(", ") || " "}
             index + 1,
             student?.roll_no || " ",
             [student?.first_name, student?.mid_name, student?.last_name].filter(Boolean).join(" "),
+            student?.division_name || " ",
             student?.subjects?.map(sub => sub.subject_name).join(", ") || " ",
             student?.optional_subjects?.map(sub => sub.subject_name).join(", ") || " "
         ]);
@@ -729,6 +733,7 @@ ${subject?.optional_subjects?.map(s => s.subject_name).join(", ") || " "}
                                                                 "Sr No.",
                                                                 "Roll No.",
                                                                 "Name",
+                                                                "Division",
                                                                 "Subject Group",
                                                                 "Optional Subject"
                                                             ]
@@ -761,7 +766,9 @@ ${subject?.optional_subjects?.map(s => s.subject_name).join(", ") || " "}
                                                                             )
                                                                             .join(" ")}
                                                                     </td>
-
+                                                                    <td className="px-2 py-2 text-center border border-gray-300">
+                                                                        {student?.division_name || " "}
+                                                                    </td>
                                                                     {/* Subject Group */}
                                                                     <td className="px-2 py-2 text-center border border-gray-300">
                                                                         {student?.subjects

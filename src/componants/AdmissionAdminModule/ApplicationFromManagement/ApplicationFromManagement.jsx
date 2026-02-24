@@ -62,7 +62,7 @@ function ApplicationForMangement() {
         `${API_URL}/api/admin/admission/classes/not-created`,
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
       console.log("Class", response);
       setClassNameWithClassId(response?.data?.data || []);
@@ -85,7 +85,7 @@ function ApplicationForMangement() {
         value: cls?.class_id,
         label: `${cls.name}`,
       })),
-    [classNameWithClassId]
+    [classNameWithClassId],
   );
 
   const previousPageRef = useRef(0);
@@ -108,7 +108,7 @@ function ApplicationForMangement() {
             Authorization: `Bearer ${token}`,
           },
           withCredentials: true,
-        }
+        },
       );
       console.log("the data of ", response.data.data);
 
@@ -145,10 +145,10 @@ function ApplicationForMangement() {
   const formatDate = (dateStr) =>
     dateStr
       ? new Date(dateStr).toLocaleDateString("en-GB", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "2-digit",
-      })
+          day: "2-digit",
+          month: "2-digit",
+          year: "2-digit",
+        })
       : "";
 
   const filteredSections = sections.filter((section) => {
@@ -170,7 +170,7 @@ function ApplicationForMangement() {
 
   const displayedSections = filteredSections.slice(
     currentPage * pageSize,
-    (currentPage + 1) * pageSize
+    (currentPage + 1) * pageSize,
   );
 
   useEffect(() => {
@@ -251,58 +251,6 @@ function ApplicationForMangement() {
     setFormFee("");
   };
 
-  //   const handleSubmitAdd = async () => {
-  //     if (isSubmitting) return;
-  //     setIsSubmitting(true);
-  //     const validationErrors = validateSectionName(
-  //       newSectionName,
-  //       newDepartmentId
-  //     );
-  //     if (Object.keys(validationErrors).length > 0) {
-  //       setFieldErrors(validationErrors);
-  //       setIsSubmitting(false);
-  //       return;
-  //     }
-  //     try {
-  //       const token = localStorage.getItem("authToken");
-
-  //       if (!token) {
-  //         throw new Error("No authentication token or academic year found");
-  //       }
-
-  //       await axios.post(
-  //         `${API_URL}/api/save_servicetypeticket`,
-  //         {
-  //           servicename: newSectionName,
-  //           role_id: newDepartmentId,
-  //           description: description,
-  //           requiresappointment: requiresAppointment,
-  //         },
-  //         {
-  //           headers: {
-  //             Authorization: `Bearer ${token}`,
-  //           },
-  //           withCredentials: true,
-  //         }
-  //       );
-
-  //       fetchSections();
-  //       handleCloseModal();
-  //       toast.success("New service type created!");
-  //     } catch (error) {
-  //       console.error("Error adding subject:", error);
-  //       if (error.response && error.response.data && error.response.data.errors) {
-  //         Object.values(error.response.data.errors).forEach((err) =>
-  //           toast.error(err)
-  //         );
-  //       } else {
-  //         toast.error("Server error. Please try again later.");
-  //       }
-  //     } finally {
-  //       setIsSubmitting(false); // Re-enable the button after the operation
-  //     }
-  //   };
-
   const handleSubmitAdd = async (e) => {
     e.preventDefault();
 
@@ -329,9 +277,18 @@ function ApplicationForMangement() {
       hasError = true;
     }
 
+    // if (!formFee) {
+    //   setFormFeeError("Please enter form fee");
+    //   hasError = true;
+    // }
     if (!formFee) {
       setFormFeeError("Please enter form fee");
       hasError = true;
+    } else if (!/^\d+(\.\d+)?$/.test(formFee)) {
+      setFormFeeError("Please enter only numbers");
+      hasError = true;
+    } else {
+      setFormFeeError("");
     }
 
     if (hasError) return;
@@ -359,7 +316,7 @@ function ApplicationForMangement() {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
-        }
+        },
       );
 
       toast.success("Admission created successfully");
@@ -369,7 +326,7 @@ function ApplicationForMangement() {
       console.error("Create admission error:", error);
       toast.error(
         error?.response?.data?.message ||
-        "Something went wrong. Please try again."
+          "Something went wrong. Please try again.",
       );
     }
   };
@@ -393,9 +350,19 @@ function ApplicationForMangement() {
       hasError = true;
     }
 
+    // if (!formFee) {
+    //   setFormFeeError("Please enter form fee");
+    //   hasError = true;
+    // }
+
     if (!formFee) {
       setFormFeeError("Please enter form fee");
       hasError = true;
+    } else if (!/^\d+(\.\d+)?$/.test(formFee)) {
+      setFormFeeError("Please enter only numbers");
+      hasError = true;
+    } else {
+      setFormFeeError("");
     }
 
     if (hasError) return;
@@ -423,7 +390,7 @@ function ApplicationForMangement() {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
-        }
+        },
       );
 
       toast.success("Admission updated successfully");
@@ -435,7 +402,7 @@ function ApplicationForMangement() {
 
       toast.error(
         error?.response?.data?.message ||
-        "Something went wrong. Please try again."
+          "Something went wrong. Please try again.",
       );
     }
   };
@@ -448,45 +415,89 @@ function ApplicationForMangement() {
     setShowDeleteModal(true);
   };
 
+  // const handleSubmitDelete = async () => {
+  //   if (isSubmitting) return;
+  //   setIsSubmitting(true);
+  //   try {
+  //     const token = localStorage.getItem("authToken");
+
+  //     if (!token || !currentSection || !currentSection.nac_id) {
+  //       throw new Error("New Admission ID is missing");
+  //     }
+  //     console.log("delete this nac_id", currentSection.nac_id);
+  //     const response = await axios.delete(
+  //       `${API_URL}/api/admin/admission-management/${currentSection.nac_id}`,
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //         withCredentials: true,
+  //       },
+  //     );
+  //     console.log("The response of the delete api ", response.data);
+  //     if (response.data.success) {
+  //       fetchSections();
+  //       setShowDeleteModal(false);
+  //       setCurrentSection(null);
+  //       toast.success("Admission class deleted successfully.");
+  //     } else {
+  //       toast.error(
+  //         response.data.message || "Failed to delete admission class!",
+  //       );
+  //     }
+  //   } catch (error) {
+  //     console.error("Error deleting admission class:", error);
+  //     if (error.response && error.response.data && error.response.data.error) {
+  //       toast.error(error.response.data.error);
+  //     } else {
+  //       toast.error("Server error. Please try again later.");
+  //     }
+  //   } finally {
+  //     setIsSubmitting(false); // Re-enable the button after the operation
+  //     setShowDeleteModal(false);
+  //   }
+  // };
   const handleSubmitDelete = async () => {
     if (isSubmitting) return;
     setIsSubmitting(true);
+
     try {
       const token = localStorage.getItem("authToken");
 
-      if (!token || !currentSection || !currentSection.nac_id) {
+      if (!token || !currentSection?.nac_id) {
         throw new Error("New Admission ID is missing");
       }
-      console.log("delete this nac_id", currentSection.nac_id);
+
       const response = await axios.delete(
         `${API_URL}/api/admin/admission-management/${currentSection.nac_id}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-          withCredentials: true,
-        }
+        },
       );
-      console.log("The response of the delete api ", response.data);
+
       if (response.data.success) {
         fetchSections();
-        setShowDeleteModal(false);
-        setCurrentSection(null);
         toast.success("Admission class deleted successfully.");
       } else {
         toast.error(
-          response.data.message || "Failed to delete admission class!"
+          response.data.message || "Failed to delete admission class!",
         );
       }
     } catch (error) {
       console.error("Error deleting admission class:", error);
-      if (error.response && error.response.data && error.response.data.error) {
-        toast.error(error.response.data.error);
+
+      if (error.response?.status === 409) {
+        toast.error(
+          error.response.data?.message ||
+            "Cannot delete this admission. It is linked with other records.",
+        );
       } else {
         toast.error("Server error. Please try again later.");
       }
     } finally {
-      setIsSubmitting(false); // Re-enable the button after the operation
+      setIsSubmitting(false);
       setShowDeleteModal(false);
     }
   };
@@ -496,7 +507,7 @@ function ApplicationForMangement() {
       <ToastContainer />
 
       <div className="container mt-4">
-        <div className="card mx-auto lg:w-4/4 shadow-lg">
+        <div className="card mx-auto shadow-lg">
           <div className="p-2 px-3 bg-gray-100 flex justify-between items-center">
             <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
               Application Form Management
@@ -573,8 +584,9 @@ function ApplicationForMangement() {
                       displayedSections.map((section, index) => (
                         <tr
                           key={section.section_id}
-                          className={`${index % 2 === 0 ? "bg-white" : "bg-gray-100"
-                            } hover:bg-gray-50`}
+                          className={`${
+                            index % 2 === 0 ? "bg-white" : "bg-gray-100"
+                          } hover:bg-gray-50`}
                         >
                           <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
                             <p className="text-gray-900 whitespace-no-wrap relative top-2">
@@ -603,10 +615,11 @@ function ApplicationForMangement() {
                           </td>
                           <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
                             <span
-                              className={`font-semibold ${section?.publish === "N"
-                                ? "text-red-500"
-                                : "text-green-500"
-                                }`}
+                              className={`font-semibold ${
+                                section?.publish === "N"
+                                  ? "text-red-500"
+                                  : "text-green-500"
+                              }`}
                             >
                               {section?.publish === "N"
                                 ? "Unpublish"
@@ -642,7 +655,7 @@ function ApplicationForMangement() {
                     ) : (
                       <div className=" absolute left-[1%] w-[100%]  text-center flex justify-center items-center mt-14">
                         <div className=" text-center text-xl text-red-700">
-                          Oops! No data found..
+                          No data available.
                         </div>
                       </div>
                     )}
@@ -1087,7 +1100,7 @@ function ApplicationForMangement() {
                   {/* Class */}
                   <div className="relative mb-3 flex items-center mx-4">
                     <label htmlFor="sectionName" className="w-1/2 mt-2">
-                      Class <span className="text-red-500">*</span>
+                      Class
                     </label>
 
                     <div className="w-full md:w-[60%]">
@@ -1103,7 +1116,7 @@ function ApplicationForMangement() {
 
                   <div className="relative mb-3 flex items-center mx-4">
                     <label htmlFor="startDate" className="w-1/2 mt-2">
-                      Start Date <span className="text-red-500">*</span>
+                      Start Date
                     </label>
 
                     <div className="w-full md:w-[60%]">
@@ -1119,7 +1132,7 @@ function ApplicationForMangement() {
 
                   <div className="relative mb-3 flex items-center mx-4">
                     <label htmlFor="endDate" className="w-1/2 mt-2">
-                      End Date <span className="text-red-500">*</span>
+                      End Date
                     </label>
 
                     <div className="w-full md:w-[60%]">
@@ -1136,7 +1149,7 @@ function ApplicationForMangement() {
                   {/* Form Fee */}
                   <div className="relative mb-3 flex items-center mx-4">
                     <label htmlFor="formFee" className="w-1/2 mt-2">
-                      Form Fee <span className="text-red-500">*</span>
+                      Form Fee
                     </label>
 
                     <div className="w-full md:w-[60%]">
@@ -1153,7 +1166,7 @@ function ApplicationForMangement() {
                   {/* Publish */}
                   <div className="relative mb-3 flex items-center mx-4">
                     <label htmlFor="formFee" className="w-1/2 mt-2">
-                      Status <span className="text-red-500">*</span>
+                      Status
                     </label>
 
                     <div className="w-full md:w-[60%]">

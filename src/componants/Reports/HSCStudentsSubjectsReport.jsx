@@ -210,33 +210,30 @@ const HSCStudentsSubjectsReport = () => {
           </thead>
           <tbody>
             ${displayedSections
-              .map(
-                (subject, index) => `
+        .map(
+          (subject, index) => `
                 <tr>
                   <td>${index + 1}</td>
                   <td>${subject?.roll_no}</td>
                   <td>
                    ${subject?.first_name ? capitalize(subject.first_name) : " "}
-                   ${
-                     subject?.mid_name
-                       ? " " + capitalize(subject.mid_name)
-                       : " "
-                   }
-                   ${
-                     subject?.last_name
-                       ? " " + capitalize(subject.last_name)
-                       : " "
-                   }
+                   ${subject?.mid_name
+              ? " " + capitalize(subject.mid_name)
+              : " "
+            }
+                   ${subject?.last_name
+              ? " " + capitalize(subject.last_name)
+              : " "
+            }
                   </td>
                   <td>${subject?.stream_name || " "}</td>
-                  <td>${
-                    subject?.subjects
-                      ?.map((sub) => sub.subject_name)
-                      .join(", ") || " "
-                  }</td>
+                  <td>${subject?.subjects
+              ?.map((sub) => sub.subject_name)
+              .join(", ") || " "
+            }</td>
                 </tr>`
-              )
-              .join("")}
+        )
+        .join("")}
           </tbody>
         </table>
       </div>
@@ -348,9 +345,8 @@ const HSCStudentsSubjectsReport = () => {
     XLSX.utils.book_append_sheet(workbook, worksheet, "Admission Form Data");
 
     // Generate and download the Excel file
-    const fileName = ` HSC_Students_Subjects_Report_${
-      selectedClass?.label || " "
-    } -${selectedDivision?.label || " "}.xlsx`;
+    const fileName = ` HSC_Students_Subjects_Report_${selectedClass?.label || " "
+      } -${selectedDivision?.label || " "}.xlsx`;
     XLSX.writeFile(workbook, fileName);
   };
 
@@ -508,9 +504,8 @@ const HSCStudentsSubjectsReport = () => {
                       type="search"
                       onClick={handleSearch}
                       style={{ backgroundColor: "#2196F3" }}
-                      className={`btn h-10 w-18 md:w-auto btn-primary text-white font-bold py-1 border-1 border-blue-500 px-4 rounded ${
-                        loadingForSearch ? "opacity-50 cursor-not-allowed" : ""
-                      }`}
+                      className={`btn h-10 w-18 md:w-auto btn-primary text-white font-bold py-1 border-1 border-blue-500 px-4 rounded ${loadingForSearch ? "opacity-50 cursor-not-allowed" : ""
+                        }`}
                       disabled={loadingForSearch}
                     >
                       {loadingForSearch ? (
