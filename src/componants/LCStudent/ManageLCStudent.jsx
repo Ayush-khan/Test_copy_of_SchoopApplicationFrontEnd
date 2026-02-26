@@ -14,6 +14,7 @@ import { RxCross1 } from "react-icons/rx";
 import Select from "react-select";
 import { MdDescription, MdOutlineRemoveRedEye } from "react-icons/md";
 import { FaAddressCard } from "react-icons/fa";
+import { handleApiError } from "../../helpers/impersonateHelper";
 // import CreateSimpleBonafied from "./CreateSimpleBonafied";
 function ManageLCStudent() {
   const API_URL = import.meta.env.VITE_API_URL; // URL for host
@@ -295,14 +296,15 @@ function ManageLCStudent() {
       setShowDeleteModal(false); // Close the modal
       toast.success("LC Student deleted successfully!");
     } catch (error) {
-      if (error.response && error.response.data) {
-        toast.error(
-          `Error deleting LC Student : ${error.response.data.message}`
-        );
-      } else {
-        toast.error(`Error deleting LC Student : ${error.message}`);
-      }
-      console.error("Error deleting LC Student :", error);
+      // if (error.response && error.response.data) {
+      //   toast.error(
+      //     `Error deleting LC Student : ${error.response.data.message}`
+      //   );
+      // } else {
+      //   toast.error(`Error deleting LC Student : ${error.message}`);
+      // }
+      // console.error("Error deleting LC Student :", error);
+      handleApiError(error);
     } finally {
       setIsSubmitting(false); // Re-enable the button after the operation
       setShowDeleteModal(false); // Close the modal

@@ -13,6 +13,7 @@ import { MdOutlineRemoveRedEye } from "react-icons/md";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { RxCross1 } from "react-icons/rx";
+import { handleApiError } from "../../helpers/impersonateHelper";
 
 function ImportantLink() {
   const API_URL = import.meta.env.VITE_API_URL; // URL for host
@@ -312,7 +313,8 @@ function ImportantLink() {
           errArr.forEach((err) => toast.error(err))
         );
       } else {
-        toast.error("Server error. Please try again later.");
+        // toast.error("Server error. Please try again later.");
+        handleApiError(error);
       }
     } finally {
       setIsSubmitting(false);
@@ -388,12 +390,13 @@ function ImportantLink() {
         );
       }
     } catch (error) {
-      console.error("Error deleting link:", error);
-      if (error.response && error.response.data?.error) {
-        toast.error(error.response.data.error);
-      } else {
-        toast.error("Server error. Please try again later.");
-      }
+      // console.error("Error deleting link:", error);
+      // if (error.response && error.response.data?.error) {
+      //   toast.error(error.response.data.error);
+      // } else {
+      //   toast.error("Server error. Please try again later.");
+      // }
+      handleApiError(error);
     } finally {
       setIsSubmitting(false);
       setShowDeleteModal(false);
@@ -444,12 +447,13 @@ function ImportantLink() {
         toast.error(response.data.message || "Failed to publish the link.");
       }
     } catch (error) {
-      console.error("Error publishing link:", error);
-      if (error.response?.data?.error) {
-        toast.error(error.response.data.error);
-      } else {
-        toast.error("Server error. Please try again later.");
-      }
+      // console.error("Error publishing link:", error);
+      // if (error.response?.data?.error) {
+      //   toast.error(error.response.data.error);
+      // } else {
+      //   toast.error("Server error. Please try again later.");
+      // }
+      handleApiError(error);
     } finally {
       setIsSubmitting(false);
       setShowPublishModal(false);

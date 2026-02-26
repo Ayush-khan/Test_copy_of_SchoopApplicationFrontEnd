@@ -8,6 +8,7 @@ import { faEdit, faTrash, faPlus } from "@fortawesome/free-solid-svg-icons";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { RxCross1 } from "react-icons/rx";
+import { handleApiError } from "../../helpers/impersonateHelper";
 
 // The is the divisionlist module
 function Grade() {
@@ -419,8 +420,9 @@ function Grade() {
       handleCloseModal();
       toast.success("Grade updated successfully!");
     } catch (error) {
-      console.error("Error editing Grade:", error);
-      toast.error("Server error. Please try again later.");
+      // console.error("Error editing Grade:", error);
+      // toast.error("Server error. Please try again later.");
+      handleApiError(error);
     } finally {
       setIsSubmitting(false); // Re-enable the button after the operation
     }
@@ -461,16 +463,17 @@ function Grade() {
         toast.error(response.data.message || "Failed to delete Division");
       }
     } catch (error) {
-      console.error("Error deleting Grade:", error);
-      if (
-        error.response &&
-        error.response.data &&
-        error.response.data.message
-      ) {
-        toast.error(error.response.data.message);
-      } else {
-        toast.error("Server error. Please try again later.");
-      }
+      // console.error("Error deleting Grade:", error);
+      // if (
+      //   error.response &&
+      //   error.response.data &&
+      //   error.response.data.message
+      // ) {
+      //   toast.error(error.response.data.message);
+      // } else {
+      //   toast.error("Server error. Please try again later.");
+      // }
+      handleApiError(error);
     } finally {
       setIsSubmitting(false); // Re-enable the button after the operation
       setShowDeleteModal(false);

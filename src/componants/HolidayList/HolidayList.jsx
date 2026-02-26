@@ -9,6 +9,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import { RxCross1 } from "react-icons/rx";
 import { useNavigate } from "react-router-dom";
 import "@fortawesome/fontawesome-free/css/all.min.css";
+import { handleApiError } from "../../helpers/impersonateHelper";
 
 function HolidayList() {
   const API_URL = import.meta.env.VITE_API_URL; // URL for host
@@ -331,10 +332,11 @@ function HolidayList() {
       setShowEditModal(false); // Close modal
       fetchHolidays(); // Refresh holiday list
     } catch (error) {
-      console.error("Error updating holiday:", error);
-      toast.error(
-        error.response?.data?.message || "Server error. Please try again later."
-      );
+      // console.error("Error updating holiday:", error);
+      // toast.error(
+      //   error.response?.data?.message || "Server error. Please try again later."
+      // );
+      handleApiError(error);
     } finally {
       setIsSubmitting(false);
     }
@@ -655,8 +657,9 @@ function HolidayList() {
       setShowDeleteModal(false); // Close modal after delete
       fetchHolidays(); // Refresh list
     } catch (error) {
-      console.error("Error deleting holiday:", error);
-      toast.error("Server error. Please try again later.");
+      // console.error("Error deleting holiday:", error);
+      // toast.error("Server error. Please try again later.");
+      handleApiError(error);
     } finally {
       setIsSubmitting(false);
     }

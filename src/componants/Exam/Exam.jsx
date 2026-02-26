@@ -7,6 +7,7 @@ import { faEdit, faTrash, faPlus } from "@fortawesome/free-solid-svg-icons";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { RxCross1 } from "react-icons/rx";
+import { handleApiError } from "../../helpers/impersonateHelper";
 
 // The is the divisionlist module
 function Exam() {
@@ -268,8 +269,9 @@ function Exam() {
       handleCloseModal();
       toast.success("Exam added successfully!");
     } catch (error) {
-      console.error("Error adding Exam:", error);
-      toast.error("Server error. Please try again later.");
+      // console.error("Error adding Exam:", error);
+      // toast.error("Server error. Please try again later.");
+      handleApiError(error);
     } finally {
       setIsSubmitting(false); // Re-enable the button after the operation
     }
@@ -313,8 +315,9 @@ function Exam() {
       handleCloseModal();
       toast.success("Exam updated successfully!");
     } catch (error) {
-      console.error("Error editing Exam:", error);
-      toast.error("Server error. Please try again later.");
+      // console.error("Error editing Exam:", error);
+      // toast.error("Server error. Please try again later.");
+      handleApiError(error);
     } finally {
       setIsSubmitting(false); // Re-enable the button after the operation
     }
@@ -355,12 +358,13 @@ function Exam() {
         toast.error(response.data.message || "Failed to delete Exam");
       }
     } catch (error) {
-      console.error("Error deleting Exam:", error);
-      if (error.response && error.response.data && error.response.data.error) {
-        toast.error(error.response.data.error);
-      } else {
-        toast.error("Server error. Please try again later.");
-      }
+      // console.error("Error deleting Exam:", error);
+      // if (error.response && error.response.data && error.response.data.error) {
+      //   toast.error(error.response.data.error);
+      // } else {
+      //   toast.error("Server error. Please try again later.");
+      // }
+      handleApiError(error);
     } finally {
       setIsSubmitting(false); // Re-enable the button after the operation
       setShowDeleteModal(false);
