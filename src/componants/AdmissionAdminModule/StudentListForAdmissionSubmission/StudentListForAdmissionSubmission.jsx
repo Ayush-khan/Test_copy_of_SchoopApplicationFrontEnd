@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { RxCross1 } from "react-icons/rx";
 import { MdOutlineRemoveRedEye } from "react-icons/md";
 import { FiSearch } from "react-icons/fi";
+import ReactPaginate from "react-paginate";
 
 const StudentListForAdmissionSubmission = () => {
   const API_URL = import.meta.env.VITE_API_URL;
@@ -28,7 +29,7 @@ const StudentListForAdmissionSubmission = () => {
 
   const [timetable, setTimetable] = useState([]);
 
-  const pageSize = 10;
+  const pageSize = 20;
   const [pageCount, setPageCount] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -88,49 +89,6 @@ const StudentListForAdmissionSubmission = () => {
     }
   };
 
-  // const handleSearch = async () => {
-  //   // if (!selectedStudentId) {
-  //   //   setStudentError("Please select class.");
-  //   //   return;
-  //   // }
-
-  //   setLoadingForSearch(true);
-  //   setLoading(true);
-  //   setTimetable([]);
-
-  //   const token = localStorage.getItem("authToken");
-
-  //   //  Now reset UI fields
-  //   setSearchTerm("");
-  //   setFormId("");
-  //   setShowSearch(false);
-
-  //   try {
-  //     const response = await axios.get(
-  //       `${API_URL}/api/admin/applications/document-submission`,
-  //       {
-  //         headers: { Authorization: `Bearer ${token}` },
-  //       },
-  //     );
-
-  //     if (!response?.data?.data?.length) {
-  //       toast.error("Admission forms data not found.");
-  //       setTimetable([]);
-  //     } else {
-  //       setTimetable(response.data.data);
-  //       setPageCount(Math.ceil(response.data.data.length / pageSize));
-  //       // setShowStudentReport(true);
-  //     }
-  //   } catch (error) {
-  //     console.error("Error fetching Admission forms:", error);
-  //     toast.error("Error fetching Admission forms. Please try again.");
-  //   } finally {
-  //     setLoadingForSearch(false);
-  //     setIsSubmitting(false);
-  //     setLoading(false);
-  //   }
-  // };
-
   const handleSearch = async () => {
     setLoadingForSearch(true);
     setLoading(true);
@@ -153,7 +111,7 @@ const StudentListForAdmissionSubmission = () => {
       const data = response?.data?.data || [];
 
       setTimetable(data);
-      setPageCount(Math.ceil(data.length / pageSize));
+      // setPageCount(Math.ceil(data.length / pageSize));
 
       if (data.length === 0) {
         toast.error("Admission forms data not found.");
@@ -223,19 +181,44 @@ const StudentListForAdmissionSubmission = () => {
     );
   });
 
-  const displayedSections = filteredSections.slice(currentPage * pageSize);
-  // const startIndex = currentPage * pageSize;
-  // const endIndex = startIndex + pageSize;
+  // const displayedSections = filteredSections.slice(currentPage * pageSize);
 
-  // const displayedSections = filteredSections.slice(startIndex, endIndex);
+  useEffect(() => {
+    setPageCount(Math.ceil(filteredSections.length / pageSize));
+  }, [filteredSections, pageSize]);
+
+  const displayedSections = filteredSections.slice(
+    currentPage * pageSize,
+    (currentPage + 1) * pageSize,
+  );
+
+  const handlePageClick = (data) => {
+    setCurrentPage(data.selected);
+  };
+
+  useEffect(() => {
+    setCurrentPage(0);
+  }, [searchTerm, timetable]);
+
+  // const allSelected =
+  //   displayedSections.length > 0 &&
+  //   displayedSections.every((row) => selectedRows.includes(row.form_id));
+
+  // const handleSelectAll = (e) => {
+  //   if (e.target.checked) {
+  //     setSelectedRows(displayedSections.map((row) => row.form_id));
+  //   } else {
+  //     setSelectedRows([]);
+  //   }
+  // };
 
   const allSelected =
-    displayedSections.length > 0 &&
-    displayedSections.every((row) => selectedRows.includes(row.form_id));
+    filteredSections.length > 0 &&
+    filteredSections.every((row) => selectedRows.includes(row.form_id));
 
   const handleSelectAll = (e) => {
     if (e.target.checked) {
-      setSelectedRows(displayedSections.map((row) => row.form_id));
+      setSelectedRows(filteredSections.map((row) => row.form_id));
     } else {
       setSelectedRows([]);
     }
@@ -380,13 +363,15 @@ const StudentListForAdmissionSubmission = () => {
                                 <span className="mr-2 whitespace-nowrap">
                                   Select All <br />
                                 </span>
-                                <input
-                                  type="checkbox"
-                                  checked={allSelected}
-                                  onChange={handleSelectAll}
-                                  className="w-3 h-3 cursor-pointer accent-blue-500"
-                                  title="Select All"
-                                />
+                                {currentPage === 0 && (
+                                  <input
+                                    type="checkbox"
+                                    checked={allSelected}
+                                    onChange={handleSelectAll}
+                                    className="w-3 h-3 cursor-pointer accent-blue-500"
+                                    title="Select All"
+                                  />
+                                )}
                               </th>
 
                               <th className=" text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold whitespace-nowrap">
@@ -442,7 +427,8 @@ const StudentListForAdmissionSubmission = () => {
                                     className="border border-gray-300"
                                   >
                                     <td className="px-2 py-2 text-center border border-gray-300">
-                                      {index + 1}
+                                      {/* {index + 1} */}
+                                      {currentPage * pageSize + index + 1}
                                     </td>
 
                                     <td className="px-2 py-2 text-center border border-gray-300 whitespace-nowrap">
@@ -514,7 +500,8 @@ const StudentListForAdmissionSubmission = () => {
                                           Total Count :
                                         </span>
                                         <span className="text-pink-600 ml-1">
-                                          {displayedSections.length}
+                                          {/* {displayedSections.length} */}
+                                          {filteredSections.length}
                                         </span>
                                       </span>
                                     </div>
@@ -530,6 +517,27 @@ const StudentListForAdmissionSubmission = () => {
                             )}
                           </tbody>
                         </table>
+                      </div>
+                      <div className=" flex justify-center  pt-2 -mb-3">
+                        <ReactPaginate
+                          previousLabel={"Previous"}
+                          nextLabel={"Next"}
+                          breakLabel={"..."}
+                          breakClassName={"page-item"}
+                          breakLinkClassName={"page-link"}
+                          pageCount={pageCount}
+                          marginPagesDisplayed={1}
+                          pageRangeDisplayed={1}
+                          onPageChange={handlePageClick}
+                          containerClassName={"pagination"}
+                          pageClassName={"page-item"}
+                          pageLinkClassName={"page-link"}
+                          previousClassName={"page-item"}
+                          previousLinkClassName={"page-link"}
+                          nextClassName={"page-item"}
+                          nextLinkClassName={"page-link"}
+                          activeClassName={"active"}
+                        />
                       </div>
                       <div className="flex justify-end gap-4 pr-3 mt-2 mr-10">
                         <button

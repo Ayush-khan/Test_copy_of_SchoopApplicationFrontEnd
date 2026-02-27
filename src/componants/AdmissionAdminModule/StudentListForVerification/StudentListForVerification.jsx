@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { RxCross1 } from "react-icons/rx";
 import { MdOutlineRemoveRedEye } from "react-icons/md";
 import { FiSearch } from "react-icons/fi";
+import ReactPaginate from "react-paginate";
 
 const StudentListForVerification = () => {
   const API_URL = import.meta.env.VITE_API_URL;
@@ -28,7 +29,7 @@ const StudentListForVerification = () => {
 
   const [timetable, setTimetable] = useState([]);
 
-  const pageSize = 10;
+  const pageSize = 20;
   const [pageCount, setPageCount] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -111,49 +112,6 @@ const StudentListForVerification = () => {
     { value: "N", label: "No" },
   ];
 
-  //   const handleSearch = async () => {
-  //     // if (!selectedStudentId) {
-  //     //   setStudentError("Please select class.");
-  //     //   return;
-  //     // }
-
-  //     setLoadingForSearch(true);
-  //     setLoading(true);
-  //     setTimetable([]);
-
-  //     const token = localStorage.getItem("authToken");
-
-  //     //  Now reset UI fields
-  //     setSearchTerm("");
-  //     setFormId("");
-  //     setShowSearch(false);
-
-  //     try {
-  //       const response = await axios.get(
-  //         `${API_URL}/api/admin/applications/interview-scheduling`,
-  //         {
-  //           headers: { Authorization: `Bearer ${token}` },
-  //         }
-  //       );
-
-  //       if (!response?.data?.data?.length) {
-  //         toast.error("Admission forms data not found.");
-  //         setTimetable([]);
-  //       } else {
-  //         setTimetable(response.data.data);
-  //         setPageCount(Math.ceil(response.data.data.length / pageSize));
-  //         // setShowStudentReport(true);
-  //       }
-  //     } catch (error) {
-  //       console.error("Error fetching Admission forms:", error);
-  //       toast.error("Error fetching Admission forms. Please try again.");
-  //     } finally {
-  //       setLoadingForSearch(false);
-  //       setIsSubmitting(false);
-  //       setLoading(false);
-  //     }
-  //   };
-
   const handleSearch = async () => {
     setLoadingForSearch(true);
     setLoading(true);
@@ -189,7 +147,7 @@ const StudentListForVerification = () => {
         setTimetable([]);
       } else {
         setTimetable(response.data.data);
-        setPageCount(Math.ceil(response.data.data.length / pageSize));
+        // setPageCount(Math.ceil(response.data.data.length / pageSize));
       }
     } catch (error) {
       console.error("Error fetching Admission forms:", error);
@@ -201,14 +159,6 @@ const StudentListForVerification = () => {
     }
   };
 
-  // const handleView = (student) => {
-  //   console.log("HandleView -->", student);
-
-  //   navigate(
-  //     `/viewAdmissionForm/${student.form_id}?class_id=${selectedStudentId}`
-  //   );
-  // };
-
   const handleView = (student) => {
     console.log("HandleView -->", student);
 
@@ -219,6 +169,7 @@ const StudentListForVerification = () => {
       },
     );
   };
+
   const camelCase = (str) =>
     str
       ?.toLowerCase()
@@ -262,15 +213,40 @@ const StudentListForVerification = () => {
     );
   });
 
-  const displayedSections = filteredSections.slice(currentPage * pageSize);
+  // const displayedSections = filteredSections.slice(currentPage * pageSize);
+
+  const displayedSections = filteredSections.slice(
+    currentPage * pageSize,
+    (currentPage + 1) * pageSize,
+  );
+
+  useEffect(() => {
+    setPageCount(Math.ceil(filteredSections.length / pageSize));
+  }, [filteredSections, pageSize]);
+
+  const handlePageClick = (data) => {
+    setCurrentPage(data.selected);
+  };
+
+  // const allSelected =
+  //   displayedSections.length > 0 &&
+  //   displayedSections.every((row) => selectedRows.includes(row.form_id));
+
+  // const handleSelectAll = (e) => {
+  //   if (e.target.checked) {
+  //     setSelectedRows(displayedSections.map((row) => row.form_id));
+  //   } else {
+  //     setSelectedRows([]);
+  //   }
+  // };
 
   const allSelected =
-    displayedSections.length > 0 &&
-    displayedSections.every((row) => selectedRows.includes(row.form_id));
+    filteredSections.length > 0 &&
+    filteredSections.every((row) => selectedRows.includes(row.form_id));
 
   const handleSelectAll = (e) => {
     if (e.target.checked) {
-      setSelectedRows(displayedSections.map((row) => row.form_id));
+      setSelectedRows(filteredSections.map((row) => row.form_id));
     } else {
       setSelectedRows([]);
     }
@@ -281,70 +257,6 @@ const StudentListForVerification = () => {
       prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
     );
   };
-  const formatDateDMY = (dateStr) => {
-    const [yyyy, mm, dd] = dateStr.split("-");
-    return `${dd}-${mm}-${yyyy}`;
-  };
-
-  //   const handleSubmit = async () => {
-  //     const newErrors = {};
-
-  //     if (!interviewDate)
-  //       newErrors.interviewDate = "Verification date is required";
-  //     if (!timeFrom) newErrors.timeFrom = "Time From is required";
-  //     if (!timeTo) newErrors.timeTo = "Time To is required";
-
-  //     if (timeFrom && timeTo && timeFrom >= timeTo) {
-  //       newErrors.timeTo = "Time To must be greater than Time From";
-  //     }
-
-  //     if (selectedRows.length === 0) {
-  //       toast.error("Please select at least one form.");
-  //       return;
-  //     }
-
-  //     if (Object.keys(newErrors).length > 0) {
-  //       setErrors(newErrors);
-  //       toast.error("Please fill all required interview details.");
-  //       return;
-  //     }
-
-  //     const token = localStorage.getItem("authToken");
-  //     setLoading(true);
-
-  //     try {
-  //       const formData = new FormData();
-
-  //       selectedRows.forEach((id) => {
-  //         formData.append("form_ids[]", id);
-  //       });
-
-  //       formData.append("interview_date", formatDateDMY(interviewDate));
-  //       formData.append("interview_time_from", timeFrom);
-  //       formData.append("interview_time_to", timeTo);
-
-  //       await axios.post(
-  //         `${API_URL}/api/admin/applications/interview-scheduling`,
-  //         formData,
-  //         {
-  //           headers: {
-  //             Authorization: `Bearer ${token}`,
-  //           },
-  //         }
-  //       );
-
-  //       toast.success("Interview scheduled successfully.");
-  //       handleSearch();
-  //       setInterviewDate("");
-  //       setTimeFrom("");
-  //       setTimeTo("");
-  //     } catch (error) {
-  //       console.error(error);
-  //       toast.error("Submission failed.");
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
 
   const handleSubmit = async () => {
     const newErrors = {};
@@ -613,13 +525,22 @@ const StudentListForVerification = () => {
                                 <span className="mr-2 whitespace-nowrap">
                                   Select All <br />
                                 </span>
-                                <input
+                                {/* <input
                                   type="checkbox"
                                   checked={allSelected}
                                   onChange={handleSelectAll}
                                   className="w-3 h-3 cursor-pointer accent-blue-500"
                                   title="Select All"
-                                />
+                                /> */}
+                                {currentPage === 0 && (
+                                  <input
+                                    type="checkbox"
+                                    checked={allSelected}
+                                    onChange={handleSelectAll}
+                                    className="w-3 h-3 cursor-pointer accent-blue-500"
+                                    title="Select All"
+                                  />
+                                )}
                               </th>
 
                               <th className="text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold whitespace-nowrap">
@@ -674,7 +595,8 @@ const StudentListForVerification = () => {
                                     className="border border-gray-300"
                                   >
                                     <td className="px-2 py-2 text-center border border-gray-300">
-                                      {index + 1}
+                                      {/* {index + 1} */}
+                                      {currentPage * pageSize + index + 1}
                                     </td>
 
                                     <td className="px-2 py-2 text-center border border-gray-300">
@@ -743,7 +665,8 @@ const StudentListForVerification = () => {
                                         </span>
 
                                         <span className="text-pink-600 ml-1">
-                                          {displayedSections.length}
+                                          {/* {displayedSections.length} */}
+                                          {filteredSections.length}
                                         </span>
                                       </span>
                                     </div>
@@ -772,9 +695,30 @@ const StudentListForVerification = () => {
 
                         {/* verification date  */}
                       </div>
+                      <div className=" flex justify-center  pt-2 -mb-3">
+                        <ReactPaginate
+                          previousLabel={"Previous"}
+                          nextLabel={"Next"}
+                          breakLabel={"..."}
+                          breakClassName={"page-item"}
+                          breakLinkClassName={"page-link"}
+                          pageCount={pageCount}
+                          marginPagesDisplayed={1}
+                          pageRangeDisplayed={1}
+                          onPageChange={handlePageClick}
+                          containerClassName={"pagination"}
+                          pageClassName={"page-item"}
+                          pageLinkClassName={"page-link"}
+                          previousClassName={"page-item"}
+                          previousLinkClassName={"page-link"}
+                          nextClassName={"page-item"}
+                          nextLinkClassName={"page-link"}
+                          activeClassName={"active"}
+                        />
+                      </div>
                       {!loading && (
                         <>
-                          <div className="flex justify-end gap-4 pr-3 mt-5 ">
+                          <div className="flex justify-end gap-4 pr-3 mt-3 ">
                             <button
                               onClick={handleSubmit}
                               className="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-4 py-2 rounded"

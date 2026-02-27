@@ -7,6 +7,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { RxCross1 } from "react-icons/rx";
 import { MdOutlineRemoveRedEye } from "react-icons/md";
 import { FiSearch } from "react-icons/fi";
+import ReactPaginate from "react-paginate";
 
 const CompleteStudentListForAdmission = () => {
   const API_URL = import.meta.env.VITE_API_URL;
@@ -34,7 +35,7 @@ const CompleteStudentListForAdmission = () => {
 
   const [timetable, setTimetable] = useState([]);
 
-  const pageSize = 10;
+  const pageSize = 20;
   const [pageCount, setPageCount] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -214,8 +215,15 @@ const CompleteStudentListForAdmission = () => {
         toast.error("Admission forms data not found.");
         setTimetable([]);
       } else {
-        setTimetable(response.data.data);
-        setPageCount(Math.ceil(response.data.data.length / pageSize));
+        // setTimetable(response.data.data);
+        const uniqueData = Array.from(
+          new Map(
+            response.data.data.map((item) => [item.adm_form_pk, item]),
+          ).values(),
+        );
+
+        setTimetable(uniqueData);
+        // setPageCount(Math.ceil(response.data.data.length / pageSize));
         setShowStudentReport(true);
       }
     } catch (error) {
@@ -338,34 +346,89 @@ const CompleteStudentListForAdmission = () => {
         })
       : "";
 
-  const filteredSections = timetable.filter((section) => {
+  // const filteredSections = timetable.filter((section) => {
+  //   const searchLower = searchTerm.toLowerCase();
+  //   const formId = section?.form_id?.toLowerCase() || "";
+  //   const studentName =
+  //     `${section?.first_name} ${section?.mid_name} ${section?.last_name}`
+  //       .toLowerCase()
+  //       .trim() || "";
+
+  //   const applicationDate = section?.application_date?.toLowerCase() || "";
+  //   const fatherName = section?.father_name?.toLowerCase() || "";
+  //   const fatherMobile = section?.f_mobile?.toLowerCase() || "";
+  //   const fatherEmail = section?.f_email?.toLowerCase() || "";
+  //   const admissionStatus = section?.admission_form_status?.toLowerCase() || "";
+  //   const className = section?.class_name?.toLowerCase() || "";
+
+  //   return (
+  //     formId.includes(searchLower) ||
+  //     studentName.includes(searchLower) ||
+  //     applicationDate.includes(searchLower) ||
+  //     fatherName.includes(searchLower) ||
+  //     fatherMobile.includes(searchLower) ||
+  //     fatherEmail.includes(searchLower) ||
+  //     admissionStatus.includes(searchLower) ||
+  //     className.includes(searchLower)
+  //   );
+  // });
+
+  const filteredSections = useMemo(() => {
+    if (!searchTerm.trim()) return timetable;
+
     const searchLower = searchTerm.toLowerCase();
-    const formId = section?.form_id?.toLowerCase() || "";
-    const studentName =
-      `${section?.first_name} ${section?.mid_name} ${section?.last_name}`
-        .toLowerCase()
-        .trim() || "";
 
-    const applicationDate = section?.application_date?.toLowerCase() || "";
-    const fatherName = section?.father_name?.toLowerCase() || "";
-    const fatherMobile = section?.f_mobile?.toLowerCase() || "";
-    const fatherEmail = section?.f_email?.toLowerCase() || "";
-    const admissionStatus = section?.admission_form_status?.toLowerCase() || "";
-    const className = section?.class_name?.toLowerCase() || "";
+    return timetable.filter((section) => {
+      const formId = String(section?.form_id || "").toLowerCase();
 
-    return (
-      formId.includes(searchLower) ||
-      studentName.includes(searchLower) ||
-      applicationDate.includes(searchLower) ||
-      fatherName.includes(searchLower) ||
-      fatherMobile.includes(searchLower) ||
-      fatherEmail.includes(searchLower) ||
-      admissionStatus.includes(searchLower) ||
-      className.includes(searchLower)
-    );
-  });
+      const studentName =
+        `${section?.first_name || ""} ${section?.mid_name || ""} ${section?.last_name || ""}`
+          .toLowerCase()
+          .trim();
 
-  const displayedSections = filteredSections.slice(currentPage * pageSize);
+      const applicationDate = String(
+        section?.application_date || "",
+      ).toLowerCase();
+      const fatherName = String(section?.father_name || "").toLowerCase();
+      const fatherMobile = String(section?.f_mobile || "").toLowerCase();
+      const fatherEmail = String(section?.f_email || "").toLowerCase();
+      const admissionStatus = String(
+        section?.admission_form_status || "",
+      ).toLowerCase();
+      const className = String(section?.class_name || "").toLowerCase();
+
+      return (
+        formId.includes(searchLower) ||
+        studentName.includes(searchLower) ||
+        applicationDate.includes(searchLower) ||
+        fatherName.includes(searchLower) ||
+        fatherMobile.includes(searchLower) ||
+        fatherEmail.includes(searchLower) ||
+        admissionStatus.includes(searchLower) ||
+        className.includes(searchLower)
+      );
+    });
+  }, [timetable, searchTerm]);
+
+  useEffect(() => {
+    setPageCount(Math.ceil(filteredSections.length / pageSize));
+  }, [filteredSections, pageSize]);
+
+  const displayedSections = filteredSections.slice(
+    currentPage * pageSize,
+    (currentPage + 1) * pageSize,
+  );
+
+  const handlePageClick = (data) => {
+    setCurrentPage(data.selected);
+  };
+
+  useEffect(() => {
+    setCurrentPage(0);
+  }, [searchTerm, timetable]);
+
+  // const displayedSections = filteredSections.slice(currentPage * pageSize);
+
   return (
     <>
       <div
@@ -588,21 +651,6 @@ const CompleteStudentListForAdmission = () => {
                     <>
                       <div className="w-full p-3">
                         <div className="card mx-auto lg:w-full shadow-lg">
-                          {/* <div className="p-2 px-3 bg-gray-100 border-none flex justify-between items-center">
-                            <div className="w-full   flex flex-row justify-end mr-0 md:mr-4 ">
-                              <div className="w-1/2 md:w-[18%] mr-1 ">
-                                <input
-                                  type="text"
-                                  className="form-control"
-                                  placeholder="Search "
-                                  onChange={(e) =>
-                                    setSearchTerm(e.target.value)
-                                  }
-                                />
-                              </div>
-                            </div>
-                          </div> */}
-
                           {showSearch && (
                             <div className="p-2 px-3 bg-gray-100 border-none">
                               <div className="w-full flex justify-end mr-0 md:mr-4">
@@ -622,13 +670,6 @@ const CompleteStudentListForAdmission = () => {
                           )}
 
                           <div className="card-body">
-                            {/* <div
-                              className="  h-96 lg:h-96  overflow-y-scroll overflow-x-scroll"
-                              style={{
-                                scrollbarWidth: "thin",
-                                scrollbarColor: "#C03178 transparent",
-                              }}
-                            > */}
                             <div
                               className="relative h-96 overflow-auto"
                               style={{
@@ -696,7 +737,8 @@ const CompleteStudentListForAdmission = () => {
                                         className="border border-gray-300"
                                       >
                                         <td className="px-2 py-2 text-center border border-gray-300">
-                                          {index + 1}
+                                          {/* {index + 1} */}
+                                          {currentPage * pageSize + index + 1}
                                         </td>
                                         <td className="px-2 py-2 text-center border border-gray-300 whitespace-nowrap">
                                           {student.form_id}
@@ -777,6 +819,27 @@ const CompleteStudentListForAdmission = () => {
                               </table>
                             </div>
                           </div>
+                          <div className=" flex justify-center  pt-2 -mb-3">
+                            <ReactPaginate
+                              previousLabel={"Previous"}
+                              nextLabel={"Next"}
+                              breakLabel={"..."}
+                              breakClassName={"page-item"}
+                              breakLinkClassName={"page-link"}
+                              pageCount={pageCount}
+                              marginPagesDisplayed={1}
+                              pageRangeDisplayed={1}
+                              onPageChange={handlePageClick}
+                              containerClassName={"pagination"}
+                              pageClassName={"page-item"}
+                              pageLinkClassName={"page-link"}
+                              previousClassName={"page-item"}
+                              previousLinkClassName={"page-link"}
+                              nextClassName={"page-item"}
+                              nextLinkClassName={"page-link"}
+                              activeClassName={"active"}
+                            />
+                          </div>
                         </div>
                       </div>
                     </>
@@ -828,10 +891,7 @@ const CompleteStudentListForAdmission = () => {
                             This student is already in System delete first.
                           </p>
                         ) : (
-                          <p>
-                            Are you sure you want to change the status to
-                            {/* <strong className="mx-1">{pendingStatus}</strong>? */}
-                          </p>
+                          <p>Are you sure you want to change the status</p>
                         )}
                       </div>
 

@@ -7,6 +7,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { RxCross1 } from "react-icons/rx";
 import { MdOutlineRemoveRedEye } from "react-icons/md";
 import { FiSearch } from "react-icons/fi";
+import ReactPaginate from "react-paginate";
 
 const StudentListForApproval = () => {
   const API_URL = import.meta.env.VITE_API_URL;
@@ -29,7 +30,7 @@ const StudentListForApproval = () => {
 
   const [timetable, setTimetable] = useState([]);
 
-  const pageSize = 10;
+  const pageSize = 20;
   const [pageCount, setPageCount] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -374,15 +375,40 @@ const StudentListForApproval = () => {
     );
   });
 
-  const displayedSections = filteredSections.slice(currentPage * pageSize);
+  // const displayedSections = filteredSections.slice(currentPage * pageSize);
+
+  const displayedSections = filteredSections.slice(
+    currentPage * pageSize,
+    (currentPage + 1) * pageSize,
+  );
+
+  useEffect(() => {
+    setPageCount(Math.ceil(filteredSections.length / pageSize));
+  }, [filteredSections, pageSize]);
+
+  const handlePageClick = (data) => {
+    setCurrentPage(data.selected);
+  };
+
+  // const allSelected =
+  //   displayedSections.length > 0 &&
+  //   displayedSections.every((row) => selectedRows.includes(row.form_id));
+
+  // const handleSelectAll = (e) => {
+  //   if (e.target.checked) {
+  //     setSelectedRows(displayedSections.map((row) => row.form_id));
+  //   } else {
+  //     setSelectedRows([]);
+  //   }
+  // };
 
   const allSelected =
-    displayedSections.length > 0 &&
-    displayedSections.every((row) => selectedRows.includes(row.form_id));
+    filteredSections.length > 0 &&
+    filteredSections.every((row) => selectedRows.includes(row.form_id));
 
   const handleSelectAll = (e) => {
     if (e.target.checked) {
-      setSelectedRows(displayedSections.map((row) => row.form_id));
+      setSelectedRows(filteredSections.map((row) => row.form_id));
     } else {
       setSelectedRows([]);
     }
@@ -660,13 +686,22 @@ const StudentListForApproval = () => {
                                   <span className="mr-2 whitespace-nowrap">
                                     Select All <br />
                                   </span>
-                                  <input
+                                  {/* <input
                                     type="checkbox"
                                     checked={allSelected}
                                     onChange={handleSelectAll}
                                     className="w-3 h-3 cursor-pointer accent-blue-500"
                                     title="Select All"
-                                  />
+                                  /> */}
+                                  {currentPage === 0 && (
+                                    <input
+                                      type="checkbox"
+                                      checked={allSelected}
+                                      onChange={handleSelectAll}
+                                      className="w-3 h-3 cursor-pointer accent-blue-500"
+                                      title="Select All"
+                                    />
+                                  )}
                                 </th>
 
                                 <th className=" text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold whitespace-nowrap">
@@ -717,7 +752,8 @@ const StudentListForApproval = () => {
                                       className="border border-gray-300"
                                     >
                                       <td className="px-2 py-2 text-center border border-gray-300">
-                                        {index + 1}
+                                        {/* {index + 1} */}
+                                        {currentPage * pageSize + index + 1}
                                       </td>
 
                                       <td className="px-2 py-2 text-center border border-gray-300">
@@ -782,7 +818,8 @@ const StudentListForApproval = () => {
                                           </span>
 
                                           <span className="text-pink-600 ml-1">
-                                            {displayedSections.length}
+                                            {/* {displayedSections.length} */}
+                                            {filteredSections.length}
                                           </span>
                                         </span>
                                       </div>
@@ -832,9 +869,30 @@ const StudentListForApproval = () => {
                                 </div>
                               </div>
                             </div>
+                            <div className=" flex justify-center  pt-2 -mb-3">
+                              <ReactPaginate
+                                previousLabel={"Previous"}
+                                nextLabel={"Next"}
+                                breakLabel={"..."}
+                                breakClassName={"page-item"}
+                                breakLinkClassName={"page-link"}
+                                pageCount={pageCount}
+                                marginPagesDisplayed={1}
+                                pageRangeDisplayed={1}
+                                onPageChange={handlePageClick}
+                                containerClassName={"pagination"}
+                                pageClassName={"page-item"}
+                                pageLinkClassName={"page-link"}
+                                previousClassName={"page-item"}
+                                previousLinkClassName={"page-link"}
+                                nextClassName={"page-item"}
+                                nextLinkClassName={"page-link"}
+                                activeClassName={"active"}
+                              />
+                            </div>
 
                             {/* Buttons */}
-                            <div className="flex justify-end gap-4 pr-3 mt-5 ">
+                            <div className="flex justify-end gap-4 pr-3 mt-3 ">
                               <button
                                 onClick={handleSubmit}
                                 className="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-4 py-2 rounded"
