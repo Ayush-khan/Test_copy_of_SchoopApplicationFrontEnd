@@ -222,7 +222,7 @@ import React from 'react'
 
 const TeacherDashboard = () => {
 
-    const LMS_URL = "https://ednova.evolvu.in";
+    const LMS_URL = "https://ednovastage.evolvu.in";
     const tokenToLMS = localStorage.getItem("authToken");
     console.log("TOken to lms", tokenToLMS);
 
