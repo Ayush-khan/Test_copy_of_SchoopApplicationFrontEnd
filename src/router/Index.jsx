@@ -96,6 +96,7 @@ import TimeTable from "../componants/TimeTableModule/TimeTable.jsx";
 import CreateTimeTable from "../componants/TimeTableModule/CreateTimeTable.jsx";
 import IDCardDetails from "../componants/IDCards/IDCardDetails.jsx";
 import ListAdmFrmRep from "../componants/Reports/ListAdmFrmRep.jsx";
+import AllApplicationFeeStatusReport from "../componants/Reports/AllApplicationFeeStatusReport.jsx";
 import Balanceleave from "../componants/Reports/Balanceleave.jsx";
 import ConsolidatedLeave from "../componants/Reports/ConsolidatedLeave.jsx";
 import StudentReport from "../componants/Reports/StudentReport.jsx";
@@ -1739,6 +1740,11 @@ function Index() {
         <Route
           path="/monthlyBookIssuedReport"
           element={<PrivateRoute element={<MonthlyBookIssueReport />} />}
+        />
+
+        <Route
+          path="/all_application_status_report"
+          element={<PrivateRoute element={<AllApplicationFeeStatusReport />} />}
         />
       </Route>
 
