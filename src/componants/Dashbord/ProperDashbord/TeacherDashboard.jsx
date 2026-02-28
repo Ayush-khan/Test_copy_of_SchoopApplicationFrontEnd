@@ -221,8 +221,8 @@ import axios from 'axios';
 import React from 'react'
 
 const TeacherDashboard = () => {
-
-    const LMS_URL = "https://ednovastage.evolvu.in";
+    const LMS_URL = import.meta.env.VITE_API_LMS_URL;
+    // const LMS_URL = "https://ednovastage.evolvu.in";
     const tokenToLMS = localStorage.getItem("authToken");
     console.log("TOken to lms", tokenToLMS);
 
