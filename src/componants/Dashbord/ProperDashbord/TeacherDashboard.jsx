@@ -278,7 +278,7 @@ const TeacherDashboard = () => {
             px-5 py-3 rounded-lg shadow-md hover:bg-pink-800
             transition-all duration-200 font-semibold"
                 >
-                    Go to LMS →
+                    Past Question Papers →
                 </button>
                 </div>
             </section>
