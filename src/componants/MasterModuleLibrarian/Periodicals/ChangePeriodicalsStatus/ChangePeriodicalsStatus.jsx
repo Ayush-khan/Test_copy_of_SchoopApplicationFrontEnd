@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import axios from "axios";
 import Select from "react-select";
 import { toast, ToastContainer } from "react-toastify";
@@ -28,6 +28,7 @@ const ChangePeriodicalsStatus = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [timetable, setTimetable] = useState([]);
+  const [modifiedRows, setModifiedRows] = useState(new Set());
 
   const pageSize = 10;
   const [pageCount, setPageCount] = useState(0);
@@ -65,6 +66,8 @@ const ChangePeriodicalsStatus = () => {
   const [selectedVolumeId, setSelectedVolumeId] = useState(null);
 
   const [subscriptionStatus, setSubscriptionStatus] = useState("");
+
+  const rowRefs = useRef({});
 
   useEffect(() => {
     // fetchSessionAndExams();
@@ -229,7 +232,6 @@ const ChangePeriodicalsStatus = () => {
   // };
 
   const handleSearch = async () => {
-    // reset errors first
     setClassError("");
     setVolumeError("");
 
@@ -269,11 +271,40 @@ const ChangePeriodicalsStatus = () => {
 
       // console.log("outside status", subscriptionStatus);
 
+      // if (!response?.data?.data?.length) {
+      //   toast.error("No data found.");
+      //   setTimetable([]);
+      // }
+      //  else {
+      //   setTimetable(response.data.data);
+      // }
+
       if (!response?.data?.data?.length) {
         toast.error("No data found.");
         setTimetable([]);
       } else {
-        setTimetable(response.data.data);
+        const data = response.data.data;
+        setTimetable(data);
+
+        // Find first empty status row
+        const firstEmptyRow = data.find(
+          (item) => !item.status || item.status.trim() === "",
+        );
+
+        if (firstEmptyRow) {
+          // Highlight that row
+          setModifiedRows(new Set([firstEmptyRow.subscription_issue_id]));
+
+          // Scroll into view after small delay (wait for render)
+          setTimeout(() => {
+            rowRefs.current[
+              firstEmptyRow.subscription_issue_id
+            ]?.scrollIntoView({
+              behavior: "smooth",
+              block: "center",
+            });
+          }, 300);
+        }
       }
     } catch (error) {
       console.error("Error fetching:", error);
@@ -352,87 +383,6 @@ Library`;
 
     return remark && remark.trim() !== "" ? remark.trim() : systemRemark;
   };
-
-  //   const handleSubmit = async (e) => {
-  //     e.preventDefault();
-
-  //     const validSelectedRows = selectedRows.filter(Boolean);
-
-  //     if (validSelectedRows.length === 0) {
-  //       toast.error("Please select at least one Student.");
-  //       return;
-  //     }
-
-  //     const token = localStorage.getItem("authToken");
-  //     if (!token) {
-  //       toast.error("Authentication token missing.");
-  //       return;
-  //     }
-
-  //     setLoading(true);
-  //     setIsSubmitting(true);
-
-  //     try {
-  //       const formData = new FormData();
-
-  //       formData.append("kvalue", validSelectedRows.length);
-
-  //       let k = 1;
-
-  //       validSelectedRows.forEach((copyId) => {
-  //         const row = displayedSections.find((item) => item.copy_id === copyId);
-  //         if (!row) return;
-
-  //         const formattedDate = new Date(row.due_date).toLocaleDateString(
-  //           "en-GB",
-  //         );
-
-  //         const systemRemark = `This is to inform you that, the student ${
-  //           row.first_name
-  //         } has not submitted the issued book ${
-  //           row.book_title
-  //         } to the Library on the due date ${formattedDate}. Students are not allowed to keep any book issued from Library. The book should be returned to the library tomorrow during short break.
-  // Regards
-  // ${camelCase(userName)}
-  // Library`;
-
-  //         const finalRemarkDesc =
-  //           remark && remark.trim() !== "" ? remark.trim() : systemRemark;
-
-  //         formData.append(`checkbox${k}`, row.member_id);
-  //         formData.append(`book_id${k}`, row.book_id);
-  //         formData.append(`due_date${k}`, row.due_date);
-  //         formData.append(`class_id${k}`, row.class_id);
-  //         formData.append(`section_id${k}`, row.section_id);
-  //         formData.append(`remark_subject${k}`, "Library Book Pending");
-  //         formData.append(`remark_desc${k}`, finalRemarkDesc);
-
-  //         k++;
-  //       });
-
-  //       if (k === 1) {
-  //         toast.error("No valid records found.");
-  //         return;
-  //       }
-
-  //       await axios.post(`${API_URL}/api/library/reminder/send`, formData, {
-  //         headers: {
-  //           Authorization: `Bearer ${token}`,
-  //         },
-  //       });
-
-  //       toast.success("Remark sent successfully.");
-  //       setSelectedRows([]);
-  //       setRemark("");
-  //       handleSearch();
-  //     } catch (error) {
-  //       console.error(error);
-  //       toast.error("Failed to send remark.");
-  //     } finally {
-  //       setLoading(false);
-  //       setIsSubmitting(false);
-  //     }
-  //   };
 
   const handleCloseModal = () => {
     setShowViewModal(false);
@@ -732,7 +682,7 @@ Library`;
                                 </tr>
                               ) : filteredSections.length ? (
                                 <>
-                                  {filteredSections.map((student, index) => (
+                                  {/* {filteredSections.map((student, index) => (
                                     <tr
                                       key={student.subscription_issue_id}
                                       className="border border-gray-300"
@@ -793,7 +743,92 @@ Library`;
                                         )}
                                       </td>
                                     </tr>
-                                  ))}
+                                  ))} */}
+
+                                  {filteredSections.map((student, index) => {
+                                    const isEmptyStatus =
+                                      !student.status ||
+                                      student.status.trim() === "";
+
+                                    return (
+                                      <tr
+                                        key={student.subscription_issue_id}
+                                        ref={(el) => {
+                                          if (el) {
+                                            rowRefs.current[
+                                              student.subscription_issue_id
+                                            ] = el;
+                                          }
+                                        }}
+                                        className={`transition-colors duration-500 ${
+                                          isEmptyStatus
+                                            ? "[&>td]:bg-blue-50"
+                                            : ""
+                                        }`}
+                                      >
+                                        <td className="px-2 py-2 w-[10%] text-center border border-gray-300">
+                                          {index + 1}
+                                        </td>
+
+                                        <td className="px-2 py-2 w-[10%] text-center border border-gray-300">
+                                          {student.issue}
+                                        </td>
+
+                                        <td className="px-2 py-2 w-[30%] text-center border border-gray-300">
+                                          {student?.status === "Received" ? (
+                                            formatDate(student?.receive_by_date)
+                                          ) : (
+                                            <input
+                                              type="date"
+                                              min={student.from_date}
+                                              max={student.to_date}
+                                              value={
+                                                student.receive_by_date || ""
+                                              }
+                                              onChange={(e) =>
+                                                handleReceiveDateChange(
+                                                  student.subscription_issue_id,
+                                                  e.target.value,
+                                                )
+                                              }
+                                              className="border border-gray-300 rounded px-2 py-1 text-sm w-[70%]"
+                                            />
+                                          )}
+                                        </td>
+
+                                        <td className="px-2 py-2 w-[20%] text-center border border-gray-300">
+                                          {student?.status || ""}
+                                        </td>
+
+                                        <td className="px-2 py-2 w-[30%] text-center border border-gray-300">
+                                          {subscriptionStatus === "Expired" ? (
+                                            <input
+                                              type="text"
+                                              value={
+                                                student.date_received || ""
+                                              }
+                                              className="border border-gray-300 rounded px-2 py-1 text-sm w-[70%]"
+                                              readOnly
+                                            />
+                                          ) : (
+                                            <input
+                                              type="date"
+                                              value={
+                                                student.date_received || ""
+                                              }
+                                              onChange={(e) =>
+                                                handleDateReceivedChange(
+                                                  student.subscription_issue_id,
+                                                  e.target.value,
+                                                )
+                                              }
+                                              className="border border-gray-300 rounded px-2 py-1 text-sm w-[70%]"
+                                            />
+                                          )}
+                                        </td>
+                                      </tr>
+                                    );
+                                  })}
                                 </>
                               ) : timetable.length === 0 ? (
                                 <tr>

@@ -109,8 +109,8 @@ const EditBookDetails = () => {
     const nextAccession =
       rows.filter((r) => r.isOld).length > 0
         ? lastAccessionNo +
-        (rows.length - rows.filter((r) => r.isOld).length) +
-        1
+          (rows.length - rows.filter((r) => r.isOld).length) +
+          1
         : lastAccessionNo + 1;
 
     setRows([
@@ -429,9 +429,9 @@ const EditBookDetails = () => {
     () =>
       Array.isArray(studentNameWithClassId)
         ? studentNameWithClassId.map((cls) => ({
-          value: cls?.value,
-          label: cls?.label || "",
-        }))
+            value: cls?.value,
+            label: cls?.label || "",
+          }))
         : [],
     [studentNameWithClassId],
   );
@@ -804,11 +804,49 @@ const EditBookDetails = () => {
       console.error("❌ API ERROR:", error);
       toast.error(
         error.response?.data?.message ||
-        "An error occurred while updating the book.",
+          "An error occurred while updating the book.",
       );
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleReset = () => {
+    // Reset main form
+    setFormData({
+      book_title: "",
+      author: "",
+      publisher: "",
+      location_of_book: "",
+      days_borrow: "",
+      issue_type: "",
+    });
+
+    setSelectedStudent("");
+    setSelectedIssueType("");
+
+    // Reset rows BUT keep old accession numbers
+    setRows((prevRows) =>
+      prevRows.map((row) => ({
+        ...row,
+
+        //  KEEP accessionNo if old, otherwise clear
+        accessionNo: row.isOld ? row.accessionNo : "",
+        option: "",
+        billNo: "",
+        edition: "",
+        source: "",
+        year: "",
+        pages: "",
+        price: "",
+        isbnno: "",
+      })),
+    );
+
+    // Reset validations
+    setErrors({});
+    setRowErrors([]);
+    setSubmitted(false);
   };
 
   return (
@@ -1088,8 +1126,9 @@ const EditBookDetails = () => {
                             )
                           }
                           readOnly={row.isOld}
-                          className={`w-full border rounded-md text-sm p-1 ${row.isOld ? "bg-gray-100 cursor-not-allowed" : ""
-                            }`}
+                          className={`w-full border rounded-md text-sm p-1 ${
+                            row.isOld ? "bg-gray-100 cursor-not-allowed" : ""
+                          }`}
                         />
                         {/* {submitted && rowErrors[index]?.accessionNo && (
                           <p className="text-red-500 text-xs mt-1">
@@ -1285,7 +1324,12 @@ const EditBookDetails = () => {
               >
                 {loading ? "Updating..." : "Update book"}
               </button>
-              <button className="bg-red-500 text-white py-1 px-4 rounded hover:bg-red-700 disabled:bg-blue-300 disabled:cursor-not-allowed mr-2">
+              <button
+                type="button"
+                className="bg-red-500 text-white py-1 px-4 rounded hover:bg-red-700 disabled:bg-blue-300 disabled:cursor-not-allowed mr-2"
+                onClick={handleReset}
+                disabled={loading}
+              >
                 Reset
               </button>
               <button

@@ -200,13 +200,13 @@ const IssueBook = () => {
     const params =
       selectedType === "student"
         ? {
-          mtype: "S",
-          class_id: selectedStudentId,
-          section_id: selectedSectionId,
-        }
+            mtype: "S",
+            class_id: selectedStudentId,
+            section_id: selectedSectionId,
+          }
         : {
-          mtype: "T",
-        };
+            mtype: "T",
+          };
 
     try {
       const response = await axios.post(
@@ -274,6 +274,7 @@ const IssueBook = () => {
     setClassError("");
     setBookError("");
     setAccessionNo("");
+    setBookList("");
 
     setTimetable([]);
     setShowStudentReport(false);
@@ -317,14 +318,14 @@ const IssueBook = () => {
 
       if (selectedType === "student") {
         if (isGrnEntered) {
-          // 👉 Search ONLY by GRN NO
+          //Search ONLY by GRN NO
           params = {
             mtype: "S",
             grn_no: grn_no,
             issuedate: issuedDate,
           };
         } else {
-          // 👉 Search by class + section + member
+          // Search by class + section + member
           params = {
             mtype: "S",
             class_id: selectedStudentId || "",
@@ -335,7 +336,7 @@ const IssueBook = () => {
           };
         }
       } else {
-        // 👉 STAFF MODE
+        //  STAFF MODE
         params = {
           mtype: "T",
           member_id: selectedStaffId || "",
@@ -429,50 +430,18 @@ const IssueBook = () => {
     }
   };
 
-  // const fetchBookByAccessionNo = async () => {
-  //   if (!accessionNo.trim()) {
-  //     setBookError("Please enter Accession No.");
-  //     return;
-  //   }
+  useEffect(() => {
+    if (!accessionNo.trim()) {
+      setBookPreview(null);
+      return;
+    }
 
-  //   try {
-  //     const token = localStorage.getItem("authToken");
+    const debounceTimer = setTimeout(() => {
+      fetchBookPreview(accessionNo);
+    }, 500); // 500ms delay
 
-  //     const response = await axios.post(
-  //       `${API_URL}/api/library/get_book_by_copy`,
-  //       { copy_id: accessionNo },
-  //       { headers: { Authorization: `Bearer ${token}` } },
-  //     );
-
-  //     if (!response.data || response.data.length === 0) {
-  //       setBookError("No book found for this accession no.");
-  //       return;
-  //     }
-
-  //     const book = response.data[0];
-
-  //     // ❗ Fetch Due Date from API
-  //     const dueDate = await fetchDueDate();
-
-  //     // Add to table list
-  //     setBookList((prev) => [
-  //       ...prev,
-  //       {
-  //         copy_id: book.copy_id,
-  //         book_title: book.book_title,
-  //         book_id: book.book_id,
-  //         due_date: dueDate, // attach due date here
-  //       },
-  //     ]);
-
-  //     // reset input
-  //     setAccessionNo("");
-  //     setBookError("");
-  //   } catch (error) {
-  //     console.error(error);
-  //     setBookError("Error fetching book details.");
-  //   }
-  // };
+    return () => clearTimeout(debounceTimer);
+  }, [accessionNo]);
 
   const fetchBookPreview = async (value) => {
     if (!value.trim()) {
@@ -495,7 +464,7 @@ const IssueBook = () => {
 
       const book = response.data.data[0];
 
-      // ✅ fetch due date ONLY when possible
+      //  fetch due date ONLY when possible
       const dueDate = selectedType && issuedDate ? await fetchDueDate() : null;
 
       setBookPreview({
@@ -511,14 +480,14 @@ const IssueBook = () => {
   };
 
   const handleIssueBook = async () => {
-    if (!issuedDate) return alert("Please select Issue Date");
-    if (!selectedType) return alert("Please select a member type");
+    if (!issuedDate) return toast("Please select Issue Date");
+    if (!selectedType) return toast("Please select a member type");
 
     if (selectedType === "student" && !selectedStudent)
-      return alert("Please select a student");
+      return toast("Please select a student");
 
     if (selectedType === "staff" && !selectedStaff)
-      return alert("Please select a staff member");
+      return toast("Please select a staff member");
 
     if (bookList.length === 0) return alert("Please add at least one book");
 
@@ -534,9 +503,7 @@ const IssueBook = () => {
       book_id: bookIds,
     };
 
-    // ===========================
-    // 📌 STUDENT MODE
-    // ===========================
+    // STUDENT MODE
     if (selectedType === "student") {
       requestData.member_type = "S";
 
@@ -552,9 +519,7 @@ const IssueBook = () => {
       }
     }
 
-    // ===========================
-    // 📌 STAFF MODE
-    // ===========================
+    // STAFF MODE
     if (selectedType === "staff") {
       requestData.member_type = "T";
       requestData.member_id = selectedStaffId || "";
@@ -595,72 +560,203 @@ const IssueBook = () => {
 
   // console.log("row", timetable);
 
-  const filteredSections = (Array.isArray(timetable) ? timetable : []).filter(
-    (student) => {
-      const searchLower = searchTerm.toLowerCase();
+  const normalizedData = Array.isArray(timetable)
+    ? timetable
+    : Array.isArray(timetable?.data)
+      ? timetable.data
+      : [];
 
-      const accessionNo = student?.copy_id || "";
+  const filteredSections = normalizedData.filter((student) => {
+    const searchLower = searchTerm.toLowerCase().trim();
+    const accessionNo = String(student?.copy_id || "").toLowerCase();
 
-      return accessionNo.includes(searchLower);
-    },
-  );
+    return accessionNo.includes(searchLower);
+  });
 
   const displayedSections = filteredSections.slice(currentPage * pageSize);
 
-  // const handleAddBook = () => {
-  //   const alreadyIssuedCount = Array.isArray(timetable) ? timetable.length : 0;
+  // const handleAddBook = async () => {
+  //   try {
+  //     // Check if accessionNo is valid
+  //     if (!accessionNo.trim()) {
+  //       setBookError("Please enter a valid accession number");
+  //       return;
+  //     }
 
-  //   const newBooksCount = bookList.length;
-  //   const totalBooks = alreadyIssuedCount + newBooksCount;
+  //     //  Fetch book info if not in preview
+  //     let book = bookPreview;
+  //     if (!bookPreview || bookPreview.copy_id !== accessionNo) {
+  //       const response = await axios.post(
+  //         `${API_URL}/api/library/get_book_by_copy`,
+  //         { copy_id: accessionNo },
+  //         {
+  //           headers: {
+  //             Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+  //           },
+  //         },
+  //       );
 
-  //   const isStudent =
-  //     selectedType === "student" || (grn_no && grn_no.trim() !== "");
+  //       if (!response.data || response.data.length === 0) {
+  //         setBookError("No book found for this accession no.");
+  //         return;
+  //       }
 
-  //   console.log({
-  //     selectedType,
-  //     grn_no,
-  //     isStudent,
-  //     totalBooks,
-  //   });
+  //       book = response.data[0];
+  //     }
 
-  //   // ✅ STUDENT LIMIT CHECK
-  //   if (isStudent && totalBooks >= 2) {
-  //     toast.error("More than 2 books cannot be issued to a student");
-  //     return;
+  //     // Fetch due date
+  //     const dueDate = await fetchDueDate();
+
+  //     // ✅ Student limit check
+  //     const alreadyIssuedCount = Array.isArray(timetable)
+  //       ? timetable.length
+  //       : 0;
+  //     const newBooksCount = bookList.length;
+  //     const totalBooks = alreadyIssuedCount + newBooksCount + 1; // +1 for this new book
+
+  //     const isStudent =
+  //       selectedType === "student" || (grn_no && grn_no.trim() !== "");
+
+  //     if (isStudent && totalBooks > 2) {
+  //       toast.error("More than 2 books cannot be issued to a student");
+  //       return;
+  //     }
+
+  //     //  Add book to list
+  //     setBookList((prev) => [
+  //       ...prev,
+  //       {
+  //         copy_id: book.copy_id || accessionNo,
+  //         book_title: book.book_title || bookPreview?.book_title,
+  //         call_no: book.call_no || bookPreview?.call_no,
+  //         category_name: book.category_name || bookPreview?.category_name,
+  //         due_date: dueDate ?? "-", // flatten due date
+  //         book_id: book.book_id || bookPreview?.book_id,
+  //       },
+  //     ]);
+
+  //     // reset input & preview
+  //     setAccessionNo("");
+  //     setBookPreview(null);
+  //     setBookError("");
+  //   } catch (error) {
+  //     console.error("Error adding book:", error);
+  //     setBookError("Failed to add book.");
   //   }
+  // };
 
-  //   // ❌ Invalid accession
-  //   if (!bookPreview || !accessionNo.trim()) {
-  //     setBookError("Please enter a valid accession number");
-  //     return;
+  // work correct for more than two book validation
+  // const handleAddBook = async () => {
+  //   try {
+  //     if (
+  //       selectedType === "student" &&
+  //       filteredSections.length >= 2 &&
+  //       filteredSections.return_date === "0000-00-00"
+  //     ) {
+  //       toast.error("First return the book, then issue another book.");
+  //       return;
+  //     }
+  //     if (selectedType === "student" && bookList.length >= 2) {
+  //       toast.error("More than two books not issued for student.");
+  //       return;
+  //     }
+
+  //     if (!accessionNo.trim()) {
+  //       setBookError("Please enter a valid accession number");
+  //       return;
+  //     }
+
+  //     let book = bookPreview;
+  //     if (!bookPreview || bookPreview.copy_id !== accessionNo) {
+  //       const response = await axios.post(
+  //         `${API_URL}/api/library/get_book_by_copy`,
+  //         { copy_id: accessionNo },
+  //         {
+  //           headers: {
+  //             Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+  //           },
+  //         },
+  //       );
+
+  //       if (!response.data || response.data.length === 0) {
+  //         setBookError("No book found for this accession no.");
+  //         return;
+  //       }
+
+  //       book = response.data[0];
+  //     }
+
+  //     const dueDate = await fetchDueDate();
+
+  //     //  Student limit validation using filteredSection
+  //     const isStudent =
+  //       selectedType === "student" || (grn_no && grn_no.trim() !== "");
+
+  //     if (isStudent && filteredSections.length >= 2) {
+  //       toast.error("More than two books not issued for student.");
+  //       return;
+  //     }
+
+  //     setBookList((prev) => [
+  //       ...prev,
+  //       {
+  //         copy_id: book.copy_id || accessionNo,
+  //         book_title: book.book_title || bookPreview?.book_title,
+  //         call_no: book.call_no || bookPreview?.call_no,
+  //         category_name: book.category_name || bookPreview?.category_name,
+  //         due_date: dueDate ?? "-",
+  //         book_id: book.book_id || bookPreview?.book_id,
+  //       },
+  //     ]);
+
+  //     setAccessionNo("");
+  //     setBookPreview(null);
+  //     setBookError("");
+  //   } catch (error) {
+  //     console.error("Error adding book:", error);
+  //     setBookError("Failed to add book.");
   //   }
-
-  //   // ✅ Add book
-  //   setBookList((prev) => [
-  //     ...prev,
-  //     {
-  //       copy_id: accessionNo,
-  //       book_title: bookPreview.book_title,
-  //       call_no: bookPreview.call_no,
-  //       category_name: bookPreview.category_name,
-  //     },
-  //   ]);
-
-  //   setAccessionNo("");
-  //   setBookPreview(null);
-  //   setBookError("");
   // };
 
   const handleAddBook = async () => {
     try {
-      // ❌ Check if accessionNo is valid
+      const isStudent = selectedType === "student";
+
+      if (isStudent) {
+        const issuedBooks = Array.isArray(filteredSections)
+          ? filteredSections
+          : [];
+
+        // Check if ANY book not returned
+        const hasActiveBook = issuedBooks.some((book) => {
+          return (
+            book.return_date === "0000-00-00" ||
+            book.return_date === null ||
+            book.return_date === "" ||
+            book.return_date === undefined
+          );
+        });
+
+        // If even 1 active book exists → block
+        if (hasActiveBook) {
+          toast.error("First return the book, then new book issued.");
+          return;
+        }
+
+        // Same time more than 2 books
+        if (bookList.length >= 2) {
+          toast.error("More than 2 books cannot be issued.");
+          return;
+        }
+      }
+
       if (!accessionNo.trim()) {
         setBookError("Please enter a valid accession number");
         return;
       }
 
-      //  Fetch book info if not in preview
       let book = bookPreview;
+
       if (!bookPreview || bookPreview.copy_id !== accessionNo) {
         const response = await axios.post(
           `${API_URL}/api/library/get_book_by_copy`,
@@ -680,37 +776,20 @@ const IssueBook = () => {
         book = response.data[0];
       }
 
-      // ✅ Fetch due date
       const dueDate = await fetchDueDate();
 
-      // ✅ Student limit check
-      const alreadyIssuedCount = Array.isArray(timetable)
-        ? timetable.length
-        : 0;
-      const newBooksCount = bookList.length;
-      const totalBooks = alreadyIssuedCount + newBooksCount + 1; // +1 for this new book
-
-      const isStudent =
-        selectedType === "student" || (grn_no && grn_no.trim() !== "");
-
-      if (isStudent && totalBooks > 2) {
-        toast.error("More than 2 books cannot be issued to a student");
-        return;
-      }
-
-      // ✅ Add book to list
       setBookList((prev) => [
         ...prev,
         {
           copy_id: book.copy_id || accessionNo,
-          book_title: book.book_title || bookPreview?.book_title,
-          call_no: book.call_no || bookPreview?.call_no,
-          category_name: book.category_name || bookPreview?.category_name,
-          due_date: dueDate ?? "-", // flatten due date
+          book_title: book.book_title || "",
+          call_no: book.call_no || "",
+          category_name: book.category_name || "",
+          due_date: dueDate ?? "-",
+          book_id: book.book_id || "",
         },
       ]);
 
-      // reset input & preview
       setAccessionNo("");
       setBookPreview(null);
       setBookError("");
@@ -723,10 +802,11 @@ const IssueBook = () => {
   return (
     <>
       <div
-        className={`mx-auto p-4 transition-all duration-700 ease-[cubic-bezier(0.4, 0, 0.2, 1)] transform ${showStudentReport
+        className={`mx-auto p-4 transition-all duration-700 ease-[cubic-bezier(0.4, 0, 0.2, 1)] transform ${
+          showStudentReport
             ? "w-full md:w-[100%] scale-100"
             : "w-full md:w-[100%] scale-[0.98]"
-          }`}
+        }`}
       >
         <ToastContainer />
         <div className="card rounded-md ">
@@ -1216,12 +1296,8 @@ const IssueBook = () => {
                                 value={accessionNo}
                                 onChange={(e) => {
                                   setAccessionNo(e.target.value);
-                                  fetchBookPreview(e.target.value);
-                                  setBookError(""); // remove error on typing
+                                  setBookError("");
                                 }}
-                                // onKeyDown={(e) =>
-                                //   e.key === "Enter" && fetchBookByAccessionNo()
-                                // }
                                 onKeyDown={(e) => {
                                   if (e.key === "Enter") {
                                     e.preventDefault();
@@ -1261,7 +1337,6 @@ const IssueBook = () => {
                               </label>
                               <input
                                 type="text"
-                                // value={bookDetails?.book_title || "Title"}
                                 value={bookPreview?.book_title || ""}
                                 readOnly
                                 className="border border-gray-300 bg-gray-200 text-gray-600 rounded-md px-3 py-1 w-full cursor-not-allowed"
@@ -1269,17 +1344,31 @@ const IssueBook = () => {
                             </div>
 
                             <div className="flex items-center w-[12%] min-w-[120px]">
-                              <button
+                              {/* <button
                                 type="button"
                                 onClick={handleAddBook}
                                 style={{ backgroundColor: "#2196F3" }}
-                                // className="h-8 text-white font-bold px-6 rounded"
-                                className={`h-8 px-6 rounded font-bold ${selectedType === "S" &&
-                                    grn_no?.trim() &&
-                                    bookList.length >= 2
+                                className={`h-8 px-6 rounded font-bold ${
+                                  selectedType === "S" &&
+                                  // grn_no?.trim() &&
+                                  bookList.length >= 2
                                     ? "bg-gray-400 cursor-not-allowed"
                                     : "bg-blue-500 text-white"
-                                  }`}
+                                }`}
+                              >
+                                Add
+                              </button> */}
+                              <button
+                                type="button"
+                                onClick={handleAddBook}
+                                disabled={
+                                  selectedType === "S" && bookList.length >= 2
+                                }
+                                className={`h-8 px-6 rounded font-bold ${
+                                  selectedType === "S" && bookList.length >= 2
+                                    ? "bg-gray-400 cursor-not-allowed"
+                                    : "bg-blue-500 text-white"
+                                }`}
                               >
                                 Add
                               </button>
@@ -1354,15 +1443,17 @@ const IssueBook = () => {
                             </table>
 
                             {/* Issue Book Button */}
-                            <div className="flex justify-end mt-4 mb-4">
-                              <button
-                                type="button"
-                                className="bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-2 rounded"
-                                onClick={handleIssueBook}
-                              >
-                                Issue Book
-                              </button>
-                            </div>
+                            {bookList.length > 0 && (
+                              <div className="flex justify-end mt-4 mb-4">
+                                <button
+                                  type="button"
+                                  className="bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-2 rounded"
+                                  onClick={handleIssueBook}
+                                >
+                                  Issue Book
+                                </button>
+                              </div>
+                            )}
                           </>
                         )}
                       </div>

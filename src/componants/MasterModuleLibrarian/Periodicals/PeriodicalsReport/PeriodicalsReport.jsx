@@ -502,7 +502,7 @@ const PeriodicalsReport = () => {
                     <FaFileExcel />
 
                     <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:flex items-center justify-center bg-gray-600  text-white text-[.7em] rounded-md py-1 px-2">
-                      Exports to excel
+                      Export to excel
                     </div>
                   </button>
 
@@ -678,6 +678,16 @@ const PeriodicalsReport = () => {
             {timetable.length > 0 && (
               <>
                 <div className="w-full px-4 mt-4 mb-4 ">
+                  <div className="flex justify-end items-center gap-2 font-medium">
+                    <span>
+                      <span className="text-blue-800 ml-1">
+                        Total no. of count periodicals :
+                      </span>
+                      <span className="text-pink-600 ml-1">
+                        {filteredSections.length}
+                      </span>
+                    </span>
+                  </div>
                   <div className="card mx-auto lg:w-full shadow-lg">
                     {showSearch && (
                       <>

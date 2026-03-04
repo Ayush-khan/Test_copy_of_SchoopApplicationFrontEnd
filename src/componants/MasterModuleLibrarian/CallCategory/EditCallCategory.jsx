@@ -223,6 +223,12 @@ const EditCallCategory = () => {
     }
   };
 
+  const handleReset = () => {
+    setSelectedClass("");
+    setSelectedSubjectType("");
+    setPreCheckedSubjects([]);
+  };
+
   return (
     <div>
       <ToastContainer />
@@ -465,6 +471,7 @@ const EditCallCategory = () => {
                   type="button"
                   className="btn btn-danger"
                   disabled={isSubmitting}
+                  onClick={handleReset}
                 >
                   Reset
                 </button>
