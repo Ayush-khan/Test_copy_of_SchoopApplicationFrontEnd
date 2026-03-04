@@ -135,8 +135,6 @@ const AllApplicationFeeStatusReport = () => {
         params.status = status === "" ? "NULL" : status;
       }
 
-      console.log(params);
-
       const response = await axios.get(
         `${API_URL}/api/get_all_admission_form_report`,
         {
@@ -263,7 +261,9 @@ const AllApplicationFeeStatusReport = () => {
       student?.category || " ",
       student?.blood_group || " ",
       student?.stud_aadhar || " ",
-      camelCase(student?.sibling_student_info || " "),
+      student.sibling === "N"
+        ? "No"
+        : `${student?.sibling_student_id} (${student.sibling_class_name} - ${student?.sibling_section_name})`,
       camelCase(student?.father_name || " "),
       camelCase(student?.father_occupation || " "),
       student?.f_mobile || " ",
@@ -301,7 +301,7 @@ const AllApplicationFeeStatusReport = () => {
     );
 
     // Generate and download the Excel file
-    const fileName = `Application_fee_status_Report_${
+    const fileName = `Admission_Forms_With_Application_fee_status_Report_${
       selectedStudent?.label || "ALL"
     }.xlsx`;
     XLSX.writeFile(workbook, fileName);
@@ -625,7 +625,7 @@ const AllApplicationFeeStatusReport = () => {
                       <td>${student.category || ""}</td>
                       <td>${student.blood_group || ""}</td>
                       <td>${student.stud_aadhar || ""}</td>
-                      <td>${camelCase(student.sibling_student_info || "")}</td>
+                      <td>${student.sibling === "N" ? "No" : `${student.sibling_student_id} (${student.sibling_class_name} - ${student.sibling_section_name})`}</td>
                       <td>${camelCase(student.father_name || "")}</td>
                       <td>${camelCase(student.father_occupation || "")}</td>
                       <td>${student.f_mobile || ""}</td>
@@ -673,6 +673,12 @@ const AllApplicationFeeStatusReport = () => {
     const studentName = camelCase(
       `${section?.first_name} ${section?.mid_name} ${section?.last_name}`,
     );
+    const siblingInfo =
+      section?.sibling === "N"
+        ? "No"
+        : `${section?.sibling_student_id ?? ""}
+       (${section?.sibling_class_name ?? ""} 
+       ${section?.sibling_section_name ?? ""})`;
     const studentDOB = formatDate(section?.dob?.toLowerCase()) || "";
     const studentGender = section?.gender?.toLowerCase() || "";
     const applicationDate = section?.application_date?.toLowerCase() || "";
@@ -697,6 +703,7 @@ const AllApplicationFeeStatusReport = () => {
     const admissionStatus = section?.admission_form_status?.toLowerCase() || "";
     const className = section?.classname?.toLowerCase() || "";
     const orderId = section?.OrderId?.toLowerCase() || "";
+    const siblingclass = section?.sibling_class_name?.toLowerCase() || "";
 
     // Check if the search term is present in any of the specified fields
     return (
@@ -726,7 +733,9 @@ const AllApplicationFeeStatusReport = () => {
       studentBloodGroup.includes(searchLower) ||
       admissionStatus.includes(searchLower) ||
       className.includes(searchLower) ||
-      orderId.includes(searchLower)
+      orderId.includes(searchLower) ||
+      siblingInfo.includes(searchLower) ||
+      siblingclass.includes(searchLower)
     );
   });
 
@@ -1120,7 +1129,10 @@ const AllApplicationFeeStatusReport = () => {
                                     {student.stud_aadhar}
                                   </td>
                                   <td className="px-2 py-2 text-center border border-gray-300">
-                                    {camelCase(student.sibling_student_info)}
+                                    {student.sibling === "N"
+                                      ? "No"
+                                      : `${student.sibling_student_id} 
+    (${student.sibling_class_name || " "} - ${student.sibling_section_name || " "})`}
                                   </td>
                                   <td className="px-2 py-2 text-center border border-gray-300">
                                     {camelCase(student.father_name)}
