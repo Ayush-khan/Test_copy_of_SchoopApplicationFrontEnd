@@ -684,11 +684,19 @@ const StudentListForVerification = () => {
                                 )} */}
                               </>
                             ) : (
-                              <div className="absolute inset-0 flex items-center justify-center z-10">
+                              <div className="absolute inset-0 flex items-center justify-center ">
                                 <div className="text-xl text-red-700 text-center">
                                   No data available.
                                 </div>
                               </div>
+                              // <tr>
+                              //   <td
+                              //     colSpan={10}
+                              //     className="text-center py-6 text-red-700 text-lg"
+                              //   >
+                              //     No data available.
+                              //   </td>
+                              // </tr>
                             )}
                           </tbody>
                         </table>
