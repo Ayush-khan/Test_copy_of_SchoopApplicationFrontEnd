@@ -305,6 +305,9 @@ import LessonPlanData from "../componants/Dashbord/PrinciplalDashboardSACS/Lesso
 import TodayStaffList from "../componants/AllTableList/TodayStaffList.jsx";
 // import Menus from "../c";../componants/Dashbord/PrinciplalDashboardSACS/LessonPlanData.jsx
 import ImpersonateListing from "../componants/SuperAdmin/Impersonate/ImpersonateListing.jsx";
+
+import AllApplicationFeeStatusReport from '../componants/Reports/AllApplicationFeeStatusReport.jsx'
+
 function Index() {
   return (
     <Routes>
