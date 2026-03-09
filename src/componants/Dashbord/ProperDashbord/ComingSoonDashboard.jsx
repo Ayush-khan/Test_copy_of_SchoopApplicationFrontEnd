@@ -3,7 +3,10 @@ import React from "react";
 
 const ComingSoonDashboard = ({ roleId }) => {
 
-    const LMS_URL = "https://ednova.evolvu.in";
+    const LMS_URL = import.meta.env.VITE_API_LMS_URL;
+
+    console.log("LMS URL: " , LMS_URL);
+
     const tokenToLMS = localStorage.getItem("authToken");
     console.log("TOken to lms", tokenToLMS);
 
@@ -60,7 +63,7 @@ const ComingSoonDashboard = ({ roleId }) => {
             px-5 py-3 rounded-lg shadow-md hover:bg-pink-800
             transition-all duration-200 font-semibold"
                 >
-                    Go to LMS →
+                    Past Question Papers →
                 </button>
                 </div>
             </section>

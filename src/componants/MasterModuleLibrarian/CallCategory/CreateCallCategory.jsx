@@ -152,6 +152,12 @@ const CreateCallCategory = () => {
     }
   };
 
+  const handleReset = () => {
+    setSelectedClass("");
+    setSelectedSubjectType("");
+    setPreCheckedSubjects([]);
+  };
+
   return (
     <div>
       <ToastContainer />
@@ -282,6 +288,7 @@ const CreateCallCategory = () => {
                   type="button"
                   className="btn btn-danger"
                   disabled={isSubmitting}
+                  onClick={handleReset}
                 >
                   Reset
                 </button>

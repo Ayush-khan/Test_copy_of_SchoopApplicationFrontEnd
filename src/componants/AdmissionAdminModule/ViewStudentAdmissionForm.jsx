@@ -44,7 +44,7 @@ function ViewStudentAdmissionForm() {
             headers: {
               Authorization: `Bearer ${token}`,
             },
-          }
+          },
         );
 
         const { application, attachments } = response.data.data;
@@ -227,7 +227,7 @@ function ViewStudentAdmissionForm() {
     BC: "Birth Certificate",
     CC: "Caste Certificate",
     PQ: "Parent's Highest Educational Qualification",
-    AC: "Aadhaar Card",
+    // AC: "Aadhaar Card",
     FP: "Family Photo",
     PS: "Photo of Child",
     BF: "Bonafide Certificate",
@@ -239,8 +239,8 @@ function ViewStudentAdmissionForm() {
     MP: "Mother Photo",
     FA: "Father Aadhar Card",
     MA: "Mother Aadhar Card",
-    // AC: "Student Aadhar Card",
-    // 9R: "9th Report Card",
+    AC: "Student Aadhar Card",
+    "9R": "9th Report Card",
     RC: "10th Preboard Report Card",
     TC: "Transfer Certificate",
     MB: "Marksheet 10th Board",
@@ -249,40 +249,194 @@ function ViewStudentAdmissionForm() {
 
   const allFiles = attachments ? Object.values(attachments).flat() : [];
 
-  const downloadFile = async (fileUrl, fileName) => {
+  // const downloadFile = async (fileUrl, fileName) => {
+  //   try {
+  //     const response = await fetch(fileUrl);
+  //     const blob = await response.blob();
+
+  //     const url = window.URL.createObjectURL(blob);
+  //     const link = document.createElement("a");
+
+  //     link.href = url;
+  //     link.download = fileName || "download";
+  //     document.body.appendChild(link);
+
+  //     link.click();
+
+  //     document.body.removeChild(link);
+  //     window.URL.revokeObjectURL(url);
+  //   } catch (error) {
+  //     console.error("Download failed:", error);
+  //   }
+  // };
+
+  // const downloadFile = async (fileUrl, fileName) => {
+  //   try {
+  //     const response = await fetch(fileUrl);
+  //     const blob = await response.blob();
+  //     const blobUrl = window.URL.createObjectURL(blob);
+
+  //     const link = document.createElement("a");
+  //     link.href = blobUrl;
+  //     link.download = fileName || "download";
+
+  //     document.body.appendChild(link);
+  //     link.click();
+
+  //     document.body.removeChild(link);
+  //     window.URL.revokeObjectURL(blobUrl);
+  //   } catch (error) {
+  //     console.warn("Fetch failed, fallback to direct download");
+
+  //     const link = document.createElement("a");
+  //     link.href = fileUrl;
+  //     link.download = fileName || "download";
+  //     link.target = "_blank";
+  //     document.body.appendChild(link);
+  //     link.click();
+  //     document.body.removeChild(link);
+  //   }
+  // };
+
+  // const downloadFile = async (fileUrl, fileName) => {
+  //   try {
+  //     const response = await axios.get(fileUrl, {
+  //       responseType: "blob", // VERY IMPORTANT
+  //       withCredentials: false,
+  //     });
+
+  //     const blob = new Blob([response.data]);
+
+  //     const blobUrl = window.URL.createObjectURL(blob);
+
+  //     const link = document.createElement("a");
+  //     link.href = blobUrl;
+  //     link.download = fileName || "download";
+  //     document.body.appendChild(link);
+  //     link.click();
+
+  //     document.body.removeChild(link);
+  //     window.URL.revokeObjectURL(blobUrl);
+  //   } catch (error) {
+  //     console.error("Download failed:", error);
+  //   }
+  // };
+  // const downloadFile = async (fileUrl, fileName) => {
+  //   console.log("filet", fileUrl);
+  //   try {
+  //     console.log("mahima");
+  //     const response = await fetch(fileUrl, {
+  //       mode: "cors",
+  //     });
+
+  //     console.log("after res", response);
+
+  //     if (!response.ok) {
+  //       throw new Error("Network response was not ok");
+  //     }
+
+  //     const blob = await response.blob();
+
+  //     // Force proper type
+  //     const blobWithType = new Blob([blob], {
+  //       type: blob.type || "application/octet-stream",
+  //     });
+
+  //     const blobUrl = window.URL.createObjectURL(blobWithType);
+
+  //     const link = document.createElement("a");
+  //     link.href = blobUrl;
+  //     link.download = fileName || "download";
+  //     link.style.display = "none";
+
+  //     document.body.appendChild(link);
+  //     link.click();
+
+  //     document.body.removeChild(link);
+  //     window.URL.revokeObjectURL(blobUrl);
+  //   } catch (error) {
+  //     console.error("Download failed:", error);
+  //   }
+  // };
+
+  const downloadFile = async (formId, fileName) => {
     try {
-      const response = await fetch(fileUrl);
-      const blob = await response.blob();
+      const token = localStorage.getItem("authToken");
+      const url = `${API_URL}/api/admin/applications/file/download?form_id=${formId}&file_name=${encodeURIComponent(fileName)}`;
 
-      const url = window.URL.createObjectURL(blob);
+      const response = await axios.get(url, {
+        responseType: "blob",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const blob = new Blob([response.data]);
+
+      const blobUrl = window.URL.createObjectURL(blob);
+
       const link = document.createElement("a");
-
-      link.href = url;
-      link.download = fileName || "download";
+      link.href = blobUrl;
+      link.download = fileName;
       document.body.appendChild(link);
-
       link.click();
 
       document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
+      window.URL.revokeObjectURL(blobUrl);
     } catch (error) {
       console.error("Download failed:", error);
     }
   };
-
   const [previewFile, setPreviewFile] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const openPreview = (file) => {
-    if (!file.is_image) {
-      window.open(file.file_url, "_blank");
-      return;
-    }
-    setPreviewFile(file);
-    setIsModalOpen(true);
-  };
+  const openPreview = async (file) => {
+    try {
+      const fileExtension = file.file_name?.split(".").pop()?.toLowerCase();
 
+      const isImage = ["jpg", "jpeg", "png", "gif", "webp"].includes(
+        fileExtension,
+      );
+
+      //  For Images → Direct URL (NO fetch)
+      if (isImage) {
+        setPreviewFile({
+          url: file.file_url,
+          file_name: file.file_name,
+          is_image: true,
+        });
+
+        setIsModalOpen(true);
+        return;
+      }
+
+      //  For PDF → Fetch as Blob (prevents forced download)
+      if (fileExtension === "pdf") {
+        const response = await fetch(file.file_url);
+        const blob = await response.blob();
+        const blobUrl = window.URL.createObjectURL(blob);
+
+        // setPreviewFile({
+        //   url: blobUrl,
+        //   file_name: file.file_name,
+        //   is_image: false,
+        // });
+        setPreviewFile({
+          url: blobUrl + "#toolbar=0&navpanes=0&scrollbar=0",
+          file_name: file.file_name,
+          is_image: false,
+        });
+
+        setIsModalOpen(true);
+      }
+    } catch (error) {
+      console.error("Preview failed:", error);
+    }
+  };
   const closePreview = () => {
+    if (previewFile?.url) {
+      window.URL.revokeObjectURL(previewFile.url);
+    }
     setPreviewFile(null);
     setIsModalOpen(false);
   };
@@ -361,7 +515,7 @@ function ViewStudentAdmissionForm() {
           <div className="flex flex-col gap-y-3 p-2 md:grid md:grid-cols-4 md:gap-x-14 md:mx-10 ">
             <div
               className="w-full col-span-4 relative "
-            // top-4
+              // top-4
             >
               <div className="w-full mx-auto">
                 <h3 className="text-blue-500 w-full mx-auto text-center  md:text-[1.2em] text-nowrap font-bold">
@@ -398,7 +552,7 @@ function ViewStudentAdmissionForm() {
                 value={formData.mid_name}
                 className=" block w-full  rounded-md py-1 px-3 bg-gray-300 "
 
-              // onBlur={handleBlur}
+                // onBlur={handleBlur}
               />
             </div>
             <div className="mt-2">
@@ -414,7 +568,7 @@ function ViewStudentAdmissionForm() {
                 value={formData.last_name}
                 className=" block w-full  rounded-md py-1 px-3 bg-gray-300 "
 
-              // onBlur={handleBlur}
+                // onBlur={handleBlur}
               />
             </div>
             <div className="mt-2">
@@ -444,7 +598,7 @@ function ViewStudentAdmissionForm() {
                 value={formData.dob}
                 className=" block w-full  rounded-md py-1 px-3 bg-gray-300 "
 
-              // onBlur={handleBlur}
+                // onBlur={handleBlur}
               />
             </div>
             <div className="mt-2">
@@ -460,7 +614,7 @@ function ViewStudentAdmissionForm() {
                 value={formData.birth_place}
                 className=" block w-full  rounded-md py-1 px-3 bg-gray-300 "
 
-              // onBlur={handleBlur}
+                // onBlur={handleBlur}
               />
             </div>
             <div className="mt-2">
@@ -476,7 +630,7 @@ function ViewStudentAdmissionForm() {
                 value={formData.mother_tongue}
                 className=" block w-full  rounded-md py-1 px-3 bg-gray-300 "
 
-              // onBlur={handleBlur}
+                // onBlur={handleBlur}
               />
             </div>
             <div className="mt-2">
@@ -498,7 +652,7 @@ function ViewStudentAdmissionForm() {
                 }
                 className=" block w-full  rounded-md py-1 px-3 bg-gray-300 "
 
-              // onBlur={handleBlur}
+                // onBlur={handleBlur}
               ></input>
             </div>
             <div className="mt-2">
@@ -514,7 +668,7 @@ function ViewStudentAdmissionForm() {
                 value={formData.religion}
                 className=" block w-full  rounded-md py-1 px-3 bg-gray-300 "
 
-              // onBlur={handleBlur}
+                // onBlur={handleBlur}
               ></input>
             </div>
             <div className="mt-2">
@@ -527,7 +681,7 @@ function ViewStudentAdmissionForm() {
                 value={formData.caste}
                 className=" block w-full  rounded-md py-1 px-3 bg-gray-300 "
 
-              // onBlur={handleBlur}
+                // onBlur={handleBlur}
               />
             </div>
             <div className="mt-2">
@@ -540,7 +694,7 @@ function ViewStudentAdmissionForm() {
                 value={formData.subcaste}
                 className=" block w-full  rounded-md py-1 px-3 bg-gray-300 "
 
-              // onBlur={handleBlur}
+                // onBlur={handleBlur}
               />
             </div>
             <div className="mt-2">
@@ -556,7 +710,7 @@ function ViewStudentAdmissionForm() {
                 value={formData.category}
                 className=" block w-full  rounded-md py-1 px-3 bg-gray-300 "
 
-              // onBlur={handleBlur}
+                // onBlur={handleBlur}
               ></input>
             </div>
             <div className="mt-2">
@@ -572,7 +726,7 @@ function ViewStudentAdmissionForm() {
                 value={formData.nationality}
                 className=" block w-full  rounded-md py-1 px-3 bg-gray-300 "
 
-              // onBlur={handleBlur}
+                // onBlur={handleBlur}
               />
             </div>
             <div className="mt-2">
@@ -601,7 +755,7 @@ function ViewStudentAdmissionForm() {
                 value={formData.city}
                 className=" block w-full  rounded-md py-1 px-3 bg-gray-300 "
 
-              // onBlur={handleBlur}
+                // onBlur={handleBlur}
               />
             </div>
             <div className="mt-2">
@@ -614,7 +768,7 @@ function ViewStudentAdmissionForm() {
                 value={formData.state}
                 className=" block w-full  rounded-md py-1 px-3 bg-gray-300 "
 
-              // onBlur={handleBlur}
+                // onBlur={handleBlur}
               />
             </div>
             <div className="mt-2">
@@ -630,7 +784,7 @@ function ViewStudentAdmissionForm() {
                 value={formData.pincode}
                 className=" block w-full  rounded-md py-1 px-3 bg-gray-300 "
 
-              // onBlur={handleBlur}
+                // onBlur={handleBlur}
               />
             </div>
             <div className="mt-2">
@@ -661,7 +815,7 @@ function ViewStudentAdmissionForm() {
                 value={formData.stud_aadhar}
                 className=" block w-full  rounded-md py-1 px-3 bg-gray-300 "
 
-              // onBlur={handleBlur}
+                // onBlur={handleBlur}
               />
             </div>
             <div className="mt-2">
@@ -738,8 +892,9 @@ function ViewStudentAdmissionForm() {
                 id="email"
                 disabled
                 maxLength={100}
-                value={`${formData.sibling_class || ""} ${formData.sibling_section || ""
-                  }`}
+                value={`${formData.sibling_class || ""} ${
+                  formData.sibling_section || ""
+                }`}
                 className=" block w-full  rounded-md py-1 px-3 bg-gray-300 "
               />
             </div>
@@ -1004,13 +1159,24 @@ function ViewStudentAdmissionForm() {
                             <FaEye className="w-4 h-4" />
                           </button>
 
+                          {/* <button
+                            type="button"
+                            className="text-green-600 hover:text-green-800"
+                            title="Download"
+                            onClick={
+                              // () => downloadFile(file.file_url, file.file_name)
+                              () =>
+                                downloadFile(file.downloadUrl, file.file_name)
+                            }
+                          >
+                            <FaDownload className="w-4 h-4" />
+                          </button> */}
+
                           <button
                             type="button"
                             className="text-green-600 hover:text-green-800"
                             title="Download"
-                            onClick={() =>
-                              downloadFile(file.file_url, file.file_name)
-                            }
+                            onClick={() => downloadFile(id, file.file_name)}
                           >
                             <FaDownload className="w-4 h-4" />
                           </button>
@@ -1059,10 +1225,10 @@ function ViewStudentAdmissionForm() {
           </div>
         </form>
       </div>
-      {isModalOpen && previewFile && (
+      {/* {isModalOpen && previewFile && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white rounded-lg w-[50%] max-w-4xl h-[80%] flex flex-col">
-            {/* Header */}
+            
             <div className="flex justify-between items-center px-4 py-2 border-b">
               <h3 className="text-sm font-semibold truncate">
                 {previewFile.file_name}
@@ -1075,7 +1241,7 @@ function ViewStudentAdmissionForm() {
               </button>
             </div>
 
-            {/* Content */}
+            
             <div className="flex-1 overflow-auto p-4">
               {previewFile.is_image ? (
                 <img
@@ -1088,6 +1254,42 @@ function ViewStudentAdmissionForm() {
                   src={previewFile.file_url}
                   title="Document Preview"
                   className="w-full h-full border"
+                />
+              )}
+            </div>
+          </div>
+        </div>
+      )} */}
+
+      {isModalOpen && previewFile && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white rounded-lg w-[60%] max-w-5xl h-[85%] flex flex-col shadow-xl">
+            {/* Header */}
+            <div className="flex justify-between items-center px-4 py-2 border-b bg-gray-50">
+              <h3 className="text-sm font-semibold truncate">
+                {previewFile.file_name}
+              </h3>
+              <button
+                onClick={closePreview}
+                className="text-gray-600 hover:text-red-500 text-lg"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Content */}
+            <div className="flex-1 overflow-auto p-4">
+              {previewFile.is_image ? (
+                <img
+                  src={previewFile.url}
+                  alt="Preview"
+                  className="mx-auto max-h-full object-contain"
+                />
+              ) : (
+                <iframe
+                  src={previewFile.url}
+                  title="Document Preview"
+                  className="w-full h-full border rounded"
                 />
               )}
             </div>

@@ -122,9 +122,9 @@ function CallCategory() {
 
   const filteredSections = Array.isArray(sections)
     ? sections.filter((leave) => {
-      const searchLower = searchTerm.trim().toLowerCase();
-      return leave.label?.toLowerCase().includes(searchLower);
-    })
+        const searchLower = searchTerm.trim().toLowerCase();
+        return leave.label?.toLowerCase().includes(searchLower);
+      })
     : [];
 
   // console.log("filtered", filteredSections);
@@ -312,8 +312,9 @@ function CallCategory() {
                       displayedSections.map((leave, index) => (
                         <tr
                           key={leave.section_id}
-                          className={`${index % 2 === 0 ? "bg-white" : "bg-gray-100"
-                            } hover:bg-gray-50 `}
+                          className={`${
+                            index % 2 === 0 ? "bg-white" : "bg-gray-100"
+                          } hover:bg-gray-50 `}
                         >
                           <td className="text-center px-2 py-2  lg:px-3 border border-gray-950 text-sm">
                             {currentPage * pageSize + index + 1}

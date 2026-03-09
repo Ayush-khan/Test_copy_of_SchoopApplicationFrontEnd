@@ -393,104 +393,12 @@ const CreateBook = () => {
     });
   };
 
-  // const handleSubmit = async (event) => {
-  //   event.preventDefault();
-  //   setSubmitted(true);
-
-  //   const validationErrors = validate();
-  //   const rowValidationErrors = validateRows();
-
-  //   const hasFormErrors = Object.keys(validationErrors).length > 0;
-  //   const hasRowErrors = rowValidationErrors.some(
-  //     (rowErr) => Object.keys(rowErr).length > 0,
-  //   );
-
-  //   if (hasFormErrors || hasRowErrors) {
-  //     setErrors(validationErrors);
-  //     toast.error("Please fix the validation errors before submitting.");
-  //     return;
-  //   }
-
-  //   // Convert empty string to null
-  //   const normalize = (v) => {
-  //     if (!v || String(v).trim() === "") return null;
-  //     return String(v).trim();
-  //   };
-
-  //   // Convert → ALWAYS return an array (backend safe)
-  //   const convert = (arr) => {
-  //     return arr.map((v) => normalize(v));
-  //   };
-
-  //   // Build row arrays
-  //   const bill_no = convert(rows.map((r) => r.billNo));
-  //   const edition = convert(rows.map((r) => r.edition));
-  //   const source = convert(rows.map((r) => r.source));
-  //   const year = convert(rows.map((r) => r.year));
-  //   const no_of_pages = convert(rows.map((r) => r.pages));
-  //   const price = convert(rows.map((r) => r.price));
-  //   const copy = convert(rows.map((r) => r.accessionNo));
-  //   const isbn = convert(rows.map((r) => r.isbn));
-
-  //   // Final payload
-  //   const payload = {
-  //     operation: "create",
-  //     book_title: formData.book_title,
-  //     category_id: selectedStudentId,
-  //     author: formData.author,
-  //     publisher: formData.publisher,
-  //     location_of_book: formData.location_of_book,
-  //     days_borrow: formData.days_borrow,
-  //     issue_type: formData.issue_type,
-
-  //     bill_no,
-  //     edition,
-  //     source,
-  //     year,
-  //     no_of_pages,
-  //     price,
-  //     copy,
-  //     isbn,
-  //   };
-
-  //   try {
-  //     setLoading(true);
-  //     const token = localStorage.getItem("authToken");
-
-  //     const response = await axios.post(
-  //       `${API_URL}/api/books/create`,
-  //       payload,
-  //       {
-  //         headers: {
-  //           "Content-Type": "application/json",
-  //           Authorization: `Bearer ${token}`,
-  //         },
-  //       },
-  //     );
-
-  //     if (response.data?.success) {
-  //       toast.success("Book Created Successfully!");
-  //       setTimeout(() => navigate("/bookDetails"), 600);
-  //     } else {
-  //       toast.error(response.data?.message);
-  //     }
-  //   } catch (error) {
-  //     console.error("Error:", error);
-  //     toast.error(
-  //       error.response?.data?.message ||
-  //         "An error occurred while submitting the form.",
-  //     );
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-
   const handleSubmit = async (event) => {
     event.preventDefault();
     setSubmitted(true);
 
     const validationErrors = validate();
-    const rowValidationErrors = await validateRows(); // ✅ fixed
+    const rowValidationErrors = await validateRows();
 
     const hasFormErrors = Object.keys(validationErrors).length > 0;
     const hasRowErrors = rowValidationErrors.some(
@@ -573,6 +481,37 @@ const CreateBook = () => {
     { value: "T", label: "Only for Teachers" },
     { value: "R", label: "Reading in Libarry" },
   ];
+
+  const handleReset = () => {
+    setFormData({
+      book_title: "",
+      author: "",
+      publisher: "",
+      location_of_book: "",
+      days_borrow: "",
+      issue_type: "",
+    });
+
+    setSelectedStudent("");
+    setSelectedIssueType("");
+
+    setRows([
+      {
+        billNo: "",
+        edition: "",
+        source: "",
+        year: "",
+        pages: "",
+        price: "",
+        accessionNo: "",
+        isbn: "",
+      },
+    ]);
+
+    // Reset validation & UI states
+    setErrors({});
+    setSubmitted(false);
+  };
 
   return (
     // <div className="container mx-auto mt-4 flex items-center justify-center  ">
@@ -973,7 +912,12 @@ const CreateBook = () => {
               >
                 {loading ? "Saving..." : "Create book"}
               </button>
-              <button className="bg-red-500 text-white py-1 px-4 rounded hover:bg-red-700 disabled:bg-blue-300 disabled:cursor-not-allowed mr-2">
+              <button
+                type="button"
+                disabled={loading}
+                className="bg-red-500 text-white py-1 px-4 rounded hover:bg-red-700 disabled:bg-blue-300 disabled:cursor-not-allowed mr-2 "
+                onClick={handleReset}
+              >
                 Reset
               </button>
               <button
