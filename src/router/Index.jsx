@@ -1570,6 +1570,49 @@ function Index() {
           path="/imageCropperSaving"
           element={<PrivateRoute element={<ImageCropperSaving />} />}
         />
+        {/* Admission module for Admin */}
+        <Route
+          path="/listofAdmissionSuccessfulPayment"
+          element={
+            <PrivateRoute element={<CompleteStudentListForAdmission />} />
+          }
+        />
+        <Route
+          path="/viewAdmissionForm/:id"
+          element={<PrivateRoute element={<ViewStudentAdmissionForm />} />}
+        />
+        <Route
+          path="/listOfStudentsForDocumentSubmission"
+          element={
+            <PrivateRoute element={<StudentListForAdmissionSubmission />} />
+          }
+        />
+        <Route
+          path="/listOfStudentForSchedulingInterview"
+          element={
+            <PrivateRoute element={<StudentListForSchedulingInterview />} />
+          }
+        />
+        <Route
+          path="/listOfStudentForVerification"
+          element={<PrivateRoute element={<StudentListForVerification />} />}
+        />
+        <Route
+          path="/listOfStudentForApproval"
+          element={<PrivateRoute element={<StudentListForApproval />} />}
+        />
+        <Route
+          path="/admissionManagement"
+          element={<PrivateRoute element={<ApplicationFromManagement />} />}
+        />
+        <Route
+          path="/dynamicMailer"
+          element={<PrivateRoute element={<DynamicMailer />} />}
+        />
+        <Route
+          path="/all_application_status_report"
+          element={<PrivateRoute element={<AllApplicationFeeStatusReport />} />}
+        />
       </Route>
 
       {/* Page Not FOund Routes */}
