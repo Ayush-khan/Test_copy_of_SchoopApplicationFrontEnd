@@ -64,6 +64,7 @@ function MainLayout() {
           );
 
           setSessionData(sessionResponse.data ?? null);
+          localStorage.setItem("academicYr" , sessionResponse?.data?.custom_claims?.academic_year);
           console.log("SESSION DATA INSIDE MAINLAYOUT" , sessionResponse.data);
       } catch (error) {
           console.error("Error fetching data:", error);

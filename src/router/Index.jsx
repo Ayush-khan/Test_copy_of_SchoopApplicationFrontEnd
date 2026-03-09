@@ -1614,7 +1614,6 @@ function Index() {
           element={<PrivateRoute element={<ReturnBook />} />}
         />
         {/* Admission module for Admin */}
-        {/* Admission module for Admin */}
         <Route
           path="/listofAdmissionSuccessfulPayment"
           element={
@@ -1665,6 +1664,10 @@ function Index() {
         <Route
           path="/superadmin/impersonate"
           element={<PrivateRoute element={<ImpersonateListing />} />}
+        />
+        <Route
+          path="/all_application_status_report"
+          element={<PrivateRoute element={<AllApplicationFeeStatusReport />} />}
         />
       </Route>
 

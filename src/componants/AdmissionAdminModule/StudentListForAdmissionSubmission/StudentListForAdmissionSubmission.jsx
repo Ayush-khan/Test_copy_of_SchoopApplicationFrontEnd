@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { RxCross1 } from "react-icons/rx";
 import { MdOutlineRemoveRedEye } from "react-icons/md";
 import { FiSearch } from "react-icons/fi";
+import ReactPaginate from "react-paginate";
 
 const StudentListForAdmissionSubmission = () => {
   const API_URL = import.meta.env.VITE_API_URL;
@@ -28,7 +29,7 @@ const StudentListForAdmissionSubmission = () => {
 
   const [timetable, setTimetable] = useState([]);
 
-  const pageSize = 10;
+  const pageSize = 20;
   const [pageCount, setPageCount] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -76,7 +77,7 @@ const StudentListForAdmissionSubmission = () => {
         `${API_URL}/api/admin/admission-classes`,
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
       console.log("Class", response);
       setStudentNameWithClassId(response?.data?.data || []);
@@ -89,18 +90,12 @@ const StudentListForAdmissionSubmission = () => {
   };
 
   const handleSearch = async () => {
-    // if (!selectedStudentId) {
-    //   setStudentError("Please select class.");
-    //   return;
-    // }
-
     setLoadingForSearch(true);
     setLoading(true);
-    setTimetable([]);
 
     const token = localStorage.getItem("authToken");
 
-    //  Now reset UI fields
+    // Reset only UI fields (not table data)
     setSearchTerm("");
     setFormId("");
     setShowSearch(false);
@@ -110,34 +105,27 @@ const StudentListForAdmissionSubmission = () => {
         `${API_URL}/api/admin/applications/document-submission`,
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
 
-      if (!response?.data?.data?.length) {
+      const data = response?.data?.data || [];
+
+      setTimetable(data);
+      // setPageCount(Math.ceil(data.length / pageSize));
+
+      if (data.length === 0) {
         toast.error("Admission forms data not found.");
-        setTimetable([]);
-      } else {
-        setTimetable(response.data.data);
-        setPageCount(Math.ceil(response.data.data.length / pageSize));
-        // setShowStudentReport(true);
       }
     } catch (error) {
       console.error("Error fetching Admission forms:", error);
       toast.error("Error fetching Admission forms. Please try again.");
+      setTimetable([]); // clear only on error
     } finally {
       setLoadingForSearch(false);
       setIsSubmitting(false);
       setLoading(false);
     }
   };
-
-  // const handleView = (student) => {
-  //   console.log("HandleView -->", student);
-
-  //   navigate(
-  //     `/viewAdmissionForm/${student.form_id}?class_id=${selectedStudentId}`
-  //   );
-  // };
 
   const handleView = (student) => {
     console.log("HandleView -->", student);
@@ -146,9 +134,10 @@ const StudentListForAdmissionSubmission = () => {
       `/viewAdmissionForm/${student.form_id}?class_id=${selectedStudentId}`,
       {
         state: { from: "  listOfStudentsForDocumentSubmission" },
-      }
+      },
     );
   };
+
   const camelCase = (str) =>
     str
       ?.toLowerCase()
@@ -159,10 +148,10 @@ const StudentListForAdmissionSubmission = () => {
   const formatDate = (dateStr) =>
     dateStr
       ? new Date(dateStr).toLocaleDateString("en-GB", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "2-digit",
-      })
+          day: "2-digit",
+          month: "2-digit",
+          year: "2-digit",
+        })
       : "";
 
   const filteredSections = timetable.filter((section) => {
@@ -192,19 +181,44 @@ const StudentListForAdmissionSubmission = () => {
     );
   });
 
-  const displayedSections = filteredSections.slice(currentPage * pageSize);
-  // const startIndex = currentPage * pageSize;
-  // const endIndex = startIndex + pageSize;
+  // const displayedSections = filteredSections.slice(currentPage * pageSize);
 
-  // const displayedSections = filteredSections.slice(startIndex, endIndex);
+  useEffect(() => {
+    setPageCount(Math.ceil(filteredSections.length / pageSize));
+  }, [filteredSections, pageSize]);
+
+  const displayedSections = filteredSections.slice(
+    currentPage * pageSize,
+    (currentPage + 1) * pageSize,
+  );
+
+  const handlePageClick = (data) => {
+    setCurrentPage(data.selected);
+  };
+
+  useEffect(() => {
+    setCurrentPage(0);
+  }, [searchTerm, timetable]);
+
+  // const allSelected =
+  //   displayedSections.length > 0 &&
+  //   displayedSections.every((row) => selectedRows.includes(row.form_id));
+
+  // const handleSelectAll = (e) => {
+  //   if (e.target.checked) {
+  //     setSelectedRows(displayedSections.map((row) => row.form_id));
+  //   } else {
+  //     setSelectedRows([]);
+  //   }
+  // };
 
   const allSelected =
-    displayedSections.length > 0 &&
-    displayedSections.every((row) => selectedRows.includes(row.form_id));
+    filteredSections.length > 0 &&
+    filteredSections.every((row) => selectedRows.includes(row.form_id));
 
   const handleSelectAll = (e) => {
     if (e.target.checked) {
-      setSelectedRows(displayedSections.map((row) => row.form_id));
+      setSelectedRows(filteredSections.map((row) => row.form_id));
     } else {
       setSelectedRows([]);
     }
@@ -212,7 +226,7 @@ const StudentListForAdmissionSubmission = () => {
 
   const handleRowSelect = (id) => {
     setSelectedRows((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
     );
   };
 
@@ -239,7 +253,7 @@ const StudentListForAdmissionSubmission = () => {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       toast.success("Documents submitted successfully.");
@@ -330,9 +344,9 @@ const StudentListForAdmissionSubmission = () => {
                       </div>
                     )}
 
-                    <div className="card-body w-full">
+                    <div className="card-body">
                       <div
-                        className=" h-96 lg:h-96  overflow-y-scroll overflow-x-scroll"
+                        className="relative h-96 overflow-auto"
                         style={{
                           scrollbarWidth: "thin",
                           scrollbarColor: "#C03178 transparent",
@@ -340,58 +354,58 @@ const StudentListForAdmissionSubmission = () => {
                       >
                         <table className="min-w-full leading-normal table-auto">
                           <thead className="">
-                            {/* bg-gray-100 sticky top-0 z-10 */}
                             <tr className="bg-gray-100">
-                              <th className="min-w-[20px] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
-                                Sr No.
+                              <th className="text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
+                                Sr <br /> No.
                               </th>
 
-                              <th className="min-w-[20px] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
+                              <th className="text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
                                 <span className="mr-2 whitespace-nowrap">
-                                  Select All
+                                  Select All <br />
                                 </span>
-                                <input
-                                  type="checkbox"
-                                  checked={allSelected}
-                                  onChange={handleSelectAll}
-                                  className="w-3 h-3 cursor-pointer accent-blue-500"
-                                  title="Select All"
-                                />
+                                {currentPage === 0 && (
+                                  <input
+                                    type="checkbox"
+                                    checked={allSelected}
+                                    onChange={handleSelectAll}
+                                    className="w-3 h-3 cursor-pointer accent-blue-500"
+                                    title="Select All"
+                                  />
+                                )}
                               </th>
 
-                              <th className="min-w-[200px] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold whitespace-nowrap">
+                              <th className=" text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold whitespace-nowrap">
                                 Form Id.
                               </th>
 
-                              <th className="min-w-[230px] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold whitespace-nowrap">
+                              <th className="text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold whitespace-nowrap">
                                 Student Name
                               </th>
 
-                              <th className="min-w-[200px] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold whitespace-nowrap">
+                              <th className="text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold whitespace-nowrap">
                                 Parent Name
                               </th>
 
-                              <th className="min-w-[80px] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
+                              <th className=" text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold whitespace-nowrap">
                                 Class
                               </th>
 
-                              <th className="min-w-[100px] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
+                              <th className=" text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold whitespace-nowrap">
                                 Phone No.
                               </th>
 
-                              <th className="min-w-[180px] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
-                                Email Id
+                              <th className="text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold whitespace-nowrap">
+                                Father Email Id
+                              </th>
+                              <th className="text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold whitespace-nowrap">
+                                Mother Email Id
                               </th>
 
-                              <th className="min-w-[140px] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
-                                Application Date (DD-MM-YY)
+                              <th className=" text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold whitespace-nowrap">
+                                Application Date <br /> (DD-MM-YY)
                               </th>
 
-                              {/* <th className="min-w-[80px] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold whitespace-nowrap">
-                                Status
-                              </th> */}
-
-                              <th className="min-w-[50px] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
+                              <th className=" text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold whitespace-nowrap">
                                 View
                               </th>
                             </tr>
@@ -399,15 +413,13 @@ const StudentListForAdmissionSubmission = () => {
 
                           <tbody>
                             {loading ? (
-                              <tr>
-                                <td
-                                  colSpan={10}
-                                  className="text-center py-6 text-blue-700 text-lg"
-                                >
+                              <div className="absolute inset-0 flex items-center justify-center  z-10">
+                                <div className="text-xl text-blue-700">
                                   Please wait while data is loading...
-                                </td>
-                              </tr>
-                            ) : displayedSections.length ? (
+                                </div>
+                              </div>
+                            ) : displayedSections &&
+                              displayedSections.length > 0 ? (
                               <>
                                 {displayedSections.map((student, index) => (
                                   <tr
@@ -415,14 +427,15 @@ const StudentListForAdmissionSubmission = () => {
                                     className="border border-gray-300"
                                   >
                                     <td className="px-2 py-2 text-center border border-gray-300">
-                                      {index + 1}
+                                      {/* {index + 1} */}
+                                      {currentPage * pageSize + index + 1}
                                     </td>
 
-                                    <td className="px-2 py-2 text-center border border-gray-300">
+                                    <td className="px-2 py-2 text-center border border-gray-300 whitespace-nowrap">
                                       <input
                                         type="checkbox"
                                         checked={selectedRows.includes(
-                                          student.form_id
+                                          student.form_id,
                                         )}
                                         onChange={() =>
                                           handleRowSelect(student.form_id)
@@ -431,17 +444,17 @@ const StudentListForAdmissionSubmission = () => {
                                       />
                                     </td>
 
-                                    <td className="px-2 py-2 text-center border border-gray-300">
+                                    <td className="px-2 py-2 text-center border border-gray-300 whitespace-nowrap">
                                       {student.form_id}
                                     </td>
 
-                                    <td className="px-2 py-2 text-center border border-gray-300">
+                                    <td className="px-2 py-2 text-center border border-gray-300 whitespace-nowrap">
                                       {camelCase(
-                                        `${student.first_name} ${student.mid_name} ${student.last_name}`
+                                        `${student.first_name} ${student.mid_name} ${student.last_name}`,
                                       )}
                                     </td>
 
-                                    <td className="px-2 py-2 text-center border border-gray-300">
+                                    <td className="px-2 py-2 text-center border border-gray-300 whitespace-nowrap">
                                       {camelCase(student.father_name)}
                                     </td>
 
@@ -455,6 +468,10 @@ const StudentListForAdmissionSubmission = () => {
 
                                     <td className="px-2 py-2 text-center border border-gray-300">
                                       {student.f_email}
+                                    </td>
+
+                                    <td className="px-2 py-2 text-center border border-gray-300">
+                                      {student.m_emailid}
                                     </td>
 
                                     <td className="px-2 py-2 text-center border border-gray-300">
@@ -472,20 +489,19 @@ const StudentListForAdmissionSubmission = () => {
                                   </tr>
                                 ))}
 
-                                {/* ✅ SUMMARY ROW */}
                                 <tr className="bg-gray-100 font-semibold">
                                   <td
-                                    colSpan={10}
+                                    colSpan={11}
                                     className="border border-gray-950"
                                   >
                                     <div className="flex justify-center items-center gap-2 px-4 py-2">
                                       <span>
                                         <span className="text-blue-800 ml-1">
-                                          Total Count :{" "}
+                                          Total Count :
                                         </span>
-
                                         <span className="text-pink-600 ml-1">
-                                          {displayedSections.length}
+                                          {/* {displayedSections.length} */}
+                                          {filteredSections.length}
                                         </span>
                                       </span>
                                     </div>
@@ -493,17 +509,43 @@ const StudentListForAdmissionSubmission = () => {
                                 </tr>
                               </>
                             ) : (
-                              <tr>
-                                <td
-                                  colSpan={10}
-                                  className="text-center py-6 text-red-700 text-lg"
-                                >
-                                  Oops! No data found..
-                                </td>
-                              </tr>
+                              <div className="absolute inset-0 flex items-center justify-center">
+                                <div className="text-xl text-red-700 text-center">
+                                  No data available.
+                                </div>
+                              </div>
+                              // <tr>
+                              //   <td
+                              //     colSpan={10}
+                              //     className="text-center py-6 text-red-700 text-lg"
+                              //   >
+                              //     No data available.
+                              //   </td>
+                              // </tr>
                             )}
                           </tbody>
                         </table>
+                      </div>
+                      <div className=" flex justify-center  pt-2 -mb-3">
+                        <ReactPaginate
+                          previousLabel={"Previous"}
+                          nextLabel={"Next"}
+                          breakLabel={"..."}
+                          breakClassName={"page-item"}
+                          breakLinkClassName={"page-link"}
+                          pageCount={pageCount}
+                          marginPagesDisplayed={1}
+                          pageRangeDisplayed={1}
+                          onPageChange={handlePageClick}
+                          containerClassName={"pagination"}
+                          pageClassName={"page-item"}
+                          pageLinkClassName={"page-link"}
+                          previousClassName={"page-item"}
+                          previousLinkClassName={"page-link"}
+                          nextClassName={"page-item"}
+                          nextLinkClassName={"page-link"}
+                          activeClassName={"active"}
+                        />
                       </div>
                       <div className="flex justify-end gap-4 pr-3 mt-2 mr-10">
                         <button
