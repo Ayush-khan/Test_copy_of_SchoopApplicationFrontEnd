@@ -35,7 +35,7 @@ function GuideNavigation() {
             >
                 <ToastContainer />
                 <div className="card rounded-md ">
-                    <div className=" card-header mb-4 flex justify-between items-center ">
+                    <div className=" card-headerflex justify-between items-center ">
                         <h5 className="text-gray-700 mt-1 text-md lg:text-lg">
                             List of created helpers
                         </h5>
@@ -54,9 +54,9 @@ function GuideNavigation() {
                         }}
                     ></div>
                     <div className="w-full flex justify-center flex-col md:flex-row gap-x-1">
-                        <div className="w-full md:w-[99%] flex flex-col md:flex-row justify-between items-start md:items-center mt-0 md:mt-2">
+                        <div className="w-full md:w-[99%] flex flex-col md:flex-row justify-between items-start md:items-center mt-0">
                             <div className="w-full flex flex-col md:flex-row gap-y-3 md:gap-y-0 md:gap-x-12">
-                                <div className="w-full md:w-[98%] flex justify-end flex-col md:flex-row gap-y-2 md:gap-y-0 md:gap-x-2 mb-1 md:my-2">
+                                <div className="w-full flex justify-end flex-col md:flex-row gap-y-2 md:gap-y-0 md:gap-x-2 mb-1 md:my-2">
                                     <button
                                         className="btn btn-primary btn-sm md:h-9 text-xs md:text-sm"
                                         onClick={() => navigate('/guideNavigations/create')}
