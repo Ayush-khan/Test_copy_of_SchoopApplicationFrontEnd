@@ -498,7 +498,7 @@ ${subject?.optional_subjects?.map(s => s.subject_name).join(", ") || " "}
                             <div className="w-full md:w-full flex md:flex-row justify-between items-center mt-0 md:mt-2">
                                 <div className="w-full  md:w-full gap-x-0  md:gap-x-12 flex flex-col gap-y-2 md:gap-y-0 md:flex-row">
                                     {/* Class Dropdown */}
-                                    <div className="w-full md:w-[80%] gap-x-2 justify-around my-1 md:my-4 flex md:flex-row">
+                                    <div className="w-full md:w-[80%] gap-x-2 justify-around my-1 md:my-4 flex md:flex-row " >
                                         <label
                                             className="w-full md:w-[25%] text-md pl-0 md:pl-5 mt-1.5"
                                             htmlFor="classSelect"
@@ -519,19 +519,8 @@ ${subject?.optional_subjects?.map(s => s.subject_name).join(", ") || " "}
                                                 className="text-sm"
                                                 isDisabled={loading}
                                                 styles={{
-                                                    control: (provided) => ({
-                                                        ...provided,
-                                                        fontSize: ".9em", // Adjust font size for selected value
-                                                        minHeight: "30px", // Reduce height
-                                                    }),
-                                                    menu: (provided) => ({
-                                                        ...provided,
-                                                        fontSize: "1em", // Adjust font size for dropdown options
-                                                    }),
-                                                    option: (provided) => ({
-                                                        ...provided,
-                                                        fontSize: ".9em", // Adjust font size for each option
-                                                    }),
+                                                    menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+                                                    menu: (base) => ({ ...base, zIndex: 9999 }),
                                                 }}
                                             />
                                             {classError && (
@@ -543,7 +532,7 @@ ${subject?.optional_subjects?.map(s => s.subject_name).join(", ") || " "}
                                     </div>
 
                                     {/* Subject Group Dropdown */}
-                                    <div className="w-full md:w-full gap-x-2 justify-around my-1 md:my-4 flex md:flex-row">
+                                    <div className="w-full md:w-full gap-x-2 justify-around my-1 md:my-4 flex md:flex-row" >
                                         <label
                                             className="w-full md:w-[50%] text-md pl-0 md:pl-5 mt-1.5"
                                         >
@@ -561,19 +550,8 @@ ${subject?.optional_subjects?.map(s => s.subject_name).join(", ") || " "}
                                                 isClearable
                                                 className="text-sm"
                                                 styles={{
-                                                    control: (provided) => ({
-                                                        ...provided,
-                                                        fontSize: ".9em",
-                                                        minHeight: "30px",
-                                                    }),
-                                                    menu: (provided) => ({
-                                                        ...provided,
-                                                        fontSize: "1em",
-                                                    }),
-                                                    option: (provided) => ({
-                                                        ...provided,
-                                                        fontSize: ".9em",
-                                                    }),
+                                                    menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+                                                    menu: (base) => ({ ...base, zIndex: 9999 }),
                                                 }}
                                             />
                                             {subjectGroupError && (
@@ -602,19 +580,8 @@ ${subject?.optional_subjects?.map(s => s.subject_name).join(", ") || " "}
                                                 isClearable
                                                 className="text-sm"
                                                 styles={{
-                                                    control: (provided) => ({
-                                                        ...provided,
-                                                        fontSize: ".9em",
-                                                        minHeight: "30px",
-                                                    }),
-                                                    menu: (provided) => ({
-                                                        ...provided,
-                                                        fontSize: "1em",
-                                                    }),
-                                                    option: (provided) => ({
-                                                        ...provided,
-                                                        fontSize: ".9em",
-                                                    }),
+                                                    menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+                                                    menu: (base) => ({ ...base, zIndex: 9999 }),
                                                 }}
                                             />
                                             {/* {optionalSubjectError && (
