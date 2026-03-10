@@ -44,8 +44,15 @@ function ApplicationForMangement() {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
+  const [ageStartDate, setAgeStartDate] = useState("");
+  const [ageEndDate, setAgeEndDate] = useState("");
+
   const [startDateError, setStartDateError] = useState("");
   const [endDateError, setEndDateError] = useState("");
+
+  const [ageStartDateError, setAgeStartDateError] = useState("");
+  const [ageEndDateError, setAgeEndDateError] = useState("");
+
   const [classError, setClassError] = useState("");
   const [formFeeError, setFormFeeError] = useState("");
   const [showViewModal, setShowViewModal] = useState(false);
@@ -143,7 +150,7 @@ function ApplicationForMangement() {
   console.log("sections before filtered sections:", sections);
 
   const formatDate = (dateStr) =>
-    dateStr
+    dateStr && dateStr !== "0000-00-00"
       ? new Date(dateStr).toLocaleDateString("en-GB", {
           day: "2-digit",
           month: "2-digit",
@@ -193,6 +200,9 @@ function ApplicationForMangement() {
     // DATES (must be YYYY-MM-DD)
     setStartDate(section.start_date);
     setEndDate(section.end_date);
+
+    setAgeStartDate(section.age_start_date);
+    setAgeEndDate(section.age_end_date);
 
     // FORM FEE
     setFormFee(section.application_form_fee);
@@ -249,6 +259,8 @@ function ApplicationForMangement() {
     setStartDate("");
     setEndDate("");
     setFormFee("");
+    setAgeEndDate("");
+    setAgeStartDate("");
   };
 
   const handleSubmitAdd = async (e) => {
@@ -305,6 +317,8 @@ function ApplicationForMangement() {
       end_date: endDate,
       form_fee: formFee.toString(),
       publish: requiresAppointment === "Y" ? "Y" : "N",
+      age_start_date: ageStartDate,
+      age_end_date: ageEndDate,
     };
 
     try {
@@ -379,6 +393,8 @@ function ApplicationForMangement() {
       end_date: endDate,
       form_fee: formFee.toString(),
       publish: requiresAppointment === "Y" ? "Y" : "N",
+      age_start_date: ageStartDate === "0000-00-00" ? "" : ageStartDate,
+      age_end_date: ageEndDate === "0000-00-00" ? "" : ageEndDate,
     };
 
     try {
@@ -539,81 +555,94 @@ function ApplicationForMangement() {
           ></div>
 
           <div className="card-body w-full">
-            <div className="h-96 lg:h-96 w-full md:w-[100%] mx-auto w-overflow-y-scroll lg:overflow-x-hidden">
-              <div className="bg-white rounded-lg shadow-xs">
-                <table className="min-w-full leading-normal table-auto">
-                  <thead>
-                    <tr className="bg-gray-200">
-                      <th className="px-2 w-full md:w-[5%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+            <div className="w-full overflow-x-auto">
+              <div className="h-96 overflow-y-auto">
+                <table className="w-full table-auto border-collapse">
+                  <thead className="bg-gray-200 sticky top-0">
+                    <tr>
+                      <th className="px-2 md:px-3 py-2 border border-gray-900 text-xs md:text-sm font-semibold text-center">
                         Sr. No
                       </th>
-                      <th className="px-2 w-full md:w-[12%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                      <th className="px-2 md:px-3 py-2 border border-gray-900 text-xs md:text-sm font-semibold text-center">
                         Class
                       </th>
-                      <th className="px-2 w-full md:w-[13%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                        Start Date (DD/MM/YY)
+                      <th className="px-2 md:px-3 py-2 border border-gray-900 text-xs md:text-sm font-semibold text-center">
+                        Start Date
                       </th>
-                      <th className="px-2 w-full md:w-[13%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                        End Date (DD/MM/YY)
+                      <th className="px-2 md:px-3 py-2 border border-gray-900 text-xs md:text-sm font-semibold text-center">
+                        End Date
                       </th>
-                      <th className="px-2 w-full md:w-[12%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                      <th className="px-2 md:px-3 py-2 border border-gray-900 text-xs md:text-sm font-semibold text-center">
+                        Age Start Date
+                      </th>
+                      <th className="px-2 md:px-3 py-2 border border-gray-900 text-xs md:text-sm font-semibold text-center">
+                        Age End Date
+                      </th>
+                      <th className="px-2 md:px-3 py-2 border border-gray-900 text-xs md:text-sm font-semibold text-center">
                         Form Fee
                       </th>
-                      <th className="px-2 w-full md:w-[12%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                      <th className="px-2 md:px-3 py-2 border border-gray-900 text-xs md:text-sm font-semibold text-center">
                         Status
                       </th>
-                      <th className="px-2 w-full md:w-[7%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                      <th className="px-2 md:px-3 py-2 border border-gray-900 text-xs md:text-sm font-semibold text-center">
                         Edit
                       </th>
-                      <th className="px-2 w-full md:w-[7%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                      <th className="px-2 md:px-3 py-2 border border-gray-900 text-xs md:text-sm font-semibold text-center">
                         Delete
                       </th>
-                      <th className="px-2 w-full md:w-[7%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                        view
+                      <th className="px-2 md:px-3 py-2 border border-gray-900 text-xs md:text-sm font-semibold text-center">
+                        View
                       </th>
                     </tr>
                   </thead>
+
                   <tbody>
                     {loading ? (
-                      <div className=" absolute left-[4%] w-[100%]  text-center flex justify-center items-center mt-14">
-                        <div className=" text-center text-xl text-blue-700">
+                      <tr>
+                        <td
+                          colSpan="11"
+                          className="text-center py-10 text-blue-700"
+                        >
                           Please wait while data is loading...
-                        </div>
-                      </div>
+                        </td>
+                      </tr>
                     ) : displayedSections.length ? (
                       displayedSections.map((section, index) => (
                         <tr
                           key={section.section_id}
-                          className={`${
+                          className={
                             index % 2 === 0 ? "bg-white" : "bg-gray-100"
-                          } hover:bg-gray-50`}
+                          }
                         >
-                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                            <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                              {currentPage * pageSize + index + 1}
-                            </p>
+                          <td className="text-center px-2 md:px-3 py-2 border border-gray-900 text-xs md:text-sm">
+                            {currentPage * pageSize + index + 1}
                           </td>
-                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                            <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                              {section?.class_name}
-                            </p>
+
+                          <td className="text-center px-2 md:px-3 py-2 border border-gray-900 text-xs md:text-sm">
+                            {section?.class_name}
                           </td>
-                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                            <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                              {formatDate(section?.start_date)}
-                            </p>
+
+                          <td className="text-center px-2 md:px-3 py-2 border border-gray-900 text-xs md:text-sm">
+                            {formatDate(section?.start_date)}
                           </td>
-                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                            <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                              {formatDate(section?.end_date)}
-                            </p>
+
+                          <td className="text-center px-2 md:px-3 py-2 border border-gray-900 text-xs md:text-sm">
+                            {formatDate(section?.end_date)}
                           </td>
-                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
-                            <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                              {section?.application_form_fee}
-                            </p>
+
+                          <td className="text-center px-2 md:px-3 py-2 border border-gray-900 text-xs md:text-sm">
+                            {formatDate(section?.age_start_date)}
                           </td>
-                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+
+                          <td className="text-center px-2 md:px-3 py-2 border border-gray-900 text-xs md:text-sm">
+                            {formatDate(section?.age_end_date)}
+                          </td>
+
+                          <td className="text-center px-2 md:px-3 py-2 border border-gray-900 text-xs md:text-sm">
+                            {section?.application_form_fee}
+                          </td>
+
+                          <td className="text-center px-2 md:px-3 py-2 border border-gray-900 text-xs md:text-sm">
                             <span
                               className={`font-semibold ${
                                 section?.publish === "N"
@@ -626,25 +655,28 @@ function ApplicationForMangement() {
                                 : "Publish"}
                             </span>
                           </td>
-                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+
+                          <td className="text-center px-2 md:px-3 py-2 border border-gray-900">
                             <button
-                              className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
+                              className="text-blue-600 hover:text-blue-800 text-sm"
                               onClick={() => handleEdit(section)}
                             >
                               <FontAwesomeIcon icon={faEdit} />
-                            </button>{" "}
+                            </button>
                           </td>
-                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+
+                          <td className="text-center px-2 md:px-3 py-2 border border-gray-900">
                             <button
-                              className="text-red-600 hover:text-red-800 hover:bg-transparent "
+                              className="text-red-600 hover:text-red-800 text-sm"
                               onClick={() => handleDelete(section.nac_id)}
                             >
                               <FontAwesomeIcon icon={faTrash} />
                             </button>
                           </td>
-                          <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+
+                          <td className="text-center px-2 md:px-3 py-2 border border-gray-900">
                             <button
-                              className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
+                              className="text-blue-600 hover:text-blue-800 text-sm"
                               onClick={() => handleView(section)}
                             >
                               <FontAwesomeIcon icon={faEye} />
@@ -653,16 +685,20 @@ function ApplicationForMangement() {
                         </tr>
                       ))
                     ) : (
-                      <div className=" absolute left-[1%] w-[100%]  text-center flex justify-center items-center mt-14">
-                        <div className=" text-center text-xl text-red-700">
+                      <tr>
+                        <td
+                          colSpan="11"
+                          className="text-center py-10 text-red-600"
+                        >
                           No data available.
-                        </div>
-                      </div>
+                        </td>
+                      </tr>
                     )}
                   </tbody>
                 </table>
               </div>
             </div>
+
             <div className=" flex justify-center  pt-2 -mb-3">
               <ReactPaginate
                 previousLabel={"Previous"}
@@ -795,6 +831,58 @@ function ApplicationForMangement() {
                         {endDateError && (
                           <div className="mt-1 text-red-500 text-xs">
                             {endDateError}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <div className="relative mb-3 flex items-center mx-4">
+                      <label htmlFor="agestartDate" className="w-1/2 mt-2">
+                        Age Start Date
+                      </label>
+
+                      <div className="w-full md:w-[60%]">
+                        <input
+                          type="date"
+                          id="agestartDate"
+                          value={ageStartDate}
+                          //   onChange={(e) => setStartDate(e.target.value)}
+                          onChange={(e) => {
+                            setAgeStartDate(e.target.value);
+                            setAgeStartDateError("");
+                          }}
+                          className="w-full border rounded px-3 py-2 text-sm"
+                        />
+
+                        {ageStartDateError && (
+                          <div className="mt-1 text-red-500 text-xs">
+                            {ageStartDateError}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="relative mb-3 flex items-center mx-4">
+                      <label htmlFor="ageendDate" className="w-1/2 mt-2">
+                        Age End Date
+                      </label>
+
+                      <div className="w-full md:w-[60%]">
+                        <input
+                          type="date"
+                          id="ageendDate"
+                          value={ageEndDate}
+                          //   onChange={(e) => setEndDate(e.target.value)}
+                          onChange={(e) => {
+                            setAgeEndDate(e.target.value);
+                            setAgeEndDateError("");
+                          }}
+                          min={ageStartDate}
+                          className="w-full border rounded px-3 py-2 text-sm"
+                        />
+
+                        {ageEndDateError && (
+                          <div className="mt-1 text-red-500 text-xs">
+                            {ageEndDateError}
                           </div>
                         )}
                       </div>
@@ -961,6 +1049,59 @@ function ApplicationForMangement() {
                       {endDateError && (
                         <div className="mt-1 text-red-500 text-xs">
                           {endDateError}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="relative mb-3 flex items-center mx-4">
+                    <label htmlFor="agestartDate" className="w-1/2 mt-2">
+                      Age Start Date
+                    </label>
+
+                    <div className="w-full md:w-[60%]">
+                      <input
+                        type="date"
+                        id="agestartDate"
+                        value={ageStartDate}
+                        //   onChange={(e) => setStartDate(e.target.value)}
+                        onChange={(e) => {
+                          setAgeStartDate(e.target.value);
+                          setAgeStartDateError("");
+                        }}
+                        className="w-full border rounded px-3 py-2 text-sm"
+                      />
+
+                      {ageStartDateError && (
+                        <div className="mt-1 text-red-500 text-xs">
+                          {ageStartDateError}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="relative mb-3 flex items-center mx-4">
+                    <label htmlFor="ageendDate" className="w-1/2 mt-2">
+                      Age End Date
+                    </label>
+
+                    <div className="w-full md:w-[60%]">
+                      <input
+                        type="date"
+                        id="ageendDate"
+                        value={ageEndDate}
+                        //   onChange={(e) => setEndDate(e.target.value)}
+                        onChange={(e) => {
+                          setAgeEndDate(e.target.value);
+                          setAgeEndDateError("");
+                        }}
+                        min={ageStartDate}
+                        className="w-full border rounded px-3 py-2 text-sm"
+                      />
+
+                      {ageEndDateError && (
+                        <div className="mt-1 text-red-500 text-xs">
+                          {ageEndDateError}
                         </div>
                       )}
                     </div>
