@@ -14,6 +14,7 @@ import { FaUserGroup } from "react-icons/fa6";
 import { FiDownload } from "react-icons/fi";
 import { FaFilePdf, FaEye, FaUser } from "react-icons/fa";
 import { useParams, useSearchParams } from "react-router-dom";
+import { MdOutlineRemoveRedEye } from "react-icons/md";
 
 function ViewStudentAdmissionForm() {
   const API_URL = import.meta.env.VITE_API_URL;
@@ -445,12 +446,11 @@ function ViewStudentAdmissionForm() {
     <div className=" w-[95%] mx-auto p-4">
       <ToastContainer />
       <div className="card rounded-md">
-        <div className="relative card-header mb-4 flex items-center justify-center">
+        {/* <div className="relative card-header mb-4 flex items-center justify-center">
           <h5 className="text-gray-700 text-md lg:text-lg">
             Admission Form Details
           </h5>
 
-          {/* Form ID – visually near heading but not affecting center */}
           <div className="bg-blue-50 border-l-2 border-r-2 border-pink-500 rounded-md shadow-md px-4 py-1 mx-auto">
             <div className="flex items-center justify-center gap-2 text-blue-800 font-medium">
               <label className="whitespace-nowrap">Form Id :</label>
@@ -458,32 +458,48 @@ function ViewStudentAdmissionForm() {
             </div>
           </div>
 
-          {/* Close icon */}
-          {/* <RxCross1
-            className="absolute right-3 text-xl text-red-600 cursor-pointer hover:bg-red-100 rounded"
-            onClick={() =>
-              navigate("/listOfAdmissionSuccessfulPayment", {
-                state: { class_id },
-              })
-            }
-          /> */}
           <RxCross1
             className="absolute right-3 text-xl text-red-600 cursor-pointer hover:bg-red-100 rounded"
-            // onClick={() => {
-            //   if (fromModule === "listOfStudentsForDocumentSubmission") {
-            //     navigate("/listOfStudentsForDocumentSubmission");
-            //   } else if (fromModule === "listOfStudentForSchedulingInterview") {
-            //     navigate("/listOfStudentForSchedulingInterview");
-            //   } else if (fromModule === "listOfStudentForVerfication") {
-            //     navigate("/listOfStudentForVerfication");
-            //   } else if (fromModule === "listOfStudentForApproval") {
-            //     navigate("/listOfStudentForApproval");
-            //   } else if (fromModule === "listofAdmissionSuccessfulPayment") {
-            //     navigate("/listofAdmissionSuccessfulPayment");
-            //   } else {
-            //     navigate(-1);
-            //   }
-            // }}
+            onClick={() => {
+              const stateData = { class_id };
+
+              if (fromModule === "listOfStudentsForDocumentSubmission") {
+                navigate("/listOfStudentsForDocumentSubmission");
+              } else if (fromModule === "listOfStudentForSchedulingInterview") {
+                navigate("/listOfStudentForSchedulingInterview");
+              } else if (fromModule === "listOfStudentForVerfication") {
+                navigate("/listOfStudentForVerfication");
+              } else if (fromModule === "listOfStudentForApproval") {
+                navigate("/listOfStudentForApproval", { state: stateData });
+              } else if (fromModule === "listofAdmissionSuccessfulPayment") {
+                navigate("/listofAdmissionSuccessfulPayment", {
+                  state: stateData,
+                });
+              } else {
+                navigate(-1);
+              }
+            }}
+          />
+        </div> */}
+        <div className="relative card-header mb-4 flex items-center">
+          {/* Heading - Left */}
+          <h5 className="text-gray-700 text-md lg:text-lg">
+            Admission Form Details
+          </h5>
+
+          {/* Form ID - Page Center */}
+          <div className="absolute left-1/2 -translate-x-1/2">
+            <div className="bg-blue-50 border-l-2 border-r-2 border-pink-500 rounded-md shadow-md px-4 py-1">
+              <div className="flex items-center justify-center gap-2 text-blue-800 font-medium">
+                <label className="whitespace-nowrap">Form Id :</label>
+                <span className="text-pink-500 font-semibold">{id}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Cross - Right */}
+          <RxCross1
+            className="absolute right-3 text-xl text-red-600 cursor-pointer hover:bg-red-100 rounded"
             onClick={() => {
               const stateData = { class_id };
 
@@ -1156,7 +1172,7 @@ function ViewStudentAdmissionForm() {
                             title="View"
                             onClick={() => openPreview(file)}
                           >
-                            <FaEye className="w-4 h-4" />
+                            <MdOutlineRemoveRedEye className="w-4 h-4" />
                           </button>
 
                           {/* <button
