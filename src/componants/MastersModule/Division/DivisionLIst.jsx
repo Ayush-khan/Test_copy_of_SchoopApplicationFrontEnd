@@ -129,7 +129,7 @@ function DivisionList() {
           Authorization: `Bearer ${token}`,
         },
       });
-      ;
+
     } catch (error) {
       console.error("Error fetching data:", error);
     }
