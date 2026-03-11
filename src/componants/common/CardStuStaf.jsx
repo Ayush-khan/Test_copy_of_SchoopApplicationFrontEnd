@@ -1,10 +1,5 @@
 import styles from "../../CSS/DashbordCss/Card.module.css";
-import { FaArrowRightLong } from "react-icons/fa6";
 import { FaSpinner } from "react-icons/fa"; // Import a spinner icon
-import { useEffect, useState } from "react";
-import { toast } from "react-toastify";
-import axios from "axios";
-import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 
 const CardStuStaf = ({
@@ -14,54 +9,14 @@ const CardStuStaf = ({
   color,
   icon,
   roleId,
+  sortName,
   badge,
   onCardClick,
 }) => {
-  const API_URL = import.meta.env.VITE_API_URL;
-  const [sortNameCookie, setSortNameCookie] = useState("");
-  const [regId, setRegId] = useState(null);
-  const [roleIdT, setRoleId] = useState(null);
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    fetchRoleId();
-  }, []);
-
-  const isLoading = !(presentValue || TotalValue);
-  const fetchRoleId = async () => {
-    const token = localStorage.getItem("authToken");
-
-    if (!token) {
-      toast.error("Authentication token not found Please login again");
-
-      return;
-    }
-
-    try {
-      const response = await axios.get(`${API_URL}/api/sessionData`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      const roleId = response?.data?.user?.role_id;
-      console.log("role id", response?.data?.user?.role_id);
-
-      const regId = response?.data?.user?.reg_id;
-      console.log("reg id", response?.data?.user?.reg_id);
-      setRegId(regId);
-      setSortNameCookie(response?.data?.custom_claims?.short_name);
-      if (roleId) {
-        setRoleId(roleId);
-      } else {
-        console.warn("role_id not found in sessionData response");
-      }
-    } catch (error) {
-      console.error("Failed to fetch session data:", error);
-    }
-  };
-
-  const isSacsM = sortNameCookie === "SACS" && roleIdT === "M";
+  const isLoading =
+    (presentValue === undefined || presentValue === null) &&
+    (TotalValue === undefined || TotalValue === null);
+  const isSacsM = sortName === "SACS" && roleId === "M";
 
   const renderLoader = () => (
     <FaSpinner className="animate-spin text-blue-500" />

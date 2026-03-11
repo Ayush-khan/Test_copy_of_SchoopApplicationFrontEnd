@@ -210,7 +210,7 @@ const EventCard = () => {
 
   useEffect(() => {
     fetchRoleId();
-  });
+  }, []);
 
   const fetchRoleId = async () => {
     const token = localStorage.getItem("authToken");
@@ -435,7 +435,7 @@ const EventCard = () => {
               <div className="relative left-[1%] w-[100%] text-center flex justify-center items-center mt-10">
                 <div className="flex flex-col items-center justify-center text-center">
 
-                  {roleId === "A" || roleId === "M" && (
+                  {(roleId === "A" || roleId === "M") && (
                     <>
                       <p className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500">
                         Create event list.

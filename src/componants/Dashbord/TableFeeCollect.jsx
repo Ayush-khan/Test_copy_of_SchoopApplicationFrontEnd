@@ -233,8 +233,8 @@ function ListFinal() {
   const filteredInstallments = selectedAccount
     ? installments[selectedAccount] || []
     : Object.entries(installments).flatMap(([account, data]) =>
-        data.map((installment) => ({ ...installment, account }))
-      );
+      data.map((installment) => ({ ...installment, account }))
+    );
 
   const parseAmount = (amt) => parseFloat(amt.replace(/,/g, "")) || 0;
 
@@ -338,17 +338,15 @@ function ListFinal() {
               filteredInstallments.map((installment, index) => (
                 <div
                   key={`${installment.account}-${installment.installment}-${index}`}
-                  className={`grid grid-cols-3 px-2 py-2 border-b border-gray-200 ${
-                    index % 2 === 0 ? "bg-white" : "bg-gray-100"
-                  }`}
+                  className={`grid grid-cols-3 px-2 py-2 border-b border-gray-200 ${index % 2 === 0 ? "bg-white" : "bg-gray-100"
+                    }`}
                 >
                   {!selectedAccount && (
                     <div className="text-black/80">{installment.account}</div>
                   )}
                   <div
-                    className={`text-black/80 ${
-                      selectedAccount ? "col-start-1" : "text-center"
-                    }`}
+                    className={`text-black/80 ${selectedAccount ? "col-start-1" : "text-center"
+                      }`}
                   >
                     {installment.installment}
                   </div>
