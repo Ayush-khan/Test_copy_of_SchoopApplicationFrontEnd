@@ -728,8 +728,8 @@ Library`;
                                   Due Date
                                 </th>
 
-                                <th className="min-w-[30px] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
-                                  Count
+                                <th className="min-w-[20px] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold">
+                                  Remark Count
                                 </th>
 
                                 {selectedRows.length > 0 && (

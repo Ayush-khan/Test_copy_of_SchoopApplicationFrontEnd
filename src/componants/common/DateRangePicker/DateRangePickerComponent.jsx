@@ -1,114 +1,75 @@
 import React, { useState, useEffect } from "react";
+import { DateRangePicker } from "react-date-range";
 import { DateRange } from "react-date-range";
-import { format, startOfWeek, endOfWeek } from "date-fns";
+import {
+  format,
+  startOfWeek,
+  endOfWeek,
+  startOfQuarter,
+  endOfQuarter,
+  startOfYear,
+  endOfYear,
+} from "date-fns";
 import "react-date-range/dist/styles.css";
 import "react-date-range/dist/theme/default.css";
 
 const DateRangePickerComponent = ({ onDateChange }) => {
-  /* 🔐 Prevent timezone issues */
-  const safeDate = (date = new Date()) => {
-    const d = new Date(date);
-    d.setHours(12, 0, 0, 0);
-    return d;
-  };
-
-  const today = safeDate();
+  const today = new Date();
   const formattedToday = format(today, "yyyy-MM-dd");
 
   const [showPicker, setShowPicker] = useState(false);
-
-  // const [dateRange, setDateRange] = useState([
-  //   { startDate: today, endDate: today, key: "selection" },
-  // ]);
-
-  // const [tempDateRange, setTempDateRange] = useState(dateRange);
-  // const [selectedPreset, setSelectedPreset] = useState("Today");
-
   const [dateRange, setDateRange] = useState([
-    { startDate: null, endDate: null, key: "selection" },
+    { startDate: today, endDate: today, key: "selection" },
   ]);
 
-  const [tempDateRange, setTempDateRange] = useState([
-    { startDate: null, endDate: null, key: "selection" },
-  ]);
-  const [selectedPreset, setSelectedPreset] = useState("");
+  const [tempDateRange, setTempDateRange] = useState(dateRange);
+  const [selectedPreset, setSelectedPreset] = useState("Today");
 
-  /* Correct preset ranges */
   const presetOptions = [
     {
       label: "Today",
-      range: [safeDate(), safeDate()],
+      range: [new Date(), new Date()],
     },
     {
       label: "Yesterday",
       range: [
-        safeDate(
-          new Date(today.getFullYear(), today.getMonth(), today.getDate() - 1),
-        ),
-        safeDate(
-          new Date(today.getFullYear(), today.getMonth(), today.getDate() - 1),
-        ),
+        new Date(new Date().setDate(today.getDate() - 1)),
+        new Date(new Date().setDate(today.getDate() - 1)),
       ],
     },
+    { label: "This Week", range: [startOfWeek(today), endOfWeek(today)] },
     {
-      label: "Last 1 Week",
+      label: "This Month",
+      range: [new Date(today.getFullYear(), today.getMonth(), 1), today],
+    },
+    {
+      label: "Last Month",
       range: [
-        safeDate(
-          new Date(today.getFullYear(), today.getMonth(), today.getDate() - 6),
-        ),
-        safeDate(today),
+        new Date(today.getFullYear(), today.getMonth() - 1, 1),
+        new Date(today.getFullYear(), today.getMonth(), 0),
       ],
     },
     {
-      label: "Last 30 Days",
+      label: "This Quarter",
+      range: [startOfQuarter(today), endOfQuarter(today)],
+    },
+    {
+      label: "This Half Year",
       range: [
-        safeDate(
-          new Date(today.getFullYear(), today.getMonth(), today.getDate() - 29),
-        ),
-        safeDate(today),
+        new Date(today.getFullYear(), 3, 1),
+        new Date(today.getFullYear(), 8, 30),
       ],
     },
     {
-      label: "Last 90 Days",
-      range: [
-        safeDate(
-          new Date(today.getFullYear(), today.getMonth(), today.getDate() - 89),
-        ),
-        safeDate(today),
-      ],
+      label: "This Year",
+      range: [startOfYear(today), endOfYear(today)],
     },
-    {
-      label: "Last 180 Days",
-      range: [
-        safeDate(
-          new Date(
-            today.getFullYear(),
-            today.getMonth(),
-            today.getDate() - 179,
-          ),
-        ),
-        safeDate(today),
-      ],
-    },
-    {
-      label: "Last 1 Year",
-      range: [
-        safeDate(
-          new Date(today.getFullYear() - 1, today.getMonth(), today.getDate()),
-        ),
-        safeDate(today),
-      ],
-    },
-    {
-      label: "Custom Range",
-      range: null,
-    },
+    { label: "Custom Range", range: null },
   ];
 
-  /* Initial load */
-  // useEffect(() => {
-  //   onDateChange(formattedToday, formattedToday);
-  // }, []);
+  useEffect(() => {
+    onDateChange(formattedToday, formattedToday);
+  }, []);
 
   const handlePresetSelect = (preset) => {
     setSelectedPreset(preset.label);
@@ -126,24 +87,7 @@ const DateRangePickerComponent = ({ onDateChange }) => {
     }
   };
 
-  /* ✅ Apply only on button click */
-  // const handleApply = () => {
-  //   const searchFrom = format(tempDateRange[0].startDate, "yyyy-MM-dd");
-  //   const searchTo = format(tempDateRange[0].endDate, "yyyy-MM-dd");
-
-  //   setDateRange(tempDateRange);
-  //   onDateChange(searchFrom, searchTo);
-  //   setShowPicker(false);
-  // };
-
-  // const formatDate = (date) => format(date, "MMMM d, yyyy");
-
   const handleApply = () => {
-    if (!tempDateRange[0].startDate || !tempDateRange[0].endDate) {
-      alert("Please select a date range");
-      return;
-    }
-
     const searchFrom = format(tempDateRange[0].startDate, "yyyy-MM-dd");
     const searchTo = format(tempDateRange[0].endDate, "yyyy-MM-dd");
 
@@ -151,37 +95,33 @@ const DateRangePickerComponent = ({ onDateChange }) => {
     onDateChange(searchFrom, searchTo);
     setShowPicker(false);
   };
-  const formatDate = (date) => {
-    if (!date) return "";
-    return format(date, "MMMM d, yyyy");
-  };
+
+  const formatDate = (date) => format(date, "MMMM d, yyyy");
 
   return (
-    <div className="relative">
+    <div className="relative ">
       <div
-        className="border border-gray-300 rounded-lg px-4 py-2 cursor-pointer shadow-md bg-white flex items-center gap-2 hover:ring-2 hover:ring-blue-500 transition-all"
+        className="border border-gray-300 rounded-lg px-4 py-2 cursor-pointer shadow-md bg-white flex items-center gap-2 hover:ring-2 hover:ring-blue-500 transition-all duration-200"
         onClick={() => setShowPicker(!showPicker)}
       >
-        <span className="text-gray-500">📅</span>
+        <span className="text-gray-500 font-medium">📅</span>
         <span className="text-gray-800">
-          {/* {formatDate(dateRange[0].startDate)} -{" "}
-          {formatDate(dateRange[0].endDate)} */}
-          {dateRange[0].startDate && dateRange[0].endDate
-            ? `${formatDate(dateRange[0].startDate)} - ${formatDate(dateRange[0].endDate)}`
-            : "Select Date Range"}
+          {`${formatDate(dateRange[0]?.startDate)} - ${formatDate(
+            dateRange[0]?.endDate,
+          )}`}
         </span>
       </div>
 
       {showPicker && (
-        <div className="absolute top-12 left-0 bg-white border rounded-lg shadow-lg z-10 w-full md:w-[70%]">
+        <div className="absolute top-12 text-black left-0 bg-white border border-gray-300 rounded-lg shadow-lg z-1 w-full md:w-[70%]">
           <div className="flex flex-col p-3 gap-2">
-            {presetOptions.map((preset) => (
+            {presetOptions.map((preset, index) => (
               <button
-                key={preset.label}
-                className={`px-3 py-1 rounded-md ${
+                key={index}
+                className={`px-3 py-1 text-md rounded-md transition-all duration-300 ${
                   selectedPreset === preset.label
                     ? "bg-blue-500 text-white"
-                    : "bg-gray-100 hover:bg-blue-100"
+                    : "bg-gray-100 hover:bg-blue-100 hover:text-blue-500 hover:font-medium"
                 }`}
                 onClick={() => handlePresetSelect(preset)}
               >
@@ -189,27 +129,37 @@ const DateRangePickerComponent = ({ onDateChange }) => {
               </button>
             ))}
           </div>
-
           {selectedPreset === "Custom Range" && (
-            <div className="absolute top-0 left-full bg-white border rounded-lg shadow-md">
+            <div
+              className="
+            absolute top-0 left-full 
+            bg-white border border-gray-300 rounded-lg shadow-md 
+            w-0  
+            [&_.rdrDay]:!bg-transparent 
+            [&_.rdrDay]:!shadow-none 
+            [&_.rdrDayHovered]:!bg-transparent 
+            [&_.rdrDayHovered]:!shadow-none
+          "
+            >
               <DateRange
                 onChange={(item) => setTempDateRange([item.selection])}
                 ranges={tempDateRange}
                 moveRangeOnFirstSelection={false}
-                editableDateInputs
+                editableDateInputs={true}
+                showSelectionPreview={true}
               />
             </div>
           )}
 
-          <div className="flex justify-end p-2 border-t gap-2">
+          <div className="flex justify-end p-2 border-t border-gray-200 gap-2">
             <button
-              className="bg-green-500 text-white px-4 py-2 rounded"
+              className="bg-green-400 text-white px-4 py-2 rounded-md hover:bg-green-500 font-medium"
               onClick={handleApply}
             >
               Apply
             </button>
             <button
-              className="bg-red-500 text-white px-4 py-2 rounded"
+              className="bg-red-400 text-white px-4 py-2 rounded-md hover:bg-red-500 font-medium "
               onClick={() => setShowPicker(false)}
             >
               Cancel

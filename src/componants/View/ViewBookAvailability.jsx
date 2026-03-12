@@ -46,11 +46,12 @@ const ViewBookAvailability = () => {
   const previousPageRef = useRef(0);
   const prevSearchTermRef = useRef("");
 
-  // useEffect(() => {
-  //   fetchCategoryGroup();
-  //   fetchCategoryName();
+  useEffect(() => {
+    // fetchCategoryGroup();
+    // fetchCategoryName();
 
-  // }, []);
+    handleSearch();
+  }, []);
 
   useEffect(() => {
     fetchCategoryGroup();
@@ -797,7 +798,7 @@ const ViewBookAvailability = () => {
                           ) : (
                             <div className=" absolute left-[1%] w-[100%]  text-center flex justify-center items-center mt-14">
                               <div className=" text-center text-xl text-red-700">
-                                Oops! No data found..
+                                No data available.
                               </div>
                             </div>
                           )}

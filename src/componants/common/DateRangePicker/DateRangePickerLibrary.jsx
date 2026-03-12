@@ -17,14 +17,23 @@ const DateRangePickerComponent = ({ onDateChange }) => {
 
   const [showPicker, setShowPicker] = useState(false);
 
+  // const [dateRange, setDateRange] = useState([
+  //   { startDate: today, endDate: today, key: "selection" },
+  // ]);
+
+  // const [tempDateRange, setTempDateRange] = useState(dateRange);
+  // const [selectedPreset, setSelectedPreset] = useState("Today");
+
   const [dateRange, setDateRange] = useState([
-    { startDate: today, endDate: today, key: "selection" },
+    { startDate: null, endDate: null, key: "selection" },
   ]);
 
-  const [tempDateRange, setTempDateRange] = useState(dateRange);
-  const [selectedPreset, setSelectedPreset] = useState("Today");
+  const [tempDateRange, setTempDateRange] = useState([
+    { startDate: null, endDate: null, key: "selection" },
+  ]);
+  const [selectedPreset, setSelectedPreset] = useState("");
 
-  /* ✅ Correct preset ranges */
+  /* Correct preset ranges */
   const presetOptions = [
     {
       label: "Today",
@@ -97,9 +106,9 @@ const DateRangePickerComponent = ({ onDateChange }) => {
   ];
 
   /* Initial load */
-  useEffect(() => {
-    onDateChange(formattedToday, formattedToday);
-  }, []);
+  // useEffect(() => {
+  //   onDateChange(formattedToday, formattedToday);
+  // }, []);
 
   const handlePresetSelect = (preset) => {
     setSelectedPreset(preset.label);
@@ -118,7 +127,23 @@ const DateRangePickerComponent = ({ onDateChange }) => {
   };
 
   /* ✅ Apply only on button click */
+  // const handleApply = () => {
+  //   const searchFrom = format(tempDateRange[0].startDate, "yyyy-MM-dd");
+  //   const searchTo = format(tempDateRange[0].endDate, "yyyy-MM-dd");
+
+  //   setDateRange(tempDateRange);
+  //   onDateChange(searchFrom, searchTo);
+  //   setShowPicker(false);
+  // };
+
+  // const formatDate = (date) => format(date, "MMMM d, yyyy");
+
   const handleApply = () => {
+    if (!tempDateRange[0].startDate || !tempDateRange[0].endDate) {
+      alert("Please select a date range");
+      return;
+    }
+
     const searchFrom = format(tempDateRange[0].startDate, "yyyy-MM-dd");
     const searchTo = format(tempDateRange[0].endDate, "yyyy-MM-dd");
 
@@ -126,8 +151,10 @@ const DateRangePickerComponent = ({ onDateChange }) => {
     onDateChange(searchFrom, searchTo);
     setShowPicker(false);
   };
-
-  const formatDate = (date) => format(date, "MMMM d, yyyy");
+  const formatDate = (date) => {
+    if (!date) return "";
+    return format(date, "MMMM d, yyyy");
+  };
 
   return (
     <div className="relative">
@@ -137,8 +164,11 @@ const DateRangePickerComponent = ({ onDateChange }) => {
       >
         <span className="text-gray-500">📅</span>
         <span className="text-gray-800">
-          {formatDate(dateRange[0].startDate)} -{" "}
-          {formatDate(dateRange[0].endDate)}
+          {/* {formatDate(dateRange[0].startDate)} -{" "}
+          {formatDate(dateRange[0].endDate)} */}
+          {dateRange[0].startDate && dateRange[0].endDate
+            ? `${formatDate(dateRange[0].startDate)} - ${formatDate(dateRange[0].endDate)}`
+            : "Select Date Range"}
         </span>
       </div>
 
@@ -148,10 +178,11 @@ const DateRangePickerComponent = ({ onDateChange }) => {
             {presetOptions.map((preset) => (
               <button
                 key={preset.label}
-                className={`px-3 py-1 rounded-md ${selectedPreset === preset.label
-                  ? "bg-blue-500 text-white"
-                  : "bg-gray-100 hover:bg-blue-100"
-                  }`}
+                className={`px-3 py-1 rounded-md ${
+                  selectedPreset === preset.label
+                    ? "bg-blue-500 text-white"
+                    : "bg-gray-100 hover:bg-blue-100"
+                }`}
                 onClick={() => handlePresetSelect(preset)}
               >
                 {preset.label}

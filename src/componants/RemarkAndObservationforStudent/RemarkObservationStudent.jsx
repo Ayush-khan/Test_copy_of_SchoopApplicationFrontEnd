@@ -18,7 +18,7 @@ import CreateRemarkObservation from "./CreateRemarkObservation";
 import CreateRemarkObservationStudent from "./CreateRemarkObservationStudent";
 // import { PiCertificateBold } from "react-icons/pi";
 import { MdOutlineRemoveRedEye } from "react-icons/md";
-import { FaCheck, FaCheckCircle, FaCheckDouble } from "react-icons/fa";
+import { FaCheck, FaCheckCircle } from "react-icons/fa";
 import { ImDownload } from "react-icons/im";
 import { Navigate, useNavigate } from "react-router-dom";
 import { IoMdSend } from "react-icons/io";
@@ -52,40 +52,7 @@ function RemarkObservationStudent() {
   const navigate = useNavigate();
   const [showModal, setShowModal] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
-  const renderWhatsAppStatus = (status) => {
-    if (!status) return <span className="text-gray-500">-</span>;
 
-    switch (status) {
-      case "sent":
-        return (
-          <span className="flex items-center justify-center gap-1 text-blue-600 font-medium">
-            <FaCheck className="text-blue-600" />
-            Sent
-          </span>
-        );
-
-      case "delivered":
-        return (
-          <span className="flex items-center justify-center gap-1 text-gray-800 font-semibold">
-            <FaCheckDouble className="text-gray-700" />
-            Delivered
-          </span>
-        );
-
-      case "read":
-        return (
-          <span className="flex items-center justify-center gap-1 text-blue-800 font-semibold">
-            <FaCheckDouble className="text-blue-600" />
-            Read
-          </span>
-        );
-
-
-
-      default:
-        return <span className="text-gray-500"></span>;
-    }
-  };
   const openModal = (file) => {
     setSelectedFile(file);
     setShowModal(true);
@@ -222,8 +189,9 @@ function RemarkObservationStudent() {
           (name) => name.charAt(0).toUpperCase() + name.slice(1).toLowerCase(),
         ) // optional: capitalize
         .join(" "),
-      classDivision: `${subject?.classname || ""} - ${subject?.sectionname || ""
-        }`,
+      classDivision: `${subject?.classname || ""} - ${
+        subject?.sectionname || ""
+      }`,
       attachments: subject.files || [],
     });
     setShowViewModal(true);
@@ -285,8 +253,9 @@ function RemarkObservationStudent() {
 
     // Set teacher name immediately from classToDelete
     setCurrestSubjectNameForDelete(
-      `${classToDelete?.first_name || ""} ${classToDelete?.mid_name || ""} ${classToDelete?.last_name || ""
-        }`.trim(),
+      `${classToDelete?.first_name || ""} ${classToDelete?.mid_name || ""} ${
+        classToDelete?.last_name || ""
+      }`.trim(),
     );
     setShowDeleteModal(true);
   };
@@ -498,7 +467,7 @@ function RemarkObservationStudent() {
       if (response.status === 200 && response.data.success) {
         toast.success(
           response?.data?.message ||
-          `Message sent successfully for Unique ID: ${uniqueId}`,
+            `Message sent successfully for Unique ID: ${uniqueId}`,
         );
         handleSearch();
       } else {
@@ -545,8 +514,9 @@ function RemarkObservationStudent() {
   const filteredSections = notices.filter((section) => {
     const remarkType = section?.remark_type?.toLowerCase() || "";
     const noticeDesc = section?.remark_subject?.toLowerCase() || "";
-    const fullName = `${section?.first_name || ""} ${section?.mid_name || ""} ${section?.last_name || ""
-      }`
+    const fullName = `${section?.first_name || ""} ${section?.mid_name || ""} ${
+      section?.last_name || ""
+    }`
       .toLowerCase()
       .trim();
     const publishDate = section?.publish_date?.toLowerCase().trim() || "";
@@ -624,10 +594,11 @@ function RemarkObservationStudent() {
   const tabs = [
     { id: "Manage", label: "Manage" },
     { id: "CreateRemarkObservation", label: "Create" },
-    roleId !== "T" && {
-      id: "CreateRemarkObservationStudent",
-      label: "Create for Student",
-    },
+    roleId !== "T" &&
+      roleId !== "L" && {
+        id: "CreateRemarkObservationStudent",
+        label: "Create for Student",
+      },
   ].filter(Boolean);
 
   return (
@@ -657,8 +628,9 @@ function RemarkObservationStudent() {
           {tabs.map(({ id, label }) => (
             <li
               key={id}
-              className={`md:-ml-7 shadow-md ${activeTab === id ? "text-blue-500 font-bold" : ""
-                }`}
+              className={`md:-ml-7 shadow-md ${
+                activeTab === id ? "text-blue-500 font-bold" : ""
+              }`}
             >
               <button
                 onClick={() => handleTabChange(id)}
@@ -721,20 +693,7 @@ function RemarkObservationStudent() {
                             <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                               Subject of Remark
                             </th>
-
                             <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                              Acknowledge
-                            </th>
-                            <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                              Viewed
-                            </th>
-                            <th className="px-2 py-2 text-center  border border-gray-300 text-sm font-semibold">
-                              Message Status
-                            </th>
-
-                            <th className="px-2 py-2 text-center  border border-gray-300 text-sm font-semibold">
-                              WhatsApp Status
-                            </th> <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                               Edit/View
                             </th>
                             <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
@@ -742,6 +701,12 @@ function RemarkObservationStudent() {
                             </th>
                             <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                               Publish
+                            </th>
+                            <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                              Acknowledge
+                            </th>
+                            <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                              Viewed
                             </th>
                           </tr>
                         </thead>
@@ -759,13 +724,14 @@ function RemarkObservationStudent() {
                                   {currentPage * pageSize + index + 1}
                                 </td>
                                 <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                  {`${subject?.first_name || ""} ${subject?.mid_name || ""
-                                    } ${subject?.last_name || ""}`
+                                  {`${subject?.first_name || ""} ${
+                                    subject?.mid_name || ""
+                                  } ${subject?.last_name || ""}`
                                     .split(" ")
                                     .map((word) =>
                                       word
                                         ? word.charAt(0).toUpperCase() +
-                                        word.slice(1).toLowerCase()
+                                          word.slice(1).toLowerCase()
                                         : "",
                                     )
                                     .join(" ")
@@ -778,10 +744,10 @@ function RemarkObservationStudent() {
                                 </td>
                                 <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                   {subject?.publish_date &&
-                                    subject.publish_date !== "0000-00-00"
+                                  subject.publish_date !== "0000-00-00"
                                     ? new Date(
-                                      subject.publish_date,
-                                    ).toLocaleDateString("en-GB")
+                                        subject.publish_date,
+                                      ).toLocaleDateString("en-GB")
                                     : ""}
                                 </td>
                                 <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
@@ -789,51 +755,6 @@ function RemarkObservationStudent() {
                                 </td>
                                 <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                   {subject?.remark_subject}
-                                </td>
-
-
-                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                  {subject.acknowledge == "Y" && (
-                                    <FontAwesomeIcon
-                                      icon={faThumbsUp}
-                                      className="text-black text-base"
-                                    />
-                                  )}
-                                </td>
-                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                  {subject.read_status == 1 && (
-                                    <FontAwesomeIcon
-                                      icon={faBookReader}
-                                      style={{ color: "#C03078" }}
-                                      className="text-base"
-                                    />
-                                  )}
-                                </td>
-                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                  {/* Show thi si Send button if published and messages pending */}
-                                  {
-                                    subject.sms_sent === "Y" &&
-                                      subject?.whatsapp_status === "failed" ? (
-                                      <div className="flex flex-col items-center gap-1">
-                                        <span className="text-green-600 font-semibold text-sm">
-                                          Message sent
-                                        </span>
-                                      </div>
-                                    ) : subject?.sms_sent === "Y" &&
-                                      (subject?.whatsapp_status === "sent" ||
-                                        subject?.whatsapp_status === "read" ||
-                                        subject?.whatsapp_status === "delivered") ? (
-                                      // Show 'S' when published and no pending messages
-                                      <div className="flex flex-col items-center">
-                                        <div className="group relative flex items-center justify-center gap-1 text-green-600 font-semibold text-sm cursor-default">
-                                          Whatsapp Sent {/* Tooltip */}
-                                        </div>
-                                      </div>
-                                    ) : subject.sms_sent === "N" ? null : null // Show Publish button when not published
-                                  }
-                                </td>
-                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                  {renderWhatsAppStatus(subject?.whatsapp_status)}
                                 </td>
                                 <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
                                   {subject.publish === "Y" ? (
@@ -935,8 +856,8 @@ function RemarkObservationStudent() {
                                 <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                   {/* Show Send button if published and failed_sms_count > 0 */}
                                   {subject.remark_type === "Remark" &&
-                                    subject.publish === "Y" &&
-                                    subject.failed_sms_count > 0 ? (
+                                  subject.publish === "Y" &&
+                                  subject.failed_sms_count > 0 ? (
                                     <div className="flex flex-col items-center gap-1">
                                       <span className="text-red-600 font-semibold text-sm">
                                         {subject.failed_sms_count}
@@ -949,10 +870,11 @@ function RemarkObservationStudent() {
                                         disabled={
                                           sendingSMS[subject?.remark_id]
                                         }
-                                        className={`flex items-center justify-center px-3 py-1 gap-1 text-xs md:text-sm font-medium rounded-md transition duration-200 ${sendingSMS[subject?.remark_id]
-                                          ? "bg-blue-300 cursor-not-allowed"
-                                          : "bg-blue-500 hover:bg-blue-600 text-white"
-                                          }`}
+                                        className={`flex items-center justify-center px-3 py-1 gap-1 text-xs md:text-sm font-medium rounded-md transition duration-200 ${
+                                          sendingSMS[subject?.remark_id]
+                                            ? "bg-blue-300 cursor-not-allowed"
+                                            : "bg-blue-500 hover:bg-blue-600 text-white"
+                                        }`}
                                         onClick={() =>
                                           handleSend(subject?.remark_id)
                                         }
@@ -1010,6 +932,24 @@ function RemarkObservationStudent() {
                                       <FaCheck className="text-lg md:text-xl" />
                                     </button>
                                   ) : null}
+                                </td>
+
+                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                  {subject.acknowledge == "Y" && (
+                                    <FontAwesomeIcon
+                                      icon={faThumbsUp}
+                                      className="text-black text-base"
+                                    />
+                                  )}
+                                </td>
+                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                  {subject.read_status == 1 && (
+                                    <FontAwesomeIcon
+                                      icon={faBookReader}
+                                      style={{ color: "#C03078" }}
+                                      className="text-base"
+                                    />
+                                  )}
                                 </td>
                               </tr>
                             ))
@@ -1074,13 +1014,15 @@ function RemarkObservationStudent() {
             </div>
           )}
 
-          {roleId !== "T" && activeTab === "CreateRemarkObservationStudent" && (
-            <div>
-              <CreateRemarkObservationStudent
-                onSaveSuccess={() => setActiveTab("Manage")}
-              />
-            </div>
-          )}
+          {roleId !== "T" &&
+            roleId !== "L" &&
+            activeTab === "CreateRemarkObservationStudent" && (
+              <div>
+                <CreateRemarkObservationStudent
+                  onSaveSuccess={() => setActiveTab("Manage")}
+                />
+              </div>
+            )}
         </div>
       </div>
 
@@ -1446,7 +1388,7 @@ function RemarkObservationStudent() {
 
                     <div className="flex-1 space-y-2">
                       {remarkData.attachments &&
-                        remarkData.attachments.length > 0 ? (
+                      remarkData.attachments.length > 0 ? (
                         remarkData.attachments.map((file, index) => {
                           const fileUrl = file.file_url;
                           const fileName =
