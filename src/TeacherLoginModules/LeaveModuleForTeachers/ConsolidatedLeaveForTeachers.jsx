@@ -512,7 +512,7 @@ const ConsolidatedLeaveForTeachers = () => {
                             <tr>
                               <td colSpan={9} className="py-20">
                                 <div className="text-center text-red-700 text-base sm:text-lg">
-                                  No data availble.
+                                  No data available.
                                 </div>
                               </td>
                             </tr>
