@@ -27,7 +27,8 @@ const BooksNonReturnReport = () => {
 
   const [timetable, setTimetable] = useState([]);
 
-  const [selectedType, setSelectedType] = useState("student");
+  // const [selectedType, setSelectedType] = useState("student");
+  const [selectedType, setSelectedType] = useState("");
 
   const pageSize = 10;
   const [pageCount, setPageCount] = useState(0);
@@ -73,6 +74,7 @@ const BooksNonReturnReport = () => {
 
     return () => clearTimeout(timer);
   }, [
+    selectedType,
     selectedSectionId,
     selectedStudentId,
     selectedStaffId,
@@ -88,6 +90,7 @@ const BooksNonReturnReport = () => {
     }
 
     const hasAnyFilter =
+      selectedType ||
       selectedStudentId ||
       selectedSectionId ||
       selectedStaffId ||
@@ -101,6 +104,7 @@ const BooksNonReturnReport = () => {
   }, [debouncedSearchTrigger]);
 
   useEffect(() => {
+    handleSearch();
     fetchDataRoleId();
   }, []);
 
@@ -189,6 +193,7 @@ const BooksNonReturnReport = () => {
 
   const handleStudentSelect = (selectedOption) => {
     setStudentError("");
+    setSelectedStaff("");
     setSelectedStudent(selectedOption);
 
     if (selectedOption) {
@@ -217,17 +222,19 @@ const BooksNonReturnReport = () => {
     const params =
       selectedType === "student"
         ? {
-            mtype: "S",
+            type: "S",
             class_id: selectedStudentId,
             section_id: selectedSectionId,
           }
         : {
-            mtype: "T",
+            type: "T",
           };
 
     try {
       const response = await axios.post(
-        `${API_URL}/api/get_library_members`,
+        `${API_URL}/api/members/issued_books`,
+
+        // get_library_members
         params,
         {
           headers: {
@@ -238,6 +245,7 @@ const BooksNonReturnReport = () => {
 
       // console.log("response library members", response.data);
       setStafflist(response.data);
+      // console.log("staff list", response.data);
     } catch (error) {
       toast.error("Error fetching library members");
       console.error("Error fetching library members:", error);
@@ -289,11 +297,11 @@ const BooksNonReturnReport = () => {
     setShowStudentReport(false);
   }, [selectedType]);
 
-  useEffect(() => {
-    const today = new Date().toISOString().split("T")[0];
-    setSearchFrom(today);
-    setSearchTo(today);
-  }, []);
+  // useEffect(() => {
+  //   const today = new Date().toISOString().split("T")[0];
+  //   setSearchFrom(today);
+  //   setSearchTo(today);
+  // }, []);
   const handleDateChange = (from, to) => {
     setSearchFrom(from);
     setSearchTo(to);
@@ -302,10 +310,16 @@ const BooksNonReturnReport = () => {
   };
 
   const handleSearch = async ({ clearAll = false } = {}) => {
+    if (!clearAll && !selectedType) {
+      toast.info("Please select member type");
+      return;
+    }
     // STUDENT VALIDATION
-    if (!clearAll && selectedType === "student") {
+    if (!clearAll && selectedType === "student" && !grn_no) {
       if (!selectedStudentId || !selectedSectionId) {
-        toast.error("Please select a class for the student.");
+        toast.info(
+          "Please select a class or enter a GRN number to view non return books.",
+        );
         return;
       }
     }
@@ -826,14 +840,25 @@ const BooksNonReturnReport = () => {
 
                   <div className="flex flex-col gap-1 w-[400px]">
                     <label className="text-md">Date</label>
-                    <DateRangePickerComponent onDateChange={handleDateChange} />
+                    <DateRangePickerLibrary onDateChange={handleDateChange} />
                   </div>
                 </>
               )}
-            </div>
-
+            </div>{" "}
             <>
               <div className="w-full  p-2">
+                {timetable.length > 0 && (
+                  <div className="flex justify-end items-center gap-2 font-medium">
+                    <span>
+                      <span className="text-blue-800 ml-1">
+                        Total Not Retured Books :{" "}
+                      </span>
+                      <span className="text-pink-600 ml-1">
+                        {filteredSections.length}
+                      </span>
+                    </span>
+                  </div>
+                )}
                 {timetable.length > 0 && (
                   <>
                     <div className="card mx-auto lg:w-full shadow-lg">
@@ -872,50 +897,6 @@ const BooksNonReturnReport = () => {
                           }}
                         >
                           <table className="min-w-full leading-normal table-auto">
-                            {/* <thead>
-                              <tr className="bg-gray-100">
-                                <th
-                                  style={{ width: "10px" }}
-                                  className="px-1 py-1 text-center border border-gray-950 text-sm font-semibold"
-                                >
-                                  Sr No.
-                                </th>
-                                <th
-                                  style={{ width: "50px" }}
-                                  className="px-1 py-1 text-center border border-gray-950 text-sm font-semibold"
-                                >
-                                  Accession No.
-                                </th>
-
-                                <th
-                                  style={{ width: "180px" }}
-                                  className="px-1 py-1 text-center border border-gray-950 text-sm font-semibold"
-                                >
-                                  Book Title
-                                </th>
-                                <th
-                                  style={{ width: "150px" }}
-                                  className="px-1 py-1 text-center border border-gray-950 text-sm font-semibold"
-                                >
-                                  Name
-                                </th>
-
-                                <th
-                                  style={{ width: "30px" }}
-                                  className="px-1 py-1 text-center border border-gray-950 text-sm font-semibold"
-                                >
-                                  Issue Date
-                                </th>
-
-                                <th
-                                  style={{ width: "30px" }}
-                                  className="px-1 py-1 text-center border border-gray-950 text-sm font-semibold"
-                                >
-                                  Due Date
-                                </th>
-                              </tr>
-                            </thead> */}
-
                             <thead>
                               <tr className="bg-gray-100">
                                 <th className="px-2 py-1 text-center border border-gray-950 text-sm font-semibold whitespace-nowrap">
@@ -1018,13 +999,13 @@ const BooksNonReturnReport = () => {
                                 displayedSections.length === 0 && (
                                   <div className="absolute inset-0 flex justify-center items-center">
                                     <div className="text-xl text-red-700">
-                                      Result data found!
+                                      Result not found!
                                     </div>
                                   </div>
                                 )}
 
                               {/* TOTAL COUNT ROW */}
-                              {!loading && filteredSections.length > 0 && (
+                              {/* {!loading && filteredSections.length > 0 && (
                                 <div className="absolute bottom-2 left-4 z-10">
                                   <div className="px-4 py-2 bg-gray-100 border rounded shadow text-sm">
                                     <span className="text-blue-800 font-semibold">
@@ -1035,7 +1016,7 @@ const BooksNonReturnReport = () => {
                                     </span>
                                   </div>
                                 </div>
-                              )}
+                              )} */}
                             </tbody>
                           </table>
                         </div>

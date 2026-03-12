@@ -342,15 +342,18 @@ const BooksReport = () => {
       ${timetable
         .map((student, index) => {
           return `
-          <tr style="background-color: ${index % 2 === 0 ? "#fff" : "#f9fafb"
-            };">
+          <tr style="background-color: ${
+            index % 2 === 0 ? "#fff" : "#f9fafb"
+          };">
             <td style="border: 1px solid #ccc; padding: 6px;">${index + 1}</td>
-            <td style="border: 1px solid #ccc; padding: 6px;">${student.copy_id || ""
+            <td style="border: 1px solid #ccc; padding: 6px;">${
+              student.copy_id || ""
             }</td>
             <td style="border: 1px solid #ccc; padding: 6px;">${formatDate(
               student.added_date || "",
             )}</td>
-            <td style="border: 1px solid #ccc; padding: 6px;">${student.book_title || ""
+            <td style="border: 1px solid #ccc; padding: 6px;">${
+              student.book_title || ""
             }</td>
             <td style="border: 1px solid #ccc; padding: 6px;">
              ${student?.call_no || "-"} / ${student?.category_name || "-"}
@@ -359,23 +362,31 @@ const BooksReport = () => {
               student.author || "",
             )}</td>
              
-             <td style="border: 1px solid #ccc; padding: 6px;">${student.publisher || ""
-            }</td>
-             <td style="border: 1px solid #ccc; padding: 6px;">${student.year || ""
-            }</td>
+             <td style="border: 1px solid #ccc; padding: 6px;">${
+               student.publisher || ""
+             }</td>
+             <td style="border: 1px solid #ccc; padding: 6px;">${
+               student.year || ""
+             }</td>
 
-              <td style="border: 1px solid #ccc; padding: 6px;">${student.edition || ""
-            }</td>
-               <td style="border: 1px solid #ccc; padding: 6px;">${student.no_of_pages || ""
-            }</td>
-                <td style="border: 1px solid #ccc; padding: 6px;">${student.source_of_book || ""
-            }</td>
-             <td style="border: 1px solid #ccc; padding: 6px;">${student.price || ""
-            }</td>
-              <td style="border: 1px solid #ccc; padding: 6px;">${student.isbn || ""
-            }</td>
-             <td style="border: 1px solid #ccc; padding: 6px;">${student.location_of_book || ""
-            }</td>
+              <td style="border: 1px solid #ccc; padding: 6px;">${
+                student.edition || ""
+              }</td>
+               <td style="border: 1px solid #ccc; padding: 6px;">${
+                 student.no_of_pages || ""
+               }</td>
+                <td style="border: 1px solid #ccc; padding: 6px;">${
+                  student.source_of_book || ""
+                }</td>
+             <td style="border: 1px solid #ccc; padding: 6px;">${
+               student.price || ""
+             }</td>
+              <td style="border: 1px solid #ccc; padding: 6px;">${
+                student.isbn || ""
+              }</td>
+             <td style="border: 1px solid #ccc; padding: 6px;">${
+               student.location_of_book || ""
+             }</td>
           
           </tr>
         `;
@@ -530,19 +541,19 @@ const BooksReport = () => {
     XLSX.utils.book_append_sheet(workbook, worksheet, "Books Available Data");
 
     // Generate and download the Excel file
-    const fileName = `Books Report.xlsx`;
+    const fileName = `Book Report.xlsx`;
     XLSX.writeFile(workbook, fileName);
   };
 
   // console.log("row", timetable);
 
   const formatDate = (dateStr) =>
-    dateStr
+    dateStr && dateStr !== "0000-00-00"
       ? new Date(dateStr).toLocaleDateString("en-GB", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "2-digit",
-      })
+          day: "2-digit",
+          month: "2-digit",
+          year: "2-digit",
+        })
       : "";
 
   const handlePageClick = (data) => {
@@ -618,7 +629,7 @@ const BooksReport = () => {
         <ToastContainer />
         <div className="card rounded-md ">
           <div className=" card-header mb-4 flex justify-between items-center ">
-            <h5 className="text-gray-700 text-md lg:text-lg">Books Report</h5>
+            <h5 className="text-gray-700 text-md lg:text-lg">Book Report</h5>
             <RxCross1
               className=" relative right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
               onClick={() => {
@@ -871,6 +882,17 @@ const BooksReport = () => {
 
             <>
               <div className="w-full  p-2">
+                {timetable.length > 0 && (
+                  <div className="flex justify-end items-center gap-2 font-medium">
+                    <span>
+                      <span className="text-blue-800 ml-1">Total Books:</span>
+                      <span className="text-pink-600 ml-1">
+                        {filteredSections.length}
+                      </span>
+                    </span>
+                  </div>
+                )}
+
                 <div className="card mx-auto lg:w-full shadow-lg">
                   {showSearch && (
                     <>
@@ -1032,14 +1054,14 @@ const BooksReport = () => {
                                 <td className="px-2 py-2 text-center border">
                                   {student?.author
                                     ? student.author
-                                      .toLowerCase()
-                                      .split(" ")
-                                      .map(
-                                        (w) =>
-                                          w.charAt(0).toUpperCase() +
-                                          w.slice(1),
-                                      )
-                                      .join(" ")
+                                        .toLowerCase()
+                                        .split(" ")
+                                        .map(
+                                          (w) =>
+                                            w.charAt(0).toUpperCase() +
+                                            w.slice(1),
+                                        )
+                                        .join(" ")
                                     : "-"}
                                 </td>
                                 <td className="px-2 py-2 text-center border">
@@ -1073,7 +1095,7 @@ const BooksReport = () => {
                           {!loading && timetable.length === 0 && (
                             <div className="absolute inset-0 flex justify-center items-center">
                               <div className="text-xl text-red-700">
-                                No data available.
+                                {/* No data available. */}{" "}
                               </div>
                             </div>
                           )}
@@ -1084,13 +1106,13 @@ const BooksReport = () => {
                             displayedSections.length === 0 && (
                               <div className="absolute inset-0 flex justify-center items-center">
                                 <div className="text-xl text-red-700">
-                                  Result data found!
+                                  Result not found!
                                 </div>
                               </div>
                             )}
 
                           {/* TOTAL COUNT ROW */}
-                          {!loading && filteredSections.length > 0 && (
+                          {/* {!loading && filteredSections.length > 0 && (
                             <div className="absolute bottom-2 left-4 z-10">
                               <div className="px-4 py-2 bg-gray-100 border rounded shadow text-sm">
                                 <span className="text-blue-800 font-semibold">
@@ -1101,7 +1123,7 @@ const BooksReport = () => {
                                 </span>
                               </div>
                             </div>
-                          )}
+                          )} */}
                         </tbody>
                       </table>
                     </div>

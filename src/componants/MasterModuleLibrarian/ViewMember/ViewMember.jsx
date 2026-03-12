@@ -472,7 +472,7 @@ const ViewMember = () => {
                 {selectedType === "staff" && (
                   <div className="flex items-center gap-4 w-full md:w-auto ml-10">
                     <label className="text-md whitespace-nowrap">
-                      Select Staff <span className="text-red-500">*</span>
+                      Select Staff
                     </label>
                     <div className="w-[250px]">
                       <Select

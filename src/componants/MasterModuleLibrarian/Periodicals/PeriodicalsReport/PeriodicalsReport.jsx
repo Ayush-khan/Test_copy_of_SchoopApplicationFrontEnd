@@ -10,6 +10,7 @@ import { FiPrinter, FiSearch } from "react-icons/fi";
 import { FaFileExcel } from "react-icons/fa";
 import * as XLSX from "xlsx";
 import zIndex from "@mui/material/styles/zIndex";
+import ReactPaginate from "react-paginate";
 
 const PeriodicalsReport = () => {
   const pdfRef = useRef();
@@ -51,6 +52,7 @@ const PeriodicalsReport = () => {
 
   useEffect(() => {
     // fetchDataRoleId();
+    handleSearch();
     fetchPeriodicals();
   }, []);
 
@@ -114,20 +116,50 @@ const PeriodicalsReport = () => {
     }
   };
 
+  // const handleStudentSelect = (selectedOption) => {
+  //   setStudentError("");
+  //   setSelectedStudent(selectedOption);
+  //   setSelectedStudentId(selectedOption?.value);
+
+  //   setSelectedVolume(null);
+  //   setSelectedVolumeId(null);
+  //   setVolumeData([]);
+
+  //   if (selectedOption?.value) {
+  //     fetchVolumes(selectedOption.value);
+  //   }
+  // };
+
   const handleStudentSelect = (selectedOption) => {
     setStudentError("");
+
+    if (!selectedOption) {
+      setSelectedStudent(null);
+      setSelectedStudentId(null);
+
+      setSelectedVolume(null);
+      setSelectedVolumeId(null);
+      setVolumeData([]);
+
+      setSelectedIssue(null);
+      setSelectedIssueId(null);
+
+      handleSearch(); // cleared
+      return;
+    }
+
     setSelectedStudent(selectedOption);
-    setSelectedStudentId(selectedOption?.value);
+    setSelectedStudentId(selectedOption.value);
 
     setSelectedVolume(null);
     setSelectedVolumeId(null);
-    setVolumeData([]);
+    setSelectedIssue(null);
+    setSelectedIssueId(null);
 
-    if (selectedOption?.value) {
-      fetchVolumes(selectedOption.value);
-    }
+    fetchVolumes(selectedOption.value);
+
+    handleSearch({ periodicalId: selectedOption.value });
   };
-
   const studentOptions = useMemo(() => {
     return classes.map((cls) => ({
       value: cls.periodical_id,
@@ -159,16 +191,43 @@ const PeriodicalsReport = () => {
     }
   };
 
+  // const handleVolumeSelect = (selectedOption) => {
+  //   setVolumeError("");
+  //   setSelectedVolume(selectedOption);
+  //   setSelectedVolumeId(selectedOption?.value);
+
+  //   if (selectedOption?.value) {
+  //     fetchIssue(selectedOption.value);
+  //   }
+  // };
+
   const handleVolumeSelect = (selectedOption) => {
     setVolumeError("");
-    setSelectedVolume(selectedOption);
-    setSelectedVolumeId(selectedOption?.value);
 
-    if (selectedOption?.value) {
-      fetchIssue(selectedOption.value);
+    if (!selectedOption) {
+      setSelectedVolume(null);
+      setSelectedVolumeId(null);
+
+      setSelectedIssue(null);
+      setSelectedIssueId(null);
+
+      handleSearch({ periodicalId: selectedStudentId });
+      return;
     }
-  };
 
+    setSelectedVolume(selectedOption);
+    setSelectedVolumeId(selectedOption.value);
+
+    setSelectedIssue(null);
+    setSelectedIssueId(null);
+
+    fetchIssue(selectedOption.value);
+
+    handleSearch({
+      periodicalId: selectedStudentId,
+      volumeId: selectedOption.value,
+    });
+  };
   const volumeOptions = useMemo(
     () =>
       volumeData.map((v) => ({
@@ -202,12 +261,33 @@ const PeriodicalsReport = () => {
     }
   };
 
-  const handleIssueSelect = (selectedOption) => {
-    // setIssueError("");
-    setSelectedIssue(selectedOption);
-    setSelectedIssueId(selectedOption?.value);
-  };
+  // const handleIssueSelect = (selectedOption) => {
+  //   // setIssueError("");
+  //   setSelectedIssue(selectedOption);
+  //   setSelectedIssueId(selectedOption?.value);
+  // };
 
+  const handleIssueSelect = (selectedOption) => {
+    if (!selectedOption) {
+      setSelectedIssue(null);
+      setSelectedIssueId(null);
+
+      handleSearch({
+        periodicalId: selectedStudentId,
+        volumeId: selectedVolumeId,
+      });
+      return;
+    }
+
+    setSelectedIssue(selectedOption);
+    setSelectedIssueId(selectedOption.value);
+
+    handleSearch({
+      periodicalId: selectedStudentId,
+      volumeId: selectedVolumeId,
+      issueId: selectedOption.value,
+    });
+  };
   const issueOptions = useMemo(
     () =>
       issue.map((v) => ({
@@ -217,9 +297,68 @@ const PeriodicalsReport = () => {
     [issue],
   );
 
-  const handleSearch = async () => {
+  // const handleSearch = async () => {
+  //   setSearchTerm("");
+  //   setShowSearch(true);
+
+  //   try {
+  //     setLoadingForSearch(true);
+  //     setTimetable([]);
+
+  //     const token = localStorage.getItem("authToken");
+
+  //     const params = {};
+
+  //     if (selectedStudent?.value) {
+  //       params.periodical_id = selectedStudent.value;
+  //     }
+
+  //     if (selectedVolume?.value) {
+  //       params.subscription_vol_id = selectedVolume.value;
+  //     }
+
+  //     if (selectedIssue?.value) {
+  //       params.subscription_issue_id = selectedIssue.value;
+  //     }
+
+  //     if (receiveDate) {
+  //       params.received_date = receiveDate;
+  //     }
+
+  //     const response = await axios.get(
+  //       `${API_URL}/api/library/periodicals_report`,
+  //       {
+  //         headers: { Authorization: `Bearer ${token}` },
+  //         params,
+  //       },
+  //     );
+
+  //     const data = response?.data?.data || [];
+
+  //     if (data.length === 0) {
+  //       toast.error("Periodical report data not found.");
+  //       setTimetable([]);
+  //     } else {
+  //       setTimetable(data);
+  //       setPageCount(Math.ceil(data.length / pageSize));
+  //     }
+  //   } catch (error) {
+  //     console.error("Error fetching periodical Report:", error);
+  //     toast.error("Error fetching periodical report. Please try again.");
+  //   } finally {
+  //     setLoadingForSearch(false);
+  //     setIsSubmitting(false);
+  //   }
+  // };
+
+  const handleSearch = async ({
+    periodicalId,
+    volumeId,
+    issueId,
+    date,
+  } = {}) => {
     setSearchTerm("");
-    setShowSearch(true);
+    setShowSearch(false);
 
     try {
       setLoadingForSearch(true);
@@ -229,21 +368,10 @@ const PeriodicalsReport = () => {
 
       const params = {};
 
-      if (selectedStudent?.value) {
-        params.periodical_id = selectedStudent.value;
-      }
-
-      if (selectedVolume?.value) {
-        params.subscription_vol_id = selectedVolume.value;
-      }
-
-      if (selectedIssue?.value) {
-        params.subscription_issue_id = selectedIssue.value;
-      }
-
-      if (receiveDate) {
-        params.received_date = receiveDate;
-      }
+      if (periodicalId) params.periodical_id = periodicalId;
+      if (volumeId) params.subscription_vol_id = volumeId;
+      if (issueId) params.subscription_issue_id = issueId;
+      if (date) params.received_date = date;
 
       const response = await axios.get(
         `${API_URL}/api/library/periodicals_report`,
@@ -256,7 +384,7 @@ const PeriodicalsReport = () => {
       const data = response?.data?.data || [];
 
       if (data.length === 0) {
-        toast.error("Periodical report data not found.");
+        toast.error("Data not found for this record.");
         setTimetable([]);
       } else {
         setTimetable(data);
@@ -267,20 +395,17 @@ const PeriodicalsReport = () => {
       toast.error("Error fetching periodical report. Please try again.");
     } finally {
       setLoadingForSearch(false);
-      setIsSubmitting(false);
     }
   };
-
   const generateStudentDetailsTableHTML = (students = []) => {
     const formatDate = (dateStr) =>
-      dateStr
+      dateStr && dateStr !== "0000-00-00"
         ? new Date(dateStr).toLocaleDateString("en-GB", {
             day: "2-digit",
             month: "2-digit",
             year: "2-digit",
           })
         : "";
-
     const headers = [
       "Sr No.",
       "Title",
@@ -446,7 +571,15 @@ const PeriodicalsReport = () => {
       })
     : [];
 
-  const displayedSections = filteredSections.slice(currentPage * pageSize);
+  // const displayedSections = filteredSections.slice(currentPage * pageSize);
+  const displayedSections = filteredSections.slice(
+    currentPage * pageSize,
+    (currentPage + 1) * pageSize,
+  );
+
+  const handlePageClick = (data) => {
+    setCurrentPage(data.selected);
+  };
 
   return (
     <>
@@ -520,14 +653,14 @@ const PeriodicalsReport = () => {
             </div>
           )}
 
-          {timetable.length === 0 && !loadingForSearch && (
+          {/* {timetable.length === 0 && !loadingForSearch && (
             <p className=" md:absolute md:right-7  md:top-[36%] mb-5  text-gray-500 ">
               <div className="mx-auto w-fit px-2 py-1 bg-blue-50 border border-blue-300 text-blue-800 text-sm rounded text-center">
                 <strong>Note:</strong> Click on the <b>Browse</b> button to view
                 data.
               </div>
             </p>
-          )}
+          )} */}
 
           <>
             <div
@@ -617,13 +750,24 @@ const PeriodicalsReport = () => {
                     type="date"
                     id="date"
                     value={receiveDate}
-                    onChange={(e) => setReceiveDate(e.target.value)}
+                    // onChange={(e) => setReceiveDate(e.target.value)}
+                    onChange={(e) => {
+                      const date = e.target.value;
+                      setReceiveDate(date);
+
+                      handleSearch({
+                        periodicalId: selectedStudentId,
+                        volumeId: selectedVolumeId,
+                        issueId: selectedIssueId,
+                        date,
+                      });
+                    }}
                     className="h-10 border border-gray-300 rounded px-3 text-sm focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
 
                 {/* Browse Button */}
-                <div className="w-full lg:w-[10%] flex">
+                {/* <div className="w-full lg:w-[10%] flex">
                   <button
                     type="button"
                     onClick={handleSearch}
@@ -634,45 +778,8 @@ const PeriodicalsReport = () => {
                   >
                     {loadingForSearch ? "Browsing..." : "Browse"}
                   </button>
-                </div>
+                </div> */}
               </div>
-
-              {/* {timetable.length > 0 && (
-                <div className="p-2 px-3 w-72 bg-gray-100 border-none flex justify-between items-center">
-                  <div className="w-full flex flex-row justify-between mr-0 md:mr-4 ">
-                    <div className="w-1/2 md:w-[98%] mr-1 ">
-                      <input
-                        type="text"
-                        className="form-control"
-                        placeholder="Search "
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                      />
-                    </div>
-                  </div>
-                  <div className="flex flex-col md:flex-row gap-x-1 justify-center md:justify-end ">
-                    <button
-                      type="button"
-                      onClick={handleDownloadEXL}
-                      className="relative bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded group mb-1 lg:mb-0"
-                    >
-                      <FaFileExcel />
-                      <div className="absolute  bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:flex items-center justify-center bg-gray-700 text-white text-xs text-nowrap rounded-md py-1 px-2 ">
-                        Export to Excel
-                      </div>
-                    </button>
-
-                    <button
-                      onClick={handleStudentPrint}
-                      className="relative bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded group flex items-center mb-1 lg:mb-0"
-                    >
-                      <FiPrinter />
-                      <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:flex items-center justify-center bg-gray-700 text-white text-xs rounded-md py-1 px-2">
-                        Print
-                      </div>
-                    </button>
-                  </div>
-                </div>
-              )} */}
             </div>
 
             {timetable.length > 0 && (
@@ -681,7 +788,7 @@ const PeriodicalsReport = () => {
                   <div className="flex justify-end items-center gap-2 font-medium">
                     <span>
                       <span className="text-blue-800 ml-1">
-                        Total no. of count periodicals :
+                        Total no. of periodicals :
                       </span>
                       <span className="text-pink-600 ml-1">
                         {filteredSections.length}
@@ -763,7 +870,7 @@ const PeriodicalsReport = () => {
                                       className="border border-gray-300"
                                     >
                                       <td className="px-2 py-2 text-center border">
-                                        {index + 1}
+                                        {currentPage * pageSize + index + 1}
                                       </td>
                                       <td className="px-2 py-2 text-center border">
                                         {student.title || ""}
@@ -792,13 +899,34 @@ const PeriodicalsReport = () => {
                                     >
                                       {timetable.length === 0
                                         ? "No data available"
-                                        : "Result data found!"}
+                                        : "Result not found!"}
                                     </td>
                                   </tr>
                                 )}
                               </tbody>
                             </table>
                           </div>
+                        </div>
+                        <div className=" flex justify-center pt-2 -mb-3">
+                          <ReactPaginate
+                            previousLabel={"Previous"}
+                            nextLabel={"Next"}
+                            breakLabel={"..."}
+                            breakClassName={"page-item"}
+                            breakLinkClassName={"page-link"}
+                            pageCount={pageCount}
+                            marginPagesDisplayed={1}
+                            pageRangeDisplayed={1}
+                            onPageChange={handlePageClick}
+                            containerClassName={"pagination"}
+                            pageClassName={"page-item"}
+                            pageLinkClassName={"page-link"}
+                            previousClassName={"page-item"}
+                            previousLinkClassName={"page-link"}
+                            nextClassName={"page-item"}
+                            nextLinkClassName={"page-link"}
+                            activeClassName={"active"}
+                          />
                         </div>
                       </div>
                     </div>

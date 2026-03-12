@@ -62,6 +62,8 @@ const IssueBook = () => {
   const [bookError, setBookError] = useState("");
   const [bookPreview, setBookPreview] = useState(null);
 
+  const [memberDetails, setMemberDetails] = useState("");
+
   const camelCase = (str) =>
     str
       ?.toLowerCase()
@@ -285,7 +287,7 @@ const IssueBook = () => {
     const isGrnEntered = grn_no && grn_no.trim() !== "";
 
     if (selectedType === "student") {
-      // 👉 If GRN exists → skip all dropdown validations
+      //  If GRN exists → skip all dropdown validations
       if (!isGrnEntered) {
         if (!selectedStudentId) {
           setClassError("Please select a class.");
@@ -301,7 +303,7 @@ const IssueBook = () => {
 
     if (selectedType === "staff") {
       if (!selectedStaffId) {
-        setStaffError("Please select a staff member.");
+        setStaffError("Please select a member.");
         hasError = true;
       }
     }
@@ -354,8 +356,11 @@ const IssueBook = () => {
       );
 
       const data = response?.data ?? [];
+      const memberData = response?.data?.member;
 
       setTimetable(data);
+      setMemberDetails(memberData);
+      // console.log("memberdata", memberData);
       setPageCount(Math.ceil(data.length / pageSize));
       setShowStudentReport(true);
     } catch (error) {
@@ -737,9 +742,11 @@ const IssueBook = () => {
           );
         });
 
-        // If even 1 active book exists → block
+        // If even 1 active book exists  block
         if (hasActiveBook) {
-          toast.error("First return the book, then new book issued.");
+          toast.error(
+            "Please return your current book before getting a new one.",
+          );
           return;
         }
 
@@ -1191,6 +1198,29 @@ const IssueBook = () => {
                       }}
                     ></div>
                     <div className="pl-2 pr-2 w-full">
+                      {selectedType === "student" && memberDetails && (
+                        <div className="flex justify-center mb-3">
+                          <div className="bg-pink-50 rounded-lg px-4 py-2 flex gap-4 items-center shadow-sm">
+                            <span className="font-semibold text-blue-800 text-sm md:text-base">
+                              {[
+                                memberDetails.first_name,
+                                memberDetails.mid_name,
+                                memberDetails.last_name,
+                              ]
+                                .filter(Boolean)
+                                .map((name) => camelCase(name))
+                                .join(" ")}
+                            </span>
+                            <span className="font-semibold text-blue-800 text-sm md:text-base">
+                              |
+                            </span>
+
+                            <span className="font-semibold text-pink-800 text-sm md:text-base">
+                              GRN No: {memberDetails.reg_no}
+                            </span>
+                          </div>
+                        </div>
+                      )}
                       <div className="w-full leading-normal">
                         <h2 className="text-sm md:text-base font-medium text-center flex items-center justify-center gap-2 text-black">
                           <i
@@ -1260,7 +1290,7 @@ const IssueBook = () => {
                                   colSpan="7"
                                   className="text-center text-red-600 font-semibold py-3 border"
                                 >
-                                  Yet no book issued
+                                  No books issued
                                 </td>
                               </tr>
                             )}

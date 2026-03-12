@@ -130,6 +130,7 @@ const ChangePeriodicalsStatus = () => {
 
   const handleClassSelect = (selectedOption) => {
     setClassError("");
+    setSelectedVolume("");
     setSelectedClass(selectedOption);
     setSelectedClassId(selectedOption?.value);
 
@@ -553,7 +554,7 @@ Library`;
 
               {/* Volume */}
               <div className="flex items-start gap-2">
-                <label className="text-base whitespace-nowrap w-32 pt-2">
+                <label className="text-base whitespace-nowrap w-25 pt-2">
                   Volume <span className="text-red-500 text-sm">*</span>
                 </label>
 

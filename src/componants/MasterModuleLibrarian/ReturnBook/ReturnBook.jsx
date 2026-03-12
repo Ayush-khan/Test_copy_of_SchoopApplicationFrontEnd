@@ -286,18 +286,46 @@ const ReturnBook = () => {
       const token = localStorage.getItem("authToken");
       let finalResults = [];
 
-      const isAccessionEntered = accessionNo?.trim() !== "";
-      const isMemberSelected =
-        selectedStaffId !== "" && selectedStaffId !== null;
-      const isGrnNo = grn_no?.trim() !== "";
+      // const isAccessionEntered = accessionNo?.trim() !== "";
+      // const isMemberSelected =
+      //   selectedStaffId !== "" && selectedStaffId !== null;
+      // const isGrnNo = grn_no?.trim() !== "";
 
-      if (!isAccessionEntered && !isMemberSelected && !isGrnNo) {
+      // if (!isAccessionEntered && !isMemberSelected && !isGrnNo) {
+      //   toast.error("Please enter at least one search criteria.");
+      //   return;
+      // }
+
+      const isAccessionEntered = accessionNo?.trim() !== "";
+      const isMemberSelected = !!selectedStaffId;
+      const isGrnNo = grn_no?.trim() !== "";
+      const isClassSelected = !!selectedStudentId;
+
+      // 1️⃣ No search criteria at all
+      if (
+        !isAccessionEntered &&
+        !isGrnNo &&
+        !isClassSelected &&
+        !isMemberSelected
+      ) {
         toast.error("Please enter at least one search criteria.");
         return;
       }
 
+      // 2️⃣ If class selected but member not selected
+      if (
+        selectedType === "student" &&
+        isClassSelected &&
+        !isMemberSelected &&
+        !isAccessionEntered &&
+        !isGrnNo
+      ) {
+        toast.error("Please select Member");
+        return;
+      }
+
       /* ----------------------------------
-       🔍 ACCESSION / GRN SEARCH
+        ACCESSION / GRN SEARCH
     ---------------------------------- */
       if (isAccessionEntered || isGrnNo) {
         const url = isAccessionEntered
@@ -349,11 +377,13 @@ const ReturnBook = () => {
       }
 
       /* ----------------------------------
-       ✅ FINAL SET
+       FINAL SET
     ---------------------------------- */
       setTimetable(finalResults);
+
       setPageCount(Math.ceil(finalResults.length / pageSize));
       setShowStudentReport(true);
+      // setSelectedCopies([]);
 
       // setAccessionNo("");
       // setGrnNo("");

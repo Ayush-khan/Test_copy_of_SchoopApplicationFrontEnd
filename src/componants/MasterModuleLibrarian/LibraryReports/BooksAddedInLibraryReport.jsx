@@ -51,7 +51,7 @@ const BooksAddedInLibraryReport = () => {
   const [selectedSourceBookId, setSelectedSourceId] = useState("");
 
   useEffect(() => {
-    // handleSearch();
+    handleSearch();
     fetchCategoryGroup();
     fetchSourceofBook();
 
@@ -81,12 +81,12 @@ const BooksAddedInLibraryReport = () => {
     searchTo,
   ]);
 
-  useEffect(() => {
-    const today = new Date().toISOString().split("T")[0];
+  // useEffect(() => {
+  //   const today = new Date().toISOString().split("T")[0];
 
-    setSearchFrom(today);
-    setSearchTo(today);
-  }, []);
+  //   setSearchFrom(today);
+  //   setSearchTo(today);
+  // }, []);
 
   const fetchCategoryGroup = async () => {
     try {
@@ -271,6 +271,13 @@ const BooksAddedInLibraryReport = () => {
       }
 
       // console.log("Search Params:", params);
+      if (!clearAll && Object.keys(params).length === 0) {
+        toast.info("Please select at least one search criteria.");
+        setLoading(false);
+        setLoadingForSearch(false);
+        setIsSubmitting(false);
+        return;
+      }
 
       const response = await axios.get(
         `${API_URL}/api/library/get_books_added_report`,
@@ -536,7 +543,7 @@ const BooksAddedInLibraryReport = () => {
   // console.log("row", timetable);
 
   const formatDate = (dateStr) =>
-    dateStr
+    dateStr && dateStr !== "0000-00-00"
       ? new Date(dateStr).toLocaleDateString("en-GB", {
           day: "2-digit",
           month: "2-digit",
@@ -729,6 +736,18 @@ const BooksAddedInLibraryReport = () => {
             <>
               <div className="w-full  p-2">
                 {timetable.length > 0 && (
+                  <div className="flex justify-end items-center gap-2 font-medium">
+                    <span>
+                      <span className="text-blue-800 ml-1">
+                        Total Books Added :{" "}
+                      </span>
+                      <span className="text-pink-600 ml-1">
+                        {filteredSections.length}
+                      </span>
+                    </span>
+                  </div>
+                )}
+                {timetable.length > 0 && (
                   <div className="card mx-auto lg:w-full shadow-lg">
                     {showSearch && (
                       <>
@@ -784,7 +803,7 @@ const BooksAddedInLibraryReport = () => {
                                 Date
                               </th>
                               <th
-                                style={{ width: "170px" }}
+                                style={{ width: "200px" }}
                                 className="px-1 py-1 text-center border border-gray-950 text-sm font-semibold"
                               >
                                 Book Title
@@ -838,7 +857,7 @@ const BooksAddedInLibraryReport = () => {
                                 ISBN No.
                               </th>
                               <th
-                                style={{ width: "160px" }}
+                                style={{ width: "120px" }}
                                 className="px-1 py-1 text-center border border-gray-950 text-sm font-semibold"
                               >
                                 Location
@@ -931,13 +950,13 @@ const BooksAddedInLibraryReport = () => {
                               displayedSections.length === 0 && (
                                 <div className="absolute inset-0 flex justify-center items-center">
                                   <div className="text-xl text-red-700">
-                                    Result data found!
+                                    Result not found!
                                   </div>
                                 </div>
                               )}
 
                             {/* TOTAL COUNT ROW */}
-                            {!loading && filteredSections.length > 0 && (
+                            {/* {!loading && filteredSections.length > 0 && (
                               <div className="absolute bottom-2 left-4 z-10">
                                 <div className="px-4 py-2 bg-gray-100 border rounded shadow text-sm">
                                   <span className="text-blue-800 font-semibold">
@@ -948,7 +967,7 @@ const BooksAddedInLibraryReport = () => {
                                   </span>
                                 </div>
                               </div>
-                            )}
+                            )} */}
                           </tbody>
                         </table>
                       </div>
