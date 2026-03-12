@@ -86,7 +86,7 @@ const MonthlyBookIssueReport = () => {
 
   const handleSearch = async ({ clearAll = false } = {}) => {
     if (!clearAll && !selectedMonth) {
-      toast.error("Please select month to view report.");
+      toast.info("Please select month to view report.");
       return;
     }
     setLoadingForSearch(true);
@@ -323,7 +323,7 @@ const MonthlyBookIssueReport = () => {
   // console.log("row", timetable);
 
   const formatDate = (dateStr) =>
-    dateStr
+    dateStr && dateStr !== "0000-00-00"
       ? new Date(dateStr).toLocaleDateString("en-GB", {
           day: "2-digit",
           month: "2-digit",
@@ -513,6 +513,19 @@ const MonthlyBookIssueReport = () => {
             <>
               <div className="w-full  p-2">
                 {timetable.length > 0 && (
+                  <div className="flex justify-end items-center gap-2 font-medium">
+                    <span>
+                      <span className="text-blue-800 ml-1">
+                        Total Books Issued :{" "}
+                        {/* in{" "} {selectedMonth?.label?.split("-")[0]} are :{" "} */}
+                      </span>
+                      <span className="text-pink-600 ml-1">
+                        {filteredSections.length}
+                      </span>
+                    </span>
+                  </div>
+                )}
+                {timetable.length > 0 && (
                   <div className="card mx-auto lg:w-full shadow-lg">
                     {showSearch && (
                       <>
@@ -547,49 +560,6 @@ const MonthlyBookIssueReport = () => {
                         }}
                       >
                         <table className="min-w-full leading-normal table-auto">
-                          {/* <thead>
-                            <tr className="bg-gray-100">
-                              <th
-                                style={{ width: "10px" }}
-                                className="px-1 py-1 text-center border border-gray-950 text-sm font-semibold"
-                              >
-                                Sr No.
-                              </th>
-                              <th
-                                style={{ width: "20px" }}
-                                className="px-1 py-1 text-center border border-gray-950 text-sm font-semibold"
-                              >
-                                Accession No.
-                              </th>
-
-                              <th
-                                style={{ width: "250px" }}
-                                className="px-1 py-1 text-center border border-gray-950 text-sm font-semibold whitespace-nowrap"
-                              >
-                                Book Title
-                              </th>
-
-                              <th
-                                style={{ width: "20px" }}
-                                className="px-1 py-1 text-center border border-gray-950 text-sm font-semibold"
-                              >
-                                Issue Type
-                              </th>
-                              <th
-                                style={{ width: "150px" }}
-                                className="px-1 py-1 text-center border border-gray-950 text-sm font-semibold whitespace-nowrap"
-                              >
-                                Borrower
-                              </th>
-                              <th
-                                style={{ width: "20px" }}
-                                className="px-1 py-1 text-center border border-gray-950 text-sm font-semibold"
-                              >
-                                Issue Date
-                              </th>
-                            </tr>
-                          </thead> */}
-
                           <thead>
                             <tr className="bg-gray-100">
                               <th className="px-1 py-1 text-center border border-gray-950 text-sm font-semibold whitespace-nowrap">
@@ -651,7 +621,7 @@ const MonthlyBookIssueReport = () => {
                                       : "Teacher"}
                                   </td>
 
-                                  <td className="px-2 py-2 text-center border">
+                                  <td className="px-2 py-2 text-center border whitespace-nowrap">
                                     {camelCase(
                                       `${student?.first_name || ""} ${student?.mid_name || ""} ${student?.last_name || ""}`,
                                     )}
@@ -666,7 +636,7 @@ const MonthlyBookIssueReport = () => {
                             {!loading && timetable.length === 0 && (
                               <div className="absolute inset-0 flex justify-center items-center">
                                 <div className="text-xl text-red-700">
-                                  No data available.
+                                  {/* No data available. */}{" "}
                                 </div>
                               </div>
                             )}
@@ -677,13 +647,13 @@ const MonthlyBookIssueReport = () => {
                               displayedSections.length === 0 && (
                                 <div className="absolute inset-0 flex justify-center items-center">
                                   <div className="text-xl text-red-700">
-                                    Result data found!
+                                    Result not found!
                                   </div>
                                 </div>
                               )}
 
                             {/* TOTAL COUNT ROW */}
-                            {!loading && filteredSections.length > 0 && (
+                            {/* {!loading && filteredSections.length > 0 && (
                               <div className="absolute bottom-2 left-4 z-10">
                                 <div className="px-4 py-2 bg-gray-100 border rounded shadow text-sm">
                                   <span className="text-blue-800 font-semibold">
@@ -697,7 +667,7 @@ const MonthlyBookIssueReport = () => {
                                   </span>
                                 </div>
                               </div>
-                            )}
+                            )} */}
                           </tbody>
                         </table>
                       </div>

@@ -10,6 +10,7 @@ import { FiPrinter, FiSearch } from "react-icons/fi";
 import { FaFileExcel } from "react-icons/fa";
 import * as XLSX from "xlsx";
 import zIndex from "@mui/material/styles/zIndex";
+import ReactPaginate from "react-paginate";
 
 const PeriodicalsNotReceivedReport = () => {
   const pdfRef = useRef();
@@ -40,6 +41,7 @@ const PeriodicalsNotReceivedReport = () => {
 
   useEffect(() => {
     // fetchDataRoleId();
+    handleSearch();
     fetchPeriodicals();
   }, []);
 
@@ -99,20 +101,38 @@ const PeriodicalsNotReceivedReport = () => {
     }
   };
 
+  // const handleStudentSelect = (selectedOption) => {
+  //   setStudentError("");
+  //   setSelectedStudent(selectedOption);
+  //   setSelectedStudentId(selectedOption?.value);
+  //   handleSearch();
+  // };
+
   const handleStudentSelect = (selectedOption) => {
     setStudentError("");
-    setSelectedStudent(selectedOption);
-    setSelectedStudentId(selectedOption?.value);
-  };
 
+    if (!selectedOption) {
+      // cleared
+      setSelectedStudent(null);
+      setSelectedStudentId(null);
+
+      handleSearch(); // call without student id
+      return;
+    }
+
+    // selected
+    setSelectedStudent(selectedOption);
+    setSelectedStudentId(selectedOption.value);
+
+    handleSearch({ studentId: selectedOption.value });
+  };
   const studentOptions = useMemo(() => {
     return classes.map((cls) => ({
       value: cls.periodical_id,
       label: `${cls?.title}`,
     }));
   }, [classes]);
-
-  const handleSearch = async () => {
+  const handleSearch = async ({ studentId } = {}) => {
     setSearchTerm("");
     setShowSearch(false);
 
@@ -122,8 +142,8 @@ const PeriodicalsNotReceivedReport = () => {
 
       const token = localStorage.getItem("authToken");
 
-      const url = selectedStudentId
-        ? `${API_URL}/api/library/periodical_not_received_report/${selectedStudentId}`
+      const url = studentId
+        ? `${API_URL}/api/library/periodical_not_received_report/${studentId}`
         : `${API_URL}/api/library/periodical_not_received_report`;
 
       const response = await axios.get(url, {
@@ -133,8 +153,8 @@ const PeriodicalsNotReceivedReport = () => {
       const data = response?.data?.data || [];
 
       if (data.length === 0) {
-        toast.error("Periodical not received report data not found.");
         setTimetable([]);
+        toast.error("Data not found for this record.");
       } else {
         setTimetable(data);
         setPageCount(Math.ceil(data.length / pageSize));
@@ -150,16 +170,53 @@ const PeriodicalsNotReceivedReport = () => {
     }
   };
 
+  // const handleSearch = async () => {
+  //   setSearchTerm("");
+  //   setShowSearch(false);
+
+  //   try {
+  //     setLoadingForSearch(true);
+  //     setTimetable([]);
+
+  //     const token = localStorage.getItem("authToken");
+
+  //     const url = selectedStudentId
+  //       ? `${API_URL}/api/library/periodical_not_received_report/${selectedStudentId}`
+  //       : `${API_URL}/api/library/periodical_not_received_report`;
+
+  //     const response = await axios.get(url, {
+  //       headers: { Authorization: `Bearer ${token}` },
+  //     });
+
+  //     const data = response?.data?.data || [];
+
+  //     if (data.length === 0) {
+  //       toast.error("Periodical not received report data not found.");
+  //       setTimetable([]);
+  //     } else {
+  //       setTimetable(data);
+  //       setPageCount(Math.ceil(data.length / pageSize));
+  //     }
+  //   } catch (error) {
+  //     console.error("Error fetching periodical not received Report:", error);
+  //     toast.error(
+  //       "Error fetching periodical not received report. Please try again.",
+  //     );
+  //   } finally {
+  //     setLoadingForSearch(false);
+  //     setIsSubmitting(false);
+  //   }
+  // };
+
   const generateStudentDetailsTableHTML = (students = []) => {
     const formatDate = (dateStr) =>
-      dateStr
+      dateStr && dateStr !== "0000-00-00"
         ? new Date(dateStr).toLocaleDateString("en-GB", {
             day: "2-digit",
             month: "2-digit",
             year: "2-digit",
           })
         : "";
-
     const headers = [
       "Sr No.",
       "Title",
@@ -331,7 +388,17 @@ const PeriodicalsNotReceivedReport = () => {
       })
     : [];
 
-  const displayedSections = filteredSections.slice(currentPage * pageSize);
+  // const displayedSections = filteredSections.slice(currentPage * pageSize);
+
+  const displayedSections = filteredSections.slice(
+    currentPage * pageSize,
+    (currentPage + 1) * pageSize,
+  );
+
+  const handlePageClick = (data) => {
+    setCurrentPage(data.selected);
+  };
+
   return (
     <>
       <div
@@ -403,7 +470,7 @@ const PeriodicalsNotReceivedReport = () => {
               </div>
             </div>
           )}
-
+          {/* 
           {timetable.length === 0 && !loadingForSearch && (
             <p className=" md:absolute md:right-7  md:top-[40%]   text-gray-500 ">
               <div className="mx-auto w-fit px-2 py-1 bg-blue-50 border border-blue-300 text-blue-800 text-sm rounded text-center">
@@ -411,7 +478,7 @@ const PeriodicalsNotReceivedReport = () => {
                 data.
               </div>
             </p>
-          )}
+          )} */}
 
           <>
             <div
@@ -457,7 +524,7 @@ const PeriodicalsNotReceivedReport = () => {
                       )}
                     </div>
                   </div>
-                  <div className="mt-1">
+                  {/* <div className="mt-1">
                     <button
                       type="search"
                       onClick={handleSearch}
@@ -495,45 +562,9 @@ const PeriodicalsNotReceivedReport = () => {
                         "Browse"
                       )}
                     </button>
-                  </div>
+                  </div> */}
                 </div>{" "}
               </div>
-              {/* {timetable.length > 0 && (
-                <div className="p-2 px-3 w-72 bg-gray-100 border-none flex justify-between items-center">
-                  <div className="w-full flex flex-row justify-between mr-0 md:mr-4 ">
-                    <div className="w-1/2 md:w-[98%] mr-1 ">
-                      <input
-                        type="text"
-                        className="form-control"
-                        placeholder="Search "
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                      />
-                    </div>
-                  </div>
-                  <div className="flex flex-col md:flex-row gap-x-1 justify-center md:justify-end ">
-                    <button
-                      type="button"
-                      onClick={handleDownloadEXL}
-                      className="relative bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded group mb-1 lg:mb-0"
-                    >
-                      <FaFileExcel />
-                      <div className="absolute  bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:flex items-center justify-center bg-gray-700 text-white text-xs text-nowrap rounded-md py-1 px-2 ">
-                        Export to Excel
-                      </div>
-                    </button>
-
-                    <button
-                      onClick={handleStudentPrint}
-                      className="relative bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded group flex items-center mb-1 lg:mb-0"
-                    >
-                      <FiPrinter />
-                      <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:flex items-center justify-center bg-gray-700 text-white text-xs rounded-md py-1 px-2">
-                        Print
-                      </div>
-                    </button>
-                  </div>
-                </div>
-              )} */}
             </div>
 
             {timetable.length > 0 && (
@@ -542,7 +573,7 @@ const PeriodicalsNotReceivedReport = () => {
                   <div className="flex justify-end items-center gap-2 font-medium">
                     <span>
                       <span className="text-blue-800 ml-1">
-                        Total no. of count periodicals not received :
+                        Total no. of periodicals not received :
                       </span>
                       <span className="text-pink-600 ml-1">
                         {filteredSections.length}
@@ -614,7 +645,7 @@ const PeriodicalsNotReceivedReport = () => {
                                   className="border border-gray-300"
                                 >
                                   <td className="px-2 py-2 text-center border border-gray-300">
-                                    {index + 1}
+                                    {currentPage * pageSize + index + 1}
                                   </td>
                                   <td className="px-2 py-2 text-center border border-gray-300">
                                     {student.title || ""}
@@ -648,13 +679,34 @@ const PeriodicalsNotReceivedReport = () => {
                             ) : (
                               <div className="absolute left-[1%] w-[100%] text-center flex justify-center items-center mt-14">
                                 <div className="text-center text-xl text-red-700">
-                                  Result data found!
+                                  Result not found!
                                 </div>
                               </div>
                             )}
                           </tbody>
                         </table>
                       </div>
+                    </div>
+                    <div className=" flex justify-center pt-2 -mb-3">
+                      <ReactPaginate
+                        previousLabel={"Previous"}
+                        nextLabel={"Next"}
+                        breakLabel={"..."}
+                        breakClassName={"page-item"}
+                        breakLinkClassName={"page-link"}
+                        pageCount={pageCount}
+                        marginPagesDisplayed={1}
+                        pageRangeDisplayed={1}
+                        onPageChange={handlePageClick}
+                        containerClassName={"pagination"}
+                        pageClassName={"page-item"}
+                        pageLinkClassName={"page-link"}
+                        previousClassName={"page-item"}
+                        previousLinkClassName={"page-link"}
+                        nextClassName={"page-item"}
+                        nextLinkClassName={"page-link"}
+                        activeClassName={"active"}
+                      />
                     </div>
                   </div>
                 </div>

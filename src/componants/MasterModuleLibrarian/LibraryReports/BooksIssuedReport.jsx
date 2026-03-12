@@ -27,7 +27,9 @@ const BookIssuedReport = () => {
 
   const [timetable, setTimetable] = useState([]);
 
-  const [selectedType, setSelectedType] = useState("student");
+  // const [selectedType, setSelectedType] = useState("student");
+
+  const [selectedType, setSelectedType] = useState("");
 
   const pageSize = 10;
   const [pageCount, setPageCount] = useState(0);
@@ -73,6 +75,7 @@ const BookIssuedReport = () => {
 
     return () => clearTimeout(timer);
   }, [
+    selectedType,
     selectedSectionId,
     selectedStudentId,
     selectedStaffId,
@@ -88,6 +91,7 @@ const BookIssuedReport = () => {
     }
 
     const hasAnyFilter =
+      selectedType ||
       selectedStudentId ||
       selectedSectionId ||
       selectedStaffId ||
@@ -101,6 +105,7 @@ const BookIssuedReport = () => {
   }, [debouncedSearchTrigger]);
 
   useEffect(() => {
+    handleSearch();
     fetchDataRoleId();
   }, []);
 
@@ -189,6 +194,7 @@ const BookIssuedReport = () => {
 
   const handleStudentSelect = (selectedOption) => {
     setStudentError("");
+    setSelectedStaff("");
     setSelectedStudent(selectedOption);
 
     if (selectedOption) {
@@ -217,13 +223,13 @@ const BookIssuedReport = () => {
     const params =
       selectedType === "student"
         ? {
-          mtype: "S",
-          class_id: selectedStudentId,
-          section_id: selectedSectionId,
-        }
+            mtype: "S",
+            class_id: selectedStudentId,
+            section_id: selectedSectionId,
+          }
         : {
-          mtype: "T",
-        };
+            mtype: "T",
+          };
 
     try {
       const response = await axios.post(
@@ -285,11 +291,12 @@ const BookIssuedReport = () => {
     setShowStudentReport(false);
   }, [selectedType]);
 
-  useEffect(() => {
-    const today = new Date().toISOString().split("T")[0];
-    setSearchFrom(today);
-    setSearchTo(today);
-  }, []);
+  // useEffect(() => {
+  //   const today = new Date().toISOString().split("T")[0];
+  //   setSearchFrom(today);
+  //   setSearchTo(today);
+  // }, []);
+
   const handleDateChange = (from, to) => {
     setSearchFrom(from);
     setSearchTo(to);
@@ -297,66 +304,25 @@ const BookIssuedReport = () => {
     // handleSearch();
   };
 
-  //   const handleSearch = async ({ clearAll = false } = {}) => {
-  //     setLoadingForSearch(true);
-  //     setIsSubmitting(true);
-  //     setLoading(true);
-  //     setShowSearch(false);
-
-  //     try {
-  //       const token = localStorage.getItem("authToken");
-  //       const type = selectedType === "student" ? "S" : "T";
-
-  //       let params = {};
-
-  //       if (!clearAll) {
-  //         if (type) params.m_type = type;
-  //         if (grn_no) params.grn_no = grn_no;
-  //         if (selectedStudentId) params.class_id = selectedStudentId;
-  //         if (selectedSectionId) params.section_id = selectedSectionId;
-  //         if (selectedStaffId) params.member_id = selectedStaffId;
-  //         if (searchFrom) params.search_from = searchFrom;
-  //         if (searchTo) params.search_to = searchTo;
-  //       }
-
-  //       console.log("Search Params:", params);
-
-  //       const response = await axios.get(
-  //         `${API_URL}/api/library/book_issued_report`,
-  //         {
-  //           headers: { Authorization: `Bearer ${token}` },
-  //           params,
-  //           paramsSerializer: (params) => new URLSearchParams(params).toString(),
-  //         },
-  //       );
-
-  //       const data = response?.data?.data || [];
-
-  //       if (data.length === 0) {
-  //         setTimetable([]);
-  //         setPageCount(0);
-  //         setCurrentPage(0);
-  //         toast.error("No records found for selected criteria.");
-  //       } else {
-  //         setTimetable(data);
-  //         setPageCount(Math.ceil(data.length / pageSize));
-  //         setCurrentPage(0);
-  //       }
-  //     } catch (error) {
-  //       console.error("Error fetching report:", error);
-  //       toast.error("Error fetching data. Please try again.");
-  //     } finally {
-  //       setIsSubmitting(false);
-  //       setLoadingForSearch(false);
-  //       setLoading(false);
-  //     }
-  //   };
-
   const handleSearch = async ({ clearAll = false } = {}) => {
+    if (!clearAll && !selectedType) {
+      toast.info("Please select member type");
+      return;
+    }
+
     // STUDENT VALIDATION
-    if (!clearAll && selectedType === "student") {
+    // if (!clearAll && selectedType === "student") {
+    //   if (!selectedStudentId || !selectedSectionId) {
+    //     toast.info("Please select class to view issued books.");
+    //     return;
+    //   }
+    // }
+
+    if (!clearAll && selectedType === "student" && !grn_no) {
       if (!selectedStudentId || !selectedSectionId) {
-        toast.error("Please select a class for the student.");
+        toast.info(
+          "Please select a class or enter a GRN number to view issued books.",
+        );
         return;
       }
     }
@@ -438,12 +404,15 @@ const BookIssuedReport = () => {
       ${timetable
         .map((student, index) => {
           return `
-          <tr style="background-color: ${index % 2 === 0 ? "#fff" : "#f9fafb"
-            };">
+          <tr style="background-color: ${
+            index % 2 === 0 ? "#fff" : "#f9fafb"
+          };">
             <td style="border: 1px solid #ccc; padding: 6px;">${index + 1}</td>
-            <td style="border: 1px solid #ccc; padding: 6px;">${student.copy_id || ""
+            <td style="border: 1px solid #ccc; padding: 6px;">${
+              student.copy_id || ""
             }</td>
-            <td style="border: 1px solid #ccc; padding: 6px;">${student.book_title || ""
+            <td style="border: 1px solid #ccc; padding: 6px;">${
+              student.book_title || ""
             }</td>
             <td style="border: 1px solid #ccc; padding: 6px;">
              ${student?.first_name || "-"}  ${student?.mid_name || "-"}  ${student?.last_name || "-"}  ${student?.name || "-"}
@@ -453,11 +422,11 @@ const BookIssuedReport = () => {
             )}</td>
              
              <td style="border: 1px solid #ccc; padding: 6px;">${formatDate(
-              student.due_date || "",
-            )}</td>
+               student.due_date || "",
+             )}</td>
              <td style="border: 1px solid #ccc; padding: 6px;">${formatDate(
-              student.return_date || "",
-            )}</td>
+               student.return_date || "",
+             )}</td>
           </tr>
         `;
         })
@@ -623,10 +592,10 @@ const BookIssuedReport = () => {
     return isNaN(date.getTime())
       ? ""
       : date.toLocaleDateString("en-GB", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "2-digit",
-      });
+          day: "2-digit",
+          month: "2-digit",
+          year: "2-digit",
+        });
   };
   const handlePageClick = (data) => {
     setCurrentPage(data.selected);
@@ -842,7 +811,7 @@ const BookIssuedReport = () => {
 
                   <div className="flex flex-col gap-1 w-[350px]">
                     <label className="text-md">Date</label>
-                    {/* <DateRangePickerComponent onDateChange={handleDateChange} /> */}
+
                     <DateRangePickerLibrary onDateChange={handleDateChange} />
                   </div>
 
@@ -888,6 +857,18 @@ const BookIssuedReport = () => {
             <>
               <div className="w-full  p-2">
                 {timetable.length > 0 && (
+                  <div className="flex justify-end items-center gap-2 font-medium">
+                    <span>
+                      <span className="text-blue-800 ml-1">
+                        Total Books Issued :{" "}
+                      </span>
+                      <span className="text-pink-600 ml-1">
+                        {filteredSections.length}
+                      </span>
+                    </span>
+                  </div>
+                )}
+                {timetable.length > 0 && (
                   <>
                     <div className="card mx-auto lg:w-full shadow-lg">
                       {showSearch && (
@@ -925,55 +906,6 @@ const BookIssuedReport = () => {
                           }}
                         >
                           <table className="min-w-full leading-normal table-auto">
-                            {/* <thead>
-                              <tr className="bg-gray-100">
-                                <th
-                                  style={{ width: "10px" }}
-                                  className="px-1 py-1 text-center border border-gray-950 text-sm font-semibold"
-                                >
-                                  Sr No.
-                                </th>
-                                <th
-                                  style={{ width: "50px" }}
-                                  className="px-1 py-1 text-center border border-gray-950 text-sm font-semibold"
-                                >
-                                  Accession No.
-                                </th>
-
-                                <th
-                                  style={{ width: "180px" }}
-                                  className="px-1 py-1 text-center border border-gray-950 text-sm font-semibold"
-                                >
-                                  Book Title
-                                </th>
-                                <th
-                                  style={{ width: "150px" }}
-                                  className="px-1 py-1 text-center border border-gray-950 text-sm font-semibold"
-                                >
-                                  Name
-                                </th>
-
-                                <th
-                                  style={{ width: "30px" }}
-                                  className="px-1 py-1 text-center border border-gray-950 text-sm font-semibold"
-                                >
-                                  Issue Date
-                                </th>
-
-                                <th
-                                  style={{ width: "30px" }}
-                                  className="px-1 py-1 text-center border border-gray-950 text-sm font-semibold"
-                                >
-                                  Due Date
-                                </th>
-                                <th
-                                  style={{ width: "30px" }}
-                                  className="px-1 py-1 text-center border border-gray-950 text-sm font-semibold"
-                                >
-                                  Return Date
-                                </th>
-                              </tr>
-                            </thead> */}
                             <thead>
                               <tr className="bg-gray-100">
                                 <th className="px-2 py-1 text-center border border-gray-950 text-sm font-semibold whitespace-nowrap">
@@ -1076,13 +1008,13 @@ const BookIssuedReport = () => {
                                 displayedSections.length === 0 && (
                                   <div className="absolute inset-0 flex justify-center items-center">
                                     <div className="text-xl text-red-700">
-                                      Result data found!
+                                      Result not found!
                                     </div>
                                   </div>
                                 )}
 
                               {/* TOTAL COUNT ROW */}
-                              {!loading && filteredSections.length > 0 && (
+                              {/* {!loading && filteredSections.length > 0 && (
                                 <div className="absolute bottom-2 left-4 z-10">
                                   <div className="px-4 py-2 bg-gray-100 border rounded shadow text-sm">
                                     <span className="text-blue-800 font-semibold">
@@ -1093,7 +1025,7 @@ const BookIssuedReport = () => {
                                     </span>
                                   </div>
                                 </div>
-                              )}
+                              )} */}
                             </tbody>
                           </table>
                         </div>

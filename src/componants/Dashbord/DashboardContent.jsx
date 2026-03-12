@@ -2,47 +2,18 @@ import { useEffect, useState } from "react";
 import DashboardRenderer from "./DashboardRenderer";
 import LoadingSpinner from "../common/LoadingSpinner";
 import api from "./api";
+import { useDashboardStructure } from "../../context/DashboardStructureContext";
 
 const DashboardContent = () => {
-  const [dashboardStructure, setDashboardStructure] = useState(null);
   const [dashboardData, setDashboardData] = useState(null);
   const [sessionInfo, setSessionInfo] = useState(null);
   const [loading, setLoading] = useState(true);
+  const { dashboardStructure, structureLoading, loadDashboardStructure } =
+    useDashboardStructure();
 
   useEffect(() => {
     initDashboard();
   }, []);
-
-  const normalizeStructurePayload = (payload) => {
-    if (payload?.sections && Array.isArray(payload.sections)) {
-      return payload;
-    }
-
-    if (payload?.data?.sections && Array.isArray(payload.data.sections)) {
-      return payload.data;
-    }
-
-    return null;
-  };
-
-  const fetchDashboardStructure = async ({ roleId, sortName }) => {
-    const endpoints = [
-      `/api/dashboard-structure?role=${roleId}`,
-      `/api/get_dashboardstructure?short_name=${sortName}&role=${roleId}`,
-    ];
-
-    for (const endpoint of endpoints) {
-      try {
-        const res = await api.get(endpoint);
-        const normalized = normalizeStructurePayload(res.data);
-        if (normalized) return normalized;
-      } catch (error) {
-        console.warn(`Failed structure endpoint: ${endpoint}`, error);
-      }
-    }
-
-    return null;
-  };
 
   const initDashboard = async () => {
     try {
@@ -58,12 +29,10 @@ const DashboardContent = () => {
         sortName,
       });
 
-      const structure = await fetchDashboardStructure({
+      await loadDashboardStructure({
         roleId: role_id,
         sortName,
       });
-
-      setDashboardStructure(structure);
 
       let summaryRes;
       if (role_id === "T") {
@@ -82,7 +51,7 @@ const DashboardContent = () => {
     }
   };
 
-  if (loading || !dashboardStructure) {
+  if (loading || structureLoading || !dashboardStructure) {
     return <LoadingSpinner />;
   }
 

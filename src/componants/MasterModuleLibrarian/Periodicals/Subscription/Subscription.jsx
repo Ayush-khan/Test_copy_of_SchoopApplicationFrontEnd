@@ -48,6 +48,8 @@ function Subscription() {
   const [toDate, setToDate] = useState("");
   const [receiveDate, setReceiveDate] = useState("");
   const [receivingDate, setReceivingDate] = useState(null);
+
+  const [receivingAnotherDate, setReceivingAnotherDate] = useState("");
   const [selectedTitle, setSelectedTitle] = useState(null);
   const [periodicalId, setPeriodicalId] = useState(null);
   const [status, setStatus] = useState("");
@@ -157,6 +159,7 @@ function Subscription() {
     value: item.periodical_id,
     label: item.title,
   }));
+
   const weeklyOptions = [
     { value: "Monday", label: "Monday" },
     { value: "Tuesday", label: "Tuesday" },
@@ -278,6 +281,15 @@ function Subscription() {
       setReceivingDate(null);
     }
 
+    if (section.receiving_date) {
+      setReceivingAnotherDate({
+        value: section.bimonthly_second_date,
+        label: String(section.bimonthly_second_date),
+      });
+    } else {
+      setReceivingAnotherDate(null);
+    }
+
     // ---- STATUS (react-select)
     setStatus({
       value: section.status,
@@ -299,7 +311,7 @@ function Subscription() {
     setShowVolumeModal(false);
     setShowDeleteVolumeModal(false);
     setVolumeForms("");
-
+    setFrequency("");
     setNewSectionName("");
     setSubscriptionNo("");
     setFromDate("");
@@ -307,6 +319,8 @@ function Subscription() {
 
     setReceivingDate(null);
     setSelectedTitle(null);
+
+    setReceivingAnotherDate(null);
 
     setCurrentSection(null);
     setFieldErrors({});
@@ -410,16 +424,29 @@ function Subscription() {
   };
 
   const handleSubmitAdd = async () => {
+    if (isSubmitting) return;
+
     if (!selectedTitle || !fromDate || !toDate || !receivingDate) {
       toast.error("Please fill all required fields");
       return;
     }
+
+    if (frequency === "Bimonthly" && !receivingAnotherDate) {
+      toast.error("Please select second receiving date.");
+      return;
+    }
+
+    setIsSubmitting(true);
 
     const payload = {
       periodical_id: selectedTitle.value,
       from_date: fromDate,
       to_date: toDate,
       receiving_date: receivingDate.value || receivingDate,
+      ...(frequency === "Bimonthly" && {
+        bimonthly_second_date:
+          receivingAnotherDate?.value || receivingAnotherDate,
+      }),
     };
 
     try {
@@ -449,20 +476,35 @@ function Subscription() {
     } catch (error) {
       console.error(error);
       toast.error("Failed to add subscription");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const handleSubmitEdit = async () => {
-    // if (!fromDate || !toDate || !receivingDate) {
-    //   toast.error("Please fill all required fields");
-    //   return;
-    // }
+    if (isSubmitting) return;
+
+    if (!fromDate || !toDate || !receivingDate) {
+      toast.error("Please fill all required fields");
+      return;
+    }
+
+    if (frequency === "Bimonthly" && !receivingAnotherDate) {
+      toast.error("Please select second receiving date");
+      return;
+    }
+
+    setIsSubmitting(true);
 
     const payload = {
       from_date: fromDate,
       to_date: toDate,
       receiving_date: receivingDate.value || receivingDate,
       status: status.value,
+      ...(frequency === "Bimonthly" && {
+        bimonthly_second_date:
+          receivingAnotherDate?.value || receivingAnotherDate,
+      }),
     };
 
     try {
@@ -477,8 +519,6 @@ function Subscription() {
 
       if (response.data.status) {
         toast.success("Subscription updated successfully.");
-
-        // Reset form
         setSelectedTitle(null);
         setSubscriptionNo("");
         setFrequency("");
@@ -492,6 +532,8 @@ function Subscription() {
     } catch (error) {
       console.error(error);
       toast.error("Failed to update subscription");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -609,58 +651,11 @@ function Subscription() {
       ...prev,
       {
         volume: "",
-        issues: defaultIssues, // 👈 auto-filled
+        issues: defaultIssues, //  auto-filled
         startDate: "",
       },
     ]);
   };
-
-  // const handleSaveVolumes = async () => {
-  //   // validation
-  //   for (let i = 0; i < volumeForms.length; i++) {
-  //     const { volume, issues, startDate } = volumeForms[i];
-  //     if (!volume || !issues || !startDate) {
-  //       toast.error(`Please fill all required fields.`);
-  //       return;
-  //     }
-  //   }
-
-  //   try {
-  //     const token = localStorage.getItem("authToken");
-
-  //     const payload = {
-  //       volume_start_dates: volumeForms.map((v) => v.startDate),
-  //       subscription_to_date: currentSection?.to_date,
-  //       receiving_date: currentSection?.receiving_date,
-  //       frequency: currentSection?.frequency,
-  //       volume: volumeForms.map((v) => v.volume),
-  //       issue: volumeForms.map((v) => Number(v.issues)),
-  //     };
-
-  //     const response = await axios.post(
-  //       `${API_URL}/api/library/subscriptions/${currentSection.subscription_id}/volumes`,
-  //       payload,
-  //       {
-  //         headers: {
-  //           Authorization: `Bearer ${token}`,
-  //         },
-  //         withCredentials: true,
-  //       },
-  //     );
-
-  //     if (response.data.status === true) {
-  //       toast.success(response.data.message || "Volumes added successfully");
-
-  //       await fetchVolumes(currentSection.subscription_id);
-  //       setVolumeForms([]);
-  //     } else {
-  //       toast.error(response.data.message || "Failed to save volumes");
-  //     }
-  //   } catch (error) {
-  //     console.error("Volume save error", error);
-  //     toast.error("Server error while saving volumes");
-  //   }
-  // };
 
   const handleSaveVolumes = async () => {
     // Validation
@@ -859,19 +854,21 @@ function Subscription() {
                           </td>
 
                           <td className="text-center px-2 py-2 border border-gray-950 text-sm">
-                            <button
-                              className="text-blue-600"
-                              onClick={() => handleEdit(section)}
-                            >
-                              <FontAwesomeIcon icon={faEdit} />
-                            </button>
+                            {section?.status === "Expired" ? (
+                              " "
+                            ) : (
+                              <button
+                                className="text-blue-600"
+                                onClick={() => handleEdit(section)}
+                              >
+                                <FontAwesomeIcon icon={faEdit} />
+                              </button>
+                            )}
                           </td>
 
                           <td className="text-center px-2 py-2 border border-gray-950 text-sm">
-                            {section.isDelete === "Y" ? (
-                              <span className="text-red-600 font-semibold">
-                                Deleted
-                              </span>
+                            {section?.status === "Expired" ? (
+                              " "
                             ) : (
                               <button
                                 onClick={() =>
@@ -1027,6 +1024,27 @@ function Subscription() {
                     </div>
 
                     <div className="flex items-center">
+                      <label htmlFor="frequency" className="w-2/3 ">
+                        Frequency <span className="text-red-500">*</span>
+                      </label>
+                      <div className="w-2/3">
+                        <input
+                          type="text"
+                          maxLength={30}
+                          id="frequency"
+                          value={frequency}
+                          readOnly
+                          className="w-full px-3 py-2 border bg-gray-200 border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
+                        />
+                        {fieldErrors.subscriptionNo && (
+                          <small className="text-danger text-xs">
+                            {fieldErrors.subscriptionNo}
+                          </small>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="flex items-center">
                       <label htmlFor="fromdate" className="w-2/3 ">
                         Subscription From Date{" "}
                         <span className="text-red-500">*</span>
@@ -1071,7 +1089,11 @@ function Subscription() {
 
                     <div className="flex items-center">
                       <label htmlFor="receivedate" className="w-2/3">
-                        Received By Date <span className="text-red-500">*</span>
+                        {frequency === "Bimonthly"
+                          ? "First Receiving Date"
+                          : "Received By Date/Day"}
+                        {/* Received By Date/Day{" "} */}
+                        <span className="text-red-500">*</span>
                       </label>
 
                       <div className="w-2/3">
@@ -1092,6 +1114,34 @@ function Subscription() {
                         )}
                       </div>
                     </div>
+
+                    {frequency === "Bimonthly" && (
+                      <div className="flex items-center">
+                        <label htmlFor="receiveanotherdate" className="w-2/3">
+                          Second Receiving Date{" "}
+                          <span className="text-red-500">*</span>
+                        </label>
+
+                        <div className="w-2/3">
+                          <Select
+                            id="receiveanotherdate"
+                            options={receivingDateOptions}
+                            value={receivingAnotherDate}
+                            onChange={(option) =>
+                              setReceivingAnotherDate(option)
+                            }
+                            placeholder="Select"
+                            isClearable
+                          />
+
+                          {fieldErrors.receivingAnotherDate && (
+                            <small className="text-danger text-xs">
+                              {fieldErrors.receivingAnotherDate}
+                            </small>
+                          )}
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   <div className=" flex justify-end p-3">
@@ -1176,6 +1226,28 @@ function Subscription() {
                   </div>
 
                   <div className="flex items-center">
+                    <label htmlFor="frequency" className="w-2/3 ">
+                      Frequency <span className="text-red-500">*</span>
+                    </label>
+                    <div className="w-2/3">
+                      <input
+                        type="text"
+                        maxLength={30}
+                        id="frequency"
+                        value={frequency}
+                        // onChange={handleChangeSubscription}
+                        readOnly
+                        className="w-full px-3 py-2 border bg-gray-200 border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
+                      />
+                      {fieldErrors.subscriptionNo && (
+                        <small className="text-danger text-xs">
+                          {fieldErrors.subscriptionNo}
+                        </small>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex items-center">
                     <label htmlFor="fromdate" className="w-2/3 ">
                       Subscription From Date{" "}
                       <span className="text-red-500">*</span>
@@ -1220,7 +1292,11 @@ function Subscription() {
 
                   <div className="flex items-center">
                     <label htmlFor="receivedate" className="w-2/3">
-                      Received By Date <span className="text-red-500">*</span>
+                      {frequency === "Bimonthly"
+                        ? "First Receiving Date"
+                        : "Received By Date/Day"}
+                      {/* Received By Date/Day{" "} */}
+                      <span className="text-red-500">*</span>
                     </label>
 
                     <div className="w-2/3">
@@ -1241,6 +1317,32 @@ function Subscription() {
                       )}
                     </div>
                   </div>
+
+                  {frequency === "Bimonthly" && (
+                    <div className="flex items-center">
+                      <label htmlFor="receiveanotherdate" className="w-2/3">
+                        Second Receiving Date{" "}
+                        <span className="text-red-500">*</span>
+                      </label>
+
+                      <div className="w-2/3">
+                        <Select
+                          id="receiveanotherdate"
+                          options={receivingDateOptions}
+                          value={receivingAnotherDate}
+                          onChange={(option) => setReceivingAnotherDate(option)}
+                          placeholder="Select"
+                          isClearable
+                        />
+
+                        {fieldErrors.receivingAnotherDate && (
+                          <small className="text-danger text-xs">
+                            {fieldErrors.receivingAnotherDate}
+                          </small>
+                        )}
+                      </div>
+                    </div>
+                  )}
 
                   <div className="flex items-center">
                     <label htmlFor="status" className="w-2/3">
@@ -1444,7 +1546,7 @@ function Subscription() {
                         className="px-2 py-1 bg-blue-600 text-white rounded-md"
                         onClick={handleAddVolume}
                       >
-                        Add
+                        Add Volume
                       </button>
                     </div>
                   )}

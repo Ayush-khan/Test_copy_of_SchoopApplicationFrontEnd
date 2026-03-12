@@ -135,7 +135,8 @@ const LocationwiseBookReport = () => {
 
   const handleSearch = async ({ clearAll = false } = {}) => {
     if (!clearAll && !selectedCategoryGroup) {
-      toast.error("Please select rack to view the report");
+      toast.info("Please select rack to view the report");
+      // console.log("Please select rack to view the report");
       return;
     }
     setLoadingForSearch(true);
@@ -213,38 +214,49 @@ const LocationwiseBookReport = () => {
       ${timetable
         .map((student, index) => {
           return `
-          <tr style="background-color: ${index % 2 === 0 ? "#fff" : "#f9fafb"
-            };">
+          <tr style="background-color: ${
+            index % 2 === 0 ? "#fff" : "#f9fafb"
+          };">
             <td style="border: 1px solid #ccc; padding: 6px;">${index + 1}</td>
-            <td style="border: 1px solid #ccc; padding: 6px;">${student.copy_id || ""
+            <td style="border: 1px solid #ccc; padding: 6px;">${
+              student.copy_id || ""
             }</td>
             <td style="border: 1px solid #ccc; padding: 6px;">${formatDate(
               student.added_date || "",
             )}</td>
-            <td style="border: 1px solid #ccc; padding: 6px;">${student.book_title || ""
+            <td style="border: 1px solid #ccc; padding: 6px;">${
+              student.book_title || ""
             }</td>
            
             <td style="border: 1px solid #ccc; padding: 6px;">${formatDate(
               student.author || "",
             )}</td>
              
-             <td style="border: 1px solid #ccc; padding: 6px;">${student.publisher || ""
-            }</td>
-             <td style="border: 1px solid #ccc; padding: 6px;">${student.year || ""
-            }</td>
+             <td style="border: 1px solid #ccc; padding: 6px;">${
+               student.publisher || ""
+             }</td>
+             <td style="border: 1px solid #ccc; padding: 6px;">${
+               student.year || ""
+             }</td>
 
-              <td style="border: 1px solid #ccc; padding: 6px;">${student.edition || ""
-            }</td>
-               <td style="border: 1px solid #ccc; padding: 6px;">${student.no_of_pages || ""
-            }</td>
-                <td style="border: 1px solid #ccc; padding: 6px;">${student.source_of_book || ""
-            }</td>
-             <td style="border: 1px solid #ccc; padding: 6px;">${student.price || ""
-            }</td>
-              <td style="border: 1px solid #ccc; padding: 6px;">${student.isbn || ""
-            }</td>
-             <td style="border: 1px solid #ccc; padding: 6px;">${student.location_of_book || ""
-            }</td>
+              <td style="border: 1px solid #ccc; padding: 6px;">${
+                student.edition || ""
+              }</td>
+               <td style="border: 1px solid #ccc; padding: 6px;">${
+                 student.no_of_pages || ""
+               }</td>
+                <td style="border: 1px solid #ccc; padding: 6px;">${
+                  student.source_of_book || ""
+                }</td>
+             <td style="border: 1px solid #ccc; padding: 6px;">${
+               student.price || ""
+             }</td>
+              <td style="border: 1px solid #ccc; padding: 6px;">${
+                student.isbn || ""
+              }</td>
+             <td style="border: 1px solid #ccc; padding: 6px;">${
+               student.location_of_book || ""
+             }</td>
           
           </tr>
         `;
@@ -358,7 +370,7 @@ const LocationwiseBookReport = () => {
       "Accession No.",
       "Date",
       "Book Title",
-      "Call No./Category",
+
       "Author",
       "Publisher/Place of Publication",
       "Year of Publication",
@@ -375,7 +387,7 @@ const LocationwiseBookReport = () => {
       student?.copy_id || " ",
       formatDate(student?.added_date || " "),
       student?.book_title || " ",
-      `${student?.call_no || " "} / ${student?.category_name}`,
+
       student?.author || " ",
       student?.publisher || " ",
       student?.year || " ",
@@ -406,12 +418,12 @@ const LocationwiseBookReport = () => {
   // console.log("row", timetable);
 
   const formatDate = (dateStr) =>
-    dateStr
+    dateStr && dateStr !== "0000-00-00"
       ? new Date(dateStr).toLocaleDateString("en-GB", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "2-digit",
-      })
+          day: "2-digit",
+          month: "2-digit",
+          year: "2-digit",
+        })
       : "";
 
   const handlePageClick = (data) => {
@@ -503,7 +515,7 @@ const LocationwiseBookReport = () => {
               backgroundColor: "#C03078",
             }}
           ></div>
-          {filteredSections.length > 0 && (
+          {filteredSections.length > 0 ? (
             <div className="md:absolute md:right-7 md:top-[10%] mb-5 text-gray-500">
               <div className="mx-auto w-fit px-2 py-1 bg-blue-50 border border-blue-300 text-blue-800 text-sm rounded text-center">
                 <div className="flex flex-col md:flex-row gap-x-1 justify-center md:justify-end">
@@ -527,7 +539,7 @@ const LocationwiseBookReport = () => {
                     <FaFileExcel />
 
                     <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:flex items-center justify-center bg-gray-600  text-white text-[.7em] rounded-md py-1 px-2">
-                      Exports to excel
+                      Export to excel
                     </div>
                   </button>
 
@@ -543,6 +555,13 @@ const LocationwiseBookReport = () => {
                 </div>
               </div>
             </div>
+          ) : (
+            // <p className=" md:absolute md:right-7  md:top-[50%]   text-gray-500 ">
+            //   <div className="mx-auto w-fit px-2 py-1 bg-blue-50 border border-blue-300 text-blue-800 text-sm rounded text-center">
+            //     <strong>Note:</strong> Please select rack to view the report.
+            //   </div>
+            // </p>
+            " "
           )}
 
           <>
@@ -582,6 +601,17 @@ const LocationwiseBookReport = () => {
 
             <>
               <div className="w-full  p-2">
+                {timetable.length > 0 && (
+                  <div className="flex justify-end items-center gap-2 font-medium">
+                    <span>
+                      <span className="text-blue-800 ml-1">Total Books: </span>
+                      <span className="text-pink-600 ml-1">
+                        {filteredSections.length}
+                      </span>
+                    </span>
+                  </div>
+                )}
+
                 {timetable.length > 0 && (
                   <div className="card mx-auto lg:w-full shadow-lg">
                     {showSearch && (
@@ -638,7 +668,7 @@ const LocationwiseBookReport = () => {
                                 Date
                               </th>
                               <th
-                                style={{ width: "170px" }}
+                                style={{ width: "200px" }}
                                 className="px-1 py-1 text-center border border-gray-950 text-sm font-semibold"
                               >
                                 Book Title
@@ -693,7 +723,7 @@ const LocationwiseBookReport = () => {
                                 ISBN No.
                               </th>
                               <th
-                                style={{ width: "160px" }}
+                                style={{ width: "120px" }}
                                 className="px-1 py-1 text-center border border-gray-950 text-sm font-semibold"
                               >
                                 Location
@@ -735,14 +765,14 @@ const LocationwiseBookReport = () => {
                                   <td className="px-2 py-2 text-center border">
                                     {student?.author
                                       ? student.author
-                                        .toLowerCase()
-                                        .split(" ")
-                                        .map(
-                                          (w) =>
-                                            w.charAt(0).toUpperCase() +
-                                            w.slice(1),
-                                        )
-                                        .join(" ")
+                                          .toLowerCase()
+                                          .split(" ")
+                                          .map(
+                                            (w) =>
+                                              w.charAt(0).toUpperCase() +
+                                              w.slice(1),
+                                          )
+                                          .join(" ")
                                       : "-"}
                                   </td>
                                   <td className="px-2 py-2 text-center border">
@@ -776,7 +806,7 @@ const LocationwiseBookReport = () => {
                             {!loading && timetable.length === 0 && (
                               <div className="absolute inset-0 flex justify-center items-center">
                                 <div className="text-xl text-red-700">
-                                  No data available.
+                                  {/* No data available. */}{" "}
                                 </div>
                               </div>
                             )}
@@ -787,13 +817,13 @@ const LocationwiseBookReport = () => {
                               displayedSections.length === 0 && (
                                 <div className="absolute inset-0 flex justify-center items-center">
                                   <div className="text-xl text-red-700">
-                                    Result data found!
+                                    Result not found!
                                   </div>
                                 </div>
                               )}
 
                             {/* TOTAL COUNT ROW */}
-                            {!loading && filteredSections.length > 0 && (
+                            {/* {!loading && filteredSections.length > 0 && (
                               <div className="absolute bottom-2 left-4 z-10">
                                 <div className="px-4 py-2 bg-gray-100 border rounded shadow text-sm">
                                   <span className="text-blue-800 font-semibold">
@@ -804,7 +834,7 @@ const LocationwiseBookReport = () => {
                                   </span>
                                 </div>
                               </div>
-                            )}
+                            )} */}
                           </tbody>
                         </table>
                       </div>

@@ -180,7 +180,7 @@ function CategoryGroup() {
         },
       );
 
-      console.log("response", response);
+      // console.log("response", response);
 
       toast.success("Category Group added successfully!");
       setNameError("");
@@ -232,7 +232,7 @@ function CategoryGroup() {
         },
       );
 
-      console.log("response", response);
+      // console.log("response", response);
 
       toast.success("Category Group updated successfully!");
       setNameError("");

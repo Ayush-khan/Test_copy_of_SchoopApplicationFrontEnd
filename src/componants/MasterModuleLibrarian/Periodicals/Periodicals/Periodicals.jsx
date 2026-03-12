@@ -319,10 +319,14 @@ function Periodicals() {
   };
 
   const handleSubmitAdd = async () => {
+    if (isSubmitting) return;
+
     if (!newSectionName || !subscriptionNo || !frequency) {
       toast.error("Please fill all required fields");
       return;
     }
+
+    setIsSubmitting(true);
 
     const payload = {
       title: newSectionName,
@@ -333,6 +337,7 @@ function Periodicals() {
 
     try {
       const token = localStorage.getItem("authToken");
+
       const response = await axios.post(
         `${API_URL}/api/library/periodicals`,
         payload,
@@ -343,6 +348,8 @@ function Periodicals() {
 
       if (response.data.status) {
         toast.success("Periodical added successfully.");
+        fetchSections();
+
         setNewSectionName("");
         setSubscriptionNo("");
         setFrequency("");
@@ -353,15 +360,19 @@ function Periodicals() {
     } catch (error) {
       console.error(error);
       toast.error("Failed to add periodical");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const handleSubmitEdit = async () => {
+    if (isSubmitting) return;
     if (!newSectionName || !subscriptionNo || !frequency) {
       toast.error("Please fill all required fields");
       return;
     }
 
+    setIsSubmitting(true);
     const payload = {
       title: newSectionName,
       subscription_no: subscriptionNo,
@@ -392,6 +403,8 @@ function Periodicals() {
     } catch (error) {
       console.error(error);
       toast.error("Failed to add periodical");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -670,7 +683,7 @@ function Periodicals() {
                     {/* Email IDs */}
                     <div className="flex items-center gap-4">
                       <label htmlFor="email" className="w-1/3">
-                        Email Ids
+                        Email Id
                       </label>
                       <div className="w-2/3">
                         <input
@@ -798,7 +811,7 @@ function Periodicals() {
                   {/* Email IDs */}
                   <div className="flex items-center gap-4">
                     <label htmlFor="email" className="w-1/3">
-                      Email Ids
+                      Email Id
                     </label>
                     <div className="w-2/3">
                       <input

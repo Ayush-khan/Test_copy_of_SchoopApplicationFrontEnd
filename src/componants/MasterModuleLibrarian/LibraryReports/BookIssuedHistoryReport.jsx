@@ -38,6 +38,10 @@ const BooksIssuedHistoryReport = () => {
   const isAccessionResetRef = useRef(false);
 
   useEffect(() => {
+    handleSearch();
+  }, []);
+
+  useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedAccessionNo(assessionNo);
     }, 500);
@@ -47,15 +51,17 @@ const BooksIssuedHistoryReport = () => {
 
   useEffect(() => {
     if (!debouncedAccessionNo) {
-      const todayDate = new Date().toISOString().split("T")[0];
+      // const todayDate = new Date().toISOString().split("T")[0];
 
       isAccessionResetRef.current = true;
 
       setTitle("");
       setTimetable([]);
       setPageCount(0);
-      setSearchFrom(todayDate);
-      setSearchTo(todayDate);
+      // setSearchFrom(todayDate);
+      // setSearchTo(todayDate);
+      setSearchFrom();
+      setSearchTo();
 
       return;
     }
@@ -95,11 +101,11 @@ const BooksIssuedHistoryReport = () => {
     }
   }, [searchFrom, searchTo, debouncedAccessionNo]);
 
-  useEffect(() => {
-    const today = new Date().toISOString().split("T")[0];
-    setSearchFrom(today);
-    setSearchTo(today);
-  }, []);
+  // useEffect(() => {
+  //   const today = new Date().toISOString().split("T")[0];
+  //   setSearchFrom(today);
+  //   setSearchTo(today);
+  // }, []);
 
   const handleDateChange = (from, to) => {
     setSearchFrom(from);
@@ -110,7 +116,7 @@ const BooksIssuedHistoryReport = () => {
 
   const handleSearch = async ({ clearAll = false } = {}) => {
     if (!assessionNo) {
-      toast.error("Please select accession no.");
+      toast.info("Please select accession no.");
       return;
     }
     setLoadingForSearch(true);
@@ -555,6 +561,19 @@ const BooksIssuedHistoryReport = () => {
             <>
               <div className="w-full  p-2">
                 {timetable.length > 0 && (
+                  <div className="flex justify-end items-center gap-2 font-medium">
+                    <span>
+                      <span className="text-blue-800 ml-1">
+                        Total Books Issued : {"  "}
+                        {/* for Accession No. {assessionNo} are : */}
+                      </span>
+                      <span className="text-pink-600 ml-1">
+                        {filteredSections.length}
+                      </span>
+                    </span>
+                  </div>
+                )}
+                {timetable.length > 0 && (
                   <div className="card mx-auto lg:w-full shadow-lg">
                     {showSearch && (
                       <>
@@ -691,13 +710,13 @@ const BooksIssuedHistoryReport = () => {
                               displayedSections.length === 0 && (
                                 <div className="absolute inset-0 flex justify-center items-center">
                                   <div className="text-xl text-red-700">
-                                    Result data found!
+                                    Result not found!
                                   </div>
                                 </div>
                               )}
 
                             {/* TOTAL COUNT ROW */}
-                            {!loading && filteredSections.length > 0 && (
+                            {/* {!loading && filteredSections.length > 0 && (
                               <div className="absolute bottom-2 left-4 z-10">
                                 <div className="px-4 py-2 bg-gray-100 border rounded shadow text-sm">
                                   <span className="text-blue-800 font-semibold">
@@ -709,7 +728,7 @@ const BooksIssuedHistoryReport = () => {
                                   </span>
                                 </div>
                               </div>
-                            )}
+                            )} */}
                           </tbody>
                         </table>
                       </div>
