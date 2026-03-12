@@ -175,23 +175,23 @@
 
 
 import { useState, useEffect } from "react";
-import axios from "axios";
 import Styles from "./EventCard.module.css"; // Import CSS module
 import Loader from "../common/LoaderFinal/DashboardLoadder/Loader";
 import { useNavigate } from "react-router-dom";
 import MarkDropdownEditor from "../Events/MarkDropdownEditor";
+import api from "./api";
+import { useDashboardStructure } from "../../context/DashboardStructureContext";
 
 const EventCard = () => {
-  const API_URL = import.meta.env.VITE_API_URL; // url for host
   const [events, setEvents] = useState([]);
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
   const currentYear = new Date().getFullYear();
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-
-  const [roleId, setRoleId] = useState(null);
-  const [regId, setRegId] = useState(null);
+  const { sessionInfo, sessionLoading, loadSessionInfo } = useDashboardStructure();
+  const roleId = sessionInfo?.roleId || null;
+  const regId = sessionInfo?.regId || null;
 
   const months = [
     { value: 0, label: "January" },
@@ -209,59 +209,28 @@ const EventCard = () => {
   ];
 
   useEffect(() => {
-    fetchRoleId();
-  }, []);
-
-  const fetchRoleId = async () => {
-    const token = localStorage.getItem("authToken");
-
-    try {
-      const response = await axios.get(`${API_URL}/api/sessionData`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      const roleId = response?.data?.user?.role_id;
-      console.log("role id", response?.data?.user?.role_id);
-
-      const regId = response?.data?.user?.reg_id;
-      console.log("reg id", response?.data?.user?.reg_id);
-      setRegId(regId);
-
-      if (roleId) {
-        setRoleId(roleId);
-      } else {
-        console.warn("role_id not found in sessionData response");
-      }
-    } catch (error) {
-      console.error("Failed to fetch session data:", error);
+    if (!sessionInfo) {
+      loadSessionInfo();
     }
-  };
+  }, [sessionInfo, loadSessionInfo]);
 
 
   const fetchData = async () => {
+    if (!roleId) return;
+    if (roleId === "T" && !regId) return;
+
     setLoading(true);
 
     try {
-      const token = localStorage.getItem("authToken");
-      if (!token) {
-        navigate("/");
-        return;
-      }
-
       const apiUrl =
         roleId === "T"
-          ? `${API_URL}/api/teachers/${regId}/dashboard/events`
-          : `${API_URL}/api/events`;
+          ? `/api/teachers/${regId}/dashboard/events`
+          : `/api/events`;
 
-      const response = await axios.get(apiUrl, {
+      const response = await api.get(apiUrl, {
         params: {
           month: Number(selectedMonth) + 1,
           year: currentYear,
-        },
-        headers: {
-          Authorization: `Bearer ${token}`,
         },
       });
 
@@ -290,10 +259,12 @@ const EventCard = () => {
   };
 
   useEffect(() => {
+    if (sessionLoading) return;
     if (!roleId) return;
+    if (roleId === "T" && !regId) return;
 
     fetchData();
-  }, [roleId, selectedMonth]);
+  }, [roleId, regId, selectedMonth, sessionLoading]);
 
   const handleMonthChange = (e) => {
     setSelectedMonth(parseInt(e.target.value, 10));

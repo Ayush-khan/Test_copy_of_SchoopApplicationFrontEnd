@@ -18,15 +18,21 @@ const normalizeStructurePayload = (payload) => {
 
 export const DashboardStructureProvider = ({ children }) => {
   const location = useLocation();
+  const [sessionInfo, setSessionInfo] = useState(null);
   const [dashboardStructure, setDashboardStructure] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [sessionLoading, setSessionLoading] = useState(false);
   const inFlightRef = useRef(null);
+  const sessionInFlightRef = useRef(null);
   const tokenRef = useRef(localStorage.getItem("authToken") || "");
 
   const clearDashboardStructure = useCallback(() => {
     inFlightRef.current = null;
+    sessionInFlightRef.current = null;
+    setSessionInfo(null);
     setDashboardStructure(null);
     setLoading(false);
+    setSessionLoading(false);
   }, []);
 
   // Reset cache when auth token changes (logout/login).
@@ -74,14 +80,52 @@ export const DashboardStructureProvider = ({ children }) => {
     return request;
   }, [dashboardStructure]);
 
+  const loadSessionInfo = useCallback(async () => {
+    if (sessionInfo) return sessionInfo;
+    if (sessionInFlightRef.current) return sessionInFlightRef.current;
+
+    const request = (async () => {
+      setSessionLoading(true);
+      try {
+        const session = await api.get("/api/sessionData");
+        const { role_id, reg_id } = session.data.user;
+        const sortName = session.data.custom_claims.short_name;
+        const normalizedSession = {
+          roleId: role_id,
+          regId: reg_id,
+          sortName,
+        };
+        setSessionInfo(normalizedSession);
+        return normalizedSession;
+      } finally {
+        sessionInFlightRef.current = null;
+        setSessionLoading(false);
+      }
+    })();
+
+    sessionInFlightRef.current = request;
+    return request;
+  }, [sessionInfo]);
+
   const value = useMemo(
     () => ({
+      sessionInfo,
+      sessionLoading,
+      loadSessionInfo,
       dashboardStructure,
       structureLoading: loading,
       loadDashboardStructure,
       clearDashboardStructure,
     }),
-    [dashboardStructure, loading, loadDashboardStructure, clearDashboardStructure],
+    [
+      sessionInfo,
+      sessionLoading,
+      loadSessionInfo,
+      dashboardStructure,
+      loading,
+      loadDashboardStructure,
+      clearDashboardStructure,
+    ],
   );
 
   return (
@@ -98,4 +142,3 @@ export const useDashboardStructure = () => {
   }
   return context;
 };
-
