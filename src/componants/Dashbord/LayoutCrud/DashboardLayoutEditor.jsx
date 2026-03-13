@@ -1,6 +1,16 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { Responsive, useContainerWidth } from "react-grid-layout";
 import { dashboardLayoutCrudService } from "./dashboardLayoutCrudService";
+import "react-grid-layout/css/styles.css";
+import "react-resizable/css/styles.css";
+
+const PREVIEW_COLS = { lg: 12, md: 8, sm: 4, xs: 2, xxs: 1 };
+const PREVIEW_BREAKPOINTS = { lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 };
+const PREVIEW_ROW_HEIGHT = 42;
+const PREVIEW_MARGIN = [10, 10];
+
+const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
 
 const createWidgetWithId = (widgetId) => ({
   dashboard_widget_id: Number(widgetId) || 0,
@@ -27,6 +37,156 @@ const createLayoutWithWidgetId = (widgetId = 0) => ({
   sections: [createSectionWithWidgetId(0, widgetId)],
 });
 
+const toSectionLayouts = (widgets = []) => {
+  const lg = widgets.map((widget, index) => {
+    const base = widget?.layout || {};
+    const i = String(widget?.dashboard_widget_id || `${widget?.widget_key}-${index}`);
+    return {
+      i,
+      x: clamp(Number(base?.x || 0), 0, PREVIEW_COLS.lg - 1),
+      y: Math.max(0, Number(base?.y || 0)),
+      w: clamp(Number(base?.w || 2), 1, PREVIEW_COLS.lg),
+      h: clamp(Number(base?.h || 2), 1, 24),
+    };
+  });
+
+  const md = widgets.map((widget, index) => {
+    const base = widget?.layout || {};
+    const i = String(widget?.dashboard_widget_id || `${widget?.widget_key}-${index}`);
+    return {
+      i,
+      x: clamp(Number(base?.x || 0), 0, PREVIEW_COLS.md - 1),
+      y: Math.max(0, Number(base?.y || 0)),
+      w: clamp(Math.min(Number(base?.w || 2), PREVIEW_COLS.md), 1, PREVIEW_COLS.md),
+      h: clamp(Number(base?.h || 2), 1, 24),
+    };
+  });
+
+  const sm = widgets.map((widget, index) => {
+    const base = widget?.layout || {};
+    const i = String(widget?.dashboard_widget_id || `${widget?.widget_key}-${index}`);
+    return {
+      i,
+      x: clamp(Number(base?.x || 0), 0, PREVIEW_COLS.sm - 1),
+      y: Math.max(0, Number(base?.y || 0)),
+      w: clamp(Math.min(Number(base?.w || 2), PREVIEW_COLS.sm), 1, PREVIEW_COLS.sm),
+      h: clamp(Number(base?.h || 2), 1, 24),
+    };
+  });
+
+  return { lg, md, sm, xs: sm, xxs: sm };
+};
+
+const widgetPreviewShellClasses = (widgetType) => {
+  const type = String(widgetType || "").toLowerCase();
+  if (type === "chart") return "bg-amber-50 border-amber-200";
+  if (type === "table") return "bg-cyan-50 border-cyan-200";
+  if (type === "list") return "bg-indigo-50 border-indigo-200";
+  return "bg-emerald-50 border-emerald-200";
+};
+
+const SectionLayoutPreview = ({ section, onCommitLayout }) => {
+  const widgets = section?.widgets || [];
+  const { width, containerRef, mounted } = useContainerWidth({
+    measureBeforeMount: false,
+    initialWidth: 1100,
+  });
+
+  const layouts = useMemo(() => toSectionLayouts(widgets), [widgets]);
+
+  const commit = (layout) => {
+    if (!Array.isArray(layout)) return;
+    onCommitLayout(layout);
+  };
+
+  return (
+    <div ref={containerRef}>
+      {mounted ? (
+        <Responsive
+          className="layout"
+          width={width}
+          layouts={layouts}
+          breakpoints={PREVIEW_BREAKPOINTS}
+          cols={PREVIEW_COLS}
+          rowHeight={PREVIEW_ROW_HEIGHT}
+          margin={PREVIEW_MARGIN}
+          containerPadding={[0, 0]}
+          isDraggable={true}
+          isResizable={true}
+          compactType={null}
+          preventCollision={true}
+          onDragStop={(layout) => commit(layout)}
+          onResizeStop={(layout) => commit(layout)}
+        >
+          {widgets.map((widget, index) => {
+            const key = String(
+              widget?.dashboard_widget_id || `${widget?.widget_key || "widget"}-${index}`,
+            );
+            return (
+              <div key={key} className="h-full">
+                <div
+                  className={`h-full rounded-md border p-2 text-xs ${widgetPreviewShellClasses(
+                    widget?.widget_type,
+                  )}`}
+                >
+                  <div className="font-semibold text-gray-800 truncate">
+                    {widget?.widget_name || "Untitled Widget"}
+                  </div>
+                  <div className="text-[11px] text-gray-600 truncate">
+                    key: {widget?.widget_key || "-"}
+                  </div>
+                  <div className="text-[11px] text-gray-600">
+                    type: {widget?.widget_type || "-"}
+                  </div>
+                  <div className="text-[11px] text-gray-600">
+                    ({widget?.layout?.x ?? 0},{widget?.layout?.y ?? 0}) w:
+                    {widget?.layout?.w ?? 0} h:{widget?.layout?.h ?? 0}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </Responsive>
+      ) : (
+        <div className="h-24 rounded bg-gray-100 animate-pulse" />
+      )}
+    </div>
+  );
+};
+
+const DashboardLayoutPreviewPanel = ({ sections, onCommitLayout }) => {
+  const orderedSections = (sections || [])
+    .map((section, originalIndex) => ({ section, originalIndex }))
+    .sort(
+      (a, b) =>
+        Number(a?.section?.section_order || 0) - Number(b?.section?.section_order || 0),
+    );
+
+  return (
+    <div className="card shadow-lg mt-3">
+      <div className="card-body">
+        <h2 className="text-base font-semibold mb-1">Dashboard Preview Mode</h2>
+        <p className="text-sm text-gray-600 mb-3">
+          Drag and resize widgets to set final position and size, then click Save.
+        </p>
+        <div className="space-y-4">
+          {orderedSections.map(({ section, originalIndex }, sectionIndex) => (
+            <div key={section?.section_id || sectionIndex} className="border rounded p-3 bg-gray-50">
+              <div className="text-sm font-semibold text-gray-700 mb-2">
+                {section?.section_name || `Section ${sectionIndex + 1}`}
+              </div>
+              <SectionLayoutPreview
+                section={section}
+                onCommitLayout={(layout) => onCommitLayout(originalIndex, layout)}
+              />
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const DashboardLayoutEditor = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -37,6 +197,7 @@ const DashboardLayoutEditor = () => {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [nextWidgetId, setNextWidgetId] = useState(1);
+  const [isPreviewMode, setIsPreviewMode] = useState(false);
 
   useEffect(() => {
     const load = async () => {
@@ -176,6 +337,39 @@ const DashboardLayoutEditor = () => {
     });
   };
 
+  const applySectionLayout = (sectionIndex, layoutItems) => {
+    setForm((prev) => {
+      const nextSections = [...prev.sections];
+      const section = nextSections[sectionIndex];
+      if (!section) return prev;
+
+      const layoutMap = new Map(
+        (layoutItems || []).map((item) => [String(item.i), item]),
+      );
+
+      const nextWidgets = (section.widgets || []).map((widget, widgetIndex) => {
+        const key = String(
+          widget?.dashboard_widget_id || `${widget?.widget_key || "widget"}-${widgetIndex}`,
+        );
+        const nextItem = layoutMap.get(key);
+        if (!nextItem) return widget;
+        return {
+          ...widget,
+          layout: {
+            ...(widget?.layout || {}),
+            x: Number(nextItem.x || 0),
+            y: Number(nextItem.y || 0),
+            w: Number(nextItem.w || 1),
+            h: Number(nextItem.h || 1),
+          },
+        };
+      });
+
+      nextSections[sectionIndex] = { ...section, widgets: nextWidgets };
+      return { ...prev, sections: nextSections };
+    });
+  };
+
   const validate = () => {
     if (!form?.dashboard?.name?.trim()) return "Dashboard name is required.";
     if (!form?.dashboard?.role?.trim()) return "Dashboard role is required.";
@@ -244,6 +438,13 @@ const DashboardLayoutEditor = () => {
             <div className="flex gap-2">
             <button
               type="button"
+                className="btn btn-outline-primary btn-sm"
+              onClick={() => setIsPreviewMode((prev) => !prev)}
+            >
+              {isPreviewMode ? "Back To Form" : "Preview Layout"}
+            </button>
+            <button
+              type="button"
                 className="btn btn-outline-secondary btn-sm"
               onClick={() => navigate("/dashboard-layout-crud")}
             >
@@ -266,6 +467,15 @@ const DashboardLayoutEditor = () => {
           </div>
         </div>
 
+      {isPreviewMode ? (
+        <div className="w-full md:w-[96%] mx-auto">
+          {error ? <div className="alert alert-danger py-2 mb-3">{error}</div> : null}
+          <DashboardLayoutPreviewPanel
+            sections={form.sections || []}
+            onCommitLayout={applySectionLayout}
+          />
+        </div>
+      ) : (
       <div className="mt-3 grid grid-cols-1 gap-4 lg:grid-cols-3 w-full md:w-[96%] mx-auto">
         <div className="lg:col-span-2">
           {error ? <div className="alert alert-danger py-2 mb-3">{error}</div> : null}
@@ -509,6 +719,7 @@ const DashboardLayoutEditor = () => {
           </div>
         </div>
       </div>
+      )}
     </div>
   );
 };
