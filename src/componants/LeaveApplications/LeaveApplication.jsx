@@ -46,7 +46,7 @@ function LeaveApplicaton() {
             Authorization: `Bearer ${token}`,
           },
           withCredentials: true,
-        }
+        },
       );
 
       setStaffs(response.data.data);
@@ -107,7 +107,7 @@ function LeaveApplicaton() {
             Authorization: `Bearer ${token}`,
           },
           withCredentials: true,
-        }
+        },
       );
       fetchLeaves();
       if (response.status === 200) {
@@ -163,7 +163,7 @@ function LeaveApplicaton() {
 
   const displayedStaffs = filteredStaffs.slice(
     currentPage * pageSize,
-    (currentPage + 1) * pageSize
+    (currentPage + 1) * pageSize,
   );
 
   return (
@@ -340,12 +340,22 @@ function LeaveApplicaton() {
                           </td>
                         </tr>
                       ))
+                    ) : staffs.length === 0 ? (
+                      <tr>
+                        <td colSpan={10} className="py-20">
+                          <div className="text-center text-red-700 text-base sm:text-lg">
+                            Create leave application to view.
+                          </div>
+                        </td>
+                      </tr>
                     ) : (
-                      <div className=" absolute left-[1%] w-[100%]  text-center flex justify-center items-center mt-14">
-                        <div className=" text-center text-xl text-red-700">
-                          Oops! No data found..
-                        </div>
-                      </div>
+                      <tr>
+                        <td colSpan={10} className="py-20">
+                          <div className="text-center text-red-700 text-base sm:text-lg">
+                            Result not found!
+                          </div>
+                        </td>
+                      </tr>
                     )}
                   </tbody>
                 </table>

@@ -60,6 +60,9 @@ const IssueBook = () => {
   const [bookDetails, setBookDetails] = useState(null); // call/category + title
   const [bookList, setBookList] = useState([]); // list for table rows
   const [bookError, setBookError] = useState("");
+  const [bookPreview, setBookPreview] = useState(null);
+
+  const [memberDetails, setMemberDetails] = useState("");
 
   const camelCase = (str) =>
     str
@@ -98,9 +101,9 @@ const IssueBook = () => {
       setRegId(reg_id);
       setAcademicYear(academicyr);
 
-      console.log("roleIDis:", role_id);
-      console.log("reg id:", reg_id);
-      console.log("academic year", academicyr);
+      // console.log("roleIDis:", role_id);
+      // console.log("reg id:", reg_id);
+      // console.log("academic year", academicyr);
 
       return { roleId, regId };
     } catch (error) {
@@ -117,10 +120,10 @@ const IssueBook = () => {
         `${API_URL}/api/get_teacherclasseswithclassteacher?teacher_id=${regId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
 
-      console.log("response", response.data.data);
+      // console.log("response", response.data.data);
 
       const mappedData = (response.data.data || [])
         .filter((item) => item.class_id && item.section_id)
@@ -215,10 +218,10 @@ const IssueBook = () => {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
-      console.log("response library members", response.data);
+      // console.log("response library members", response.data);
       setStafflist(response.data);
     } catch (error) {
       toast.error("Error fetching library members");
@@ -237,17 +240,6 @@ const IssueBook = () => {
     }));
   }, [stafflist]);
 
-  // const handleMemberSelect = (selectedOption) => {
-  //   setSelectedStaff(selectedOption);
-
-  //   if (selectedOption) {
-  //     setSelectedStaffId(selectedOption.value);
-  //     setSelectedStaffName(selectedOption.label);
-  //   } else {
-  //     setSelectedStaffId(null);
-  //     setSelectedStaffName(null);
-  //   }
-  // };
   const handleMemberSelect = (selectedOption) => {
     setSelectedStaff(selectedOption);
 
@@ -284,6 +276,7 @@ const IssueBook = () => {
     setClassError("");
     setBookError("");
     setAccessionNo("");
+    setBookList("");
 
     setTimetable([]);
     setShowStudentReport(false);
@@ -294,7 +287,7 @@ const IssueBook = () => {
     const isGrnEntered = grn_no && grn_no.trim() !== "";
 
     if (selectedType === "student") {
-      // 👉 If GRN exists → skip all dropdown validations
+      //  If GRN exists → skip all dropdown validations
       if (!isGrnEntered) {
         if (!selectedStudentId) {
           setClassError("Please select a class.");
@@ -310,7 +303,7 @@ const IssueBook = () => {
 
     if (selectedType === "staff") {
       if (!selectedStaffId) {
-        setStaffError("Please select a staff member.");
+        setStaffError("Please select a member.");
         hasError = true;
       }
     }
@@ -327,14 +320,14 @@ const IssueBook = () => {
 
       if (selectedType === "student") {
         if (isGrnEntered) {
-          // 👉 Search ONLY by GRN NO
+          //Search ONLY by GRN NO
           params = {
             mtype: "S",
             grn_no: grn_no,
             issuedate: issuedDate,
           };
         } else {
-          // 👉 Search by class + section + member
+          // Search by class + section + member
           params = {
             mtype: "S",
             class_id: selectedStudentId || "",
@@ -345,7 +338,7 @@ const IssueBook = () => {
           };
         }
       } else {
-        // 👉 STAFF MODE
+        //  STAFF MODE
         params = {
           mtype: "T",
           member_id: selectedStaffId || "",
@@ -359,179 +352,147 @@ const IssueBook = () => {
         params,
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
 
       const data = response?.data ?? [];
+      const memberData = response?.data?.member;
 
       setTimetable(data);
+      setMemberDetails(memberData);
+      // console.log("memberdata", memberData);
       setPageCount(Math.ceil(data.length / pageSize));
       setShowStudentReport(true);
     } catch (error) {
       console.error("API Error:", error?.response?.data || error.message);
-      toast.error("Failed to fetch data. Please try again.");
+
+      if (error.response) {
+        const { status, data } = error.response;
+
+        // Show backend message if available
+        if (data?.message) {
+          toast.error(data.message);
+        } else {
+          toast.error(`Request failed (${status})`);
+        }
+      } else {
+        toast.error("Server not reachable. Please try again.");
+      }
     } finally {
       setLoadingForSearch(false);
       setIsSubmitting(false);
     }
   };
+  // const fetchDueDate = async () => {
+  //   try {
+  //     const token = localStorage.getItem("authToken");
+
+  //     const mtype = selectedType === "student" ? "S" : "T";
+  //     const issueDate = issuedDate;
+
+  //     const response = await axios.get(
+  //       `${API_URL}/api/library/get_due_date/${mtype}/${issueDate}`,
+  //       { headers: { Authorization: `Bearer ${token}` } },
+  //     );
+
+  //     console.log("Due Date Response:", response.data);
+
+  //     if (response.data && response.data.due_date) {
+  //       return response.data.due_date; // return due date
+  //     }
+
+  //     return null;
+  //   } catch (error) {
+  //     console.error("Due Date API Error:", error);
+  //     return null;
+  //   }
+  // };
+
   const fetchDueDate = async () => {
+    if (!selectedType || !issuedDate) {
+      console.warn("Due date skipped: missing type or issue date");
+      return null;
+    }
+
     try {
       const token = localStorage.getItem("authToken");
 
       const mtype = selectedType === "student" ? "S" : "T";
-      const issueDate = issuedDate;
 
       const response = await axios.get(
-        `${API_URL}/api/library/get_due_date/${mtype}/${issueDate}`,
-        { headers: { Authorization: `Bearer ${token}` } }
+        `${API_URL}/api/library/get_due_date/${mtype}/${issuedDate}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
       );
 
-      console.log("Due Date Response:", response.data);
+      // console.log("Due Date Response:", response.data);
 
-      if (response.data && response.data.due_date) {
-        return response.data.due_date; // return due date
-      }
-
-      return null;
+      return response.data?.due_date ?? null;
     } catch (error) {
       console.error("Due Date API Error:", error);
       return null;
     }
   };
 
-  // const fetchBookByAccessionNo = async () => {
-  //   setBookError("");
-
-  //   if (!accessionNo.trim()) {
-  //     setBookError("Please enter Accession No.");
-  //     return;
-  //   }
-
-  //   if (!/^[0-9]+$/.test(accessionNo)) {
-  //     setBookError("Only numbers are allowed.");
-  //     return;
-  //   }
-
-  //   // -----------------------------------------
-  //   // 🔥 BOOK LIMIT VALIDATION (STUDENT ONLY)
-  //   // -----------------------------------------
-  //   if (selectedType === "student") {
-  //     const alreadyIssuedCount = displayedSections.length;
-  //     const newBooksAddedCount = bookList.length;
-  //     const totalBooks = alreadyIssuedCount + newBooksAddedCount;
-
-  //     if (totalBooks >= 2) {
-  //       toast.error("More than two books not issued");
-  //       return;
-  //     }
-  //   }
-  //   // -----------------------------------------
-
-  //   try {
-  //     const token = localStorage.getItem("authToken");
-
-  //     const response = await axios.post(
-  //       `${API_URL}/api/library/get_book_by_copy`,
-  //       { copy_id: accessionNo },
-  //       { headers: { Authorization: `Bearer ${token}` } }
-  //     );
-
-  //     if (!response.data || response.data.length === 0) {
-  //       setBookError("Enter a valid Accession No.");
-  //       setBookDetails(null);
-  //       return;
-  //     }
-
-  //     const book = response.data[0];
-
-  //     // issue_type validations (T / R)
-  //     if (book.issue_type === "T" && selectedType === "student") {
-  //       toast.error("This book is not allowed to be issued to the student.");
-  //       return;
-  //     }
-
-  //     if (book.issue_type === "R") {
-  //       toast.error("This book is not to be issued.");
-  //       return;
-  //     }
-
-  //     setBookDetails(book);
-  //   } catch (error) {
-  //     console.error(error);
-  //     setBookError("Error fetching book details.");
-  //   }
-  // };
-
-  const fetchBookByAccessionNo = async () => {
+  useEffect(() => {
     if (!accessionNo.trim()) {
-      setBookError("Please enter Accession No.");
+      setBookPreview(null);
+      return;
+    }
+
+    const debounceTimer = setTimeout(() => {
+      fetchBookPreview(accessionNo);
+    }, 500); // 500ms delay
+
+    return () => clearTimeout(debounceTimer);
+  }, [accessionNo]);
+
+  const fetchBookPreview = async (value) => {
+    if (!value.trim()) {
+      setBookPreview(null);
       return;
     }
 
     try {
       const token = localStorage.getItem("authToken");
 
-      const response = await axios.post(
-        `${API_URL}/api/library/get_book_by_copy`,
-        { copy_id: accessionNo },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      const response = await axios.get(`${API_URL}/api/books/search`, {
+        params: { accession_no: value },
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-      if (!response.data || response.data.length === 0) {
-        setBookError("No book found for this accession no.");
+      if (!response.data?.data?.length) {
+        setBookPreview(null);
         return;
       }
 
-      const book = response.data[0];
+      const book = response.data.data[0];
 
-      // ❗ Fetch Due Date from API
-      const dueDate = await fetchDueDate();
+      //  fetch due date ONLY when possible
+      const dueDate = selectedType && issuedDate ? await fetchDueDate() : null;
 
-      // Add to table list
-      setBookList((prev) => [
-        ...prev,
-        {
-          copy_id: book.copy_id,
-          book_title: book.book_title,
-          book_id: book.book_id,
-          due_date: dueDate, // attach due date here
-        },
-      ]);
-
-      // reset input
-      setAccessionNo("");
-      setBookError("");
+      setBookPreview({
+        book_title: book.book_title,
+        call_no: book.call_no,
+        category_name: book.category_name,
+        due_date: dueDate,
+      });
     } catch (error) {
       console.error(error);
-      setBookError("Error fetching book details.");
+      setBookPreview(null);
     }
-  };
-
-  const handleAddBook = () => {
-    if (!bookDetails || !accessionNo) {
-      setBookError("Please enter a valid accession number");
-      return;
-    }
-
-    // Add record to list
-    setBookList((prev) => [...prev, bookDetails]);
-
-    // Reset form after adding
-    setAccessionNo("");
-    setBookDetails(null);
-    setBookError("");
   };
 
   const handleIssueBook = async () => {
-    if (!issuedDate) return alert("Please select Issue Date");
-    if (!selectedType) return alert("Please select a member type");
+    if (!issuedDate) return toast("Please select Issue Date");
+    if (!selectedType) return toast("Please select a member type");
 
     if (selectedType === "student" && !selectedStudent)
-      return alert("Please select a student");
+      return toast("Please select a student");
 
     if (selectedType === "staff" && !selectedStaff)
-      return alert("Please select a staff member");
+      return toast("Please select a staff member");
 
     if (bookList.length === 0) return alert("Please add at least one book");
 
@@ -547,9 +508,7 @@ const IssueBook = () => {
       book_id: bookIds,
     };
 
-    // ===========================
-    // 📌 STUDENT MODE
-    // ===========================
+    // STUDENT MODE
     if (selectedType === "student") {
       requestData.member_type = "S";
 
@@ -565,15 +524,13 @@ const IssueBook = () => {
       }
     }
 
-    // ===========================
-    // 📌 STAFF MODE
-    // ===========================
+    // STAFF MODE
     if (selectedType === "staff") {
       requestData.member_type = "T";
       requestData.member_id = selectedStaffId || "";
     }
 
-    console.log("Final Payload:", requestData);
+    // console.log("Final Payload:", requestData);
 
     try {
       const token = localStorage.getItem("authToken");
@@ -586,7 +543,7 @@ const IssueBook = () => {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
-        }
+        },
       );
 
       if (response.data.status === true) {
@@ -606,19 +563,248 @@ const IssueBook = () => {
     }
   };
 
-  console.log("row", timetable);
+  // console.log("row", timetable);
 
-  const filteredSections = (Array.isArray(timetable) ? timetable : []).filter(
-    (student) => {
-      const searchLower = searchTerm.toLowerCase();
+  const normalizedData = Array.isArray(timetable)
+    ? timetable
+    : Array.isArray(timetable?.data)
+      ? timetable.data
+      : [];
 
-      const accessionNo = student?.copy_id || "";
+  const filteredSections = normalizedData.filter((student) => {
+    const searchLower = searchTerm.toLowerCase().trim();
+    const accessionNo = String(student?.copy_id || "").toLowerCase();
 
-      return accessionNo.includes(searchLower);
-    }
-  );
+    return accessionNo.includes(searchLower);
+  });
 
   const displayedSections = filteredSections.slice(currentPage * pageSize);
+
+  // const handleAddBook = async () => {
+  //   try {
+  //     // Check if accessionNo is valid
+  //     if (!accessionNo.trim()) {
+  //       setBookError("Please enter a valid accession number");
+  //       return;
+  //     }
+
+  //     //  Fetch book info if not in preview
+  //     let book = bookPreview;
+  //     if (!bookPreview || bookPreview.copy_id !== accessionNo) {
+  //       const response = await axios.post(
+  //         `${API_URL}/api/library/get_book_by_copy`,
+  //         { copy_id: accessionNo },
+  //         {
+  //           headers: {
+  //             Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+  //           },
+  //         },
+  //       );
+
+  //       if (!response.data || response.data.length === 0) {
+  //         setBookError("No book found for this accession no.");
+  //         return;
+  //       }
+
+  //       book = response.data[0];
+  //     }
+
+  //     // Fetch due date
+  //     const dueDate = await fetchDueDate();
+
+  //     // ✅ Student limit check
+  //     const alreadyIssuedCount = Array.isArray(timetable)
+  //       ? timetable.length
+  //       : 0;
+  //     const newBooksCount = bookList.length;
+  //     const totalBooks = alreadyIssuedCount + newBooksCount + 1; // +1 for this new book
+
+  //     const isStudent =
+  //       selectedType === "student" || (grn_no && grn_no.trim() !== "");
+
+  //     if (isStudent && totalBooks > 2) {
+  //       toast.error("More than 2 books cannot be issued to a student");
+  //       return;
+  //     }
+
+  //     //  Add book to list
+  //     setBookList((prev) => [
+  //       ...prev,
+  //       {
+  //         copy_id: book.copy_id || accessionNo,
+  //         book_title: book.book_title || bookPreview?.book_title,
+  //         call_no: book.call_no || bookPreview?.call_no,
+  //         category_name: book.category_name || bookPreview?.category_name,
+  //         due_date: dueDate ?? "-", // flatten due date
+  //         book_id: book.book_id || bookPreview?.book_id,
+  //       },
+  //     ]);
+
+  //     // reset input & preview
+  //     setAccessionNo("");
+  //     setBookPreview(null);
+  //     setBookError("");
+  //   } catch (error) {
+  //     console.error("Error adding book:", error);
+  //     setBookError("Failed to add book.");
+  //   }
+  // };
+
+  // work correct for more than two book validation
+  // const handleAddBook = async () => {
+  //   try {
+  //     if (
+  //       selectedType === "student" &&
+  //       filteredSections.length >= 2 &&
+  //       filteredSections.return_date === "0000-00-00"
+  //     ) {
+  //       toast.error("First return the book, then issue another book.");
+  //       return;
+  //     }
+  //     if (selectedType === "student" && bookList.length >= 2) {
+  //       toast.error("More than two books not issued for student.");
+  //       return;
+  //     }
+
+  //     if (!accessionNo.trim()) {
+  //       setBookError("Please enter a valid accession number");
+  //       return;
+  //     }
+
+  //     let book = bookPreview;
+  //     if (!bookPreview || bookPreview.copy_id !== accessionNo) {
+  //       const response = await axios.post(
+  //         `${API_URL}/api/library/get_book_by_copy`,
+  //         { copy_id: accessionNo },
+  //         {
+  //           headers: {
+  //             Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+  //           },
+  //         },
+  //       );
+
+  //       if (!response.data || response.data.length === 0) {
+  //         setBookError("No book found for this accession no.");
+  //         return;
+  //       }
+
+  //       book = response.data[0];
+  //     }
+
+  //     const dueDate = await fetchDueDate();
+
+  //     //  Student limit validation using filteredSection
+  //     const isStudent =
+  //       selectedType === "student" || (grn_no && grn_no.trim() !== "");
+
+  //     if (isStudent && filteredSections.length >= 2) {
+  //       toast.error("More than two books not issued for student.");
+  //       return;
+  //     }
+
+  //     setBookList((prev) => [
+  //       ...prev,
+  //       {
+  //         copy_id: book.copy_id || accessionNo,
+  //         book_title: book.book_title || bookPreview?.book_title,
+  //         call_no: book.call_no || bookPreview?.call_no,
+  //         category_name: book.category_name || bookPreview?.category_name,
+  //         due_date: dueDate ?? "-",
+  //         book_id: book.book_id || bookPreview?.book_id,
+  //       },
+  //     ]);
+
+  //     setAccessionNo("");
+  //     setBookPreview(null);
+  //     setBookError("");
+  //   } catch (error) {
+  //     console.error("Error adding book:", error);
+  //     setBookError("Failed to add book.");
+  //   }
+  // };
+
+  const handleAddBook = async () => {
+    try {
+      const isStudent = selectedType === "student";
+
+      if (isStudent) {
+        const issuedBooks = Array.isArray(filteredSections)
+          ? filteredSections
+          : [];
+
+        // Check if ANY book not returned
+        const hasActiveBook = issuedBooks.some((book) => {
+          return (
+            book.return_date === "0000-00-00" ||
+            book.return_date === null ||
+            book.return_date === "" ||
+            book.return_date === undefined
+          );
+        });
+
+        // If even 1 active book exists  block
+        if (hasActiveBook) {
+          toast.error(
+            "Please return your current book before getting a new one.",
+          );
+          return;
+        }
+
+        // Same time more than 2 books
+        if (bookList.length >= 2) {
+          toast.error("More than 2 books cannot be issued.");
+          return;
+        }
+      }
+
+      if (!accessionNo.trim()) {
+        setBookError("Please enter a valid accession number");
+        return;
+      }
+
+      let book = bookPreview;
+
+      if (!bookPreview || bookPreview.copy_id !== accessionNo) {
+        const response = await axios.post(
+          `${API_URL}/api/library/get_book_by_copy`,
+          { copy_id: accessionNo },
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+            },
+          },
+        );
+
+        if (!response.data || response.data.length === 0) {
+          setBookError("No book found for this accession no.");
+          return;
+        }
+
+        book = response.data[0];
+      }
+
+      const dueDate = await fetchDueDate();
+
+      setBookList((prev) => [
+        ...prev,
+        {
+          copy_id: book.copy_id || accessionNo,
+          book_title: book.book_title || "",
+          call_no: book.call_no || "",
+          category_name: book.category_name || "",
+          due_date: dueDate ?? "-",
+          book_id: book.book_id || "",
+        },
+      ]);
+
+      setAccessionNo("");
+      setBookPreview(null);
+      setBookError("");
+    } catch (error) {
+      console.error("Error adding book:", error);
+      setBookError("Failed to add book.");
+    }
+  };
 
   return (
     <>
@@ -654,184 +840,16 @@ const IssueBook = () => {
           )}
 
           <>
-            {/* {!showStudentReport && (
-              <div
-                className={`w-full flex flex-col md:flex-row md:items-end gap-4 pl-4 pr-4 ${
-                  timetable.length > 0 ? "md:w-[100%]" : "md:w-[100%]"
-                }`}
-              >
-                <div className="w-full flex flex-col md:flex-row justify-between items-start mt-0 md:mt-4 md:mb-4">
-                  <div
-                    className={`w-full md:w-[100%] flex flex-col md:flex-row gap-y-4 md:gap-x-8 ${
-                      timetable.length > 0 ? "left-0" : "relative left-10"
-                    }`}
-                  >
-                    <div className="flex flex-col w-full md:w-auto">
-                      <label className="text-md mb-1">
-                        Member Type <span className="text-red-500">*</span>
-                      </label>
-
-                      <div className="flex items-center border border-gray-300 rounded-md px-4 py-2 bg-white">
-                        <label className="flex items-center gap-1 cursor-pointer">
-                          <input
-                            type="radio"
-                            name="userType"
-                            value="student"
-                            checked={selectedType === "student"}
-                            onChange={() => setSelectedType("student")}
-                            className="accent-pink-600"
-                          />
-                          <span>Student</span>
-                        </label>
-
-                        <label className="flex items-center gap-1 ml-4 cursor-pointer">
-                          <input
-                            type="radio"
-                            name="userType"
-                            value="staff"
-                            checked={selectedType === "staff"}
-                            onChange={() => setSelectedType("staff")}
-                            className="accent-pink-600"
-                          />
-                          <span>Staff</span>
-                        </label>
-                      </div>
-                    </div>
-
-                    {selectedType === "student" && (
-                      <>
-                        <div className="flex flex-col w-full md:w-auto">
-                          <label className="text-md mb-1">
-                            Select Class<span className="text-red-500">*</span>
-                          </label>
-
-                          <div className="w-[160px]">
-                            <Select
-                              menuPortalTarget={document.body}
-                              menuPosition="fixed"
-                              value={selectedStudent}
-                              onChange={handleStudentSelect}
-                              options={studentOptions}
-                              placeholder="Select"
-                              isClearable
-                              isSearchable
-                            />
-                            {classError && (
-                              <p className="text-red-500 text-sm">
-                                {classError}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-
-                        
-                        <div className="flex flex-col w-full md:w-auto">
-                          <label className="text-md mb-1">
-                            Member Name <span className="text-red-500">*</span>
-                          </label>
-
-                          <div className="w-[230px]">
-                            <Select
-                              menuPortalTarget={document.body}
-                              menuPosition="fixed"
-                              value={selectedStaff}
-                              onChange={handleMemberSelect}
-                              options={staffOptions}
-                              placeholder="Select"
-                              isSearchable
-                              isClearable
-                            />
-                            {staffError && (
-                              <p className="text-red-500 text-sm">
-                                {staffError}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-
-                        <div className="flex flex-col w-full md:w-auto">
-                          <label className="text-md mb-1">Issue Date</label>
-                          <input
-                            type="date"
-                            value={issuedDate}
-                            min={minDate} // start from academic year
-                            max={today} // cannot select future date
-                            onChange={(e) => setIssuedDate(e.target.value)}
-                            className="border border-gray-300 rounded px-2 py-2"
-                          />
-                        </div>
-
-                        
-                        <div className="flex flex-col w-full md:w-auto">
-                          <label className="text-md mb-1">
-                            Enter/Scan GRN No.
-                          </label>
-
-                          <input
-                            type="text"
-                            value={grn_no}
-                            onChange={(e) => setGrnNo(e.target.value)}
-                            placeholder="Enter"
-                            className="border border-gray-300 rounded px-2 py-2 w-[150px]"
-                            maxLength={8}
-                          />
-                        </div>
-                      </>
-                    )}
-
-                    
-                    {selectedType === "staff" && (
-                      <>
-                        <div className="flex flex-col w-full md:w-auto">
-                          <label className="text-md mb-1">
-                            Member Name <span className="text-red-500">*</span>
-                          </label>
-
-                          <div className="w-[250px]">
-                            <Select
-                              menuPortalTarget={document.body}
-                              menuPosition="fixed"
-                              value={selectedStaff}
-                              onChange={handleMemberSelect}
-                              options={staffOptions}
-                              placeholder="Select"
-                              isSearchable
-                              isClearable
-                            />
-                          </div>
-                        </div>
-
-                        <div className="flex flex-col w-full md:w-auto">
-                          <label className="text-md mb-1">Issue Date</label>
-                          <input
-                            type="date"
-                            value={issuedDate}
-                            onChange={(e) => setIssuedDate(e.target.value)}
-                            min={minDate}
-                            max={today}
-                            className="border border-gray-300 rounded px-2 py-2"
-                          />
-                        </div>
-                      </>
-                    )}
-
-                    <div className="flex flex-col justify-end">
-                      <button
-                        type="button"
-                        onClick={handleSearch}
-                        style={{ backgroundColor: "#2196F3" }}
-                        className="h-10 text-white px-4 rounded font-semibold"
-                      >
-                        {loadingForSearch ? "Browsing.." : "Browse"}
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )} */}
-
             {!showStudentReport && (
-              <div className="w-full px-6 py-2">
+              <div
+                className="w-full px-6 py-2"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    handleSearch();
+                  }
+                }}
+              >
                 <div className="w-full flex flex-col md:flex-row md:items-start gap-6">
                   {/* Member Type */}
                   <div className="flex flex-col w-full md:w-auto">
@@ -1008,65 +1026,104 @@ const IssueBook = () => {
                   <div className="card mx-auto lg:w-full shadow-lg">
                     <div className="p-2 px-3 bg-gray-100 border-none flex items-center justify-between">
                       <div className="w-full flex flex-row items-center justify-between ">
-                        <h3 className="text-gray-700 mt-1 text-[1.1em] mr-4">
+                        <h3 className="text-gray-700 mt-1 text-[1.1em] lg:text-xl text-nowrap mr-2">
                           Issue Book
                         </h3>
-
                         <div
-                          className="bg-blue-50 border-l-2 border-r-2 text-[0.9em] border-pink-500 rounded-md shadow-md px-3 py-1"
-                          style={{ overflowX: "auto", whiteSpace: "nowrap" }}
+                          className="flex items-center w-full"
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              e.preventDefault();
+                              handleSearch();
+                            }
+                          }}
                         >
-                          <div className="flex items-center gap-x-4 flex-wrap">
-                            {/* Member Type */}
-                            <div className="flex items-center gap-x-1">
-                              <label className="text-sm whitespace-nowrap">
-                                Member Type{" "}
-                                <span className="text-red-500">*</span>
-                              </label>
-
-                              <div className="flex items-center border border-gray-300 rounded-md px-2 py-2 bg-white text-sm">
-                                <label className="flex items-center gap-1 cursor-pointer">
-                                  <input
-                                    type="radio"
-                                    name="userType"
-                                    value="student"
-                                    checked={selectedType === "student"}
-                                    onChange={() => setSelectedType("student")}
-                                    className="accent-pink-600"
-                                  />
-                                  <span>Student</span>
-                                </label>
-
-                                <label className="flex items-center gap-1 ml-3 cursor-pointer">
-                                  <input
-                                    type="radio"
-                                    name="userType"
-                                    value="staff"
-                                    checked={selectedType === "staff"}
-                                    onChange={() => setSelectedType("staff")}
-                                    className="accent-pink-600"
-                                  />
-                                  <span>Staff</span>
-                                </label>
-                              </div>
-                            </div>
-
-                            {selectedType === "student" && (
-                              <>
-                                {/* Class */}
+                          <div
+                            className="bg-blue-50 border-l-2 border-r-2 text-[0.9em] border-pink-500 rounded-md shadow-md mx-auto px-6 py-2"
+                            style={{
+                              overflowX: "auto",
+                              whiteSpace: "nowrap",
+                            }}
+                          >
+                            <div
+                              className="flex items-center gap-x-1 text-blue-800 font-medium"
+                              style={{ flexWrap: "nowrap" }}
+                            >
+                              <div className="flex items-center gap-x-2 flex-wrap">
                                 <div className="flex items-center gap-x-1">
                                   <label className="text-sm whitespace-nowrap">
-                                    Class{" "}
+                                    Member Type{" "}
                                     <span className="text-red-500">*</span>
                                   </label>
 
-                                  <div className="w-[110px]">
+                                  <div className="flex items-center border border-gray-300 rounded-md px-2 py-2 bg-white text-sm">
+                                    <label className="flex items-center gap-1 cursor-pointer">
+                                      <input
+                                        type="radio"
+                                        name="userType"
+                                        value="student"
+                                        checked={selectedType === "student"}
+                                        onChange={() =>
+                                          setSelectedType("student")
+                                        }
+                                        className="accent-pink-600"
+                                      />
+                                      <span>Student</span>
+                                    </label>
+
+                                    <label className="flex items-center gap-1 ml-3 cursor-pointer">
+                                      <input
+                                        type="radio"
+                                        name="userType"
+                                        value="staff"
+                                        checked={selectedType === "staff"}
+                                        onChange={() =>
+                                          setSelectedType("staff")
+                                        }
+                                        className="accent-pink-600"
+                                      />
+                                      <span>Staff</span>
+                                    </label>
+                                  </div>
+                                </div>
+
+                                {selectedType === "student" && (
+                                  <>
+                                    <div className="flex items-center gap-x-1">
+                                      <label className="text-sm whitespace-nowrap">
+                                        Class{" "}
+                                        <span className="text-red-500">*</span>
+                                      </label>
+
+                                      <div className="w-[110px]">
+                                        <Select
+                                          menuPortalTarget={document.body}
+                                          menuPosition="fixed"
+                                          value={selectedStudent}
+                                          onChange={handleStudentSelect}
+                                          options={studentOptions}
+                                          placeholder="Select"
+                                          isClearable
+                                          isSearchable
+                                          className="text-sm"
+                                        />
+                                      </div>
+                                    </div>
+                                  </>
+                                )}
+
+                                <div className="flex items-center gap-x-1">
+                                  <label className="text-sm whitespace-nowrap">
+                                    Name <span className="text-red-500">*</span>
+                                  </label>
+
+                                  <div className="w-[140px]">
                                     <Select
                                       menuPortalTarget={document.body}
                                       menuPosition="fixed"
-                                      value={selectedStudent}
-                                      onChange={handleStudentSelect}
-                                      options={studentOptions}
+                                      value={selectedStaff}
+                                      onChange={handleMemberSelect}
+                                      options={staffOptions}
                                       placeholder="Select"
                                       isClearable
                                       isSearchable
@@ -1074,70 +1131,51 @@ const IssueBook = () => {
                                     />
                                   </div>
                                 </div>
-                              </>
-                            )}
-                            {/* Name */}
-                            <div className="flex items-center gap-x-1">
-                              <label className="text-sm whitespace-nowrap">
-                                Name <span className="text-red-500">*</span>
-                              </label>
 
-                              <div className="w-[140px]">
-                                <Select
-                                  menuPortalTarget={document.body}
-                                  menuPosition="fixed"
-                                  value={selectedStaff}
-                                  onChange={handleMemberSelect}
-                                  options={staffOptions}
-                                  placeholder="Select"
-                                  isClearable
-                                  isSearchable
-                                  className="text-sm"
-                                />
-                              </div>
-                            </div>
-
-                            {/* Issue Date */}
-                            <div className="flex items-center gap-x-1">
-                              <label className="text-sm whitespace-nowrap">
-                                Issue Date
-                              </label>
-                              <input
-                                type="date"
-                                value={issuedDate}
-                                onChange={(e) => setIssuedDate(e.target.value)}
-                                className="border border-gray-300 rounded px-1 py-2 text-sm w-[100px]"
-                              />
-                            </div>
-
-                            {selectedType === "student" && (
-                              <>
-                                {/* GRN No */}
                                 <div className="flex items-center gap-x-1">
                                   <label className="text-sm whitespace-nowrap">
-                                    GRN No.
+                                    Issue Date
                                   </label>
                                   <input
-                                    type="text"
-                                    maxLength={8}
-                                    value={grn_no}
-                                    onChange={(e) => setGrnNo(e.target.value)}
-                                    className="border border-gray-300 rounded px-1 py-2 text-sm w-[80px]"
-                                    placeholder="Enter"
+                                    type="date"
+                                    value={issuedDate}
+                                    onChange={(e) =>
+                                      setIssuedDate(e.target.value)
+                                    }
+                                    className="border border-gray-300 rounded px-1 py-2 text-sm w-[100px]"
                                   />
                                 </div>
-                              </>
-                            )}
 
-                            {/* Browse Button */}
-                            <button
-                              type="button"
-                              onClick={handleSearch}
-                              className="h-8 text-white px-1 rounded font-medium text-sm"
-                              style={{ backgroundColor: "#2196F3" }}
-                            >
-                              {loadingForSearch ? "Browsing.." : "Browse"}
-                            </button>
+                                {selectedType === "student" && (
+                                  <>
+                                    <div className="flex items-center gap-x-1">
+                                      <label className="text-sm whitespace-nowrap">
+                                        GRN No.
+                                      </label>
+                                      <input
+                                        type="text"
+                                        maxLength={8}
+                                        value={grn_no}
+                                        onChange={(e) =>
+                                          setGrnNo(e.target.value)
+                                        }
+                                        className="border border-gray-300 rounded px-1 py-2 text-sm w-[80px]"
+                                        placeholder="Enter"
+                                      />
+                                    </div>
+                                  </>
+                                )}
+
+                                <button
+                                  type="button"
+                                  onClick={handleSearch}
+                                  className="h-8 text-white px-1 rounded font-medium text-sm"
+                                  style={{ backgroundColor: "#2196F3" }}
+                                >
+                                  {loadingForSearch ? "Browsing.." : "Browse"}
+                                </button>
+                              </div>
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -1145,7 +1183,10 @@ const IssueBook = () => {
                       <div className="flex mb-1.5 flex-col md:flex-row gap-x-6 justify-center md:justify-end ml-2">
                         <RxCross1
                           className="text-base text-red-600 cursor-pointer hover:bg-red-100 rounded"
-                          onClick={() => setShowStudentReport(false)}
+                          onClick={() => {
+                            setShowStudentReport(false); // close the report
+                            setBookList([]); // clear the book list
+                          }}
                         />
                       </div>
                     </div>
@@ -1157,6 +1198,29 @@ const IssueBook = () => {
                       }}
                     ></div>
                     <div className="pl-2 pr-2 w-full">
+                      {selectedType === "student" && memberDetails && (
+                        <div className="flex justify-center mb-3">
+                          <div className="bg-pink-50 rounded-lg px-4 py-2 flex gap-4 items-center shadow-sm">
+                            <span className="font-semibold text-blue-800 text-sm md:text-base">
+                              {[
+                                memberDetails.first_name,
+                                memberDetails.mid_name,
+                                memberDetails.last_name,
+                              ]
+                                .filter(Boolean)
+                                .map((name) => camelCase(name))
+                                .join(" ")}
+                            </span>
+                            <span className="font-semibold text-blue-800 text-sm md:text-base">
+                              |
+                            </span>
+
+                            <span className="font-semibold text-pink-800 text-sm md:text-base">
+                              GRN No: {memberDetails.reg_no}
+                            </span>
+                          </div>
+                        </div>
+                      )}
                       <div className="w-full leading-normal">
                         <h2 className="text-sm md:text-base font-medium text-center flex items-center justify-center gap-2 text-black">
                           <i
@@ -1226,7 +1290,7 @@ const IssueBook = () => {
                                   colSpan="7"
                                   className="text-center text-red-600 font-semibold py-3 border"
                                 >
-                                  Yet no book issued
+                                  No books issued
                                 </td>
                               </tr>
                             )}
@@ -1262,11 +1326,14 @@ const IssueBook = () => {
                                 value={accessionNo}
                                 onChange={(e) => {
                                   setAccessionNo(e.target.value);
-                                  setBookError(""); // remove error on typing
+                                  setBookError("");
                                 }}
-                                onKeyDown={(e) =>
-                                  e.key === "Enter" && fetchBookByAccessionNo()
-                                }
+                                onKeyDown={(e) => {
+                                  if (e.key === "Enter") {
+                                    e.preventDefault();
+                                    handleAddBook();
+                                  }
+                                }}
                                 placeholder="Enter"
                                 className="border border-gray-300 rounded-md px-3 py-1 w-full"
                               />
@@ -1284,11 +1351,11 @@ const IssueBook = () => {
                               </label>
                               <input
                                 type="text"
-                                value={`${
-                                  bookDetails?.category_id || "Call"
-                                } / ${
-                                  bookDetails?.category_name || "Category"
-                                }`}
+                                value={
+                                  bookPreview
+                                    ? `${bookPreview.call_no} / ${bookPreview.category_name}`
+                                    : ""
+                                }
                                 readOnly
                                 className="border border-gray-300 bg-gray-200 text-gray-600 rounded-md px-3 py-1 w-full cursor-not-allowed"
                               />
@@ -1300,18 +1367,38 @@ const IssueBook = () => {
                               </label>
                               <input
                                 type="text"
-                                value={bookDetails?.book_title || "Title"}
+                                value={bookPreview?.book_title || ""}
                                 readOnly
                                 className="border border-gray-300 bg-gray-200 text-gray-600 rounded-md px-3 py-1 w-full cursor-not-allowed"
                               />
                             </div>
 
                             <div className="flex items-center w-[12%] min-w-[120px]">
-                              <button
+                              {/* <button
                                 type="button"
                                 onClick={handleAddBook}
                                 style={{ backgroundColor: "#2196F3" }}
-                                className="h-8 text-white font-bold px-6 rounded"
+                                className={`h-8 px-6 rounded font-bold ${
+                                  selectedType === "S" &&
+                                  // grn_no?.trim() &&
+                                  bookList.length >= 2
+                                    ? "bg-gray-400 cursor-not-allowed"
+                                    : "bg-blue-500 text-white"
+                                }`}
+                              >
+                                Add
+                              </button> */}
+                              <button
+                                type="button"
+                                onClick={handleAddBook}
+                                disabled={
+                                  selectedType === "S" && bookList.length >= 2
+                                }
+                                className={`h-8 px-6 rounded font-bold ${
+                                  selectedType === "S" && bookList.length >= 2
+                                    ? "bg-gray-400 cursor-not-allowed"
+                                    : "bg-blue-500 text-white"
+                                }`}
                               >
                                 Add
                               </button>
@@ -1371,7 +1458,7 @@ const IssueBook = () => {
                                         className="text-red-500"
                                         onClick={() => {
                                           setBookList((prev) =>
-                                            prev.filter((_, i) => i !== index)
+                                            prev.filter((_, i) => i !== index),
                                           );
                                           setAccessionNo("");
                                           setBookDetails(null);
@@ -1386,15 +1473,17 @@ const IssueBook = () => {
                             </table>
 
                             {/* Issue Book Button */}
-                            <div className="flex justify-end mt-4 mb-4">
-                              <button
-                                type="button"
-                                className="bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-2 rounded"
-                                onClick={handleIssueBook}
-                              >
-                                Issue Book
-                              </button>
-                            </div>
+                            {bookList.length > 0 && (
+                              <div className="flex justify-end mt-4 mb-4">
+                                <button
+                                  type="button"
+                                  className="bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-2 rounded"
+                                  onClick={handleIssueBook}
+                                >
+                                  Issue Book
+                                </button>
+                              </div>
+                            )}
                           </>
                         )}
                       </div>

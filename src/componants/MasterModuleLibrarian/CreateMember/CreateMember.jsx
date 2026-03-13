@@ -19,6 +19,7 @@ const CreateMember = () => {
   const [selectedStudentIds, setSelectedStudentIds] = useState([]);
   const [selectedTeacherIds, setSelectedTeacherIds] = useState([]);
 
+  const [showCreateModal, setShowCreateModal] = useState(false);
   const navigate = useNavigate();
   const [loadingExams, setLoadingExams] = useState(false);
   const [studentError, setStudentError] = useState("");
@@ -77,9 +78,9 @@ const CreateMember = () => {
       setRegId(reg_id);
       setAcademicYear(academicyr);
 
-      console.log("roleIDis:", role_id);
-      console.log("reg id:", reg_id);
-      console.log("academic year", academicyr);
+      // console.log("roleIDis:", role_id);
+      // console.log("reg id:", reg_id);
+      // console.log("academic year", academicyr);
 
       return { roleId, regId };
     } catch (error) {
@@ -96,10 +97,10 @@ const CreateMember = () => {
         `${API_URL}/api/get_teacherclasseswithclassteacher?teacher_id=${regId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
 
-      console.log("response", response.data.data);
+      // console.log("response", response.data.data);
 
       const mappedData = (response.data.data || [])
         .filter((item) => item.class_id && item.section_id)
@@ -214,7 +215,7 @@ const CreateMember = () => {
         return;
       }
 
-      console.log("Fetched Data:", data);
+      // console.log("Fetched Data:", data);
 
       // ✅ Prefill selected IDs based on type
       if (selectedType === "student") {
@@ -267,7 +268,7 @@ const CreateMember = () => {
         type: selectedType === "student" ? "Student" : "Teacher",
       };
 
-      console.log("Final Payload:", payload);
+      // console.log("Final Payload:", payload);
 
       const response = await axios.post(
         `${API_URL}/api/create-member`,
@@ -277,7 +278,7 @@ const CreateMember = () => {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
-        }
+        },
       );
 
       if (response.status === 200 || response.status === 201) {
@@ -310,8 +311,8 @@ const CreateMember = () => {
   return (
     <>
       <div
-        className={` transition-all duration-500 w-[85%]  mx-auto p-4 ${
-          showStudentReport ? "w-[85%] " : "w-[85%] "
+        className={` transition-all duration-500 w-[65%]  mx-auto p-4 ${
+          showStudentReport ? "w-[70%] " : "w-[85%] "
         }`}
       >
         <ToastContainer />
@@ -344,7 +345,7 @@ const CreateMember = () => {
                 <div className="w-full md:w-[99%] flex md:flex-row justify-between items-center mt-0 md:mt-4">
                   <div className="w-full md:w-[99%]  gap-x-0 md:gap-x-4 flex flex-col gap-y-2 md:gap-y-0 md:flex-row">
                     <div className="w-full md:w-[50%] gap-x-2 justify-around my-1 md:my-4 flex md:flex-row">
-                      <label className="w-full md:w-[60%] text-md pl-0 md:pl-5 mt-1.5">
+                      <label className="w-full md:w-[40%] text-md pl-0 md:pl-5 mt-1.5">
                         Member Type <span className="text-red-500">*</span>
                       </label>
 
@@ -378,9 +379,9 @@ const CreateMember = () => {
                     </div>
 
                     {selectedType === "student" && (
-                      <div className="w-full md:w-[60%] gap-x-2 justify-around my-1 md:my-4 flex md:flex-row">
+                      <div className="w-full md:w-[40%] gap-x-2 justify-around my-1 md:my-4 flex md:flex-row">
                         <label
-                          className="w-full md:w-[30%] text-md pl-0 md:pl-5 mt-1.5"
+                          className="w-full md:w-[35%] text-md pl-0 md:pl-5 mt-1.5"
                           htmlFor="studentSelect"
                         >
                           Select Class <span className="text-red-500">*</span>
@@ -479,115 +480,7 @@ const CreateMember = () => {
                           <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap mr-6">
                             Create Member
                           </h3>
-                          {/* <div className="flex items-center w-full">
-                            <div className="flex flex-row flex-nowrap items-center gap-4 w-full overflow-x-auto bg-blue-50 border-l-2 border-r-2 border-pink-500 rounded-md shadow-md px-4 py-2">
-                              <div className="flex items-center gap-2 flex-1 min-w-[100px]">
-                                <label
-                                  className="w-[30%] whitespace-nowrap text-md sm:text-md"
-                                  htmlFor="studentSelect"
-                                >
-                                  Member Type{" "}
-                                  <span className="text-red-500">*</span>
-                                </label>
-                                <div className="flex items-center w-full">
-                                  <div className="flex items-center justify-between w-full md:w-[230px] border border-gray-300 rounded-md px-4 py-2 bg-white focus-within:border-pink-500 transition">
-                                    <label className="flex items-center gap-2 cursor-pointer">
-                                      <input
-                                        type="radio"
-                                        name="userType"
-                                        value="student"
-                                        className="accent-pink-600"
-                                        checked={selectedType === "student"}
-                                        onChange={() =>
-                                          setSelectedType("student")
-                                        }
-                                        //   onChange={(e) => setSelectedType(e.target.value)}
-                                      />
-                                      <span>Student</span>
-                                    </label>
 
-                                    <label className="flex items-center gap-2 cursor-pointer">
-                                      <input
-                                        type="radio"
-                                        name="userType"
-                                        value="staff"
-                                        className="accent-pink-600"
-                                        checked={selectedType === "staff"}
-                                        onChange={(e) =>
-                                          setSelectedType(e.target.value)
-                                        }
-                                      />
-                                      <span>Staff</span>
-                                    </label>
-                                  </div>
-                                </div>
-                              </div>
-
-                              {selectedType === "student" && (
-                                <div className="flex items-center gap-2 flex-1 min-w-[100px]">
-                                  <label
-                                    className="w-full md:w-[30%] text-md pl-0 md:pl-5 mt-1.5"
-                                    htmlFor="studentSelect"
-                                  >
-                                    Select Class{" "}
-                                    <span className="text-red-500">*</span>
-                                  </label>
-                                  <div className="w-full md:w-[55%]">
-                                    <Select
-                                      menuPortalTarget={document.body}
-                                      menuPosition="fixed"
-                                      id="studentSelect"
-                                      value={selectedStudent}
-                                      onChange={handleStudentSelect}
-                                      options={studentOptions}
-                                      placeholder={
-                                        loadingExams ? "Loading..." : "Select"
-                                      }
-                                      isSearchable
-                                      isClearable
-                                      className="text-sm"
-                                      isDisabled={loadingExams}
-                                      styles={{
-                                        control: (provided) => ({
-                                          ...provided,
-                                          fontSize: "1em",
-                                          minHeight: "30px",
-                                        }),
-                                        menu: (provided) => ({
-                                          ...provided,
-                                          fontSize: "1em",
-                                        }),
-                                        option: (provided) => ({
-                                          ...provided,
-                                          fontSize: ".9em",
-                                        }),
-                                      }}
-                                    />
-                                    {studentError && (
-                                      <div className="h-8 relative ml-1 text-danger text-xs">
-                                        {studentError}
-                                      </div>
-                                    )}
-                                  </div>
-                                </div>
-                              )}
-                              <div className="flex items-center min-w-[90px]">
-                                <button
-                                  type="button"
-                                  onClick={handleSearch}
-                                  style={{ backgroundColor: "#2196F3" }}
-                                  className={`btn h-9 w-full btn-primary text-white font-bold px-3 rounded ${
-                                    loadingForSearch
-                                      ? "opacity-50 cursor-not-allowed"
-                                      : ""
-                                  }`}
-                                  disabled={loadingForSearch}
-                                >
-                                  {loadingForSearch ? "Browsing..." : "Browse"}
-                                </button>
-                              </div>
-                            </div>
-                          </div> */}
                           {selectedType === "student" && selectedStudent && (
                             <div
                               className="bg-blue-50 border-l-2 border-r-2 text-[1em] border-pink-500 rounded-md shadow-md mx-auto px-6 py-2"
@@ -630,7 +523,7 @@ const CreateMember = () => {
                         }}
                       ></div>
 
-                      <div className="card-body w-full">
+                      <div className="card-body w-full  md:w-[85%] md:ml-14 ">
                         <div
                           className="h-96 lg:h-96 overflow-y-scroll overflow-x-scroll"
                           style={{
@@ -641,21 +534,64 @@ const CreateMember = () => {
                           <table className="min-w-full leading-normal table-auto">
                             <thead>
                               <tr className="bg-gray-100">
-                                <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                                <th className="px-2 w-[12%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                                   Sr No.
                                 </th>
 
-                                <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                                  Select
+                                {/* <th className="px-2 w-[12%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                                  Select All
+                                </th> */}
+
+                                <th className="px-2 w-[13%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                                  Select All{" "}
+                                  <input
+                                    type="checkbox"
+                                    checked={
+                                      selectedType === "student"
+                                        ? displayedSections.length > 0 &&
+                                          displayedSections.every((p) =>
+                                            selectedStudentIds.includes(
+                                              p.student_id,
+                                            ),
+                                          )
+                                        : displayedSections.length > 0 &&
+                                          displayedSections.every((p) =>
+                                            selectedTeacherIds.includes(
+                                              p.teacher_id,
+                                            ),
+                                          )
+                                    }
+                                    onChange={(e) => {
+                                      const checked = e.target.checked;
+
+                                      if (selectedType === "student") {
+                                        const allStudentIds =
+                                          displayedSections.map(
+                                            (p) => p.student_id,
+                                          );
+                                        setSelectedStudentIds(
+                                          checked ? allStudentIds : [],
+                                        );
+                                      } else if (selectedType === "staff") {
+                                        const allTeacherIds =
+                                          displayedSections.map(
+                                            (p) => p.teacher_id,
+                                          );
+                                        setSelectedTeacherIds(
+                                          checked ? allTeacherIds : [],
+                                        );
+                                      }
+                                    }}
+                                  />
                                 </th>
 
                                 {selectedType === "student" && (
-                                  <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                                  <th className="px-2 w-[12%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                                     Roll No
                                   </th>
                                 )}
 
-                                <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                                <th className="px-2 w-[30%] text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                                   Name
                                 </th>
                               </tr>
@@ -689,10 +625,10 @@ const CreateMember = () => {
                                           checked={
                                             selectedType === "student"
                                               ? selectedStudentIds.includes(
-                                                  personId
+                                                  personId,
                                                 )
                                               : selectedTeacherIds.includes(
-                                                  personId
+                                                  personId,
                                                 )
                                           }
                                           onChange={(e) => {
@@ -704,8 +640,8 @@ const CreateMember = () => {
                                                   checked
                                                     ? [...prev, personId] // add
                                                     : prev.filter(
-                                                        (id) => id !== personId
-                                                      ) // remove
+                                                        (id) => id !== personId,
+                                                      ), // remove
                                               );
                                             } else if (
                                               selectedType === "staff"
@@ -714,8 +650,8 @@ const CreateMember = () => {
                                                 checked
                                                   ? [...prev, personId]
                                                   : prev.filter(
-                                                      (id) => id !== personId
-                                                    )
+                                                      (id) => id !== personId,
+                                                    ),
                                               );
                                             }
                                           }}
@@ -733,7 +669,7 @@ const CreateMember = () => {
                                           ? camelCase(
                                               `${person?.first_name || ""} ${
                                                 person?.mid_name || ""
-                                              } ${person?.last_name || ""}`
+                                              } ${person?.last_name || ""}`,
                                             )
                                           : camelCase(person?.name) || ""}
                                       </td>
@@ -759,12 +695,19 @@ const CreateMember = () => {
                           </table>
                         </div>
                         <div className="flex justify-end gap-3 mt-4 mr-4">
-                          <button
+                          {/* <button
                             type="button"
                             onClick={handleSubmit}
                             className={`bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-lg shadow-md`}
                           >
                             {isSubmitting ? "Creating" : "Create"}
+                          </button> */}
+                          <button
+                            type="button"
+                            onClick={() => setShowCreateModal(true)}
+                            className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-lg shadow-md"
+                          >
+                            Create
                           </button>
 
                           <button
@@ -783,6 +726,58 @@ const CreateMember = () => {
             )}
           </>
         </div>
+        {showCreateModal && (
+          <div
+            className="modal"
+            style={{ display: "block", backgroundColor: "rgba(0, 0, 0, 0.5)" }}
+          >
+            <div className="modal-dialog modal-dialog-centered">
+              <div className="modal-content">
+                {/* Header */}
+                <div className="flex justify-between p-3">
+                  <h5 className="modal-title">Confirm Creation</h5>
+                  <RxCross1
+                    className="text-xl text-red-600 cursor-pointer hover:bg-red-100"
+                    onClick={() => setShowCreateModal(false)}
+                  />
+                </div>
+
+                <div className="h-1 w-[97%] mx-auto bg-red-700"></div>
+
+                {/* Body */}
+                <div className="modal-body">
+                  <p>
+                    Are you sure you want to create selected{" "}
+                    <strong>{selectedType}</strong> members for library?
+                  </p>
+                </div>
+
+                {/* Footer */}
+                <div className="flex justify-end gap-2 p-3">
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={() => setShowCreateModal(false)}
+                  >
+                    Cancel
+                  </button>
+
+                  <button
+                    type="button"
+                    className="btn btn-primary"
+                    disabled={isSubmitting}
+                    onClick={() => {
+                      setShowCreateModal(false); // close modal
+                      handleSubmit(); // 🔥 now call submit
+                    }}
+                  >
+                    {isSubmitting ? "Creating..." : "Submit"}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </>
   );

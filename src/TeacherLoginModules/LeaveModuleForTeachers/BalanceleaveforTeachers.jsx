@@ -89,7 +89,7 @@ const BalanceleaveforTeachers = () => {
         {
           headers: { Authorization: `Bearer ${token}` },
           params,
-        }
+        },
       );
 
       const data = response?.data?.data;
@@ -183,7 +183,7 @@ const BalanceleaveforTeachers = () => {
                 <td class="px-2 text-center py-2 border border-black">${
                   subject?.balance_leave || " "
                 }</td>
-              </tr>`
+              </tr>`,
             )
             .join("")}
         </tbody>
@@ -383,7 +383,7 @@ const BalanceleaveforTeachers = () => {
                                     {header}
                                   </th>
                                 );
-                              }
+                              },
                             )}
                           </tr>
                         </thead>
@@ -406,11 +406,19 @@ const BalanceleaveforTeachers = () => {
                                 </td>
                               </tr>
                             ))
+                          ) : timetable.length === 0 ? (
+                            <tr>
+                              <td colSpan={4} className="py-20">
+                                <div className="text-center text-red-700 text-base sm:text-lg">
+                                  No data available.
+                                </div>
+                              </td>
+                            </tr>
                           ) : (
                             <tr>
-                              <td colSpan={4}>
-                                <div className="w-full text-center text-xl text-red-700 py-6">
-                                  Oops! No data found..
+                              <td colSpan={4} className="py-20">
+                                <div className="text-center text-red-700 text-base sm:text-lg">
+                                  Result not found!
                                 </div>
                               </td>
                             </tr>

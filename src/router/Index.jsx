@@ -308,6 +308,21 @@ import ImpersonateListing from "../componants/SuperAdmin/Impersonate/Impersonate
 
 import AllApplicationFeeStatusReport from '../componants/Reports/AllApplicationFeeStatusReport.jsx'
 
+// Librarian
+import SendRemainderRemark from "../componants/MasterModuleLibrarian/SendRemainderRemark/SendRemainderRemark.jsx";
+import Periodicals from "../componants/MasterModuleLibrarian/Periodicals/Periodicals/Periodicals.jsx";
+import Subscription from "../componants/MasterModuleLibrarian/Periodicals/Subscription/Subscription.jsx";
+import ChangePeriodicalsStatus from "../componants/MasterModuleLibrarian/Periodicals/ChangePeriodicalsStatus/ChangePeriodicalsStatus.jsx";
+import PeriodicalsNotReceivedReport from "../componants/MasterModuleLibrarian/Periodicals/PeriodicalsReport/PeriodicalsNotReceivedReport.jsx";
+import PeriodicalsReport from "../componants/MasterModuleLibrarian/Periodicals/PeriodicalsReport/PeriodicalsReport.jsx";
+import BooksReport from "../componants/MasterModuleLibrarian/LibraryReports/BooksReport.jsx";
+import LocationwiseBookReport from "../componants/MasterModuleLibrarian/LibraryReports/LocationwiseBookReport.jsx";
+import BooksAddedInLibraryReport from "../componants/MasterModuleLibrarian/LibraryReports/BooksAddedInLibraryReport.jsx";
+import BooksIssuedHistoryReport from "../componants/MasterModuleLibrarian/LibraryReports/BookIssuedHistoryReport.jsx";
+import BookIssuedReport from "../componants/MasterModuleLibrarian/LibraryReports/BooksIssuedReport.jsx";
+import BooksNonReturnReport from "../componants/MasterModuleLibrarian/LibraryReports/BooksNonReturnReport.jsx";
+import MonthlyBookIssueReport from "../componants/MasterModuleLibrarian/LibraryReports/MonthlyBookIssueReport.jsx";
+
 function Index() {
   return (
     <Routes>
@@ -1671,6 +1686,117 @@ function Index() {
         <Route
           path="/all_application_status_report"
           element={<PrivateRoute element={<AllApplicationFeeStatusReport />} />}
+        />
+        <Route
+          path="/send_reminder_remark_non_returned_book"
+          element={<PrivateRoute element={<SendRemainderRemark />} />}
+        />
+        {/* Periodicals */}
+        <Route
+          path="/periodic_details"
+          element={<PrivateRoute element={<Periodicals />} />}
+        />
+        <Route
+          path="/subscription"
+          element={<PrivateRoute element={<Subscription />} />}
+        />
+        <Route
+          path="/change_periodical_status"
+          element={<PrivateRoute element={<ChangePeriodicalsStatus />} />}
+        />
+        <Route
+          path="/periodicalsNotReceivedReport"
+          element={<PrivateRoute element={<PeriodicalsNotReceivedReport />} />}
+        />
+        <Route
+          path="/periodicalsReport"
+          element={<PrivateRoute element={<PeriodicalsReport />} />}
+        />
+        <Route
+          path="/booksReport"
+          element={<PrivateRoute element={<BooksReport />} />}
+        />
+        <Route
+          path="/locationwiseBookReport"
+          element={<PrivateRoute element={<LocationwiseBookReport />} />}
+        />
+        <Route
+          path="/booksAddedInLibraryReport"
+          element={<PrivateRoute element={<BooksAddedInLibraryReport />} />}
+        />
+        <Route
+          path="/bookIssuedHistoryReport"
+          element={<PrivateRoute element={<BooksIssuedHistoryReport />} />}
+        />
+        <Route
+          path="/booksIssuedReport"
+          element={<PrivateRoute element={<BookIssuedReport />} />}
+        />
+        <Route
+          path="/booksNonReturnReport"
+          element={<PrivateRoute element={<BooksNonReturnReport />} />}
+        />
+        <Route
+          path="/monthlyBookIssuedReport"
+          element={<PrivateRoute element={<MonthlyBookIssueReport />} />}
+        />
+        {/* Librarian Login */}
+        {/* Master module */}
+        {/* Create Member */}
+        <Route
+          path="/createMember"
+          element={<PrivateRoute element={<CreateMember />} />}
+        />
+        {/* Category Group */}
+        <Route
+          path="/categoryGroup"
+          element={<PrivateRoute element={<CategoryGroup />} />}
+        />
+        {/* Call Category */}
+        <Route
+          path="/callCategory"
+          element={<PrivateRoute element={<CallCategory />} />}
+        />
+        <Route
+          path="/createCallCategory"
+          element={<PrivateRoute element={<CreateCallCategory />} />}
+        />
+        <Route
+          path="/editCallCategory/:id"
+          element={<PrivateRoute element={<EditCallCategory />} />}
+        />
+        {/* Book Details */}
+        <Route
+          path="/bookDetails"
+          element={<PrivateRoute element={<BookDetails />} />}
+        />
+        <Route
+          path="/createBook"
+          element={<PrivateRoute element={<CreateBook />} />}
+        />
+        <Route
+          path="/bookDetails/edit/:id"
+          element={<PrivateRoute element={<EditBookDetails />} />}
+        />
+        {/* Generate Barcode */}
+        <Route
+          path="/generateBarcode"
+          element={<PrivateRoute element={<GenerateBarcode />} />}
+        />
+        {/* Library */}
+        {/* View Members */}
+        <Route
+          path="/viewMembers"
+          element={<PrivateRoute element={<ViewMember />} />}
+        />
+        {/* Issue Book */}
+        <Route
+          path="/issueBook"
+          element={<PrivateRoute element={<IssueBook />} />}
+        />
+        <Route
+          path="/returnBook"
+          element={<PrivateRoute element={<ReturnBook />} />}
         />
       </Route>
 

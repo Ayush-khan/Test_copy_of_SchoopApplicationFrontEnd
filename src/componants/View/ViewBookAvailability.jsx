@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { RxCross1 } from "react-icons/rx";
 import { FiPrinter } from "react-icons/fi";
 import { FaFileExcel } from "react-icons/fa";
+import { FaStar } from "react-icons/fa";
 import * as XLSX from "xlsx";
 import ReactPaginate from "react-paginate";
 
@@ -46,10 +47,18 @@ const ViewBookAvailability = () => {
   const prevSearchTermRef = useRef("");
 
   useEffect(() => {
-    fetchCategoryGroup();
-    fetchCategoryName();
-    // handleSearch();
+    // fetchCategoryGroup();
+    // fetchCategoryName();
+
+    handleSearch();
   }, []);
+
+  useEffect(() => {
+    fetchCategoryGroup();
+
+    // always call API, with or without groupId
+    fetchCategoryName(selectedCategoryGroupId);
+  }, [selectedCategoryGroupId]);
 
   const fetchCategoryGroup = async () => {
     try {
@@ -60,7 +69,7 @@ const ViewBookAvailability = () => {
         `${API_URL}/api/get_category_group_name`,
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
 
       console.log("group name:", response.data);
@@ -93,27 +102,61 @@ const ViewBookAvailability = () => {
     }));
   }, [categoryGroup]);
 
-  const fetchCategoryName = async () => {
+  // const fetchCategoryName = async () => {
+  //   try {
+  //     setLoadingExams(true);
+  //     const token = localStorage.getItem("authToken");
+
+  //     const response = await axios.get(
+  //       `${API_URL}/api/get_allcategoryname?category_group_id=${selectedCategoryGroupId}`,
+  //       {
+  //         headers: { Authorization: `Bearer ${token}` },
+  //       }
+  //     );
+
+  //     console.log("all category name:", response.data.data);
+
+  //     // Ensure response is an array before setting state
+  //     if (Array.isArray(response.data.data)) {
+  //       setCategoryName(response.data.data);
+  //     } else {
+  //       setCategoryName([]); // Default to empty array
+  //       console.error("Unexpected API response format:", response.data);
+  //     }
+  //   } catch (error) {
+  //     toast.error("Error fetching Students");
+  //     console.error("Error fetching Students:", error);
+  //   } finally {
+  //     setLoadingExams(false);
+  //   }
+  // };
+
+  const fetchCategoryName = async (groupId) => {
     try {
       setLoadingExams(true);
       const token = localStorage.getItem("authToken");
 
-      const response = await axios.get(`${API_URL}/api/get_allcategoryname`, {
+      // build URL conditionally
+      let url = `${API_URL}/api/get_allcategoryname`;
+      if (groupId) {
+        url += `?category_group_id=${groupId}`;
+      }
+
+      const response = await axios.get(url, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
       console.log("all category name:", response.data.data);
 
-      // Ensure response is an array before setting state
       if (Array.isArray(response.data.data)) {
         setCategoryName(response.data.data);
       } else {
-        setCategoryName([]); // Default to empty array
+        setCategoryName([]);
         console.error("Unexpected API response format:", response.data);
       }
     } catch (error) {
-      toast.error("Error fetching Students");
-      console.error("Error fetching Students:", error);
+      toast.error("Error fetching categories");
+      console.error("Error fetching categories:", error);
     } finally {
       setLoadingExams(false);
     }
@@ -138,50 +181,6 @@ const ViewBookAvailability = () => {
     R: "Reserved",
     L: "Lost",
   };
-
-  // const handleSearch = async () => {
-  //   setLoadingForSearch(true);
-  //   setIsSubmitting(true);
-
-  //   try {
-  //     const token = localStorage.getItem("authToken");
-
-  //     // Build params only if field has value
-  //     let params = {};
-  //     if (assessionNo) params.accession_no = assessionNo;
-  //     if (title) params.title = title;
-  //     if (author) params.author = author;
-  //     if (selectedCategoryGroup)
-  //       params.category_group_id = selectedCategoryGroup.value;
-  //     if (selectedCategory) params.category_id = selectedCategory.value;
-
-  //     console.log("Search Params:", params);
-
-  //     const response = await axios.get(`${API_URL}/api/get_all_books`, {
-  //       headers: { Authorization: `Bearer ${token}` },
-  //       params,
-  //       paramsSerializer: (params) => {
-  //         return new URLSearchParams(params).toString();
-  //       },
-  //     });
-
-  //     console.log("API Response:", response?.data);
-
-  //     if (!response?.data?.data || response?.data?.data?.length === 0) {
-  //       setTimetable([]);
-  //       toast.error("No records found for selected criteria.");
-  //     } else {
-  //       setTimetable(response?.data?.data);
-  //       setPageCount(Math.ceil(response?.data?.data?.length / pageSize));
-  //     }
-  //   } catch (error) {
-  //     console.error("Error fetching report:", error);
-  //     toast.error("Error fetching data. Please try again.");
-  //   } finally {
-  //     setIsSubmitting(false);
-  //     setLoadingForSearch(false);
-  //   }
-  // };
 
   const handleSearch = async () => {
     setLoadingForSearch(true);
@@ -216,10 +215,14 @@ const ViewBookAvailability = () => {
 
       if (!response?.data?.data || response?.data?.data?.length === 0) {
         setTimetable([]);
+        setPageCount(0);
+        setCurrentPage(0);
         toast.error("No records found for selected criteria.");
       } else {
         setTimetable(response?.data?.data);
-        setPageCount(Math.ceil(response?.data?.data?.length / pageSize));
+
+        setPageCount(Math.ceil(response?.data?.data?.length || 0 / pageSize));
+        setCurrentPage(0);
       }
     } catch (error) {
       console.error("Error fetching report:", error);
@@ -291,7 +294,7 @@ const ViewBookAvailability = () => {
                  <td class="px-2 text-center py-2 border border-black">${
                    subject?.Amount || " "
                  }</td>
-              </tr>`
+              </tr>`,
             )
             .join("")}
         </tbody>
@@ -469,7 +472,7 @@ const ViewBookAvailability = () => {
     const amount = normalize(student?.copy_id);
     const receiptNo = normalize(student?.location_of_book);
     const combined = normalize(
-      `${student?.call_no || ""} / ${student?.category_name || ""}`
+      `${student?.call_no || ""} / ${student?.category_name || ""}`,
     );
 
     // Check if the search term is present in any of the specified fields
@@ -490,7 +493,7 @@ const ViewBookAvailability = () => {
 
   const displayedSections = filteredSections.slice(
     currentPage * pageSize,
-    (currentPage + 1) * pageSize
+    (currentPage + 1) * pageSize,
   );
 
   return (
@@ -586,14 +589,14 @@ const ViewBookAvailability = () => {
 
               {/* New Arrival + Search button in same row */}
               <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2">
+                <div className="flex flex-col items-start gap-1">
+                  <label className="text-md">New Arrival</label>
                   <input
                     type="checkbox"
                     className="w-5 h-5 text-blue-600 accent-blue-600"
                     checked={isNewArrival}
                     onChange={(e) => setIsNewArrival(e.target.checked)}
                   />
-                  <label className="text-md">New Arrival</label>
                 </div>
 
                 <button
@@ -725,17 +728,47 @@ const ViewBookAvailability = () => {
                           ) : displayedSections.length ? (
                             displayedSections?.map((student, index) => (
                               <tr
-                                key={student.adm_form_pk}
+                                key={`${student.adm_form_pk}-${index}`}
                                 className="border border-gray-300"
                               >
                                 <td className="px-2 py-2 text-center border border-gray-300">
-                                  {index + 1}
+                                  {currentPage * pageSize + index + 1}
                                 </td>
                                 <td className="px-2 py-2 text-center border border-gray-300">
                                   {student?.copy_id || " "}
                                 </td>
                                 <td className="px-2 py-2 text-center border border-gray-300">
                                   {student?.book_title || " "}
+                                  {(() => {
+                                    if (student?.added_date) {
+                                      const addedDate = new Date(
+                                        student.added_date,
+                                      );
+                                      const today = new Date();
+                                      const diffDays = Math.floor(
+                                        (today - addedDate) /
+                                          (1000 * 60 * 60 * 24),
+                                      );
+
+                                      if (diffDays <= 60) {
+                                        return (
+                                          // <span className="ml-2 text-red-500 flex items-center justify-center">
+                                          //   <FaStar className="ml-1" />{" "}
+                                          //   <span className="ml-1 text-xs font-semibold">
+                                          //     New
+                                          //   </span>
+                                          // </span>
+
+                                          <img
+                                            src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTLK84hT0eGuSJbqDKHoGSflFsH35iu_6pWiQ&s" // your flaticon "New" icon link
+                                            alt="New"
+                                            className="inline-block w-6 h-6 ml-2"
+                                          />
+                                        );
+                                      }
+                                    }
+                                    return null;
+                                  })()}
                                 </td>
                                 <td className="px-2 py-2 text-center border border-gray-300">
                                   {student?.author
@@ -745,7 +778,7 @@ const ViewBookAvailability = () => {
                                         .map(
                                           (word) =>
                                             word.charAt(0).toUpperCase() +
-                                            word.slice(1)
+                                            word.slice(1),
                                         )
                                         .join(" ")
                                     : " "}
@@ -765,34 +798,34 @@ const ViewBookAvailability = () => {
                           ) : (
                             <div className=" absolute left-[1%] w-[100%]  text-center flex justify-center items-center mt-14">
                               <div className=" text-center text-xl text-red-700">
-                                Oops! No data found..
+                                No data available.
                               </div>
                             </div>
                           )}
                         </tbody>
                       </table>
                     </div>
-                  </div>
-                  <div className=" flex justify-center  pt-2 -mb-1  box-border  overflow-hidden">
-                    <ReactPaginate
-                      previousLabel={"Previous"}
-                      nextLabel={"Next"}
-                      breakLabel={"..."}
-                      breakClassName={"page-item"}
-                      breakLinkClassName={"page-link"}
-                      pageCount={pageCount}
-                      marginPagesDisplayed={1}
-                      pageRangeDisplayed={1}
-                      onPageChange={handlePageClick}
-                      containerClassName={"pagination justify-content-center"}
-                      pageClassName={"page-item"}
-                      pageLinkClassName={"page-link"}
-                      previousClassName={"page-item"}
-                      previousLinkClassName={"page-link"}
-                      nextClassName={"page-item"}
-                      nextLinkClassName={"page-link"}
-                      activeClassName={"active"}
-                    />
+                    <div className=" flex justify-center pt-2 -mb-3">
+                      <ReactPaginate
+                        previousLabel={"Previous"}
+                        nextLabel={"Next"}
+                        breakLabel={"..."}
+                        breakClassName={"page-item"}
+                        breakLinkClassName={"page-link"}
+                        pageCount={pageCount}
+                        marginPagesDisplayed={1}
+                        pageRangeDisplayed={1}
+                        onPageChange={handlePageClick}
+                        containerClassName={"pagination"}
+                        pageClassName={"page-item"}
+                        pageLinkClassName={"page-link"}
+                        previousClassName={"page-item"}
+                        previousLinkClassName={"page-link"}
+                        nextClassName={"page-item"}
+                        nextLinkClassName={"page-link"}
+                        activeClassName={"active"}
+                      />
+                    </div>
                   </div>
                 </div>
               </div>

@@ -101,11 +101,11 @@ const ConsolidatedLeaveForTeachers = () => {
         {
           headers: { Authorization: `Bearer ${token}` },
           params,
-        }
+        },
       );
 
       if (!response?.data?.data || response?.data?.data?.length === 0) {
-        toast.error("Consolidated Leave data not found.");
+        // toast.error("Consolidated Leave data not found.");
         setTimetable([]);
       } else {
         setTimetable(response?.data?.data);
@@ -166,7 +166,7 @@ const ConsolidatedLeaveForTeachers = () => {
                 ${
                   subject?.leave_start_date
                     ? new Date(subject?.leave_start_date).toLocaleDateString(
-                        "en-GB"
+                        "en-GB",
                       )
                     : ""
                 }</td>
@@ -174,7 +174,7 @@ const ConsolidatedLeaveForTeachers = () => {
                  ${
                    subject?.leave_start_date
                      ? new Date(subject?.leave_start_date).toLocaleDateString(
-                         "en-GB"
+                         "en-GB",
                        )
                      : ""
                  }</td>
@@ -187,7 +187,7 @@ const ConsolidatedLeaveForTeachers = () => {
                     <td class="px-2 text-center py-2 border border-black">${
                       subject?.ApprovedBy || " "
                     }</td>
-              </tr>`
+              </tr>`,
             )
             .join("")}
         </tbody>
@@ -484,7 +484,7 @@ const ConsolidatedLeaveForTeachers = () => {
                                 <td className="px-2 py-2 text-center border border-gray-300">
                                   {student?.leave_start_date
                                     ? new Date(
-                                        student?.leave_start_date
+                                        student?.leave_start_date,
                                       ).toLocaleDateString("en-GB")
                                     : ""}
                                 </td>
@@ -492,7 +492,7 @@ const ConsolidatedLeaveForTeachers = () => {
                                 <td className="px-2 py-2 text-center border border-gray-300">
                                   {student?.leave_end_date
                                     ? new Date(
-                                        student?.leave_end_date
+                                        student?.leave_end_date,
                                       ).toLocaleDateString("en-GB")
                                     : ""}
                                 </td>
@@ -508,12 +508,22 @@ const ConsolidatedLeaveForTeachers = () => {
                                 </td>
                               </tr>
                             ))
+                          ) : timetable.length === 0 ? (
+                            <tr>
+                              <td colSpan={9} className="py-20">
+                                <div className="text-center text-red-700 text-base sm:text-lg">
+                                  No data available.
+                                </div>
+                              </td>
+                            </tr>
                           ) : (
-                            <div className=" absolute left-[1%] w-[100%]  text-center flex justify-center items-center mt-14">
-                              <div className=" text-center text-xl text-red-700">
-                                Oops! No data found..
-                              </div>
-                            </div>
+                            <tr>
+                              <td colSpan={9} className="py-20">
+                                <div className="text-center text-red-700 text-base sm:text-lg">
+                                  Result not found!
+                                </div>
+                              </td>
+                            </tr>
                           )}
                         </tbody>
                       </table>

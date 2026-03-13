@@ -50,6 +50,7 @@ const GenerateBarcode = () => {
       }
 
       if (!fromDate && !toDate) {
+        toast.error("Please select at least one to generate barcode.");
         setFromError("Please enter Accession No. From");
         setToError("Please enter Accession No. To");
         setLoadingForSearch(false);
@@ -69,10 +70,10 @@ const GenerateBarcode = () => {
         const response = await axios.post(
           `${API_URL}/api/generate_barcode`,
           params,
-          { headers: { Authorization: `Bearer ${token}` } }
+          { headers: { Authorization: `Bearer ${token}` } },
         );
 
-        console.log("testing");
+        // console.log("testing");
         handleResult(response.data.data);
         return;
       }
@@ -83,7 +84,7 @@ const GenerateBarcode = () => {
         const response = await axios.post(
           `${API_URL}/api/generate_barcode`,
           params,
-          { headers: { Authorization: `Bearer ${token}` } }
+          { headers: { Authorization: `Bearer ${token}` } },
         );
 
         handleResult(response.data.data);
@@ -93,7 +94,7 @@ const GenerateBarcode = () => {
       if (fromDate && toDate) {
         if (Number(fromDate) > Number(toDate)) {
           toast.error(
-            "Accession No. To must be greater than Accession No. From"
+            "Accession No. To must be greater than Accession No. From",
           );
           setLoadingForSearch(false);
           setIsSubmitting(false);
@@ -113,7 +114,7 @@ const GenerateBarcode = () => {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       handleResult(response.data.data);
@@ -121,7 +122,7 @@ const GenerateBarcode = () => {
       console.error("Error fetching Accession no.:", error);
       toast.error(
         error?.response?.data?.message ||
-          "Error fetching accession no. Please try again."
+          "Error fetching accession no. Please try again.",
       );
     } finally {
       setIsSubmitting(false);
@@ -135,57 +136,127 @@ const GenerateBarcode = () => {
     return canvas.toDataURL("image/png");
   };
 
+  // const handlePrint = () => {
+  //   const printTitle = `List of Barcode ${fromDate} to ${toDate}`;
+
+  //   // Build rows with 2 barcodes per row
+  //   const barcodeRows = (() => {
+  //     let rows = "";
+  //     for (let i = 0; i < displayedSections.length; i += 2) {
+  //       const first = displayedSections[i];
+  //       const second = displayedSections[i + 1];
+
+  //       const firstBarcode = generateBarcodeBase64(String(first.copy_id));
+  //       const secondBarcode = second
+  //         ? generateBarcodeBase64(String(second.copy_id))
+  //         : null;
+
+  //       rows += `
+  //     <tr style="border:1px solid black;">
+  //       <td style="padding:10px; text-align:center;">
+  //         <img src="${firstBarcode}" style="width:200px; height:150px;" />
+
+  //       </td>
+
+  //       <td style="padding:10px; text-align:center;">
+  //         ${
+  //           secondBarcode
+  //             ? `<img src="${secondBarcode}" style="width:200px; height:150px;" />`
+  //             : ""
+  //         }
+  //       </td>
+  //     </tr>
+  //   `;
+  //     }
+  //     return rows;
+  //   })();
+
+  //   // Main HTML for printing
+  //   const printContent = `
+  //   <div style="width:100%; text-align:center;">
+  //     <h3 style="font-weight:bold; font-size:20px; margin-bottom:10px;">
+  //       ${printTitle}
+  //     </h3>
+
+  //     <table style=" solid black; border-collapse; width:80%; margin:auto;">
+  //       <tbody>
+  //         ${barcodeRows}
+  //       </tbody>
+  //     </table>
+  //   </div>
+  // `;
+
+  //   // Open print window
+  //   const printWindow = window.open("", "_blank", "width=1000,height=800");
+
+  //   printWindow.document.write(`
+  //   <html>
+  //     <head>
+  //       <title>${printTitle}</title>
+  //       <style>
+  //         body { font-family: Arial, sans-serif; margin: 20px; }
+  //         table { width: 80%; margin: auto; border-collapse; }
+  //         td, th { solid #000; padding: 8px; text-align: center; }
+  //         img { display:block; margin:auto; }
+  //         @page { size: A4; margin: 10mm; }
+  //       </style>
+  //     </head>
+
+  //     <body>
+  //       ${printContent}
+  //     </body>
+  //   </html>
+  // `);
+
+  //   printWindow.document.close();
+
+  //   printWindow.onload = function () {
+  //     printWindow.focus();
+  //     printWindow.print();
+  //     printWindow.close();
+  //   };
+  // };
+
+  // console.log("row", timetable);
+
   const handlePrint = () => {
     const printTitle = `List of Barcode ${fromDate} to ${toDate}`;
+    let pagesHtml = "";
 
-    // Build rows with 2 barcodes per row
-    const barcodeRows = (() => {
-      let rows = "";
-      for (let i = 0; i < displayedSections.length; i += 2) {
-        const first = displayedSections[i];
-        const second = displayedSections[i + 1];
+    for (let i = 0; i < displayedSections.length; i += 2) {
+      const first = displayedSections[i];
+      const second = displayedSections[i + 1];
 
-        const firstBarcode = generateBarcodeBase64(String(first.copy_id));
-        const secondBarcode = second
-          ? generateBarcodeBase64(String(second.copy_id))
-          : null;
+      const firstBarcode = generateBarcodeBase64(String(first.copy_id));
+      const secondBarcode = second
+        ? generateBarcodeBase64(String(second.copy_id))
+        : null;
 
-        rows += `
-      <tr style="border:1px solid black;">
-        <td style="padding:10px; text-align:center;">
-          <img src="${firstBarcode}" style="width:200px; height:150px;" />
-          
-        </td>
+      pagesHtml += `
+      <div class="page">
+        <h3 class="title">${printTitle}</h3>
 
-        <td style="padding:10px; text-align:center;">
+        <div class="barcode-container">
+          <div class="barcode">
+            <img src="${firstBarcode}" />
+            <div>${first.copy_id}</div>
+          </div>
+
           ${
             secondBarcode
-              ? `<img src="${secondBarcode}" style="width:200px; height:150px;" />`
+              ? `
+              <div class="barcode">
+                <img src="${secondBarcode}" />
+                <div>${second.copy_id}</div>
+              </div>
+              `
               : ""
           }
-        </td>
-      </tr>
+        </div>
+      </div>
     `;
-      }
-      return rows;
-    })();
+    }
 
-    // Main HTML for printing
-    const printContent = `
-    <div style="width:100%; text-align:center;">
-      <h3 style="font-weight:bold; font-size:20px; margin-bottom:10px;">
-        ${printTitle}
-      </h3>
-
-      <table style=" solid black; border-collapse; width:80%; margin:auto;">
-        <tbody>
-          ${barcodeRows}
-        </tbody>
-      </table>
-    </div>
-  `;
-
-    // Open print window
     const printWindow = window.open("", "_blank", "width=1000,height=800");
 
     printWindow.document.write(`
@@ -193,30 +264,79 @@ const GenerateBarcode = () => {
       <head>
         <title>${printTitle}</title>
         <style>
-          body { font-family: Arial, sans-serif; margin: 20px; }
-          table { width: 80%; margin: auto; border-collapse; }
-          td, th { solid #000; padding: 8px; text-align: center; }
-          img { display:block; margin:auto; }
-          @page { size: A4; margin: 10mm; }
+          body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+          }
+
+          @page {
+            size: A4;
+            margin: 10mm;
+          }
+
+          .page {
+            height: 100vh;
+            page-break-after: always;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+          }
+
+          .title {
+            margin-bottom: 30px;
+            font-size: 20px;
+            font-weight: bold;
+          }
+
+          .barcode-container {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+          }
+
+          .barcode {
+            text-align: center;
+          }
+
+          img {
+            width: 220px;
+            height: auto;
+          }
         </style>
       </head>
 
       <body>
-        ${printContent}
+        ${pagesHtml}
       </body>
     </html>
   `);
 
     printWindow.document.close();
 
-    printWindow.onload = function () {
-      printWindow.focus();
-      printWindow.print();
-      printWindow.close();
+    printWindow.onload = () => {
+      const images = printWindow.document.images;
+      let loaded = 0;
+
+      for (let img of images) {
+        if (img.complete) loaded++;
+        else {
+          img.onload = img.onerror = () => {
+            loaded++;
+            if (loaded === images.length) {
+              printWindow.print();
+              printWindow.close();
+            }
+          };
+        }
+      }
+
+      if (loaded === images.length) {
+        printWindow.print();
+        printWindow.close();
+      }
     };
   };
-
-  console.log("row", timetable);
 
   const filteredSections = (Array.isArray(timetable) ? timetable : []).filter(
     (student) => {
@@ -225,7 +345,7 @@ const GenerateBarcode = () => {
       const accessionNo = student?.copy_id || "";
 
       return accessionNo.includes(searchLower);
-    }
+    },
   );
 
   const displayedSections = filteredSections.slice(currentPage * pageSize);
@@ -278,7 +398,7 @@ const GenerateBarcode = () => {
                       className="ml-0 md:ml-4 w-full md:w-[80%] text-md mt-1.5"
                       htmlFor="fromDate"
                     >
-                      Accession No. From
+                      Accession No. From <span className="text-red-500">*</span>
                     </label>
 
                     <div className="w-[80%]">
@@ -305,7 +425,7 @@ const GenerateBarcode = () => {
                       className="ml-0 md:ml-4 w-full md:w-[70%] text-md mt-1.5"
                       htmlFor="toDate"
                     >
-                      Accession No. To
+                      Accession No. To <span className="text-red-500">*</span>
                     </label>
 
                     <div className="w-[80%]">
