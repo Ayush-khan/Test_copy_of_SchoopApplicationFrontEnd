@@ -8,6 +8,8 @@ import NavBar from "../Layouts/NavBar";
 import UserProfile from "../componants/UserProfile";
 import LandingPage from "../componants/LandingPage";
 import AdminDashboard from "../componants/Dashbord/AdminDashboard";
+import DashboardLayoutList from "../componants/Dashbord/LayoutCrud/DashboardLayoutList.jsx";
+import DashboardLayoutEditor from "../componants/Dashbord/LayoutCrud/DashboardLayoutEditor.jsx";
 import EventCard from "../componants/Dashbord/EventCard";
 import NoticeBord from "../componants/Dashbord/NoticeBord";
 import StudentsChart from "../componants/Dashbord/Charts/StudentsChart";
@@ -645,6 +647,18 @@ function Index() {
         <Route
           path="/dashboard"
           element={<PrivateRoute element={<AdminDashboard />} />}
+        />
+        <Route
+          path="/dashboard-layout-crud"
+          element={<PrivateRoute element={<DashboardLayoutList />} />}
+        />
+        <Route
+          path="/dashboard-layout-crud/new"
+          element={<PrivateRoute element={<DashboardLayoutEditor />} />}
+        />
+        <Route
+          path="/dashboard-layout-crud/:id"
+          element={<PrivateRoute element={<DashboardLayoutEditor />} />}
         />
         {/* Teacher login  dashboard*/}
         <Route
