@@ -5,6 +5,8 @@ import "react-resizable/css/styles.css";
 
 const COLS = { lg: 12, md: 8, sm: 4, xs: 2, xxs: 1 };
 const BREAKPOINTS = { lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 };
+const ROW_HEIGHT = 56;
+const GRID_MARGIN = [16, 16];
 
 const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
 
@@ -13,20 +15,13 @@ const DashboardRenderer = ({ sections, dashboardData, sessionInfo }) => {
         (a, b) => Number(a?.section_order || 0) - Number(b?.section_order || 0),
     );
 
-    const getWidgetMinHeight = (widget) => {
-        const type = widget?.widget_type?.toLowerCase();
-        const h = Number(widget?.layout?.h || 2);
-
-        if (type === "card") return 112;
-        if (type === "chart") return Math.max(320, h * 90);
-        if (type === "table") return Math.max(320, h * 90);
-        return Math.max(220, h * 80);
-    };
-
     const getWidgetShellClasses = (widget) => {
         const type = widget?.widget_type?.toLowerCase();
         if (type === "card") return "h-full";
-        return "h-full bg-white border border-gray-200 rounded-lg shadow-sm p-2 sm:p-3";
+        if (type === "chart") {
+            return "h-full overflow-hidden rounded-lg bg-white border border-gray-200 shadow-sm";
+        }
+        return "h-full overflow-hidden rounded-lg";
     };
 
     const { width, containerRef, mounted } = useContainerWidth({
@@ -39,8 +34,17 @@ const DashboardRenderer = ({ sections, dashboardData, sessionInfo }) => {
             ? Math.min(...widgets.map((widget) => Number(widget?.layout?.y || 0)))
             : 0;
 
+        const getBaseLayout = (widget, breakpointKey) => {
+            const raw = widget?.layout || {};
+            // Supports both: layout:{x,y,w,h} and layout:{lg:{...},md:{...},sm:{...}}
+            if (raw?.[breakpointKey] && typeof raw[breakpointKey] === "object") {
+                return raw[breakpointKey];
+            }
+            return raw;
+        };
+
         const lg = widgets.map((widget, index) => {
-            const base = widget?.layout || {};
+            const base = getBaseLayout(widget, "lg");
             const i = String(widget?.dashboard_widget_id || `${widget?.widget_key}-${index}`);
             const x = clamp(Number(base?.x || 0), 0, COLS.lg - 1);
             const y = Math.max(0, Number(base?.y || 0) - minY);
@@ -52,26 +56,34 @@ const DashboardRenderer = ({ sections, dashboardData, sessionInfo }) => {
 
         const md = widgets.map((widget, index) => {
             const i = String(widget?.dashboard_widget_id || `${widget?.widget_key}-${index}`);
+            const base = getBaseLayout(widget, "md");
+            const hasBreakpointLayout =
+                typeof widget?.layout?.md === "object" &&
+                widget?.layout?.md !== null;
             const lgItem = lg[index];
             return {
                 i,
-                x: 0,
-                y: index * Math.max(1, lgItem.h),
-                w: COLS.md,
-                h: lgItem.h,
+                x: hasBreakpointLayout ? clamp(Number(base?.x || 0), 0, COLS.md - 1) : 0,
+                y: hasBreakpointLayout ? Math.max(0, Number(base?.y || 0)) : index * Math.max(1, lgItem.h),
+                w: hasBreakpointLayout ? clamp(Number(base?.w || 1), 1, COLS.md) : COLS.md,
+                h: hasBreakpointLayout ? clamp(Number(base?.h || 1), 1, 24) : lgItem.h,
                 static: true,
             };
         });
 
         const sm = widgets.map((widget, index) => {
             const i = String(widget?.dashboard_widget_id || `${widget?.widget_key}-${index}`);
+            const base = getBaseLayout(widget, "sm");
+            const hasBreakpointLayout =
+                typeof widget?.layout?.sm === "object" &&
+                widget?.layout?.sm !== null;
             const lgItem = lg[index];
             return {
                 i,
-                x: 0,
-                y: index * Math.max(1, lgItem.h),
-                w: COLS.sm,
-                h: lgItem.h,
+                x: hasBreakpointLayout ? clamp(Number(base?.x || 0), 0, COLS.sm - 1) : 0,
+                y: hasBreakpointLayout ? Math.max(0, Number(base?.y || 0)) : index * Math.max(1, lgItem.h),
+                w: hasBreakpointLayout ? clamp(Number(base?.w || 1), 1, COLS.sm) : COLS.sm,
+                h: hasBreakpointLayout ? clamp(Number(base?.h || 1), 1, 24) : lgItem.h,
                 static: true,
             };
         });
@@ -104,22 +116,21 @@ const DashboardRenderer = ({ sections, dashboardData, sessionInfo }) => {
                                 layouts={layouts}
                                 breakpoints={BREAKPOINTS}
                                 cols={COLS}
-                                rowHeight={56}
-                                margin={[16, 16]}
+                                rowHeight={ROW_HEIGHT}
+                                margin={GRID_MARGIN}
                                 containerPadding={[0, 0]}
                                 isDraggable={false}
                                 isResizable={false}
-                                compactType="vertical"
-                                preventCollision={false}
+                                compactType={null}
+                                preventCollision={true}
                             >
                                 {widgets.map((widget, index) => {
                                     const key = String(
                                         widget?.dashboard_widget_id || `${widget?.widget_key}-${index}`,
                                     );
-                                    const minHeight = getWidgetMinHeight(widget);
 
                                     return (
-                                        <div key={key} style={{ minHeight }}>
+                                        <div key={key} className="h-full">
                                             <div className={`w-full rounded-lg ${getWidgetShellClasses(widget)}`}>
                                                 <WidgetRenderer
                                                     widget={widget}

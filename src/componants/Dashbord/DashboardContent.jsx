@@ -7,23 +7,23 @@ import { useDashboardStructure } from "../../context/DashboardStructureContext";
 const SUMMARY_STALE_MS = 30 * 1000; // 30s
 
 let summaryCache = {
-  dashboardData: null,
-  token: null,
-  fetchedAt: 0,
+    dashboardData: null,
+    token: null,
+    fetchedAt: 0,
 };
 let summaryInFlight = null;
 
 const DashboardContent = () => {
-  const [dashboardData, setDashboardData] = useState(summaryCache.dashboardData);
-  const [loading, setLoading] = useState(!summaryCache.dashboardData);
-  const {
-    sessionInfo,
-    sessionLoading,
-    loadSessionInfo,
-    dashboardStructure,
-    structureLoading,
-    loadDashboardStructure,
-  } = useDashboardStructure();
+    const [dashboardData, setDashboardData] = useState(summaryCache.dashboardData);
+    const [loading, setLoading] = useState(!summaryCache.dashboardData);
+    const {
+        sessionInfo,
+        sessionLoading,
+        loadSessionInfo,
+        dashboardStructure,
+        structureLoading,
+        loadDashboardStructure,
+    } = useDashboardStructure();
 
     useEffect(() => {
         initDashboard();
@@ -61,22 +61,22 @@ const DashboardContent = () => {
                 if (!silent) setLoading(true);
                 const currentToken = localStorage.getItem("authToken") || "";
 
-      let nextSessionInfo = sessionInfo;
+                let nextSessionInfo = sessionInfo;
 
-      if (!nextSessionInfo) {
-        nextSessionInfo = await loadSessionInfo();
-      }
+                if (!nextSessionInfo) {
+                    nextSessionInfo = await loadSessionInfo();
+                }
 
-      await loadDashboardStructure({
-        roleId: nextSessionInfo.roleId,
-        sortName: nextSessionInfo.sortName,
-      });
+                await loadDashboardStructure({
+                    roleId: nextSessionInfo.roleId,
+                    sortName: nextSessionInfo.sortName,
+                });
 
-      const summaryRes = await fetchSummary(nextSessionInfo);
-      setDashboardData(summaryRes.data);
-      summaryCache.dashboardData = summaryRes.data;
-      summaryCache.token = currentToken;
-      summaryCache.fetchedAt = Date.now();
+                const summaryRes = await fetchSummary(nextSessionInfo);
+                setDashboardData(summaryRes.data);
+                summaryCache.dashboardData = summaryRes.data;
+                summaryCache.token = currentToken;
+                summaryCache.fetchedAt = Date.now();
             } catch (error) {
                 console.error("Dashboard Load Error", error);
             } finally {

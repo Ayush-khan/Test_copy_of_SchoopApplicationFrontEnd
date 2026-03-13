@@ -2,7 +2,7 @@ import { resolveWidgetComponent } from "./widgetRegistry.jsx";
 
 const WidgetRenderer = ({ widget, data, sessionInfo }) => {
 
-    const Component = resolveWidgetComponent(widget?.widget_key);
+    const Component = resolveWidgetComponent(widget);
 
     if (!Component) {
         return (
