@@ -619,6 +619,28 @@ const LeavingCertificate = () => {
       }
     }
 
+    if (sortNameCookie === "DEMONEW") {
+      const sacsFields = [
+        "state",
+        "prev_school_class",
+        "dob_proof",
+        "attendance",
+      ];
+      sacsFields.forEach((field) => {
+        if (!formData[field]) {
+          newErrors[field] = "This field is required";
+        }
+      });
+
+      // Subject selection check only for SACS
+      if (
+        !formData.selectedSubjects ||
+        formData.selectedSubjects.length === 0
+      ) {
+        newErrors.selectedSubjects = "Please select at least one subject";
+      }
+    }
+
     // Specific validation for class > 427
     // if (classIdForSearch > 427 && !formData.udise_pen_no) {
     //   newErrors.udise_pen_no = "This field is required";
@@ -1797,6 +1819,77 @@ const LeavingCertificate = () => {
                           )}
                         </div>
                       )}
+                      {sortNameCookie === "DEMONEW" && (
+                        // Purpose input field here
+                        <div className="grid   col-span-2 row-span-2 ">
+                          <label
+                            htmlFor="subjects"
+                            className="block font-bold text-xs  col-span-3"
+                          >
+                            Subjects Studied{" "}
+                            <span className="text-red-500">*</span>
+                          </label>
+
+                          {formData.subjectsFor &&
+                          formData.subjectsFor.length > 0 ? (
+                            formData.subjectsFor.map((subject, index) => (
+                              <div key={index} className="grid-col-3 relative ">
+                                <label className="">
+                                  <input
+                                    type="checkbox"
+                                    name="subjects"
+                                    value={subject.name}
+                                    checked={formData?.selectedSubjects?.includes(
+                                      subject.name
+                                    )}
+                                    onChange={(e) =>
+                                      handleSubjectSelection(e, subject.name)
+                                    }
+                                    className="form-checkbox h-4 w-4 text-blue-600"
+                                  />
+                                  <span className="ml-1 text-sm">
+                                    {subject.name}
+                                  </span>
+                                </label>
+                              </div>
+                            ))
+                          ) : (
+                            <p className="text-sm text-gray-500 col-span-3">
+                              No subjects available
+                            </p>
+                          )}
+
+                          {selectedClassForSubject == "10" && (
+                            <div className="col-span-1 relative  ">
+                              <label className="inline-flex items-center">
+                                <input
+                                  type="checkbox"
+                                  name="subjects"
+                                  value="Basic Mathematics"
+                                  checked={formData?.selectedSubjects?.includes(
+                                    "Basic Mathematics"
+                                  )}
+                                  onChange={(e) =>
+                                    handleSubjectSelection(
+                                      e,
+                                      "Basic Mathematics"
+                                    )
+                                  }
+                                  className="form-checkbox h-4 w-4 text-blue-600"
+                                />
+                                <span className="ml-1 text-sm">
+                                  Basic Mathematics
+                                </span>
+                              </label>
+                            </div>
+                          )}
+                          {errors.selectedSubjects && (
+                            <span className="text-red-500 text-xs ml-1 h-1 col-span-3">
+                              {errors.selectedSubjects}
+                            </span>
+                          )}
+                        </div>
+                      )}
                       {/* <div className="grid col-span-2 row-span-2">
                       <label
                         htmlFor="subjects"
@@ -1884,7 +1977,7 @@ const LeavingCertificate = () => {
         ${
           sortNameCookie === "HSCS"
             ? "relative -top-6"
-            : sortNameCookie === "SACS"
+            : sortNameCookie === "SACS" || sortNameCookie === "DEMONEW"
             ? "relative top-0"
             : "relative top-0"
         }`}
@@ -1905,7 +1998,7 @@ const LeavingCertificate = () => {
                               <span className="text-red-500">*</span>
                             </p>
                           )}
-                          {sortNameCookie === "SACS" && (
+                          {sortNameCookie === "SACS" || sortNameCookie === "DEMONEW"  && (
                             <>
                               Promoted to{" "}
                               <span className="text-red-500">*</span>
@@ -1984,7 +2077,7 @@ const LeavingCertificate = () => {
                           </span>
                         )}
                       </div>
-                      {sortNameCookie === "SACS" && (
+                      {sortNameCookie === "SACS" || sortNameCookie === "DEMONEW" && (
                         <div>
                           <label
                             htmlFor="state"
@@ -2115,7 +2208,7 @@ const LeavingCertificate = () => {
                     {/* </legend> */}
 
                     <div className="grid grid-cols-1 md:grid-cols-4  gap-4">
-                      {sortNameCookie === "SACS" && (
+                      {sortNameCookie === "SACS" || sortNameCookie === "DEMONEW"  && (
                         <div>
                           <label
                             htmlFor="prev_school_class"
@@ -2211,6 +2304,39 @@ const LeavingCertificate = () => {
                       </div>{" "}
                       {/* Dropdown for Proof of DOB submitted */}
                       {sortNameCookie === "SACS" && (
+                        <div className="">
+                          <label
+                            htmlFor="dob_proof"
+                            className="block font-bold text-xs mb-2"
+                          >
+                            Proof of DOB Submitted at the Time of Admission
+                            <span className="text-red-500">*</span>
+                          </label>
+                          <select
+                            id="dob_proof"
+                            name="dob_proof"
+                            value={formData.dob_proof}
+                            onChange={handleChange}
+                            className="block w-full border border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
+                          >
+                            <option value="">Select</option>
+                            <option value="Birth Certificate">
+                              Birth Certificate
+                            </option>
+                            <option value="School Leaving Certificate">
+                              School Leaving Certificate
+                            </option>
+                            <option value="Aadhar Card">Aadhar Card</option>
+                            <option value="Passport">Passport</option>
+                          </select>
+                          {errors.dob_proof && (
+                            <span className="text-red-500 text-xs ml-1 h-1">
+                              {errors.dob_proof}
+                            </span>
+                          )}
+                        </div>
+                      )}
+                      {sortNameCookie === "DEMONEW" && (
                         <div className="">
                           <label
                             htmlFor="dob_proof"
@@ -2463,6 +2589,30 @@ const LeavingCertificate = () => {
                             )}
                           </div>
                         </>
+                      )}
+                      {sortNameCookie === "DEMONEW" && (
+                        <div>
+                          <label
+                            htmlFor="attendance"
+                            className="block font-bold text-xs mb-2"
+                          >
+                            Attendance <span className="text-red-500">*</span>
+                          </label>
+                          <input
+                            type="text"
+                            id="attendance"
+                            maxLength={7}
+                            name="attendance"
+                            value={formData.attendance}
+                            onChange={handleChange}
+                            className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-white shadow-inner"
+                          />
+                          {errors.attendance && (
+                            <span className="text-red-500 text-xs ml-1 h-1">
+                              {errors.attendance}
+                            </span>
+                          )}
+                        </div>
                       )}
                       <div>
                         <label
