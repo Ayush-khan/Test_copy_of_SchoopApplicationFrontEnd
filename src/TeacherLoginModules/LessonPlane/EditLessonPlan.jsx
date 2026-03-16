@@ -486,16 +486,16 @@ const EditLessonPlan = () => {
       // 🔸 Validate class/section selection
       const studentsArray = Array.isArray(selectedStudent)
         ? selectedStudent.map((s) => ({
-          class_id: s.value,
-          section_id: s.section_id || sectionId || "0", // ✅ uses state fallback
-        }))
+            class_id: s.value,
+            section_id: s.section_id || sectionId || "0", // ✅ uses state fallback
+          }))
         : selectedStudent
           ? [
-            {
-              class_id: selectedStudent.value,
-              section_id: selectedStudent.section_id || sectionId || "0", // ✅ corrected property name
-            },
-          ]
+              {
+                class_id: selectedStudent.value,
+                section_id: selectedStudent.section_id || sectionId || "0", // ✅ corrected property name
+              },
+            ]
           : [];
 
       if (!studentsArray.length) {
@@ -588,7 +588,7 @@ const EditLessonPlan = () => {
           const val =
             studentRemarks[`${item.lesson_plan_headings_id}_${rowIndex}`] ||
             timetable[0]?.[
-            `dc_description_${item.lesson_plan_headings_id}_${rowIndex + 1}`
+              `dc_description_${item.lesson_plan_headings_id}_${rowIndex + 1}`
             ] ||
             "";
           return val.trim() !== "";
@@ -706,8 +706,9 @@ const EditLessonPlan = () => {
   return (
     <>
       <div
-        className={` transition-all duration-500 w-[95%]  mx-auto p-4 ${showStudentReport ? "w-full " : "w-[90%] "
-          }`}
+        className={` transition-all duration-500 w-[95%]  mx-auto p-4 ${
+          showStudentReport ? "w-full " : "w-[90%] "
+        }`}
       >
         <ToastContainer />
         <div className="card pb-4  rounded-md ">
@@ -990,13 +991,13 @@ const EditLessonPlan = () => {
                                             setWeekRange("");
                                           }}
                                         >
-                                          <RxCross1 className="text-xs text-red-600 ml-2" />
+                                          {/* <RxCross1 className="text-xs text-red-600 ml-2" /> */}
                                         </button>
                                       )}
                                     </div>
 
                                     {/* DatePicker */}
-                                    <DatePicker
+                                    {/* <DatePicker
                                       ref={datePickerRef}
                                       selected={fromDate}
                                       onChange={handleDateChange}
@@ -1004,7 +1005,7 @@ const EditLessonPlan = () => {
                                       dateFormat="dd-MM-yyyy"
                                       minDate={minDate}
                                       maxDate={maxDate}
-                                      /* 🔥 INLINE FIX */
+                                      
                                       popperPlacement="bottom-start"
                                       popperModifiers={[
                                         {
@@ -1015,7 +1016,7 @@ const EditLessonPlan = () => {
                                         },
                                       ]}
                                       className="hidden"
-                                    />
+                                    /> */}
                                   </div>
                                 </div>
                                 <div
@@ -1040,10 +1041,11 @@ const EditLessonPlan = () => {
                                           {(heading || []).map((item, i) => (
                                             <th
                                               key={item.lesson_plan_headings_id}
-                                              className={`px-6 py-2 border-2 text-sm font-semibold text-center text-gray-800 ${i === 0
+                                              className={`px-6 py-2 border-2 text-sm font-semibold text-center text-gray-800 ${
+                                                i === 0
                                                   ? "sticky left-0 bg-gray-200"
                                                   : ""
-                                                }`}
+                                              }`}
                                               style={{ width: "210px" }}
                                             >
                                               {item.name}
@@ -1060,10 +1062,11 @@ const EditLessonPlan = () => {
                                                 key={
                                                   item.lesson_plan_headings_id
                                                 }
-                                                className={`border-2 px-2 py-1 ${colIndex === 0
+                                                className={`border-2 px-2 py-1 ${
+                                                  colIndex === 0
                                                     ? "sticky left-0 bg-white"
                                                     : ""
-                                                  }`}
+                                                }`}
                                                 style={{
                                                   width: "210px",
                                                   minHeight: "250px",
@@ -1072,8 +1075,8 @@ const EditLessonPlan = () => {
                                                 <textarea
                                                   value={
                                                     studentRemarks[
-                                                    item
-                                                      .lesson_plan_headings_id
+                                                      item
+                                                        .lesson_plan_headings_id
                                                     ] || ""
                                                   }
                                                   onChange={(e) =>
@@ -1155,7 +1158,7 @@ const EditLessonPlan = () => {
                                                       setTimeout(() => {
                                                         e.target.selectionStart =
                                                           e.target.selectionEnd =
-                                                          cursorPos;
+                                                            cursorPos;
                                                       }, 0);
                                                     }
 
@@ -1176,7 +1179,7 @@ const EditLessonPlan = () => {
                                                           "• ",
                                                         ) &&
                                                         selectionStart ===
-                                                        lineStart + 2
+                                                          lineStart + 2
                                                       ) {
                                                         e.preventDefault();
                                                         const newValue =
@@ -1193,7 +1196,7 @@ const EditLessonPlan = () => {
                                                         setTimeout(() => {
                                                           e.target.selectionStart =
                                                             e.target.selectionEnd =
-                                                            lineStart;
+                                                              lineStart;
                                                         }, 0);
                                                       }
                                                     }
@@ -1206,7 +1209,7 @@ const EditLessonPlan = () => {
                                                     const updatedLines =
                                                       lines.map((line) =>
                                                         line.trim() === "" ||
-                                                          line.startsWith("• ")
+                                                        line.startsWith("• ")
                                                           ? line
                                                           : "• " + line,
                                                       );
@@ -1219,7 +1222,7 @@ const EditLessonPlan = () => {
                                                       e.target.value = newValue;
                                                       e.target.selectionStart =
                                                         e.target.selectionEnd =
-                                                        newValue.length;
+                                                          newValue.length;
                                                     }
                                                   }}
                                                   onBlur={(e) => {
@@ -1363,11 +1366,12 @@ const EditLessonPlan = () => {
                                                     <textarea
                                                       value={
                                                         studentRemarks[
-                                                        `${item.lesson_plan_headings_id}_${rowIndex}`
+                                                          `${item.lesson_plan_headings_id}_${rowIndex}`
                                                         ] ||
                                                         timetable?.[0]?.[
-                                                        `dc_description_${item.lesson_plan_headings_id
-                                                        }_${rowIndex + 1}`
+                                                          `dc_description_${
+                                                            item.lesson_plan_headings_id
+                                                          }_${rowIndex + 1}`
                                                         ] ||
                                                         ""
                                                       }
@@ -1385,7 +1389,7 @@ const EditLessonPlan = () => {
                                                             value.lastIndexOf(
                                                               "\n",
                                                               selectionStart -
-                                                              1,
+                                                                1,
                                                             ) + 1;
                                                           const currentLine =
                                                             value.substring(
@@ -1435,7 +1439,7 @@ const EditLessonPlan = () => {
                                                           setTimeout(() => {
                                                             e.target.selectionStart =
                                                               e.target.selectionEnd =
-                                                              cursorPos;
+                                                                cursorPos;
                                                           }, 0);
                                                         }
 
@@ -1446,7 +1450,7 @@ const EditLessonPlan = () => {
                                                             value.lastIndexOf(
                                                               "\n",
                                                               selectionStart -
-                                                              1,
+                                                                1,
                                                             ) + 1;
                                                           const currentLine =
                                                             value.substring(
@@ -1459,7 +1463,7 @@ const EditLessonPlan = () => {
                                                               "• ",
                                                             ) &&
                                                             selectionStart ===
-                                                            lineStart + 2
+                                                              lineStart + 2
                                                           ) {
                                                             e.preventDefault();
 
@@ -1487,7 +1491,7 @@ const EditLessonPlan = () => {
                                                             setTimeout(() => {
                                                               e.target.selectionStart =
                                                                 e.target.selectionEnd =
-                                                                lineStart;
+                                                                  lineStart;
                                                             }, 0);
                                                           }
                                                         }
@@ -1501,9 +1505,9 @@ const EditLessonPlan = () => {
                                                           lines.map((line) =>
                                                             line.trim() ===
                                                               "" ||
-                                                              line.startsWith(
-                                                                "• ",
-                                                              )
+                                                            line.startsWith(
+                                                              "• ",
+                                                            )
                                                               ? line
                                                               : "• " + line,
                                                           );
@@ -1519,7 +1523,7 @@ const EditLessonPlan = () => {
                                                             newValue;
                                                           e.target.selectionStart =
                                                             e.target.selectionEnd =
-                                                            newValue.length;
+                                                              newValue.length;
                                                         }
                                                       }}
                                                       onChange={(e) =>
