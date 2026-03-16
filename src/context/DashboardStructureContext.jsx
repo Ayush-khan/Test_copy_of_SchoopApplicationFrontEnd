@@ -50,8 +50,8 @@ export const DashboardStructureProvider = ({ children }) => {
     if (inFlightRef.current) return inFlightRef.current;
 
     const endpoints = [
-      `/api/dashboard-structure?role=${roleId}`,
       `/api/get_dashboardstructure?short_name=${sortName}&role=${roleId}`,
+      `/get_dashboardstructure?short_name=${sortName}&role=${roleId}`,
     ];
 
     const request = (async () => {

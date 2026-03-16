@@ -17,7 +17,10 @@ const getStore = () => {
     const parsed = JSON.parse(raw);
     return {
       created: Array.isArray(parsed?.created) ? parsed.created : [],
-      updated: parsed?.updated && typeof parsed.updated === "object" ? parsed.updated : {},
+      updated:
+        parsed?.updated && typeof parsed.updated === "object"
+          ? parsed.updated
+          : {},
       deleted: Array.isArray(parsed?.deleted) ? parsed.deleted : [],
     };
   } catch {
@@ -31,8 +34,45 @@ const saveStore = (store) => {
 
 const normalizeStructurePayload = (payload) => {
   if (payload?.sections && Array.isArray(payload.sections)) return payload;
-  if (payload?.data?.sections && Array.isArray(payload.data.sections)) return payload.data;
+  if (payload?.data?.sections && Array.isArray(payload.data.sections))
+    return payload.data;
   return null;
+};
+
+const stripClientKeys = (payload) => {
+  const cloned = clone(payload || {});
+  cloned.sections = (cloned.sections || []).map((section) => ({
+    ...section,
+    widgets: (section.widgets || []).map((widget) => {
+      const { __clientKey, ...rest } = widget || {};
+      return rest;
+    }),
+  }));
+  return cloned;
+};
+
+const saveDashboardWidgets = async (payload) => {
+  const token = localStorage.getItem("authToken");
+  if (!token) {
+    throw new Error("No authentication token found");
+  }
+
+  const res = await api.post(
+    "/api/save_dashboardwidgets",
+    stripClientKeys(payload),
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      withCredentials: true,
+    },
+  );
+  const serverPayload =
+    normalizeStructurePayload(res.data) ||
+    normalizeStructurePayload(res.data?.data) ||
+    res.data?.data ||
+    res.data;
+  return serverPayload || payload;
 };
 
 const normalizeLayout = (payload, sourceLayouts = []) => {
@@ -43,7 +83,8 @@ const normalizeLayout = (payload, sourceLayouts = []) => {
   const nextSectionId =
     sourceLayouts.reduce((max, layout) => {
       const sectionMax = (layout?.sections || []).reduce(
-        (innerMax, section) => Math.max(innerMax, Number(section?.section_id || 0)),
+        (innerMax, section) =>
+          Math.max(innerMax, Number(section?.section_id || 0)),
         0,
       );
       return Math.max(max, sectionMax);
@@ -51,14 +92,20 @@ const normalizeLayout = (payload, sourceLayouts = []) => {
 
   const nextWidgetId =
     sourceLayouts.reduce((max, layout) => {
-      const widgetMax = (layout?.sections || []).reduce((sectionMax, section) => {
-        const maxInSection = (section?.widgets || []).reduce(
-          (widgetMaxValue, widget) =>
-            Math.max(widgetMaxValue, Number(widget?.dashboard_widget_id || 0)),
-          0,
-        );
-        return Math.max(sectionMax, maxInSection);
-      }, 0);
+      const widgetMax = (layout?.sections || []).reduce(
+        (sectionMax, section) => {
+          const maxInSection = (section?.widgets || []).reduce(
+            (widgetMaxValue, widget) =>
+              Math.max(
+                widgetMaxValue,
+                Number(widget?.dashboard_widget_id || 0),
+              ),
+            0,
+          );
+          return Math.max(sectionMax, maxInSection);
+        },
+        0,
+      );
       return Math.max(max, widgetMax);
     }, 0) + 1;
 
@@ -87,7 +134,9 @@ const normalizeLayout = (payload, sourceLayouts = []) => {
 
     return {
       section_id: Number(section?.section_id || 0) || sectionCounter++,
-      section_name: String(section?.section_name || `Section ${sectionIndex + 1}`).trim(),
+      section_name: String(
+        section?.section_name || `Section ${sectionIndex + 1}`,
+      ).trim(),
       section_order: Number(section?.section_order || sectionIndex + 1),
       widgets: normalizedWidgets,
     };
@@ -98,7 +147,9 @@ const normalizeLayout = (payload, sourceLayouts = []) => {
     dashboard: {
       dashboard_id: Number(dashboard?.dashboard_id || 0),
       name: String(dashboard?.name || "").trim(),
-      role: String(dashboard?.role || "").trim().toUpperCase(),
+      role: String(dashboard?.role || "")
+        .trim()
+        .toUpperCase(),
     },
     sections: normalizedSections,
   };
@@ -141,7 +192,10 @@ const fetchRemoteLayouts = async () => {
 
 const mergeLayouts = (remoteLayouts, store) => {
   const mergedMap = new Map(
-    (remoteLayouts || []).map((layout) => [Number(layout?.dashboard?.dashboard_id), layout]),
+    (remoteLayouts || []).map((layout) => [
+      Number(layout?.dashboard?.dashboard_id),
+      layout,
+    ]),
   );
 
   Object.entries(store.updated || {}).forEach(([id, value]) => {
@@ -158,7 +212,8 @@ const mergeLayouts = (remoteLayouts, store) => {
 
   return [...mergedMap.values()].sort(
     (a, b) =>
-      Number(a?.dashboard?.dashboard_id || 0) - Number(b?.dashboard?.dashboard_id || 0),
+      Number(a?.dashboard?.dashboard_id || 0) -
+      Number(b?.dashboard?.dashboard_id || 0),
   );
 };
 
@@ -201,10 +256,13 @@ export const dashboardLayoutCrudService = {
     const normalized = normalizeLayout(payload, current);
     normalized.dashboard.dashboard_id = getMaxDashboardId(current) + 1;
 
+    const saved = await saveDashboardWidgets(normalized);
+    const savedNormalized = normalizeLayout(saved, current);
+
     const store = getStore();
-    store.created.push(normalized);
+    store.created.push(savedNormalized);
     saveStore(store);
-    return clone(normalized);
+    return clone(savedNormalized);
   },
 
   async update(id, payload) {
@@ -213,19 +271,24 @@ export const dashboardLayoutCrudService = {
     const normalized = normalizeLayout(payload, current);
     normalized.dashboard.dashboard_id = dashboardId;
 
+    const saved = await saveDashboardWidgets(normalized);
+    const savedNormalized = normalizeLayout(saved, current);
+
     const store = getStore();
     const createdIndex = store.created.findIndex(
       (item) => Number(item?.dashboard?.dashboard_id) === dashboardId,
     );
 
     if (createdIndex !== -1) {
-      store.created[createdIndex] = normalized;
+      store.created[createdIndex] = savedNormalized;
     } else {
-      store.updated[String(dashboardId)] = normalized;
-      store.deleted = store.deleted.filter((item) => Number(item) !== dashboardId);
+      store.updated[String(dashboardId)] = savedNormalized;
+      store.deleted = store.deleted.filter(
+        (item) => Number(item) !== dashboardId,
+      );
     }
     saveStore(store);
-    return clone(normalized);
+    return clone(savedNormalized);
   },
 
   async remove(id) {
@@ -242,7 +305,9 @@ export const dashboardLayoutCrudService = {
         store.deleted.push(dashboardId);
       }
     } else {
-      store.deleted = store.deleted.filter((item) => Number(item) !== dashboardId);
+      store.deleted = store.deleted.filter(
+        (item) => Number(item) !== dashboardId,
+      );
     }
     saveStore(store);
     return true;
@@ -258,4 +323,3 @@ export const dashboardLayoutCrudService = {
     return getMaxWidgetId(layouts) + 1;
   },
 };
-

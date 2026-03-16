@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Responsive, useContainerWidth } from "react-grid-layout";
 import { dashboardLayoutCrudService } from "./dashboardLayoutCrudService";
@@ -13,36 +13,41 @@ const PREVIEW_DRAG_HANDLE = ".preview-drag-handle";
 
 const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
 
-const createWidgetWithId = (widgetId) => ({
+const createWidgetWithId = (widgetId, clientKey) => ({
   dashboard_widget_id: Number(widgetId) || 0,
+  __clientKey: clientKey,
   widget_key: "",
   widget_name: "",
   widget_type: "Card",
   layout: { x: 0, y: 0, w: 2, h: 2 },
 });
 
-const createSectionWithWidgetId = (index = 0, widgetId = 0, overrides = {}) => ({
+const createSectionWithWidgetId = (index = 0, widgetId = 0, overrides = {}, clientKey) => ({
   section_id: 0,
   section_name: overrides.section_name || `Section ${index + 1}`,
   section_order:
     Number(overrides.section_order) > 0 ? Number(overrides.section_order) : index + 1,
-  widgets: [createWidgetWithId(widgetId)],
+  widgets: [createWidgetWithId(widgetId, clientKey)],
 });
 
-const createLayoutWithWidgetId = (widgetId = 0) => ({
+const createLayoutWithWidgetId = (widgetId = 0, clientKey) => ({
   status: true,
   dashboard: {
     dashboard_id: 0,
     name: "",
     role: "",
   },
-  sections: [createSectionWithWidgetId(0, widgetId)],
+  sections: [createSectionWithWidgetId(0, widgetId, {}, clientKey)],
 });
 
 const toSectionLayouts = (widgets = []) => {
   const lg = widgets.map((widget, index) => {
     const base = widget?.layout || {};
-    const i = String(widget?.dashboard_widget_id || `${widget?.widget_key}-${index}`);
+    const i = String(
+      widget?.__clientKey ||
+        widget?.dashboard_widget_id ||
+        `${widget?.widget_key}-${index}`,
+    );
     return {
       i,
       x: clamp(Number(base?.x || 0), 0, PREVIEW_COLS.lg - 1),
@@ -54,7 +59,11 @@ const toSectionLayouts = (widgets = []) => {
 
   const md = widgets.map((widget, index) => {
     const base = widget?.layout || {};
-    const i = String(widget?.dashboard_widget_id || `${widget?.widget_key}-${index}`);
+    const i = String(
+      widget?.__clientKey ||
+        widget?.dashboard_widget_id ||
+        `${widget?.widget_key}-${index}`,
+    );
     return {
       i,
       x: clamp(Number(base?.x || 0), 0, PREVIEW_COLS.md - 1),
@@ -66,7 +75,11 @@ const toSectionLayouts = (widgets = []) => {
 
   const sm = widgets.map((widget, index) => {
     const base = widget?.layout || {};
-    const i = String(widget?.dashboard_widget_id || `${widget?.widget_key}-${index}`);
+    const i = String(
+      widget?.__clientKey ||
+        widget?.dashboard_widget_id ||
+        `${widget?.widget_key}-${index}`,
+    );
     return {
       i,
       x: clamp(Number(base?.x || 0), 0, PREVIEW_COLS.sm - 1),
@@ -87,7 +100,7 @@ const widgetPreviewShellClasses = (widgetType) => {
   return "bg-gradient-to-br from-emerald-50 to-teal-50 border-emerald-200";
 };
 
-const SectionLayoutPreview = ({ section, onCommitLayout }) => {
+const SectionLayoutPreview = ({ section, onCommitLayout, onRemoveWidget }) => {
   const widgets = section?.widgets || [];
   const { width, containerRef, mounted } = useContainerWidth({
     measureBeforeMount: false,
@@ -123,7 +136,9 @@ const SectionLayoutPreview = ({ section, onCommitLayout }) => {
         >
           {widgets.map((widget, index) => {
             const key = String(
-              widget?.dashboard_widget_id || `${widget?.widget_key || "widget"}-${index}`,
+              widget?.__clientKey ||
+                widget?.dashboard_widget_id ||
+                `${widget?.widget_key || "widget"}-${index}`,
             );
             return (
               <div key={key} className="h-full">
@@ -136,13 +151,23 @@ const SectionLayoutPreview = ({ section, onCommitLayout }) => {
                     <div className="font-semibold text-gray-800 truncate">
                       {widget?.widget_name || "Untitled Widget"}
                     </div>
-                    <button
-                      type="button"
-                      className="preview-drag-handle border-0 bg-white rounded px-2 py-[2px] text-[10px] text-gray-600"
-                      title="Drag to move"
-                    >
-                      Drag
-                    </button>
+                    <div className="flex items-center gap-1">
+                      <button
+                        type="button"
+                        className="border-0 bg-white rounded px-1.5 py-[1px] text-[10px] text-red-600 hover:bg-red-50"
+                        title="Remove widget"
+                        onClick={() => onRemoveWidget?.(widget)}
+                      >
+                        ×
+                      </button>
+                      <button
+                        type="button"
+                        className="preview-drag-handle border-0 bg-white rounded px-2 py-[2px] text-[10px] text-gray-600"
+                        title="Drag to move"
+                      >
+                        Drag
+                      </button>
+                    </div>
                   </div>
                   <div className="text-[11px] text-gray-600 truncate mb-1">
                     key: {widget?.widget_key || "-"}
@@ -166,7 +191,7 @@ const SectionLayoutPreview = ({ section, onCommitLayout }) => {
   );
 };
 
-const DashboardLayoutPreviewPanel = ({ sections, onCommitLayout }) => {
+const DashboardLayoutPreviewPanel = ({ sections, onCommitLayout, onRemoveWidget }) => {
   const orderedSections = (sections || [])
     .map((section, originalIndex) => ({ section, originalIndex }))
     .sort(
@@ -206,6 +231,7 @@ const DashboardLayoutPreviewPanel = ({ sections, onCommitLayout }) => {
               <SectionLayoutPreview
                 section={section}
                 onCommitLayout={(layout) => onCommitLayout(originalIndex, layout)}
+                onRemoveWidget={(widget) => onRemoveWidget(originalIndex, widget)}
               />
             </div>
           ))}
@@ -227,10 +253,28 @@ const DashboardLayoutEditor = () => {
   const [nextWidgetId, setNextWidgetId] = useState(1);
   const [isPreviewMode, setIsPreviewMode] = useState(false);
   const [showFloatingSave, setShowFloatingSave] = useState(false);
+  const clientKeyRef = useRef(0);
   const [sectionDraft, setSectionDraft] = useState({
     section_name: "Section",
     section_order: 1,
   });
+
+  const makeClientKey = () => {
+    clientKeyRef.current += 1;
+    return `ck_${Date.now()}_${clientKeyRef.current}`;
+  };
+
+  const ensureClientKeys = (layout) => {
+    const next = { ...layout };
+    next.sections = (layout?.sections || []).map((section) => ({
+      ...section,
+      widgets: (section?.widgets || []).map((widget) => ({
+        ...widget,
+        __clientKey: widget?.__clientKey || makeClientKey(),
+      })),
+    }));
+    return next;
+  };
 
   const logSavedLayout = (mode, payload) => {
     const endpoint =
@@ -277,7 +321,7 @@ const DashboardLayoutEditor = () => {
       setNextWidgetId(suggestedWidgetId);
 
       if (isCreate) {
-        setForm(createLayoutWithWidgetId(suggestedWidgetId));
+        setForm(createLayoutWithWidgetId(suggestedWidgetId, makeClientKey()));
         setSectionDraft({ section_name: `Section ${1}`, section_order: 1 });
         setNextWidgetId((prev) => prev + 1);
         setLoading(false);
@@ -288,7 +332,7 @@ const DashboardLayoutEditor = () => {
       if (!found) {
         setError("Dashboard layout not found.");
       } else {
-        setForm(found);
+        setForm(ensureClientKeys(found));
         const nextOrder =
           Math.max(
             ...((found.sections || []).map((section) => Number(section?.section_order || 0))),
@@ -358,7 +402,12 @@ const DashboardLayoutEditor = () => {
       ...prev,
       sections: [
         ...prev.sections,
-        createSectionWithWidgetId(prev.sections.length, allocatedWidgetId, options),
+        createSectionWithWidgetId(
+          prev.sections.length,
+          allocatedWidgetId,
+          options,
+          makeClientKey(),
+        ),
       ],
     }));
     setSectionDraft((prev) => ({
@@ -370,7 +419,7 @@ const DashboardLayoutEditor = () => {
   const removeSection = (sectionIndex) => {
     setForm((prev) => {
       const nextSections = prev.sections.filter((_, idx) => idx !== sectionIndex);
-      const fallbackSection = createSectionWithWidgetId(0, nextWidgetId);
+      const fallbackSection = createSectionWithWidgetId(0, nextWidgetId, {}, makeClientKey());
       return {
         ...prev,
         sections: nextSections.length ? nextSections : [fallbackSection],
@@ -405,7 +454,7 @@ const DashboardLayoutEditor = () => {
         ...nextSections[sectionIndex],
         widgets: [
           ...(nextSections[sectionIndex].widgets || []),
-          createWidgetWithId(allocatedWidgetId),
+          createWidgetWithId(allocatedWidgetId, makeClientKey()),
         ],
       };
       return { ...prev, sections: nextSections };
@@ -425,7 +474,9 @@ const DashboardLayoutEditor = () => {
       const nextWidgets = existing.filter((_, idx) => idx !== widgetIndex);
       nextSections[sectionIndex] = {
         ...nextSections[sectionIndex],
-        widgets: nextWidgets.length ? nextWidgets : [createWidgetWithId(nextWidgetId)],
+        widgets: nextWidgets.length
+          ? nextWidgets
+          : [createWidgetWithId(nextWidgetId, makeClientKey())],
       };
       return { ...prev, sections: nextSections };
     });
@@ -468,7 +519,9 @@ const DashboardLayoutEditor = () => {
 
       const nextWidgets = (section.widgets || []).map((widget, widgetIndex) => {
         const key = String(
-          widget?.dashboard_widget_id || `${widget?.widget_key || "widget"}-${widgetIndex}`,
+          widget?.__clientKey ||
+            widget?.dashboard_widget_id ||
+            `${widget?.widget_key || "widget"}-${widgetIndex}`,
         );
         const nextItem = layoutMap.get(key);
         if (!nextItem) return widget;
@@ -485,6 +538,30 @@ const DashboardLayoutEditor = () => {
       });
 
       nextSections[sectionIndex] = { ...section, widgets: nextWidgets };
+      return { ...prev, sections: nextSections };
+    });
+  };
+
+  const removeWidgetFromPreview = (sectionIndex, widget) => {
+    const keyToRemove =
+      widget?.__clientKey || widget?.dashboard_widget_id || widget?.widget_key;
+    if (!keyToRemove) return;
+
+    setForm((prev) => {
+      const nextSections = [...prev.sections];
+      const section = nextSections[sectionIndex];
+      if (!section) return prev;
+
+      const nextWidgets = (section.widgets || []).filter((item) => {
+        const key =
+          item?.__clientKey || item?.dashboard_widget_id || item?.widget_key;
+        return key !== keyToRemove;
+      });
+
+      nextSections[sectionIndex] = {
+        ...section,
+        widgets: nextWidgets.length ? nextWidgets : [],
+      };
       return { ...prev, sections: nextSections };
     });
   };
@@ -615,6 +692,7 @@ const DashboardLayoutEditor = () => {
             <DashboardLayoutPreviewPanel
               sections={form.sections || []}
               onCommitLayout={applySectionLayout}
+              onRemoveWidget={removeWidgetFromPreview}
             />
           </div>
         </div>
@@ -939,7 +1017,7 @@ const DashboardLayoutEditor = () => {
             </div>
           </div>
         </div>
-        )}
+      )}
       {showFloatingSave && (
         <div className="fixed bottom-5 right-5 z-50 animate-[savePop_.25s_ease-out]">
           <button
