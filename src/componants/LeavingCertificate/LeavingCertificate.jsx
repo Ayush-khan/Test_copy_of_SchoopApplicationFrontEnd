@@ -268,7 +268,7 @@ const LeavingCertificate = () => {
         `${API_URL}/api/get_pendingbooksreturnforstudent?student_id=${selectedStudentId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
 
       if (response.data && response.data.status === 200) {
@@ -328,7 +328,7 @@ const LeavingCertificate = () => {
         {
           headers: { Authorization: `Bearer ${token}` },
           params,
-        }
+        },
       );
 
       setStudentNameWithClassId(response?.data?.data || []);
@@ -376,7 +376,7 @@ const LeavingCertificate = () => {
         key: `${cls.class_id}-${cls.section_id}`,
         classNameforSearchUsingUdisepen: `${cls?.get_class?.name} ${cls.name}`,
       })),
-    [classesforForm]
+    [classesforForm],
   );
 
   const studentOptions = useMemo(
@@ -388,7 +388,7 @@ const LeavingCertificate = () => {
             stu?.last_name || ""
           }`.trim() || "",
       })),
-    [studentNameWithClassId]
+    [studentNameWithClassId],
   );
 
   const handleSearch = async () => {
@@ -455,7 +455,7 @@ const LeavingCertificate = () => {
         `${API_URL}/api/get_srnoleavingcertificatedata/${selectedStudentId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
 
       // Check if data was received and update the form state
@@ -465,7 +465,7 @@ const LeavingCertificate = () => {
         setParentInformation(fetchedData); // Assuming response data contains parent information
         // Extract all subject names for initial selected state
         const allSubjectNames = (fetchedData.classsubject || []).map(
-          (subject) => subject.name
+          (subject) => subject.name,
         );
 
         console.log("fetchedData", fetchedData);
@@ -521,7 +521,7 @@ const LeavingCertificate = () => {
       } else {
         if (response.data && response.data.status === 403) {
           toast.error(
-            "Leaving Certificate Already Generated. Please go to manage to download the Leaving Certificate."
+            "Leaving Certificate Already Generated. Please go to manage to download the Leaving Certificate.",
           );
           console.log("reppp---->", response.data);
         } else if (response.data && response.data.status === 409) {
@@ -530,7 +530,7 @@ const LeavingCertificate = () => {
         } else if (response.data && response.data.status == 422) {
           toast.error(
             response.data.message ||
-              "Date of birth not available for this student."
+              "Date of birth not available for this student.",
           );
         } else {
           // Show a generic error message if the error is not a 403
@@ -551,7 +551,7 @@ const LeavingCertificate = () => {
       "grn_no",
       "date",
       "first_name",
-      "stud_id_no",
+      // "stud_id_no",
       "promoted_to",
       "last_exam",
       "father_name",
@@ -617,15 +617,19 @@ const LeavingCertificate = () => {
       if (!formData.attendance) {
         newErrors.attendance = "This field is required";
       }
+
+      if (classLevel > 9 && !formData.udise_pen_no) {
+        newErrors.udise_pen_no = "This field is required";
+      }
     }
 
     // Specific validation for class > 427
     // if (classIdForSearch > 427 && !formData.udise_pen_no) {
     //   newErrors.udise_pen_no = "This field is required";
     // }
-    if (classLevel > 9 && !formData.udise_pen_no) {
-      newErrors.udise_pen_no = "This field is required";
-    }
+    // if (classLevel > 9 && !formData.udise_pen_no) {
+    //   newErrors.udise_pen_no = "This field is required";
+    // }
     // Field-specific validations
     if (formData.first_name && /^\d/.test(formData.first_name)) {
       newErrors.first_name = "Student Name should not start with a number";
@@ -869,7 +873,7 @@ const LeavingCertificate = () => {
         `${API_URL}/api/get_srnoleavingcertificateByAcademicyr/${selectedStudentId}/${selectedAcademicYear}`,
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
 
       if (response?.data?.data) {
@@ -887,7 +891,7 @@ const LeavingCertificate = () => {
           subjectsFor: fetchedData.classsubject || [],
           academicStudent: fetchedData.academicStudent || [],
           selectedSubjects: (fetchedData.classsubject || []).map(
-            (subject) => subject.name
+            (subject) => subject.name,
           ),
           // subjects: allSubjectNames,
 
@@ -1014,7 +1018,7 @@ const LeavingCertificate = () => {
         {
           headers: { Authorization: `Bearer ${token}` },
           responseType: "blob", // For PDF response
-        }
+        },
       );
 
       if (response.status === 200) {
@@ -1163,7 +1167,7 @@ const LeavingCertificate = () => {
     } else {
       // Remove the unselected activity
       updatedActivities = selectedActivities.filter(
-        (activity) => activity !== value
+        (activity) => activity !== value,
       );
       setSelectedActivities(updatedActivities);
     }
@@ -1500,12 +1504,15 @@ const LeavingCertificate = () => {
                           className="input-field block border w-full border-1 border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
                         />
                       </div>
+
+                      {/* {sortNameCookie === "HSCS" && ( */}
                       <div>
                         <label
                           htmlFor="stud_id_no"
                           className="block font-bold text-xs mb-2"
                         >
-                          STUDENT ID NO <span className="text-red-500">*</span>
+                          STUDENT ID NO
+                          {/* <span className="text-red-500">*</span> */}
                         </label>
                         <input
                           type="text"
@@ -1523,11 +1530,12 @@ const LeavingCertificate = () => {
                           </span>
                         )}
                       </div>
+                      {/* )} */}
 
                       {/* {classIdForSearch > 427 && ( */}
                       {parseInt(
                         classIdForSearch?.match(/\d+/)?.[0] || "0",
-                        10
+                        10,
                       ) > 9 && (
                         <div className="mt-2">
                           <label
@@ -1556,6 +1564,7 @@ const LeavingCertificate = () => {
                           )}
                         </div>
                       )}
+
                       <div>
                         <label
                           htmlFor="stu_aadhaar_no"
@@ -1747,7 +1756,7 @@ const LeavingCertificate = () => {
                                     name="subjects"
                                     value={subject.name}
                                     checked={formData?.selectedSubjects?.includes(
-                                      subject.name
+                                      subject.name,
                                     )}
                                     onChange={(e) =>
                                       handleSubjectSelection(e, subject.name)
@@ -1774,12 +1783,12 @@ const LeavingCertificate = () => {
                                   name="subjects"
                                   value="Basic Mathematics"
                                   checked={formData?.selectedSubjects?.includes(
-                                    "Basic Mathematics"
+                                    "Basic Mathematics",
                                   )}
                                   onChange={(e) =>
                                     handleSubjectSelection(
                                       e,
-                                      "Basic Mathematics"
+                                      "Basic Mathematics",
                                     )
                                   }
                                   className="form-checkbox h-4 w-4 text-blue-600"
@@ -1885,8 +1894,8 @@ const LeavingCertificate = () => {
           sortNameCookie === "HSCS"
             ? "relative -top-6"
             : sortNameCookie === "SACS"
-            ? "relative top-0"
-            : "relative top-0"
+              ? "relative top-0"
+              : "relative top-0"
         }`}
                       >
                         {/* <label

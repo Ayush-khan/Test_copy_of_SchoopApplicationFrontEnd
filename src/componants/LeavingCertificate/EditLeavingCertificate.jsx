@@ -21,7 +21,7 @@ const EditLeavingCertificate = () => {
   const location = useLocation();
   const { student } = location.state || {};
   const [selectedClassForSubject, setSelectedClassForSubject] = useState(
-    location?.state?.classname || ""
+    location?.state?.classname || "",
   );
 
   const srNo = location.state?.sr_no || location.state?.student?.sr_no || null;
@@ -86,7 +86,7 @@ const EditLeavingCertificate = () => {
   });
   const classLevel = parseInt(
     formData?.classname?.match(/\d+/)?.[0] || "0",
-    10
+    10,
   );
   // Fetch initial data on component load
   useEffect(() => {
@@ -101,7 +101,7 @@ const EditLeavingCertificate = () => {
           `${API_URL}/api/get_getleavingcertificatedata/${student?.sr_no}`,
           {
             headers: { Authorization: `Bearer ${token}` },
-          }
+          },
         );
 
         if (response.data.success && response.data.data) {
@@ -324,6 +324,90 @@ const EditLeavingCertificate = () => {
 
   const today = new Date().toISOString().split("T")[0];
 
+  // const validate = () => {
+  //   const newErrors = {};
+
+  //   // Required fields validation
+  //   const requiredFields = [
+  //     "grn_no",
+  //     "issue_date",
+  //     "first_name",
+
+  //     "student_id_no",
+  //     "promoted_to",
+  //     "last_exam",
+  //     "father_name",
+  //     "mother_name",
+  //     "birth_place",
+  //     "state",
+  //     "mother_tongue",
+  //     "dob",
+  //     "dob_words",
+  //     "nationality",
+  //     "prev_school_class",
+  //     "date_of_admission",
+  //     "admission_class",
+  //     "reason_leaving",
+  //     "application_date",
+  //     "leaving_date",
+  //     "standard_studying",
+  //     "dob_proof",
+  //     "aadhar_no",
+  //     "attendance",
+  //     "fee_month",
+  //     "remark",
+  //     "conduct",
+  //   ];
+
+  //   requiredFields.forEach((field) => {
+  //     if (!formData[field]) {
+  //       newErrors[field] = "This field is required";
+  //     }
+  //   });
+  //   if (formData.class_id > 109) {
+  //     if (!formData.udise_pen_no) {
+  //       newErrors.udise_pen_no = "This field is required";
+  //     }
+  //   }
+  //   // Additional validations for specific fields
+  //   if (formData.first_name && /^\d/.test(formData.first_name)) {
+  //     newErrors.first_name = "Student Name should not start with a number";
+  //   }
+  //   if (formData.father_name && /^\d/.test(formData.father_name)) {
+  //     newErrors.father_name = "Father's Name should not start with a number";
+  //   }
+  //   if (formData.mother_name && /^\d/.test(formData.mother_name)) {
+  //     newErrors.mother_name = "Mother's Name should not start with a number";
+  //   }
+
+  //   // Checkbox validation
+  //   if (
+  //     !formData.selectedActivities ||
+  //     formData.selectedActivities.length === 0
+  //   ) {
+  //     newErrors.activities =
+  //       "Please select at least one extra-curricular activity";
+  //   }
+  //   if (!formData.selectedSubjects || formData.selectedSubjects.length === 0) {
+  //     newErrors.selectedSubjects = "Please select at least one subject";
+  //   }
+
+  //   // Dropdown-specific validations
+  //   if (!formData.dob_proof) {
+  //     newErrors.dob_proof = "This field is required";
+  //   }
+  //   if (!formData.part_of) {
+  //     newErrors.part_of = "This field is required";
+  //   }
+  //   if (!formData.academic_yr) {
+  //     newErrors.academic_yr = "This field is required";
+  //   }
+
+  //   setErrors(newErrors);
+
+  //   // Return true if no errors, false if errors exist
+  //   return Object.keys(newErrors).length === 0;
+  // };
   const validate = () => {
     const newErrors = {};
 
@@ -331,7 +415,7 @@ const EditLeavingCertificate = () => {
       "grn_no",
       "issue_date",
       "first_name",
-      "student_id_no",
+      // "student_id_no",
       "promoted_to",
       "last_exam",
       "father_name",
@@ -549,7 +633,7 @@ const EditLeavingCertificate = () => {
         `${API_URL}/api/get_srnoleavingcertificateByAcademicyr/${student?.stud_id}/${selectedAcademicYear}`,
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
 
       if (response?.data?.data) {
@@ -567,7 +651,7 @@ const EditLeavingCertificate = () => {
           subjectsFor: fetchedData.classsubject || [],
           academicStudent: fetchedData.academicStudent || [],
           selectedSubjects: (fetchedData.classsubject || []).map(
-            (subject) => subject.name
+            (subject) => subject.name,
           ),
           // subjects: allSubjectNames,
 
@@ -693,7 +777,7 @@ const EditLeavingCertificate = () => {
         {
           headers: { Authorization: `Bearer ${token}` },
           responseType: "blob", // For PDF response
-        }
+        },
       );
 
       if (response.status === 200) {
@@ -1022,7 +1106,8 @@ const EditLeavingCertificate = () => {
                   htmlFor="student_id_no"
                   className="block font-bold text-xs mb-2"
                 >
-                  STUDENT ID NO <span className="text-red-500">*</span>
+                  STUDENT ID NO
+                  {/* <span className="text-red-500">*</span> */}
                 </label>
                 <input
                   type="text"
@@ -1041,7 +1126,7 @@ const EditLeavingCertificate = () => {
                 )}
               </div>
 
-              {formData?.class_id > 109 && (
+              {/* {formData?.class_id > 109 && (
                 <div className="mt-2">
                   <label
                     htmlFor="studentAadharNumber"
@@ -1067,7 +1152,36 @@ const EditLeavingCertificate = () => {
                     </span>
                   )}
                 </div>
+              )} */}
+
+              {formData?.class_id > 109 && (
+                <div className="mt-2">
+                  <label
+                    htmlFor="Udise_no"
+                    className="block font-bold text-xs mb-0.5"
+                  >
+                    Udise Pen No. <span className="text-red-500">*</span>
+                  </label>
+
+                  <input
+                    type="text"
+                    id="Udise_no"
+                    name="udise_pen_no"
+                    maxLength={14}
+                    value={formData.udise_pen_no}
+                    readOnly
+                    className="input-field block w-full border border-gray-900 rounded-md py-1 px-3 bg-gray-200 shadow-inner"
+                    onChange={handleChange}
+                  />
+
+                  {errors.udise_pen_no && (
+                    <span className="text-red-500 text-xs ml-1 h-1">
+                      {errors.udise_pen_no}
+                    </span>
+                  )}
+                </div>
               )}
+
               <div>
                 <label
                   htmlFor="aadhar_no"
@@ -1250,7 +1364,7 @@ const EditLeavingCertificate = () => {
                             name="subjects"
                             value={subject.name}
                             checked={formData?.selectedSubjects?.includes(
-                              subject.name
+                              subject.name,
                             )}
                             onChange={(e) =>
                               handleSubjectSelection(e, subject.name)
@@ -1275,7 +1389,7 @@ const EditLeavingCertificate = () => {
                           name="subjects"
                           value="Basic Mathematics"
                           checked={formData?.selectedSubjects?.includes(
-                            "Basic Mathematics"
+                            "Basic Mathematics",
                           )}
                           onChange={(e) =>
                             handleSubjectSelection(e, "Basic Mathematics")
@@ -1316,8 +1430,8 @@ const EditLeavingCertificate = () => {
           sortNameCookie === "HSCS"
             ? "relative -top-6"
             : sortNameCookie === "SACS"
-            ? "relative top-0"
-            : "relative top-0"
+              ? "relative top-0"
+              : "relative top-0"
         }`}
               >
                 {" "}
