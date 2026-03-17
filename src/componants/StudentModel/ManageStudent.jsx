@@ -18,6 +18,7 @@ function ManageSubjectList() {
   // const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [shouldCheckReport, setShouldCheckReport] = useState(false);
 
   const [classes, setClasses] = useState([]);
   const [studentNameWithClassId, setStudentNameWithClassId] = useState([]);
@@ -71,9 +72,13 @@ function ManageSubjectList() {
   const [loadingClasses, setLoadingClasses] = useState(false);
   const [loadingStudents, setLoadingStudents] = useState(false);
   const [isHpcClass, setIsHpcClass] = useState(false);
+  const [generated, setGenerated] = useState(null);
 
   const [classTeacher, setClassTeacher] = useState([]);
   const [isClassTeacher, setIsClassTeacher] = useState("");
+  const [publishStatus, setPublishStatus] = useState(null);
+
+  const [academicYr, setAcademicYr] = useState("");
 
   const location = useLocation();
   const section_id = location.state?.section_id || null;
@@ -118,7 +123,7 @@ function ManageSubjectList() {
   useEffect(() => {
     if (location.state?.section_id) {
       const matchingOption = classOptions.find(
-        (opt) => opt.value === location.state.section_id
+        (opt) => opt.value === location.state.section_id,
       );
 
       if (matchingOption) {
@@ -143,7 +148,7 @@ function ManageSubjectList() {
             .join(" "),
         }))
         .filter((option) => option.label), // Remove items with empty labels
-    [studentNameWithClassId]
+    [studentNameWithClassId],
   );
 
   const fetchClassTeacherData = async () => {
@@ -155,7 +160,7 @@ function ManageSubjectList() {
         `${API_URL}/api/get_classes_of_classteacher?teacher_id=${roleIdValue}`,
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
 
       const classData = response.data.data;
@@ -167,7 +172,7 @@ function ManageSubjectList() {
 
       // Check if the teacher is a class teacher
       const isClassTeacherFlag = classData.some(
-        (cls) => cls.is_class_teacher === 1
+        (cls) => cls.is_class_teacher === 1,
       )
         ? 1
         : 0; // store as 1 or 0
@@ -235,7 +240,7 @@ function ManageSubjectList() {
         {
           headers: { Authorization: `Bearer ${token}` },
           params: section_id ? { section_id } : {},
-        }
+        },
       );
       setStudentNameWithClassId(response?.data?.data || []);
     } catch (error) {
@@ -245,23 +250,10 @@ function ManageSubjectList() {
     }
   };
 
-  // const handleClassSelect = (selectedOption) => {
-  //   // console.log("", setNameError());
-  //   setNameError("");
-  //   setSelectedClass(selectedOption);
-  //   setSelectedStudent(null);
-  //   setSelectedStudentId(null);
-
-  //   const sectionId = selectedOption ? selectedOption.value : null;
-  //   setclassIdForManage(sectionId);
-  //   setSectionIdForStudentList(sectionId);
-  //   fetchStudentNameWithClassId(sectionId);
-  // };
-
   const handleClassSelect = (selectedOption) => {
+    // console.log("", setNameError());
     setNameError("");
     setSelectedClass(selectedOption);
-    console.log("selected class", selectedOption);
     setSelectedStudent(null);
     setSelectedStudentId(null);
 
@@ -270,6 +262,20 @@ function ManageSubjectList() {
     setSectionIdForStudentList(sectionId);
     fetchStudentNameWithClassId(sectionId);
   };
+
+  // Correct working before add bunch downloading
+  // const handleClassSelect = (selectedOption) => {
+  //   setNameError("");
+  //   setSelectedClass(selectedOption);
+  //   console.log("selected class", selectedOption);
+  //   setSelectedStudent(null);
+  //   setSelectedStudentId(null);
+  //   const sectionId = selectedOption ? selectedOption.value : null;
+  //   console.log("section...", sectionId);
+  //   setclassIdForManage(sectionId);
+  //   setSectionIdForStudentList(sectionId);
+  //   fetchStudentNameWithClassId(sectionId);
+  // };
 
   const handleStudentSelect = (selectedOption) => {
     setNameError(""); // Reset student error on selection
@@ -447,9 +453,11 @@ function ManageSubjectList() {
 
       const roleId = sessionResponse?.data?.user?.role_id;
       const regId = sessionResponse?.data?.user?.reg_id;
+      const academic = sessionResponse?.data?.custom_claims?.academic_year;
 
       setRoleId(roleId); // optional for global use
       setRoleIdValue(regId); // optional for global use
+      setAcademicYr(academic);
 
       return { roleId, roleIdValue: regId }; // ✅ return both
     } catch (error) {
@@ -458,6 +466,326 @@ function ManageSubjectList() {
     }
   };
 
+  const fetchStatus = async (classId, sectionId) => {
+    if (!classId || !sectionId) return; // 🛡️ safety guard
+
+    setLoading(true);
+    try {
+      const token = localStorage.getItem("authToken");
+
+      const response = await axios.get(
+        `${API_URL}/api/check_publish_status_of_report_card`,
+        {
+          params: {
+            class_id: classId,
+            section_id: sectionId,
+          },
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      console.log("check status", response.data.data);
+      setPublishStatus(response.data.data);
+    } catch (error) {
+      console.error("Error fetching report card status:", error);
+      setPublishStatus("error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (selectedClass?.class_id && selectedClass?.section_id) {
+      fetchStatus(selectedClass.class_id, selectedClass.section_id);
+      checkReportCardStatus(selectedClass.class_id, selectedClass.section_id);
+    }
+  }, [selectedClass]);
+
+  // const handleDownloadReport = async (studCount) => {
+  //   setLoading(true);
+  //   try {
+  //     const token = localStorage.getItem("authToken");
+
+  //     const response = await axios.get(`${API_URL}/api/pdf_download_all`, {
+  //       params: {
+  //         class_id: selectedClassIdHPC,
+  //         section_id: selectedSectionIdHPC,
+  //         academic_yr: academicYr,
+  //         stud_count: studCount,
+  //       },
+  //       headers: {
+  //         Authorization: `Bearer ${token}`,
+  //       },
+  //     });
+
+  //     if (response.status === 200) {
+  //       toast.success(
+  //         `Report Card PDF (Upto ${studCount}) downloaded successfully.`
+  //       );
+  //       console.log("download pdf");
+  //     }
+  //   } catch (error) {
+  //     console.error("Error downloading report card:", error);
+  //     toast.error("Failed to download report card");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
+  // const checkReportCardStatus = async () => {
+  //   try {
+  //     const token = localStorage.getItem("authToken");
+
+  //     const response = await axios.get(
+  //       `${API_URL}/api/get_students_reports_card`,
+  //       {
+  //         params: {
+  //           class_id: selectedClassIdHPC,
+  //           section_id: selectedSectionIdHPC,
+  //           academic_yr: academicYr,
+  //         },
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //       }
+  //     );
+
+  //     if (response.status === 200) {
+  //       const data = response.data;
+
+  //       if (data.status === "pending") {
+  //         toast.warning("Report Card is downloading. Please wait...");
+  //       } else if (data.status === "completed") {
+  //         toast.success(`Report Card is ready! Download here: ${data.url}`);
+  //         console.log("Report Card URL:", data.url);
+  //         // You can also trigger a direct download if needed
+  //         // window.open(data.url, "_blank");
+  //       } else {
+  //         toast.error("Unknown report card status");
+  //       }
+  //     } else {
+  //       toast.error("Failed to fetch student report cards");
+  //     }
+  //   } catch (error) {
+  //     console.error("Error checking report card status:", error);
+  //     toast.error("Failed to check report card status");
+  //   }
+  // };
+
+  // const checkReportCardStatus = async () => {
+  //   console.log("🔥 checkReportCardStatus FUNCTION CALLED");
+
+  //   try {
+  //     const token = localStorage.getItem("authToken");
+  //     console.log("🔑 Token:", token);
+
+  //     console.log("📤 API PARAMS:", {
+  //       class_id: selectedClassIdHPC,
+  //       section_id: selectedSectionIdHPC,
+  //       academic_yr: academicYr,
+  //     });
+
+  //     const response = await axios.get(
+  //       `${API_URL}/api/get_students_reports_card`,
+  //       {
+  //         params: {
+  //           class_id: selectedClassIdHPC,
+  //           section_id: selectedSectionIdHPC,
+  //           academic_yr: academicYr,
+  //         },
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //       }
+  //     );
+
+  //     console.log("✅ API RESPONSE RECEIVED", response);
+
+  //     if (response.status === 200) {
+  //       const data = response.data.data;
+
+  //       if (data.status === "pending") {
+  //         toast.warning("Report Card is downloading. Please wait...");
+  //       } else if (data.status === "completed") {
+  //         toast.success(`Report Card is ready! Download here: ${data.url}`);
+  //       }
+  //     }
+  //   } catch (error) {
+  //     console.error("❌ ERROR in checkReportCardStatus:", error);
+  //   }
+  // };
+
+  const checkReportCardStatus = async (classId, sectionId) => {
+    if (!classId || !sectionId) return;
+
+    setLoading(true);
+    try {
+      const token = localStorage.getItem("authToken");
+
+      const response = await axios.get(
+        `${API_URL}/api/get_students_reports_card`,
+        {
+          params: {
+            class_id: classId,
+            section_id: sectionId,
+            academic_yr: academicYr,
+          },
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      if (response.status === 200) {
+        const data = response.data.data;
+
+        if (data.status === "pending") {
+          // toast.warning("Report Card is downloading. Please wait...");
+        } else if (data.status === "generated") {
+          setGenerated(data.url);
+          console.log("urlllllllllllllllllllllllllllll", data.url);
+          // toast.success("Report Card is ready! Click download.");
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching report card status:", error);
+      setPublishStatus("error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDownloadReport = async () => {
+    setLoading(true);
+    try {
+      const token = localStorage.getItem("authToken");
+
+      // First API call
+      const response = await axios.get(`${API_URL}/api/pdf_download_all`, {
+        params: {
+          class_id: selectedClassIdHPC,
+          section_id: selectedSectionIdHPC,
+          academic_yr: academicYr,
+        },
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.status === 200) {
+        toast.success(`Report Card generation started.`);
+        console.log("First PDF generation API successful");
+
+        // Second API call after first succeeds
+        const secondResponse = await axios.get(
+          `${API_URL}/api/get_students_reports_card`,
+          {
+            params: {
+              class_id: selectedClassIdHPC,
+              section_id: selectedSectionIdHPC,
+              academic_yr: academicYr,
+            },
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          },
+        );
+        // console.log("******", secondResponse.data.data.status);
+
+        if (secondResponse.status === 200) {
+          const dataStatus = secondResponse.data.data.status; // check the internal status
+          if (dataStatus === "pending") {
+            toast.warning("Report Card is downloading. Please wait...");
+          } else if (dataStatus === "completed") {
+            toast.success("Student report cards fetched successfully!");
+            console.log("Second API response:", secondResponse.data);
+            // Handle the fetched data here if needed
+          } else {
+            toast.error("Unknown report card status");
+          }
+        } else {
+          toast.error("Failed to fetch student report cards");
+        }
+      }
+    } catch (error) {
+      console.error("Error downloading report card:", error);
+      toast.error("Failed to download report card");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const forceDownload = async (url) => {
+    try {
+      const response = await fetch(url);
+      const blob = await response.blob();
+
+      const blobUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+
+      link.href = blobUrl;
+      link.download = url.split("/").pop(); // auto filename
+      document.body.appendChild(link);
+      link.click();
+
+      link.remove();
+      window.URL.revokeObjectURL(blobUrl);
+    } catch (err) {
+      console.error("Download failed:", err);
+    }
+  };
+
+  // const readyReportCard = async () => {
+  //   try {
+  //     const response = await fetch(generated);
+  //     const blob = await response.blob();
+
+  //     const blobUrl = window.URL.createObjectURL(blob);
+  //     const a = document.createElement("a");
+
+  //     a.href = blobUrl;
+  //     a.download = generated.split("/").pop();
+
+  //     document.body.appendChild(a);
+  //     a.click();
+
+  //     document.body.removeChild(a);
+  //     window.URL.revokeObjectURL(blobUrl);
+  //   } catch (error) {
+  //     console.error("Download failed:", error);
+  //     toast.error("Failed to download report card");
+  //   }
+  // };
+
+  // const handleDownloadReport = async () => {
+  //   setLoading(true);
+  //   try {
+  //     const token = localStorage.getItem("authToken");
+
+  //     const response = await axios.get(`${API_URL}/api/pdf_download_all`, {
+  //       params: {
+  //         class_id: selectedClassIdHPC,
+  //         section_id: selectedSectionIdHPC,
+  //         academic_yr: academicYr,
+  //       },
+  //       headers: {
+  //         Authorization: `Bearer ${token}`,
+  //       },
+  //     });
+
+  //     if (response.status === 200) {
+  //       toast.success(`Report Card generation started.`);
+  //       console.log("download pdf");
+  //     }
+  //   } catch (error) {
+  //     console.error("Error downloading report card:", error);
+  //     toast.error("Failed to download report card");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
   const handlePageClick = (data) => {
     setCurrentPage(data.selected);
   };
@@ -481,14 +809,14 @@ function ManageSubjectList() {
     setCurrentSection({ classToDelete });
     // console.log("the currecne t section", currentSection);
     setCurrestSubjectNameForDelete(
-      currentSection?.CurrentSection?.student_name
+      currentSection?.CurrentSection?.student_name,
     );
   };
 
   const handleActiveAndInactive = (subjectIsPass) => {
     // console.log("handleActiveAndInactive-->", subjectIsPass.student_id);
     const studentToActiveOrDeactive = subjects.find(
-      (cls) => cls.student_id === subjectIsPass.student_id
+      (cls) => cls.student_id === subjectIsPass.student_id,
     );
     setCurrentStudentDataForActivate({ studentToActiveOrDeactive });
     // console.log("studentToActiveOrDeactive", studentToActiveOrDeactive);
@@ -516,7 +844,7 @@ function ManageSubjectList() {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       handleSearch();
@@ -549,8 +877,17 @@ function ManageSubjectList() {
   };
 
   const handleCertificateView = (subjectIsPass) => {
-    navigate("/comingSoon");
-    // console.log("handleCertificateView-->", subjectIsPass);
+    console.log("handleCertificateView-->", subjectIsPass);
+
+    // navigate("/StudentSearchUsingGRN", {
+    //   state: { studentData: subjectIsPass },
+    // });
+    navigate("/show_report_card", {
+      state: {
+        student: subjectIsPass,
+        academicYr: academicYr,
+      },
+    });
   };
 
   const handleResetPassword = (subjectIsPass) => {
@@ -600,6 +937,61 @@ function ManageSubjectList() {
 
   const [errorMessage, setErrorMessage] = useState(""); // State to store error message
 
+  // const handleSubmitResetPassword = async () => {
+  //   if (isSubmitting) return; // Prevent re-submitting
+  //   setIsSubmitting(true);
+  //   try {
+  //     const token = localStorage.getItem("authToken");
+
+  //     if (!token) {
+  //       toast.error("Authentication token missing");
+  //       setErrorMessage("Authentication token missing"); // Set error below the field
+  //       return;
+  //     }
+
+  //     // API call to reset the password with correct header placement
+  //     const response = await axios.put(
+  //       `${API_URL}/api/resetPasssword/${userIdset}`,
+  //       {}, // Pass empty body if there's no data to send
+  //       {
+  //         headers: { Authorization: `Bearer ${token}` },
+  //       }
+  //     );
+  //     if (response?.data?.Status === 404) {
+  //       // console.log("Response is fail");
+  //       // toast.error("User not found");
+  //       setErrorMessage("Invalid user ID");
+  //       return;
+  //     }
+  //     toast.success(
+  //       response?.data?.Message || `Your password has been reset successfully.`
+  //     );
+  //     setShowEditModal(false); // Close modal after success
+  //     setErrorMessage(""); // Clear error message on success
+  //   } catch (error) {
+  //     // console.error("Error resetting password:", error);
+
+  //     // Capture server error message and set it below the field
+  //     if (
+  //       error.response &&
+  //       error?.response?.data &&
+  //       error?.response?.data?.Message
+  //     ) {
+  //       setErrorMessage(error?.response?.data?.Message);
+  //       toast.error(error?.response?.data?.Message); // Show toast with the error
+  //     } else {
+  //       setErrorMessage("Failed to update password. Please try again.");
+  //       toast.error("Failed to update password. Please try again.");
+  //     }
+  //   } finally {
+  //     setIsSubmitting(false); // Re-enable the button after the operation
+  //   }
+  // };
+
+  // Handle input change for password
+
+  // Handle input change for User ID
+
   const handleSubmitResetPassword = async () => {
     if (isSubmitting) return; // Prevent re-submitting
     setIsSubmitting(true);
@@ -608,53 +1000,46 @@ function ManageSubjectList() {
 
       if (!token) {
         toast.error("Authentication token missing");
-        setErrorMessage("Authentication token missing"); // Set error below the field
+        setErrorMessage("Authentication token missing");
         return;
       }
 
-      // API call to reset the password with correct header placement
       const response = await axios.put(
         `${API_URL}/api/resetPasssword/${userIdset}`,
-        {}, // Pass empty body if there's no data to send
+        {},
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
-      if (response?.data?.Status === 404) {
-        // console.log("Response is fail");
-        // toast.error("User not found");
-        setErrorMessage("Invalid user ID");
+      if (response?.data?.status === 400) {
+        toast.error("You are not authorised to change password for this user");
+        return;
+      }
+      if (response?.data?.status === 404) {
+        setErrorMessage("Invalid User ID");
         return;
       }
       toast.success(
-        `Password for user id "${userIdset}" is reset to arnolds successfully!`
+        response?.data?.Message || `Your password has been reset successfully.`,
       );
-      setShowEditModal(false); // Close modal after success
-      setErrorMessage(""); // Clear error message on success
+      setShowEditModal(false);
+      setErrorMessage("");
     } catch (error) {
-      // console.error("Error resetting password:", error);
-
-      // Capture server error message and set it below the field
       if (
         error.response &&
         error?.response?.data &&
         error?.response?.data?.Message
       ) {
         setErrorMessage(error?.response?.data?.Message);
-        toast.error(error?.response?.data?.Message); // Show toast with the error
+        toast.error(error?.response?.data?.Message);
       } else {
         setErrorMessage("Failed to update password. Please try again.");
         toast.error("Failed to update password. Please try again.");
       }
     } finally {
-      setIsSubmitting(false); // Re-enable the button after the operation
+      setIsSubmitting(false);
     }
   };
-
-  // Handle input change for password
-
-  // Handle input change for User ID
-
   const handleUserIdChange = (e) => {
     setErrorMessage(""); // Clear previous error message
     setUserIdset(e.target.value);
@@ -697,7 +1082,7 @@ function ManageSubjectList() {
             Authorization: `Bearer ${token}`,
           },
           withCredentials: true,
-        }
+        },
       );
 
       // fetchClassNames();
@@ -754,12 +1139,10 @@ function ManageSubjectList() {
     const studentClass = section?.get_class?.name?.toLowerCase() || "";
     const studentUserId = section?.user_master?.user_id?.toLowerCase() || "";
     const studentRollNo = section?.roll_no?.toString().toLowerCase() || ""; // Convert roll number to string for comparison
-    const studentGrNo = section?.reg_no?.toString().toLowerCase() || ""; // Convert roll number to string for comparison
 
     // Check if the search term is present in Roll No, Name, Class, or UserId
     return (
       studentRollNo.includes(searchLower) ||
-      studentGrNo.includes(searchLower) ||
       studentName.includes(searchLower) ||
       studentClass.includes(searchLower) ||
       studentUserId.includes(searchLower)
@@ -772,7 +1155,7 @@ function ManageSubjectList() {
 
   const displayedSections = filteredSections.slice(
     currentPage * pageSize,
-    (currentPage + 1) * pageSize
+    (currentPage + 1) * pageSize,
   );
 
   // handle allot subject close model
@@ -787,7 +1170,7 @@ function ManageSubjectList() {
     setCurrentSection({ classToDelete });
     // console.log("the currecne t section", currentSection);
     setCurrestSubjectNameForDelete(
-      currentSection?.CurrentSection?.student_name
+      currentSection?.CurrentSection?.student_name,
     );
 
     setShowDownloadReportCard(true);
@@ -811,7 +1194,7 @@ function ManageSubjectList() {
             Authorization: `Bearer ${token}`,
           },
           responseType: "blob",
-        }
+        },
       );
 
       if (response.status === 200) {
@@ -848,8 +1231,9 @@ function ManageSubjectList() {
     } catch (error) {
       if (error.response && error.response.data) {
         toast.error(
-          `Error in Downloading Report Card: ${error.response.data.error || error.message
-          }`
+          `Error in Downloading Report Card: ${
+            error.response.data.error || error.message
+          }`,
         );
       } else {
         toast.error(`Error in Downloading Report Card: ${error.message}`);
@@ -929,7 +1313,7 @@ function ManageSubjectList() {
                     </label>
                     <div className="w-[60%] md:w-[85%] ">
                       {roleId !== "T" ||
-                        (roleId === "T" && classIdForManage) ? (
+                      (roleId === "T" && classIdForManage) ? (
                         <Select
                           value={selectedStudent}
                           onChange={handleStudentSelect}
@@ -1038,6 +1422,58 @@ function ManageSubjectList() {
                       backgroundColor: "#C03078",
                     }}
                   ></div>
+                  {/* <div className="w-[97%] mx-auto flex gap-3 justify-start">
+                    <button className="px-4 py-2 rounded-md bg-blue-200 text-blue-900 font-medium hover:bg-blue-700 hover:text-white transition">
+                      Download PDF
+                    </button>
+
+                    <button className="px-4 py-2 rounded-md bg-blue-200 text-blue-900 font-medium hover:bg-blue-700 hover:text-white transition">
+                      Download Excel
+                    </button>
+
+                    <button className="px-4 py-2 rounded-md bg-blue-200 text-blue-900 font-medium hover:bg-blue-700 hover:text-white transition">
+                      Download CSV
+                    </button>
+
+                    <button className="px-4 py-2 rounded-md bg-blue-200 text-blue-900 font-medium hover:bg-blue-700 hover:text-white transition">
+                      Download ZIP
+                    </button>
+                  </div> */}
+
+                  {hasSearched && publishStatus === "Y" && (
+                    <div className="w-[97%] mx-auto flex items-center gap-3">
+                      <span className="font-semibold text-pink-700">
+                        Download Report Card PDF
+                      </span>
+
+                      <button
+                        onClick={() => handleDownloadReport()}
+                        className="px-4 py-1 rounded-md bg-blue-200 text-blue-900 font-medium hover:bg-blue-700 hover:text-white transition"
+                      >
+                        Genarate Report Card
+                      </button>
+                      {/* {generated && (
+                        <a
+                          href={generated}
+                          target="_blank"
+                          download
+                          rel="noopener noreferrer"
+                          className="inline-block px-4 py-1 rounded-md bg-blue-200 text-blue-900 font-medium hover:bg-blue-700 hover:text-white transition"
+                        >
+                          Ready
+                        </a>
+                      )} */}
+                      {generated && (
+                        <button
+                          type="button"
+                          onClick={() => forceDownload(generated)}
+                          className="inline-block px-4 py-1 rounded-md bg-blue-200 text-blue-900 font-medium hover:bg-blue-700 hover:text-white transition"
+                        >
+                          Ready
+                        </button>
+                      )}
+                    </div>
+                  )}
 
                   <div className="card-body w-full">
                     <div className="h-96 lg:h-96 overflow-y-scroll lg:overflow-x-hidden">
@@ -1049,9 +1485,6 @@ function ManageSubjectList() {
                             </th>
                             <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                               Roll No
-                            </th>
-                            <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                              GR No.
                             </th>
                             <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                               Photo
@@ -1071,18 +1504,18 @@ function ManageSubjectList() {
                             {(roleId === "A" ||
                               roleId === "M" ||
                               roleId === "U") && (
-                                <>
-                                  <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                                    Edit
-                                  </th>
-                                  <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                                    Delete
-                                  </th>
-                                  <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                                    Inactive
-                                  </th>
-                                </>
-                              )}
+                              <>
+                                <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                                  Edit
+                                </th>
+                                <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                                  Delete
+                                </th>
+                                <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                                  Inactive
+                                </th>
+                              </>
+                            )}
 
                             <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                               View
@@ -1113,11 +1546,11 @@ function ManageSubjectList() {
                                     cls.is_class_teacher === 1 &&
                                     cls.class_id === selectedClassIdHPC &&
                                     cls.section_id === selectedSectionIdHPC &&
-                                    hpcClassIds.includes(cls.class_id)
+                                    hpcClassIds.includes(cls.class_id),
                                 )) ||
                                 (["A", "M", "U"].includes(roleId) &&
                                   hpcClassIds.includes(
-                                    selectedClassIdHPC
+                                    selectedClassIdHPC,
                                   ))) && (
                                 <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                                   HPC Report Card
@@ -1127,13 +1560,28 @@ function ManageSubjectList() {
                             {/* <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                               RC & Certificates
                             </th> */}
+
+                            {hasSearched &&
+                              ((roleId === "T" &&
+                                classTeacher.some(
+                                  (cls) =>
+                                    cls.is_class_teacher === 1 &&
+                                    cls.class_id === selectedClassIdHPC &&
+                                    cls.section_id === selectedSectionIdHPC,
+                                )) ||
+                                ["A", "M", "U"].includes(roleId)) && (
+                                <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                                  RC & Certificates
+                                </th>
+                              )}
+
                             {(roleId === "A" ||
                               roleId === "M" ||
                               roleId === "U") && (
-                                <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                                  Reset Password
-                                </th>
-                              )}
+                              <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                                Reset Password
+                              </th>
+                            )}
                           </tr>
                         </thead>
                         <tbody>
@@ -1146,32 +1594,33 @@ function ManageSubjectList() {
                                 <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                   {subject?.roll_no}
                                 </td>
-                                <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                  {subject?.reg_no}
-                                </td>
-
+                                {/* <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                {subject?.photo}
+                              </td>{" "} */}
                                 <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm py-1">
                                   <img
                                     src={
                                       subject?.image_name
                                         ? // ? `https://sms.evolvu.in/storage/app/public/student_images/${subject?.image_name}`
-                                        `${subject?.image_name}`
+                                          `${subject?.image_name}`
                                         : "https://via.placeholder.com/50"
                                     }
-                                    alt={subject?.name}
+                                    // alt={subject?.name}
                                     className="rounded-full w-8 h-8 lg:w-10 lg:h-10 object-cover"
                                   />
                                 </td>
                                 <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                  {`${subject?.first_name ?? ""} ${subject?.mid_name
-                                    ? subject.mid_name + " "
-                                    : ""
-                                    }${subject?.last_name ?? ""}`.trim()}
+                                  {`${subject?.first_name ?? ""} ${
+                                    subject?.mid_name
+                                      ? subject.mid_name + " "
+                                      : ""
+                                  }${subject?.last_name ?? ""}`.trim()}
                                 </td>
 
                                 <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm text-nowrap">
-                                  {`${subject?.get_class?.name}${" "}${subject?.get_division?.name
-                                    }`}
+                                  {`${subject?.get_class?.name}${" "}${
+                                    subject?.get_division?.name
+                                  }`}
                                 </td>
                                 {/* <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                 {subject?.get_division?.name}
@@ -1182,56 +1631,57 @@ function ManageSubjectList() {
                                 {(roleId === "A" ||
                                   roleId === "M" ||
                                   roleId === "U") && (
-                                    <>
+                                  <>
+                                    <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                      <button
+                                        onClick={() => handleEdit(subject)}
+                                        className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
+                                      >
+                                        <FontAwesomeIcon icon={faEdit} />
+                                      </button>
+                                    </td>
+                                    {subject.isPromoted !== "Y" ? (
                                       <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                         <button
-                                          onClick={() => handleEdit(subject)}
-                                          className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
+                                          onClick={() => handleDelete(subject)}
+                                          className="text-red-600 hover:text-red-800 hover:bg-transparent "
                                         >
-                                          <FontAwesomeIcon icon={faEdit} />
+                                          <FontAwesomeIcon icon={faTrash} />
                                         </button>
                                       </td>
-                                      {subject.isPromoted !== "Y" ? (
-                                        <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                          <button
-                                            onClick={() => handleDelete(subject)}
-                                            className="text-red-600 hover:text-red-800 hover:bg-transparent "
-                                          >
-                                            <FontAwesomeIcon icon={faTrash} />
-                                          </button>
-                                        </td>
-                                      ) : (
-                                        <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                          <button
-                                            // onClick={() => ()}
-                                            className="text-green-500-600 hover:text-green-800 hover:bg-transparent "
-                                          >
-                                            {/* <FontAwesomeIcon icon={faTrash} /> */}
-                                          </button>
-                                        </td>
-                                      )}
-                                      <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm hover:bg-none">
+                                    ) : (
+                                      <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                         <button
-                                          onClick={() =>
-                                            handleActiveAndInactive(subject)
-                                          }
-                                          className={`  font-bold hover:bg-none ${subject.isActive === "Y"
+                                          // onClick={() => ()}
+                                          className="text-green-500-600 hover:text-green-800 hover:bg-transparent "
+                                        >
+                                          {/* <FontAwesomeIcon icon={faTrash} /> */}
+                                        </button>
+                                      </td>
+                                    )}
+                                    <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm hover:bg-none">
+                                      <button
+                                        onClick={() =>
+                                          handleActiveAndInactive(subject)
+                                        }
+                                        className={`  font-bold hover:bg-none ${
+                                          subject.isActive === "Y"
                                             ? "text-green-600 hover:text-green-800 hover:bg-transparent"
                                             : "text-red-700 hover:text-red-900  hover:bg-transparent"
-                                            }`}
-                                        >
-                                          {subject.isActive === "Y" ? (
-                                            <FaCheck className="text-xl" />
-                                          ) : (
-                                            <FontAwesomeIcon
-                                              icon={faXmark}
-                                              className="text-xl"
-                                            />
-                                          )}
-                                        </button>
-                                      </td>
-                                    </>
-                                  )}
+                                        }`}
+                                      >
+                                        {subject.isActive === "Y" ? (
+                                          <FaCheck className="text-xl" />
+                                        ) : (
+                                          <FontAwesomeIcon
+                                            icon={faXmark}
+                                            className="text-xl"
+                                          />
+                                        )}
+                                      </button>
+                                    </td>
+                                  </>
+                                )}
 
                                 <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                   <button
@@ -1276,12 +1726,12 @@ function ManageSubjectList() {
                                         cls.is_class_teacher === 1 &&
                                         cls.class_id === selectedClassIdHPC &&
                                         cls.section_id ===
-                                        selectedSectionIdHPC &&
-                                        hpcClassIds.includes(cls.class_id)
+                                          selectedSectionIdHPC &&
+                                        hpcClassIds.includes(cls.class_id),
                                     )) ||
                                     (["A", "M", "U"].includes(roleId) &&
                                       hpcClassIds.includes(
-                                        selectedClassIdHPC
+                                        selectedClassIdHPC,
                                       ))) && (
                                     <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                       <button
@@ -1289,6 +1739,26 @@ function ManageSubjectList() {
                                           handleReportView(subject)
                                         }
                                         className="text-green-600 hover:text-green-800 hover:bg-transparent"
+                                      >
+                                        <TbFileCertificate className="font-bold text-xl" />
+                                      </button>
+                                    </td>
+                                  )}
+                                {hasSearched &&
+                                  ((roleId === "T" &&
+                                    classTeacher.some(
+                                      (cls) =>
+                                        cls.is_class_teacher === 1 &&
+                                        cls.class_id === selectedClassIdHPC &&
+                                        cls.section_id === selectedSectionIdHPC,
+                                    )) ||
+                                    ["A", "M", "U"].includes(roleId)) && (
+                                    <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                      <button
+                                        onClick={() =>
+                                          handleCertificateView(subject)
+                                        }
+                                        className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
                                       >
                                         <TbFileCertificate className="font-bold text-xl" />
                                       </button>
@@ -1308,17 +1778,17 @@ function ManageSubjectList() {
                                 {(roleId === "A" ||
                                   roleId === "M" ||
                                   roleId === "U") && (
-                                    <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                      <button
-                                        onClick={() =>
-                                          handleResetPassword(subject)
-                                        }
-                                        className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
-                                      >
-                                        <MdLockReset className="font-bold text-xl" />
-                                      </button>
-                                    </td>
-                                  )}
+                                  <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                    <button
+                                      onClick={() =>
+                                        handleResetPassword(subject)
+                                      }
+                                      className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
+                                    >
+                                      <MdLockReset className="font-bold text-xl" />
+                                    </button>
+                                  </td>
+                                )}
                               </tr>
                             ))
                           ) : (
@@ -1431,14 +1901,17 @@ function ManageSubjectList() {
                     <label htmlFor="userId" className="w-1/2 mt-2">
                       User ID <span className="text-red-500">*</span>
                     </label>
+
                     <input
                       type="text"
                       maxLength={30}
-                      className="form-control shadow-md mb-2"
                       id="userId"
-                      value={userIdset} // Prefill userId
+                      readOnly
+                      value={userIdset}
                       onChange={handleUserIdChange}
+                      className="shadow-md mb-2 bg-gray-200 border border-gray-300 rounded-md px-3 py-2 w-full cursor-not-allowed"
                     />
+
                     <div className="absolute top-9 left-1/3">
                       {errorMessage && (
                         <span className="text-danger text-xs">
@@ -1469,10 +1942,10 @@ function ManageSubjectList() {
                   </div> */}
                 </div>
 
-                <div className="flex justify-end p-3">
+                <div className="flex justify-end pr-3 pb-3">
                   <button
                     type="button"
-                    className="btn btn-primary px-3 mb-2"
+                    className="btn btn-primary px-3"
                     onClick={handleSubmitResetPassword}
                     disabled={isSubmitting}
                   >
@@ -1515,25 +1988,25 @@ function ManageSubjectList() {
                   {currentStudentDataForActivate?.studentToActiveOrDeactive
                     ?.isActive === "Y"
                     ? `Are you sure you want to deactivate this student ${[
-                      currentStudentDataForActivate?.studentToActiveOrDeactive
-                        ?.first_name,
-                      currentStudentDataForActivate?.studentToActiveOrDeactive
-                        ?.mid_name,
-                      currentStudentDataForActivate?.studentToActiveOrDeactive
-                        ?.last_name,
-                    ]
-                      .filter(Boolean) // removes undefined/null/empty strings
-                      .join(" ")}?`
+                        currentStudentDataForActivate?.studentToActiveOrDeactive
+                          ?.first_name,
+                        currentStudentDataForActivate?.studentToActiveOrDeactive
+                          ?.mid_name,
+                        currentStudentDataForActivate?.studentToActiveOrDeactive
+                          ?.last_name,
+                      ]
+                        .filter(Boolean) // removes undefined/null/empty strings
+                        .join(" ")}?`
                     : `Are you sure you want to activate this student ${[
-                      currentStudentDataForActivate?.studentToActiveOrDeactive
-                        ?.first_name,
-                      currentStudentDataForActivate?.studentToActiveOrDeactive
-                        ?.mid_name,
-                      currentStudentDataForActivate?.studentToActiveOrDeactive
-                        ?.last_name,
-                    ]
-                      .filter(Boolean) // removes undefined/null/empty strings
-                      .join(" ")}?`}
+                        currentStudentDataForActivate?.studentToActiveOrDeactive
+                          ?.first_name,
+                        currentStudentDataForActivate?.studentToActiveOrDeactive
+                          ?.mid_name,
+                        currentStudentDataForActivate?.studentToActiveOrDeactive
+                          ?.last_name,
+                      ]
+                        .filter(Boolean) // removes undefined/null/empty strings
+                        .join(" ")}?`}
                 </div>
 
                 <div className=" flex justify-end p-3">
@@ -1545,11 +2018,11 @@ function ManageSubjectList() {
                   >
                     {isSubmitting
                       ? currentStudentDataForActivate?.studentToActiveOrDeactive
-                        ?.isActive === "Y"
+                          ?.isActive === "Y"
                         ? "Deactivating..."
                         : "Activating..."
                       : currentStudentDataForActivate?.studentToActiveOrDeactive
-                        ?.isActive === "Y"
+                            ?.isActive === "Y"
                         ? "Deactivate"
                         : "Activate"}
                     {/* {isSubmitting ? "Activating..." : "Active"} */}
