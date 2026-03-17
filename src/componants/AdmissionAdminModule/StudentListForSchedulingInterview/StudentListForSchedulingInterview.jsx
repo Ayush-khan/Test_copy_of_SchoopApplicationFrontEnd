@@ -712,7 +712,7 @@ const StudentListForSchedulingInterview = () => {
                                     </td>
 
                                     <td className="px-2 py-2 text-center border border-gray-300 whitespace-nowrap">
-                                      {student.form_id}
+                                      {student.form_id} ({student.adm_form_pk})
                                     </td>
 
                                     <td className="px-2 py-2 text-center border border-gray-300 whitespace-nowrap">
