@@ -442,7 +442,7 @@ const ConsolidatedLeaveForTeachers = () => {
                           <tr className="bg-gray-100">
                             {[
                               "Sr No.",
-                              "Staff Name",
+                              // "Staff Name",
                               "Phone No.",
                               "Leave Type",
                               "Start Date",
@@ -471,9 +471,9 @@ const ConsolidatedLeaveForTeachers = () => {
                                 <td className="px-2 py-2 text-center border border-gray-300">
                                   {index + 1}
                                 </td>
-                                <td className="px-2 py-2 text-center border border-gray-300">
+                                {/* <td className="px-2 py-2 text-center border border-gray-300">
                                   {student?.StaffName || " "}
-                                </td>
+                                </td> */}
 
                                 <td className="px-2 py-2 text-center border border-gray-300">
                                   {student?.phone || " "}
