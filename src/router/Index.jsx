@@ -320,6 +320,7 @@ import BookIssuedReport from "../componants/MasterModuleLibrarian/LibraryReports
 import BooksNonReturnReport from "../componants/MasterModuleLibrarian/LibraryReports/BooksNonReturnReport.jsx";
 import MonthlyBookIssueReport from "../componants/MasterModuleLibrarian/LibraryReports/MonthlyBookIssueReport.jsx";
 import HSCSStudentSubjectGroupReport from "../componants/Reports/HSCSStudentSubjectGroupReport.jsx";
+import ShowReportCard from "../componants/StudentSearchUsingGRN/ShowReportCard.jsx";
 function Index() {
   return (
     <Routes>
@@ -1746,6 +1747,12 @@ function Index() {
           path="/all_application_status_report"
           element={<PrivateRoute element={<AllApplicationFeeStatusReport />} />}
         />
+
+        <Route
+          path="/show_report_card"
+          element={<PrivateRoute element={<ShowReportCard />} />}
+        />
+
       </Route>
 
       {/* Page Not FOund Routes */}
