@@ -96,6 +96,7 @@ import TimeTable from "../componants/TimeTableModule/TimeTable.jsx";
 import CreateTimeTable from "../componants/TimeTableModule/CreateTimeTable.jsx";
 import IDCardDetails from "../componants/IDCards/IDCardDetails.jsx";
 import ListAdmFrmRep from "../componants/Reports/ListAdmFrmRep.jsx";
+import AllApplicationFeeStatusReport from "../componants/Reports/AllApplicationFeeStatusReport.jsx";
 import Balanceleave from "../componants/Reports/Balanceleave.jsx";
 import ConsolidatedLeave from "../componants/Reports/ConsolidatedLeave.jsx";
 import StudentReport from "../componants/Reports/StudentReport.jsx";
@@ -305,10 +306,6 @@ import LessonPlanData from "../componants/Dashbord/PrinciplalDashboardSACS/Lesso
 import TodayStaffList from "../componants/AllTableList/TodayStaffList.jsx";
 // import Menus from "../c";../componants/Dashbord/PrinciplalDashboardSACS/LessonPlanData.jsx
 import ImpersonateListing from "../componants/SuperAdmin/Impersonate/ImpersonateListing.jsx";
-
-import AllApplicationFeeStatusReport from '../componants/Reports/AllApplicationFeeStatusReport.jsx'
-
-// Librarian
 import SendRemainderRemark from "../componants/MasterModuleLibrarian/SendRemainderRemark/SendRemainderRemark.jsx";
 import Periodicals from "../componants/MasterModuleLibrarian/Periodicals/Periodicals/Periodicals.jsx";
 import Subscription from "../componants/MasterModuleLibrarian/Periodicals/Subscription/Subscription.jsx";
@@ -322,7 +319,8 @@ import BooksIssuedHistoryReport from "../componants/MasterModuleLibrarian/Librar
 import BookIssuedReport from "../componants/MasterModuleLibrarian/LibraryReports/BooksIssuedReport.jsx";
 import BooksNonReturnReport from "../componants/MasterModuleLibrarian/LibraryReports/BooksNonReturnReport.jsx";
 import MonthlyBookIssueReport from "../componants/MasterModuleLibrarian/LibraryReports/MonthlyBookIssueReport.jsx";
-
+// import HSCSStudentSubjectGroupReport from "../componants/Reports/HSCSStudentSubjectGroupReport.jsx";
+// import ShowReportCard from "../componants/StudentSearchUsingGRN/ShowReportCard.jsx";
 function Index() {
   return (
     <Routes>
@@ -1203,6 +1201,11 @@ function Index() {
           path="/hSCStudSubjectsRepo"
           element={<PrivateRoute element={<HSCStudentsSubjectsReport />} />}
         />
+        {/* {HSCS Student Subject Group Report } */}
+        {/* <Route
+          path="/hSCStudentSubjectGroupRepo"
+          element={<PrivateRoute element={<HSCSStudentSubjectGroupReport />} />}
+        /> */}
         {/* Fee payment report module */}
         <Route
           path="/feePaymentRepo"
@@ -1632,6 +1635,7 @@ function Index() {
           element={<PrivateRoute element={<ReturnBook />} />}
         />
         {/* Admission module for Admin */}
+        {/* Admission module for Admin */}
         <Route
           path="/listofAdmissionSuccessfulPayment"
           element={
@@ -1683,10 +1687,8 @@ function Index() {
           path="/superadmin/impersonate"
           element={<PrivateRoute element={<ImpersonateListing />} />}
         />
-        <Route
-          path="/all_application_status_report"
-          element={<PrivateRoute element={<AllApplicationFeeStatusReport />} />}
-        />
+
+        {/* Librabry modules of mahima */}
         <Route
           path="/send_reminder_remark_non_returned_book"
           element={<PrivateRoute element={<SendRemainderRemark />} />}
@@ -1740,64 +1742,17 @@ function Index() {
           path="/monthlyBookIssuedReport"
           element={<PrivateRoute element={<MonthlyBookIssueReport />} />}
         />
-        {/* Librarian Login */}
-        {/* Master module */}
-        {/* Create Member */}
+
         <Route
-          path="/createMember"
-          element={<PrivateRoute element={<CreateMember />} />}
+          path="/all_application_status_report"
+          element={<PrivateRoute element={<AllApplicationFeeStatusReport />} />}
         />
-        {/* Category Group */}
-        <Route
-          path="/categoryGroup"
-          element={<PrivateRoute element={<CategoryGroup />} />}
-        />
-        {/* Call Category */}
-        <Route
-          path="/callCategory"
-          element={<PrivateRoute element={<CallCategory />} />}
-        />
-        <Route
-          path="/createCallCategory"
-          element={<PrivateRoute element={<CreateCallCategory />} />}
-        />
-        <Route
-          path="/editCallCategory/:id"
-          element={<PrivateRoute element={<EditCallCategory />} />}
-        />
-        {/* Book Details */}
-        <Route
-          path="/bookDetails"
-          element={<PrivateRoute element={<BookDetails />} />}
-        />
-        <Route
-          path="/createBook"
-          element={<PrivateRoute element={<CreateBook />} />}
-        />
-        <Route
-          path="/bookDetails/edit/:id"
-          element={<PrivateRoute element={<EditBookDetails />} />}
-        />
-        {/* Generate Barcode */}
-        <Route
-          path="/generateBarcode"
-          element={<PrivateRoute element={<GenerateBarcode />} />}
-        />
-        {/* Library */}
-        {/* View Members */}
-        <Route
-          path="/viewMembers"
-          element={<PrivateRoute element={<ViewMember />} />}
-        />
-        {/* Issue Book */}
-        <Route
-          path="/issueBook"
-          element={<PrivateRoute element={<IssueBook />} />}
-        />
-        <Route
-          path="/returnBook"
-          element={<PrivateRoute element={<ReturnBook />} />}
-        />
+
+        {/* <Route
+          path="/show_report_card"
+          element={<PrivateRoute element={<ShowReportCard />} />}
+        /> */}
+
       </Route>
 
       {/* Page Not FOund Routes */}

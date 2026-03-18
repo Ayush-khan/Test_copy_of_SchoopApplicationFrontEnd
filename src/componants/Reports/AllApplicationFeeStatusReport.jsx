@@ -664,139 +664,48 @@ const AllApplicationFeeStatusReport = () => {
       printWindow.close();
     };
   };
-  // const filteredSections = timetable.filter((section) => {
-  //   const searchLower = searchTerm.toLowerCase();
-
-  //   // Extract relevant fields and convert them to lowercase for case-insensitive search
-  //   const formId = section?.form_id?.toLowerCase() || "";
-  //   const academicYear = section?.academic_yr?.toLowerCase() || "";
-  //   const studentName =
-  //     `${section?.first_name || ""} ${section?.mid_name || ""} ${section?.last_name || ""}`
-  //       .toLowerCase()
-  //       .trim();
-  //   const siblingInfo =
-  //     section?.sibling === "N"
-  //       ? "No"
-  //       : `${section?.sibling_student_id ?? ""}
-  //      (${section?.sibling_class_name ?? ""}
-  //      ${section?.sibling_section_name ?? ""})`;
-  //   const studentDOB = formatDate(section?.dob?.toLowerCase()) || "";
-  //   const studentGender = section?.gender?.toLowerCase() || "";
-  //   const applicationDate = section?.application_date?.toLowerCase() || "";
-  //   const studentReligion = section?.religion?.toLowerCase() || "";
-  //   const studentCaste = section?.caste?.toLowerCase() || "";
-  //   const studentSubcaste = section?.subcaste?.toLowerCase() || "";
-  //   const studentNationality = section?.nationality?.toLowerCase() || "";
-  //   const studentMotherTongue = section?.mother_tongue?.toLowerCase() || "";
-  //   const studentCategory = section?.category?.toLowerCase() || "";
-  //   const studentLocality = section?.locality?.toLowerCase() || "";
-  //   const studentCity = section?.city?.toLowerCase() || "";
-  //   const studentState = section?.state?.toLowerCase() || "";
-  //   const studentPincode = section?.pincode?.toString().toLowerCase() || "";
-  //   const permanentAddress = section?.perm_address?.toLowerCase() || "";
-  //   const fatherName = section?.father_name?.toLowerCase() || "";
-  //   const fatherMobile = section?.f_mobile?.toLowerCase() || "";
-  //   const fatherEmail = section?.f_email?.toLowerCase() || "";
-  //   const motherName = section?.mother_name?.toLowerCase() || "";
-  //   const motherMobile = section?.m_mobile?.toLowerCase() || "";
-  //   const motherEmail = section?.m_emailid?.toLowerCase() || "";
-  //   const studentBloodGroup = section?.blood_group?.toLowerCase() || "";
-  //   const admissionStatus = section?.admission_form_status?.toLowerCase() || "";
-  //   const className = section?.classname?.toLowerCase() || "";
-  //   const orderId = section?.OrderId?.toLowerCase() || "";
-  //   const siblingclass = section?.sibling_class_name?.toLowerCase() || "";
-
-  //   // Check if the search term is present in any of the specified fields
-  //   return (
-  //     formId.includes(searchLower) ||
-  //     academicYear.includes(searchLower) ||
-  //     // studentName.includes(searchLower) ||
-  //     studentName.includes(searchTerm.toLowerCase().trim()) ||
-  //     studentDOB.includes(searchLower) ||
-  //     studentGender.includes(searchLower) ||
-  //     applicationDate.includes(searchLower) ||
-  //     studentReligion.includes(searchLower) ||
-  //     studentCaste.includes(searchLower) ||
-  //     studentSubcaste.includes(searchLower) ||
-  //     studentNationality.includes(searchLower) ||
-  //     studentMotherTongue.includes(searchLower) ||
-  //     studentCategory.includes(searchLower) ||
-  //     studentLocality.includes(searchLower) ||
-  //     studentCity.includes(searchLower) ||
-  //     studentState.includes(searchLower) ||
-  //     studentPincode.includes(searchLower) ||
-  //     permanentAddress.includes(searchLower) ||
-  //     fatherName.includes(searchLower) ||
-  //     fatherMobile.includes(searchLower) ||
-  //     fatherEmail.includes(searchLower) ||
-  //     motherName.includes(searchLower) ||
-  //     motherMobile.includes(searchLower) ||
-  //     motherEmail.includes(searchLower) ||
-  //     studentBloodGroup.includes(searchLower) ||
-  //     admissionStatus.includes(searchLower) ||
-  //     className.includes(searchLower) ||
-  //     orderId.includes(searchLower) ||
-  //     siblingInfo.includes(searchLower) ||
-  //     siblingclass.includes(searchLower)
-  //   );
-  // });
-
-  const normalize = (value) => {
-    if (!value) return "";
-    return value.toString().toLowerCase().replace(/\s+/g, " ").trim();
-  };
   const filteredSections = timetable.filter((section) => {
-    const searchLower = normalize(searchTerm);
+    const searchLower = searchTerm.toLowerCase();
 
-    const studentName = normalize(
-      `${section?.first_name || ""} ${section?.mid_name || ""} ${section?.last_name || ""}`,
+    // Extract relevant fields and convert them to lowercase for case-insensitive search
+    const formId = section?.form_id?.toLowerCase() || "";
+    const academicYear = section?.academic_yr?.toLowerCase() || "";
+    const studentName = camelCase(
+      `${section?.first_name} ${section?.mid_name} ${section?.last_name}`,
     );
-
-    const search = normalize(searchTerm);
-
-    // Special handling for status search
-    if (search === "paid") {
-      return section.status === "S";
-    }
-
-    if (search === "unpaid") {
-      return section.status === null;
-    }
-    const formId = normalize(section?.form_id);
-    const academicYear = normalize(section?.academic_yr);
-    const studentDOB = normalize(formatDate(section?.dob));
-    const studentGender = normalize(section?.gender);
-    const applicationDate = normalize(formatDate(section?.application_date));
-    const studentReligion = normalize(section?.religion);
-    const studentCaste = normalize(section?.caste);
-    const studentSubcaste = normalize(section?.subcaste);
-    const studentNationality = normalize(section?.nationality);
-    const studentMotherTongue = normalize(section?.mother_tongue);
-    const studentCategory = normalize(section?.category);
-    const studentLocality = normalize(section?.locality);
-    const studentCity = normalize(section?.city);
-    const studentState = normalize(section?.state);
-    const studentPincode = normalize(section?.pincode);
-    const permanentAddress = normalize(section?.perm_address);
-    const fatherName = normalize(section?.father_name);
-    const fatherMobile = normalize(section?.f_mobile);
-    const fatherEmail = normalize(section?.f_email);
-    const motherName = normalize(section?.mother_name);
-    const motherMobile = normalize(section?.m_mobile);
-    const motherEmail = normalize(section?.m_emailid);
-    const studentBloodGroup = normalize(section?.blood_group);
-    const admissionStatus = normalize(section?.admission_form_status);
-    const className = normalize(section?.classname);
-    const orderId = normalize(section?.OrderId);
-    const siblingClass = normalize(section?.sibling_class_name);
-
     const siblingInfo =
       section?.sibling === "N"
-        ? "no"
-        : normalize(
-            `${section?.sibling_student_id ?? ""} ${section?.sibling_class_name ?? ""} ${section?.sibling_section_name ?? ""}`,
-          );
+        ? "No"
+        : `${section?.sibling_student_id ?? ""}
+       (${section?.sibling_class_name ?? ""} 
+       ${section?.sibling_section_name ?? ""})`;
+    const studentDOB = formatDate(section?.dob?.toLowerCase()) || "";
+    const studentGender = section?.gender?.toLowerCase() || "";
+    const applicationDate = section?.application_date?.toLowerCase() || "";
+    const studentReligion = section?.religion?.toLowerCase() || "";
+    const studentCaste = section?.caste?.toLowerCase() || "";
+    const studentSubcaste = section?.subcaste?.toLowerCase() || "";
+    const studentNationality = section?.nationality?.toLowerCase() || "";
+    const studentMotherTongue = section?.mother_tongue?.toLowerCase() || "";
+    const studentCategory = section?.category?.toLowerCase() || "";
+    const studentLocality = section?.locality?.toLowerCase() || "";
+    const studentCity = section?.city?.toLowerCase() || "";
+    const studentState = section?.state?.toLowerCase() || "";
+    const studentPincode = section?.pincode?.toString().toLowerCase() || "";
+    const permanentAddress = section?.perm_address?.toLowerCase() || "";
+    const fatherName = section?.father_name?.toLowerCase() || "";
+    const fatherMobile = section?.f_mobile?.toLowerCase() || "";
+    const fatherEmail = section?.f_email?.toLowerCase() || "";
+    const motherName = section?.mother_name?.toLowerCase() || "";
+    const motherMobile = section?.m_mobile?.toLowerCase() || "";
+    const motherEmail = section?.m_emailid?.toLowerCase() || "";
+    const studentBloodGroup = section?.blood_group?.toLowerCase() || "";
+    const admissionStatus = section?.admission_form_status?.toLowerCase() || "";
+    const className = section?.classname?.toLowerCase() || "";
+    const orderId = section?.OrderId?.toLowerCase() || "";
+    const siblingclass = section?.sibling_class_name?.toLowerCase() || "";
 
+    // Check if the search term is present in any of the specified fields
     return (
       formId.includes(searchLower) ||
       academicYear.includes(searchLower) ||
@@ -826,7 +735,7 @@ const AllApplicationFeeStatusReport = () => {
       className.includes(searchLower) ||
       orderId.includes(searchLower) ||
       siblingInfo.includes(searchLower) ||
-      siblingClass.includes(searchLower)
+      siblingclass.includes(searchLower)
     );
   });
 

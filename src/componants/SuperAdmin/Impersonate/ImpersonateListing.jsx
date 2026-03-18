@@ -207,7 +207,7 @@ function ImpersonateListing() {
                     <div className="w-full flex justify-center flex-col md:flex-row gap-x-1">
                         <div className="w-full md:w-[99%] flex flex-col md:flex-row justify-between items-start md:items-center mt-0 md:mt-2">
                             <div className="w-full flex flex-col md:flex-row gap-y-3 md:gap-y-0 md:gap-x-12">
-                                <div className="w-full md:w-[80%] flex flex-col md:flex-row gap-y-2 md:gap-y-0 md:gap-x-2 mb-1 md:my-2">
+                                <div className="w-full md:w-[40%] flex flex-col md:flex-row gap-y-2 md:gap-y-0 md:gap-x-2 mb-1 md:my-2">
                                     
                                     {/* Label */}
                                     <label
