@@ -51,6 +51,18 @@ const stripClientKeys = (payload) => {
   return cloned;
 };
 
+const pickServerPayload = (data) =>
+  normalizeStructurePayload(data) ||
+  normalizeStructurePayload(data?.data) ||
+  data?.data ||
+  data;
+
+const isUsableStructure = (value) =>
+  value &&
+  Array.isArray(value.sections) &&
+  value.sections.length > 0 &&
+  value.dashboard;
+
 const saveDashboardWidgets = async (payload) => {
   const token = localStorage.getItem("authToken");
   if (!token) {
@@ -67,12 +79,11 @@ const saveDashboardWidgets = async (payload) => {
       withCredentials: true,
     },
   );
-  const serverPayload =
-    normalizeStructurePayload(res.data) ||
-    normalizeStructurePayload(res.data?.data) ||
-    res.data?.data ||
-    res.data;
-  return serverPayload || payload;
+  const serverPayload = pickServerPayload(res.data);
+  if (isUsableStructure(serverPayload)) {
+    return serverPayload;
+  }
+  return payload;
 };
 
 const normalizeLayout = (payload, sourceLayouts = []) => {
@@ -169,9 +180,6 @@ const fetchRemoteLayouts = async () => {
 
     const endpoints = [
       `/api/get_dashboardstructure?short_name=${sortName}&role=${roleId}`,
-      `/get_dashboardstructure?short_name=${sortName}&role=${roleId}`,
-      `/api/dashboard-structure?role=${roleId}`,
-      `/dashboard-structure?role=${roleId}`,
     ];
 
     for (const endpoint of endpoints) {
@@ -252,12 +260,9 @@ export const dashboardLayoutCrudService = {
   },
 
   async create(payload) {
-    const current = await this.list();
-    const normalized = normalizeLayout(payload, current);
-    normalized.dashboard.dashboard_id = getMaxDashboardId(current) + 1;
-
+    const normalized = normalizeLayout(payload, []);
     const saved = await saveDashboardWidgets(normalized);
-    const savedNormalized = normalizeLayout(saved, current);
+    const savedNormalized = normalizeLayout(saved, []);
 
     const store = getStore();
     store.created.push(savedNormalized);
@@ -267,12 +272,11 @@ export const dashboardLayoutCrudService = {
 
   async update(id, payload) {
     const dashboardId = Number(id);
-    const current = await this.list();
-    const normalized = normalizeLayout(payload, current);
+    const normalized = normalizeLayout(payload, []);
     normalized.dashboard.dashboard_id = dashboardId;
 
     const saved = await saveDashboardWidgets(normalized);
-    const savedNormalized = normalizeLayout(saved, current);
+    const savedNormalized = normalizeLayout(saved, []);
 
     const store = getStore();
     const createdIndex = store.created.findIndex(

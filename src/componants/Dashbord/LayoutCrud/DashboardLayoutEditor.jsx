@@ -45,8 +45,8 @@ const toSectionLayouts = (widgets = []) => {
     const base = widget?.layout || {};
     const i = String(
       widget?.__clientKey ||
-        widget?.dashboard_widget_id ||
-        `${widget?.widget_key}-${index}`,
+      widget?.dashboard_widget_id ||
+      `${widget?.widget_key}-${index}`,
     );
     return {
       i,
@@ -61,8 +61,8 @@ const toSectionLayouts = (widgets = []) => {
     const base = widget?.layout || {};
     const i = String(
       widget?.__clientKey ||
-        widget?.dashboard_widget_id ||
-        `${widget?.widget_key}-${index}`,
+      widget?.dashboard_widget_id ||
+      `${widget?.widget_key}-${index}`,
     );
     return {
       i,
@@ -77,8 +77,8 @@ const toSectionLayouts = (widgets = []) => {
     const base = widget?.layout || {};
     const i = String(
       widget?.__clientKey ||
-        widget?.dashboard_widget_id ||
-        `${widget?.widget_key}-${index}`,
+      widget?.dashboard_widget_id ||
+      `${widget?.widget_key}-${index}`,
     );
     return {
       i,
@@ -137,8 +137,8 @@ const SectionLayoutPreview = ({ section, onCommitLayout, onRemoveWidget }) => {
           {widgets.map((widget, index) => {
             const key = String(
               widget?.__clientKey ||
-                widget?.dashboard_widget_id ||
-                `${widget?.widget_key || "widget"}-${index}`,
+              widget?.dashboard_widget_id ||
+              `${widget?.widget_key || "widget"}-${index}`,
             );
             return (
               <div key={key} className="h-full">
@@ -277,11 +277,8 @@ const DashboardLayoutEditor = () => {
   };
 
   const logSavedLayout = (mode, payload) => {
-    const endpoint =
-      mode === "Create"
-        ? "/api/dashboard-structure"
-        : `/api/dashboard-structure/${payload?.dashboard?.dashboard_id}`;
-    const method = mode === "Create" ? "POST" : "PUT";
+    const endpoint = "/save_dashboardwidgets";
+    const method = "POST";
     const postmanFormat = {
       method,
       url: `{{baseUrl}}${endpoint}`,
@@ -520,8 +517,8 @@ const DashboardLayoutEditor = () => {
       const nextWidgets = (section.widgets || []).map((widget, widgetIndex) => {
         const key = String(
           widget?.__clientKey ||
-            widget?.dashboard_widget_id ||
-            `${widget?.widget_key || "widget"}-${widgetIndex}`,
+          widget?.dashboard_widget_id ||
+          `${widget?.widget_key || "widget"}-${widgetIndex}`,
         );
         const nextItem = layoutMap.get(key);
         if (!nextItem) return widget;
@@ -595,6 +592,7 @@ const DashboardLayoutEditor = () => {
       return;
     }
     setError("");
+    console.log("Save Request Payload (client):", form);
     setSaving(true);
     if (isCreate) {
       const created = await dashboardLayoutCrudService.create(form);
