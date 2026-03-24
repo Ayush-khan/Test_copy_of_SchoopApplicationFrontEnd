@@ -181,6 +181,7 @@ import { useNavigate } from "react-router-dom";
 import MarkDropdownEditor from "../Events/MarkDropdownEditor";
 import api from "./api";
 import { useDashboardStructure } from "../../context/DashboardStructureContext";
+import Select from "react-select";
 
 const EventCard = () => {
   const [events, setEvents] = useState([]);
@@ -266,8 +267,13 @@ const EventCard = () => {
     fetchData();
   }, [roleId, regId, selectedMonth, sessionLoading]);
 
-  const handleMonthChange = (e) => {
-    setSelectedMonth(parseInt(e.target.value, 10));
+  const monthOptions = months.map((month) => ({
+    value: month.value,
+    label: `${month.label} ${currentYear}`,
+  }));
+
+  const handleMonthChange = (option) => {
+    setSelectedMonth(Number(option?.value ?? 0));
   };
 
   const filteredEvents = events.filter((event) => {
@@ -284,32 +290,51 @@ const EventCard = () => {
 
 
   return (
-    <div className={`relative w-full border-2 border-solid  bg-slate-100  `}>
+    <div className="relative w-full h-full border-2 border-solid bg-white rounded-lg overflow-hidden flex flex-col">
       <div className="sticky top-0 w-full m-auto header p-1 flex justify-between items-center bg-gray-200 rounded-t-lg mb-3" style={{ zIndex: "2" }}>
         <span className="lg:text-lg sm:text-xs sm:font-semibold text-gray-500 mb-1">
           Events List
         </span>
-        <select
-          value={selectedMonth}
-          onChange={handleMonthChange}
-          className="   text-sm text-gray-700 font-semibold hover:cursor-pointer bg-gray-50 mb-1 border border-gray-400"
-        >
-          {months.map((month) => (
-            <option key={month.value} value={month.value}>
-              {month.label} {currentYear}
-            </option>
-          ))}
-        </select>
+        <div className="min-w-[160px]">
+          <Select
+            classNamePrefix="react-select"
+            value={
+              monthOptions.find((opt) => opt.value === selectedMonth) || null
+            }
+            onChange={handleMonthChange}
+            options={monthOptions}
+            isSearchable
+            styles={{
+              control: (base) => ({
+                ...base,
+                minHeight: "30px",
+                fontSize: "12px",
+              }),
+              dropdownIndicator: (base) => ({
+                ...base,
+                padding: "2px 6px",
+              }),
+              valueContainer: (base) => ({
+                ...base,
+                padding: "0 6px",
+              }),
+              indicatorsContainer: (base) => ({
+                ...base,
+                height: "30px",
+              }),
+            }}
+          />
+        </div>
 
       </div>
       {
         loading ? (
-          <p className="text-center relative top-[16%]  w-10 mt-10 mx-auto  ">
+          <div className="flex-1 flex items-start justify-center pt-6">
             <Loader />
-          </p>
+          </div>
         ) : (
           <div
-            className={`${Styles.eventsList} rounded-lg pb-3 bg-gray-100 px-2 max-h-fit overflow-x-auto min-h-fit`}
+            className={`${Styles.eventsList} rounded-lg pb-3 bg-white px-2 flex-1 overflow-y-auto`}
           >
             {filteredEvents.length > 0 ? (
               filteredEvents.map((event, index) => (

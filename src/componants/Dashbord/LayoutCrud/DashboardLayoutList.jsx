@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEdit, faTrash } from "@fortawesome/free-solid-svg-icons";
+import api from "../api";
 import { dashboardLayoutCrudService } from "./dashboardLayoutCrudService";
 
 const DashboardLayoutList = () => {
@@ -11,8 +12,25 @@ const DashboardLayoutList = () => {
 
   const load = async () => {
     setLoading(true);
-    const data = await dashboardLayoutCrudService.list();
-    setItems(data);
+    const token = localStorage.getItem("authToken");
+    if (!token) {
+      setItems([]);
+      setLoading(false);
+      return;
+    }
+    try {
+      const res = await api.get("/api/get_dashboards", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        withCredentials: true,
+      });
+      const data = Array.isArray(res.data?.data) ? res.data.data : res.data;
+      setItems(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error("Failed to load dashboards list:", error);
+      setItems([]);
+    }
     setLoading(false);
   };
 
@@ -117,27 +135,34 @@ const DashboardLayoutList = () => {
                     </thead>
                     <tbody>
                       {items.map((item) => {
-                        const sections = item?.sections || [];
-                        const widgets = sections.reduce(
-                          (sum, section) => sum + (section?.widgets?.length || 0),
-                          0,
-                        );
+                        const dashboardId = item?.dashboard_id ?? item?.dashboard?.dashboard_id;
+                        const dashboardName = item?.name ?? item?.dashboard?.name;
+                        const dashboardRole = item?.role ?? item?.dashboard?.role;
+                        const totalSections =
+                          item?.total_sections ??
+                          (item?.sections ? item.sections.length : undefined);
+                        const totalWidgets =
+                          item?.total_widgets ??
+                          (item?.sections || []).reduce(
+                            (sum, section) => sum + (section?.widgets?.length || 0),
+                            0,
+                          );
                         return (
-                          <tr key={item?.dashboard?.dashboard_id}>
+                          <tr key={dashboardId}>
                             <td className="px-3 py-2 text-center border border-gray-300">
-                              {item?.dashboard?.dashboard_id}
+                              {dashboardId}
                             </td>
                             <td className="px-3 py-2 text-center border border-gray-300">
-                              {item?.dashboard?.name || "-"}
+                              {dashboardName || "-"}
                             </td>
                             <td className="px-3 py-2 text-center border border-gray-300">
-                              {item?.dashboard?.role || "-"}
+                              {dashboardRole || "-"}
                             </td>
                             <td className="px-3 py-2 text-center border border-gray-300">
-                              {sections.length}
+                              {totalSections ?? "-"}
                             </td>
                             <td className="px-3 py-2 text-center border border-gray-300">
-                              {widgets}
+                              {totalWidgets ?? "-"}
                             </td>
                             <td className="px-3 py-2 text-center border border-gray-300">
                               <button
@@ -145,7 +170,7 @@ const DashboardLayoutList = () => {
                                 className="btn btn-sm btn-outline-primary"
                                 onClick={() =>
                                   navigate(
-                                    `/dashboard-layout-crud/${item?.dashboard?.dashboard_id}`,
+                                    `/dashboard-layout-crud/${dashboardId}`,
                                   )
                                 }
                                 title="Edit"
@@ -157,7 +182,7 @@ const DashboardLayoutList = () => {
                               <button
                                 type="button"
                                 className="btn btn-sm btn-outline-danger"
-                                onClick={() => onDelete(item?.dashboard?.dashboard_id)}
+                                onClick={() => onDelete(dashboardId)}
                                 title="Delete"
                               >
                                 <FontAwesomeIcon icon={faTrash} />

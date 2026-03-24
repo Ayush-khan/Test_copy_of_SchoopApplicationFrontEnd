@@ -31,6 +31,7 @@ import ShowRolesWithMenu from "../componants/RoleMangement/ShowRolesWithMenu.jsx
 import Roles from "../componants/RoleMangement/Roles.jsx";
 import ManageRoleAccess from "../componants/RoleMangement/ManageRoleAccess.jsx";
 import Menus from "../componants/RoleMangement/Menus.jsx";
+import WidgetsCrud from "../componants/WidgetCrud/WidgetsCrud.jsx";
 import DivisionList from "../componants/MastersModule/Division/DivisionLIst.jsx";
 import SubjectList from "../componants/MastersModule/Subject/SubjectList.jsx";
 import ManageSubjectList from "../componants/MastersModule/SubjectAllotment/ManageSubjectList.jsx";
@@ -337,6 +338,10 @@ function Index() {
         <Route
           path="/manageMenus"
           element={<PrivateRoute element={<Menus />} />}
+        />
+        <Route
+          path="/manageWidgets"
+          element={<PrivateRoute element={<WidgetsCrud />} />}
         />
         {/* background changer component */}
         <Route

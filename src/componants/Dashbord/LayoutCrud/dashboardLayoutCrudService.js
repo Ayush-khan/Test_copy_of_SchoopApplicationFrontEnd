@@ -79,11 +79,18 @@ const saveDashboardWidgets = async (payload) => {
       withCredentials: true,
     },
   );
+  localStorage.setItem("dashboardLayoutUpdatedAt", String(Date.now()));
   const serverPayload = pickServerPayload(res.data);
   if (isUsableStructure(serverPayload)) {
     return serverPayload;
   }
   return payload;
+};
+
+const normalizeGridValue = (value, fallback = 0) => {
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric)) return fallback;
+  return Math.round(numeric * 10) / 10;
 };
 
 const normalizeLayout = (payload, sourceLayouts = []) => {
@@ -135,10 +142,10 @@ const normalizeLayout = (payload, sourceLayouts = []) => {
         widget_name: String(widget?.widget_name || "").trim(),
         widget_type: String(widget?.widget_type || "Card").trim(),
         layout: {
-          x: Number(layout?.x || 0),
-          y: Number(layout?.y || 0),
-          w: Math.max(1, Number(layout?.w || 1)),
-          h: Math.max(1, Number(layout?.h || 1)),
+          x: Math.max(0, normalizeGridValue(layout?.x, 0)),
+          y: Math.max(0, normalizeGridValue(layout?.y, 0)),
+          w: Math.max(0.1, normalizeGridValue(layout?.w, 1)),
+          h: Math.max(0.1, normalizeGridValue(layout?.h, 1)),
         },
       };
     });

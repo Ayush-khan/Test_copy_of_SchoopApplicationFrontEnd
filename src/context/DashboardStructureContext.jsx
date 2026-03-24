@@ -25,6 +25,8 @@ export const DashboardStructureProvider = ({ children }) => {
   const inFlightRef = useRef(null);
   const sessionInFlightRef = useRef(null);
   const tokenRef = useRef(localStorage.getItem("authToken") || "");
+  const lastLoadedAtRef = useRef(0);
+  const layoutUpdateKey = "dashboardLayoutUpdatedAt";
 
   const clearDashboardStructure = useCallback(() => {
     inFlightRef.current = null;
@@ -33,6 +35,7 @@ export const DashboardStructureProvider = ({ children }) => {
     setDashboardStructure(null);
     setLoading(false);
     setSessionLoading(false);
+    lastLoadedAtRef.current = 0;
   }, []);
 
   // Reset cache when auth token changes (logout/login).
@@ -46,7 +49,13 @@ export const DashboardStructureProvider = ({ children }) => {
 
   const loadDashboardStructure = useCallback(async ({ roleId, sortName }) => {
     if (!roleId) return null;
-    if (dashboardStructure) return dashboardStructure;
+    const updatedAt = Number(localStorage.getItem(layoutUpdateKey) || 0);
+    const needsRefresh = updatedAt > lastLoadedAtRef.current;
+    if (dashboardStructure && !needsRefresh) return dashboardStructure;
+    if (needsRefresh) {
+      inFlightRef.current = null;
+      setDashboardStructure(null);
+    }
     if (inFlightRef.current) return inFlightRef.current;
 
     const endpoints = [
@@ -63,6 +72,7 @@ export const DashboardStructureProvider = ({ children }) => {
             const normalized = normalizeStructurePayload(res.data);
             if (normalized) {
               setDashboardStructure(normalized);
+              lastLoadedAtRef.current = Math.max(Date.now(), updatedAt || 0);
               return normalized;
             }
           } catch (error) {

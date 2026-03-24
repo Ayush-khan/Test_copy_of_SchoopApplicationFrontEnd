@@ -3,12 +3,24 @@ import WidgetRenderer from "./WidgetRenderer";
 import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
 
-const COLS = { lg: 12, md: 8, sm: 4, xs: 2, xxs: 1 };
+const GRID_SCALE = 10;
+const COLS = {
+    lg: 12 * GRID_SCALE,
+    md: 8 * GRID_SCALE,
+    sm: 4 * GRID_SCALE,
+    xs: 2 * GRID_SCALE,
+    xxs: 1 * GRID_SCALE,
+};
 const BREAKPOINTS = { lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 };
-const ROW_HEIGHT = 56;
-const GRID_MARGIN = [16, 16];
+const ROW_HEIGHT = 56 / GRID_SCALE;
+const GRID_MARGIN = [16 / GRID_SCALE, 16 / GRID_SCALE];
+const MAX_GRID_H = 24 * GRID_SCALE;
 
 const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
+const scaleToGrid = (value) => {
+    const numeric = Number(value || 0);
+    return Number.isFinite(numeric) ? Math.round(numeric * GRID_SCALE) : 0;
+};
 
 const DashboardRenderer = ({ sections, dashboardData, sessionInfo }) => {
     const sortedSections = [...(sections || [])].sort(
@@ -19,6 +31,9 @@ const DashboardRenderer = ({ sections, dashboardData, sessionInfo }) => {
         const type = widget?.widget_type?.toLowerCase();
         if (type === "card") return "h-full";
         if (type === "chart") {
+            return "h-full overflow-hidden rounded-lg bg-white border border-gray-200 shadow-sm p-2";
+        }
+        if (type === "table" || type === "list") {
             return "h-full overflow-hidden rounded-lg bg-white border border-gray-200 shadow-sm";
         }
         return "h-full overflow-hidden rounded-lg";
@@ -30,10 +45,6 @@ const DashboardRenderer = ({ sections, dashboardData, sessionInfo }) => {
     });
 
     const buildLayouts = (widgets = []) => {
-        const minY = widgets.length
-            ? Math.min(...widgets.map((widget) => Number(widget?.layout?.y || 0)))
-            : 0;
-
         const getBaseLayout = (widget, breakpointKey) => {
             const raw = widget?.layout || {};
             // Supports both: layout:{x,y,w,h} and layout:{lg:{...},md:{...},sm:{...}}
@@ -46,10 +57,10 @@ const DashboardRenderer = ({ sections, dashboardData, sessionInfo }) => {
         const lg = widgets.map((widget, index) => {
             const base = getBaseLayout(widget, "lg");
             const i = String(widget?.dashboard_widget_id || `${widget?.widget_key}-${index}`);
-            const x = clamp(Number(base?.x || 0), 0, COLS.lg - 1);
-            const y = Math.max(0, Number(base?.y || 0) - minY);
-            const w = clamp(Number(base?.w || 1), 1, COLS.lg);
-            const h = clamp(Number(base?.h || 1), 1, 24);
+            const x = clamp(scaleToGrid(base?.x || 0), 0, COLS.lg - 1);
+            const y = Math.max(0, scaleToGrid(base?.y || 0));
+            const w = clamp(scaleToGrid(base?.w || 1), 1, COLS.lg);
+            const h = clamp(scaleToGrid(base?.h || 1), 1, MAX_GRID_H);
 
             return { i, x, y, w, h, static: true };
         });
@@ -63,10 +74,12 @@ const DashboardRenderer = ({ sections, dashboardData, sessionInfo }) => {
             const lgItem = lg[index];
             return {
                 i,
-                x: hasBreakpointLayout ? clamp(Number(base?.x || 0), 0, COLS.md - 1) : 0,
-                y: hasBreakpointLayout ? Math.max(0, Number(base?.y || 0)) : index * Math.max(1, lgItem.h),
-                w: hasBreakpointLayout ? clamp(Number(base?.w || 1), 1, COLS.md) : COLS.md,
-                h: hasBreakpointLayout ? clamp(Number(base?.h || 1), 1, 24) : lgItem.h,
+                x: hasBreakpointLayout ? clamp(scaleToGrid(base?.x || 0), 0, COLS.md - 1) : 0,
+                y: hasBreakpointLayout
+                    ? Math.max(0, scaleToGrid(base?.y || 0))
+                    : index * Math.max(1, lgItem.h),
+                w: hasBreakpointLayout ? clamp(scaleToGrid(base?.w || 1), 1, COLS.md) : COLS.md,
+                h: hasBreakpointLayout ? clamp(scaleToGrid(base?.h || 1), 1, MAX_GRID_H) : lgItem.h,
                 static: true,
             };
         });
@@ -80,10 +93,12 @@ const DashboardRenderer = ({ sections, dashboardData, sessionInfo }) => {
             const lgItem = lg[index];
             return {
                 i,
-                x: hasBreakpointLayout ? clamp(Number(base?.x || 0), 0, COLS.sm - 1) : 0,
-                y: hasBreakpointLayout ? Math.max(0, Number(base?.y || 0)) : index * Math.max(1, lgItem.h),
-                w: hasBreakpointLayout ? clamp(Number(base?.w || 1), 1, COLS.sm) : COLS.sm,
-                h: hasBreakpointLayout ? clamp(Number(base?.h || 1), 1, 24) : lgItem.h,
+                x: hasBreakpointLayout ? clamp(scaleToGrid(base?.x || 0), 0, COLS.sm - 1) : 0,
+                y: hasBreakpointLayout
+                    ? Math.max(0, scaleToGrid(base?.y || 0))
+                    : index * Math.max(1, lgItem.h),
+                w: hasBreakpointLayout ? clamp(scaleToGrid(base?.w || 1), 1, COLS.sm) : COLS.sm,
+                h: hasBreakpointLayout ? clamp(scaleToGrid(base?.h || 1), 1, MAX_GRID_H) : lgItem.h,
                 static: true,
             };
         });

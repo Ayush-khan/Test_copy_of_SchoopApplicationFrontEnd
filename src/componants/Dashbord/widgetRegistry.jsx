@@ -353,6 +353,7 @@ export const widgetRegistry = {
   fee_collection: TableFeeCollect,
   house_chart: HouseStudentChart,
   events_list: EventCard,
+  notice: NoticeBord,
 
   // Existing keys kept for compatibility
   student_card: CardStuStaf,
@@ -387,6 +388,9 @@ const widgetAliases = {
   staff_non_teaching: "non_teaching_staff",
   event_list: "events_list",
   events: "events_list",
+  notice_board: "notice",
+  notice_list: "notice",
+  notices: "notice",
 };
 
 const keywordResolvers = [
@@ -409,6 +413,11 @@ const keywordResolvers = [
     test: (normalized, type) =>
       type === "table" && normalized.includes("event"),
     component: EventCard,
+  },
+  {
+    test: (normalized, type) =>
+      (type === "table" || type === "list") && normalized.includes("notice"),
+    component: NoticeBord,
   },
   {
     test: (normalized, type) =>

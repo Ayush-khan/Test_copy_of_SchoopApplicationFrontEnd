@@ -1,24 +1,46 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Responsive, useContainerWidth } from "react-grid-layout";
+import Select from "react-select";
 import { dashboardLayoutCrudService } from "./dashboardLayoutCrudService";
+import api from "../api";
+import WidgetRenderer from "../WidgetRenderer";
+import { useDashboardStructure } from "../../../context/DashboardStructureContext";
 import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
 
-const PREVIEW_COLS = { lg: 12, md: 8, sm: 4, xs: 2, xxs: 1 };
+const GRID_SCALE = 10;
+const PREVIEW_COLS = {
+  lg: 12 * GRID_SCALE,
+  md: 8 * GRID_SCALE,
+  sm: 4 * GRID_SCALE,
+  xs: 2 * GRID_SCALE,
+  xxs: 1 * GRID_SCALE,
+};
 const PREVIEW_BREAKPOINTS = { lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 };
-const PREVIEW_ROW_HEIGHT = 42;
-const PREVIEW_MARGIN = [10, 10];
+const PREVIEW_ROW_HEIGHT = 56 / GRID_SCALE;
+const PREVIEW_MARGIN = [16 / GRID_SCALE, 16 / GRID_SCALE];
+const MAX_GRID_H = 24 * GRID_SCALE;
 const PREVIEW_DRAG_HANDLE = ".preview-drag-handle";
 
 const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
+const scaleToGrid = (value) => {
+  const numeric = Number(value || 0);
+  return Number.isFinite(numeric) ? Math.round(numeric * GRID_SCALE) : 0;
+};
+const roundTenth = (value) => Math.round(value * 10) / 10;
+const unscaleFromGrid = (value) => {
+  const numeric = Number(value || 0);
+  return Number.isFinite(numeric) ? roundTenth(numeric / GRID_SCALE) : 0;
+};
 
 const createWidgetWithId = (widgetId, clientKey) => ({
   dashboard_widget_id: Number(widgetId) || 0,
   __clientKey: clientKey,
   widget_key: "",
   widget_name: "",
-  widget_type: "Card",
+  widget_type: "",
+  widget_type_id: "",
   layout: { x: 0, y: 0, w: 2, h: 2 },
 });
 
@@ -50,10 +72,10 @@ const toSectionLayouts = (widgets = []) => {
     );
     return {
       i,
-      x: clamp(Number(base?.x || 0), 0, PREVIEW_COLS.lg - 1),
-      y: Math.max(0, Number(base?.y || 0)),
-      w: clamp(Number(base?.w || 2), 1, PREVIEW_COLS.lg),
-      h: clamp(Number(base?.h || 2), 1, 24),
+      x: clamp(scaleToGrid(base?.x || 0), 0, PREVIEW_COLS.lg - 1),
+      y: Math.max(0, scaleToGrid(base?.y || 0)),
+      w: clamp(scaleToGrid(base?.w || 2), 1, PREVIEW_COLS.lg),
+      h: clamp(scaleToGrid(base?.h || 2), 1, MAX_GRID_H),
     };
   });
 
@@ -66,10 +88,10 @@ const toSectionLayouts = (widgets = []) => {
     );
     return {
       i,
-      x: clamp(Number(base?.x || 0), 0, PREVIEW_COLS.md - 1),
-      y: Math.max(0, Number(base?.y || 0)),
-      w: clamp(Math.min(Number(base?.w || 2), PREVIEW_COLS.md), 1, PREVIEW_COLS.md),
-      h: clamp(Number(base?.h || 2), 1, 24),
+      x: clamp(scaleToGrid(base?.x || 0), 0, PREVIEW_COLS.md - 1),
+      y: Math.max(0, scaleToGrid(base?.y || 0)),
+      w: clamp(Math.min(scaleToGrid(base?.w || 2), PREVIEW_COLS.md), 1, PREVIEW_COLS.md),
+      h: clamp(scaleToGrid(base?.h || 2), 1, MAX_GRID_H),
     };
   });
 
@@ -82,10 +104,10 @@ const toSectionLayouts = (widgets = []) => {
     );
     return {
       i,
-      x: clamp(Number(base?.x || 0), 0, PREVIEW_COLS.sm - 1),
-      y: Math.max(0, Number(base?.y || 0)),
-      w: clamp(Math.min(Number(base?.w || 2), PREVIEW_COLS.sm), 1, PREVIEW_COLS.sm),
-      h: clamp(Number(base?.h || 2), 1, 24),
+      x: clamp(scaleToGrid(base?.x || 0), 0, PREVIEW_COLS.sm - 1),
+      y: Math.max(0, scaleToGrid(base?.y || 0)),
+      w: clamp(Math.min(scaleToGrid(base?.w || 2), PREVIEW_COLS.sm), 1, PREVIEW_COLS.sm),
+      h: clamp(scaleToGrid(base?.h || 2), 1, MAX_GRID_H),
     };
   });
 
@@ -94,17 +116,24 @@ const toSectionLayouts = (widgets = []) => {
 
 const widgetPreviewShellClasses = (widgetType) => {
   const type = String(widgetType || "").toLowerCase();
-  if (type === "chart") return "bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200";
-  if (type === "table") return "bg-gradient-to-br from-cyan-50 to-sky-50 border-cyan-200";
-  if (type === "list") return "bg-gradient-to-br from-indigo-50 to-violet-50 border-indigo-200";
-  return "bg-gradient-to-br from-emerald-50 to-teal-50 border-emerald-200";
+  if (type === "chart")
+    return "bg-white border border-gray-200 shadow-sm p-2";
+  if (type === "table" || type === "list")
+    return "bg-white border border-gray-200 shadow-sm";
+  return "h-full";
 };
 
-const SectionLayoutPreview = ({ section, onCommitLayout, onRemoveWidget }) => {
+const SectionLayoutPreview = ({
+  section,
+  onCommitLayout,
+  onRemoveWidget,
+  previewData,
+  previewSession,
+}) => {
   const widgets = section?.widgets || [];
   const { width, containerRef, mounted } = useContainerWidth({
     measureBeforeMount: false,
-    initialWidth: 1100,
+    initialWidth: 1280,
   });
 
   const layouts = useMemo(() => toSectionLayouts(widgets), [widgets]);
@@ -115,7 +144,7 @@ const SectionLayoutPreview = ({ section, onCommitLayout, onRemoveWidget }) => {
   };
 
   return (
-    <div ref={containerRef}>
+    <div ref={containerRef} className="w-full">
       {mounted ? (
         <Responsive
           className="layout"
@@ -143,41 +172,33 @@ const SectionLayoutPreview = ({ section, onCommitLayout, onRemoveWidget }) => {
             return (
               <div key={key} className="h-full">
                 <div
-                  className={`h-full rounded-lg border p-2 text-xs shadow-sm transition-all ${widgetPreviewShellClasses(
+                  className={`h-full rounded-lg relative overflow-hidden ${widgetPreviewShellClasses(
                     widget?.widget_type,
                   )}`}
                 >
-                  <div className="flex items-center justify-between mb-1">
-                    <div className="font-semibold text-gray-800 truncate">
-                      {widget?.widget_name || "Untitled Widget"}
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <button
-                        type="button"
-                        className="border-0 bg-white rounded px-1.5 py-[1px] text-[10px] text-red-600 hover:bg-red-50"
-                        title="Remove widget"
-                        onClick={() => onRemoveWidget?.(widget)}
-                      >
-                        ×
-                      </button>
-                      <button
-                        type="button"
-                        className="preview-drag-handle border-0 bg-white rounded px-2 py-[2px] text-[10px] text-gray-600"
-                        title="Drag to move"
-                      >
-                        Drag
-                      </button>
-                    </div>
+                  <div className="absolute top-2 right-2 z-10 flex items-center gap-1">
+                    <button
+                      type="button"
+                      className="border-0 bg-white/90 rounded px-1.5 py-[1px] text-[10px] text-red-600 hover:bg-red-50 shadow"
+                      title="Remove widget"
+                      onClick={() => onRemoveWidget?.(widget)}
+                    >
+                      x
+                    </button>
+                    <button
+                      type="button"
+                      className="preview-drag-handle border-0 bg-white/90 rounded px-2 py-[2px] text-[10px] text-gray-700 shadow"
+                      title="Drag to move"
+                    >
+                      Drag
+                    </button>
                   </div>
-                  <div className="text-[11px] text-gray-600 truncate mb-1">
-                    key: {widget?.widget_key || "-"}
-                  </div>
-                  <div className="inline-block text-[10px] px-2 py-[2px] rounded bg-white text-gray-700 mb-1">
-                    {widget?.widget_type || "-"}
-                  </div>
-                  <div className="text-[11px] text-gray-700">
-                    ({widget?.layout?.x ?? 0},{widget?.layout?.y ?? 0}) w:
-                    {widget?.layout?.w ?? 0} h:{widget?.layout?.h ?? 0}
+                  <div className="h-full w-full pointer-events-none">
+                    <WidgetRenderer
+                      widget={widget}
+                      data={previewData}
+                      sessionInfo={previewSession}
+                    />
                   </div>
                 </div>
               </div>
@@ -191,7 +212,13 @@ const SectionLayoutPreview = ({ section, onCommitLayout, onRemoveWidget }) => {
   );
 };
 
-const DashboardLayoutPreviewPanel = ({ sections, onCommitLayout, onRemoveWidget }) => {
+const DashboardLayoutPreviewPanel = ({
+  sections,
+  onCommitLayout,
+  onRemoveWidget,
+  previewData,
+  previewSession,
+}) => {
   const orderedSections = (sections || [])
     .map((section, originalIndex) => ({ section, originalIndex }))
     .sort(
@@ -200,43 +227,18 @@ const DashboardLayoutPreviewPanel = ({ sections, onCommitLayout, onRemoveWidget 
     );
 
   return (
-    <div className="card shadow-lg mt-3 border-0">
-      <div className="card-body">
-        <div className="rounded-lg bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-100 px-3 py-2 mb-3">
-          <h2 className="text-base font-semibold mb-1">Dashboard Preview Mode</h2>
-          <p className="text-sm text-gray-700 mb-2">
-            Widget card ke top-right me <strong>Drag</strong> se move karein, corner se resize karein, then Save.
-          </p>
-          <div className="flex flex-wrap gap-2 text-[11px]">
-            <span className="px-2 py-1 rounded bg-emerald-100 text-emerald-800">Card</span>
-            <span className="px-2 py-1 rounded bg-amber-100 text-amber-800">Chart</span>
-            <span className="px-2 py-1 rounded bg-cyan-100 text-cyan-800">Table</span>
-            <span className="px-2 py-1 rounded bg-indigo-100 text-indigo-800">List</span>
-          </div>
+    <div className="space-y-6 p-4">
+      {orderedSections.map(({ section, originalIndex }, sectionIndex) => (
+        <div key={section?.section_id || sectionIndex} className="bg-transparent">
+          <SectionLayoutPreview
+            section={section}
+            onCommitLayout={(layout) => onCommitLayout(originalIndex, layout)}
+            onRemoveWidget={(widget) => onRemoveWidget(originalIndex, widget)}
+            previewData={previewData}
+            previewSession={previewSession}
+          />
         </div>
-        <div className="space-y-4">
-          {orderedSections.map(({ section, originalIndex }, sectionIndex) => (
-            <div
-              key={section?.section_id || sectionIndex}
-              className="rounded-xl p-3 bg-white border border-gray-200 shadow-sm"
-            >
-              <div className="flex items-center justify-between mb-2">
-                <div className="text-sm font-semibold text-gray-700">
-                  {section?.section_name || `Section ${sectionIndex + 1}`}
-                </div>
-                <span className="text-[11px] px-2 py-[2px] rounded bg-gray-100 text-gray-600">
-                  Widgets: {(section?.widgets || []).length}
-                </span>
-              </div>
-              <SectionLayoutPreview
-                section={section}
-                onCommitLayout={(layout) => onCommitLayout(originalIndex, layout)}
-                onRemoveWidget={(widget) => onRemoveWidget(originalIndex, widget)}
-              />
-            </div>
-          ))}
-        </div>
-      </div>
+      ))}
     </div>
   );
 };
@@ -258,6 +260,13 @@ const DashboardLayoutEditor = () => {
     section_name: "Section",
     section_order: 1,
   });
+  const [widgetTypes, setWidgetTypes] = useState([]);
+  const [widgetsByType, setWidgetsByType] = useState({});
+  const [widgetTypesLoading, setWidgetTypesLoading] = useState(false);
+  const [widgetsLoading, setWidgetsLoading] = useState({});
+  const { sessionInfo, loadSessionInfo } = useDashboardStructure();
+
+  const previewData = useMemo(() => ({ data: {} }), []);
 
   const makeClientKey = () => {
     clientKeyRef.current += 1;
@@ -274,6 +283,86 @@ const DashboardLayoutEditor = () => {
       })),
     }));
     return next;
+  };
+
+  const normalizeWidgetTypes = (data) => {
+    const list = Array.isArray(data?.data) ? data.data : data;
+    if (!Array.isArray(list)) return [];
+    return list.map((item) => ({
+      id:
+        item?.widget_type_id ??
+        item?.id ??
+        item?.widget_type ??
+        item?.type_id ??
+        item?.value,
+      name:
+        item?.widget_name ??
+        item?.name ??
+        item?.widget_type_name ??
+        item?.label ??
+        item?.type_name,
+    })).filter((item) => item.id !== undefined && item.name);
+  };
+
+  const normalizeWidgets = (data) => {
+    const list = Array.isArray(data?.data) ? data.data : data;
+    if (!Array.isArray(list)) return [];
+    return list.map((item) => ({
+      id: item?.id ?? item?.widget_id ?? item?.dashboard_widget_id,
+      name: item?.name ?? item?.widget_name ?? item?.label,
+      key: item?.key ?? item?.widget_key,
+    })).filter((item) => item.id !== undefined && item.name);
+  };
+
+  const fetchWidgetTypes = async () => {
+    const token = localStorage.getItem("authToken");
+    if (!token) return;
+    setWidgetTypesLoading(true);
+    try {
+      const res = await api.get("/api/get_widgetstype", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        withCredentials: true,
+      });
+      setWidgetTypes(normalizeWidgetTypes(res?.data?.data));
+    } catch (error) {
+      console.error("Failed to load widget types:", error);
+      setWidgetTypes([]);
+    } finally {
+      setWidgetTypesLoading(false);
+    }
+  };
+
+  const fetchWidgetsByType = async (typeId) => {
+    if (!typeId) return;
+    if (widgetsByType[typeId]) return;
+    const token = localStorage.getItem("authToken");
+    if (!token) return;
+    setWidgetsLoading((prev) => ({ ...prev, [typeId]: true }));
+    try {
+      const res = await api.get(`/api/widgets?widget_type=${typeId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        withCredentials: true,
+      });
+      const normalized = normalizeWidgets(res.data);
+      setWidgetsByType((prev) => ({ ...prev, [typeId]: normalized }));
+    } catch (error) {
+      console.error("Failed to load widgets by type:", error);
+      setWidgetsByType((prev) => ({ ...prev, [typeId]: [] }));
+    } finally {
+      setWidgetsLoading((prev) => ({ ...prev, [typeId]: false }));
+    }
+  };
+
+  const getTypeIdByName = (name) => {
+    if (!name) return "";
+    const match = widgetTypes.find(
+      (type) => String(type.name).toLowerCase() === String(name).toLowerCase(),
+    );
+    return match?.id ?? "";
   };
 
   const logSavedLayout = (mode, payload) => {
@@ -341,6 +430,46 @@ const DashboardLayoutEditor = () => {
     };
     load();
   }, [id, isCreate]);
+
+  useEffect(() => {
+    fetchWidgetTypes();
+  }, []);
+
+  useEffect(() => {
+    if (!sessionInfo) {
+      loadSessionInfo();
+    }
+  }, [sessionInfo, loadSessionInfo]);
+
+  useEffect(() => {
+    if (!widgetTypes.length) return;
+    setForm((prev) => ({
+      ...prev,
+      sections: (prev.sections || []).map((section) => ({
+        ...section,
+        widgets: (section.widgets || []).map((widget) => {
+          if (widget.widget_type_id) return widget;
+          const typeId = getTypeIdByName(widget.widget_type);
+          return typeId ? { ...widget, widget_type_id: typeId } : widget;
+        }),
+      })),
+    }));
+  }, [widgetTypes]);
+
+  useEffect(() => {
+    const typeIds = new Set();
+    (form.sections || []).forEach((section) => {
+      (section.widgets || []).forEach((widget) => {
+        const typeId = widget.widget_type_id || getTypeIdByName(widget.widget_type);
+        if (typeId) typeIds.add(String(typeId));
+      });
+    });
+    typeIds.forEach((typeId) => {
+      if (!widgetsByType[typeId]) {
+        fetchWidgetsByType(typeId);
+      }
+    });
+  }, [form.sections, widgetsByType, widgetTypes]);
 
   useEffect(() => {
     const onScroll = () => {
@@ -497,10 +626,10 @@ const DashboardLayoutEditor = () => {
   };
 
   const updateLayoutField = (sectionIndex, widgetIndex, key, value) => {
-    const numeric = Number(value);
+    const numeric = parseFloat(value);
     updateWidget(sectionIndex, widgetIndex, "layout", {
       ...(form.sections?.[sectionIndex]?.widgets?.[widgetIndex]?.layout || {}),
-      [key]: Number.isFinite(numeric) ? numeric : 0,
+      [key]: Number.isFinite(numeric) ? roundTenth(numeric) : 0,
     });
   };
 
@@ -526,10 +655,10 @@ const DashboardLayoutEditor = () => {
           ...widget,
           layout: {
             ...(widget?.layout || {}),
-            x: Number(nextItem.x || 0),
-            y: Number(nextItem.y || 0),
-            w: Number(nextItem.w || 1),
-            h: Number(nextItem.h || 1),
+            x: Math.max(0, unscaleFromGrid(nextItem.x || 0)),
+            y: Math.max(0, unscaleFromGrid(nextItem.y || 0)),
+            w: Math.max(0.5, unscaleFromGrid(nextItem.w || 1)),
+            h: Math.max(0.5, unscaleFromGrid(nextItem.h || 1)),
           },
         };
       });
@@ -573,9 +702,14 @@ const DashboardLayoutEditor = () => {
       if (!section?.section_name?.trim()) return "Each section must have a name.";
       if (!section?.widgets?.length) return "Each section must have at least one widget.";
       for (const widget of section.widgets) {
-        if (!widget?.widget_key?.trim()) return "Each widget must have widget_key.";
-        if (!widget?.widget_name?.trim()) return "Each widget must have widget_name.";
-        if (!widget?.widget_type?.trim()) return "Each widget must have widget_type.";
+        if (!widget?.widget_type_id && !widget?.widget_type?.trim()) {
+          return "Each widget must have a widget type.";
+        }
+        if (!widget?.widget_name?.trim()) return "Each widget must have widget name.";
+        if (!widget?.widget_key?.trim()) return "Each widget must have widget key.";
+        if (!Number(widget?.dashboard_widget_id || 0)) {
+          return "Each widget must have a valid widget id.";
+        }
         const widgetId = Number(widget?.dashboard_widget_id || 0);
         if (!widgetId) return "Each widget must have a valid dashboard_widget_id.";
         if (widgetIds.has(widgetId)) return "dashboard_widget_id must be unique.";
@@ -619,7 +753,7 @@ const DashboardLayoutEditor = () => {
   }
 
   return (
-    <div className="p-4 md:p-6">
+    <div className="p-4">
       <div className="w-full md:w-[96%] mx-auto">
         <div className="w-full mx-auto">
           <div className="card mx-auto lg:w-full shadow-lg border-0 transition-all duration-300 ease-out hover:shadow-xl backdrop-blur-sm">
@@ -683,7 +817,7 @@ const DashboardLayoutEditor = () => {
       </div>
 
       {isPreviewMode ? (
-        <div className="w-full md:w-[96%] mx-auto overflow-y-auto">
+        <div className="w-full overflow-y-auto">
           {error ? <div className="alert alert-danger py-2 mb-3">{error}</div> : null}
 
           <div className="animate-[fadeIn_.28s_ease-out]">
@@ -691,6 +825,8 @@ const DashboardLayoutEditor = () => {
               sections={form.sections || []}
               onCommitLayout={applySectionLayout}
               onRemoveWidget={removeWidgetFromPreview}
+              previewData={previewData}
+              previewSession={sessionInfo}
             />
           </div>
         </div>
@@ -870,63 +1006,128 @@ const DashboardLayoutEditor = () => {
                             <input
                               type="number"
                               className="form-control"
-                              value={widget.dashboard_widget_id || 0}
-                              onChange={(e) =>
-                                updateWidget(
-                                  sectionIndex,
-                                  widgetIndex,
-                                  "dashboard_widget_id",
-                                  Number(e.target.value),
-                                )
-                              }
+                              value={widget.dashboard_widget_id || ""}
+                              readOnly
                             />
-                            <button
-                              type="button"
-                              className="btn btn-outline-secondary"
-                              onClick={() => assignNextWidgetId(sectionIndex, widgetIndex)}
-                              title="Assign next auto id"
-                            >
-                              Auto
-                            </button>
                           </div>
                         </div>
 
+                        <div className="col-md-3">
+                          <label className="form-label">Widget Type</label>
+                          <Select
+                            classNamePrefix="react-select"
+                            isLoading={widgetTypesLoading}
+                            value={(() => {
+                              const typeId =
+                                widget.widget_type_id ||
+                                getTypeIdByName(widget.widget_type);
+                              const match = widgetTypes.find(
+                                (type) => String(type.id) === String(typeId),
+                              );
+                              return match
+                                ? { value: match.id, label: match.name }
+                                : null;
+                            })()}
+                            options={widgetTypes.map((type) => ({
+                              value: type.id,
+                              label: type.name,
+                            }))}
+                            placeholder="Select Type"
+                            onChange={(option) => {
+                              const nextTypeId = option?.value || "";
+                              const nextTypeName = option?.label || "";
+                              updateWidget(sectionIndex, widgetIndex, "widget_type_id", nextTypeId);
+                              updateWidget(sectionIndex, widgetIndex, "widget_type", nextTypeName);
+                              updateWidget(sectionIndex, widgetIndex, "widget_name", "");
+                              updateWidget(sectionIndex, widgetIndex, "widget_key", "");
+                              updateWidget(sectionIndex, widgetIndex, "dashboard_widget_id", 0);
+                              fetchWidgetsByType(nextTypeId);
+                            }}
+                          />
+                        </div>
+                        <div className="col-md-3">
+                          <label className="form-label">Widget Name</label>
+                          <Select
+                            classNamePrefix="react-select"
+                            isLoading={(() => {
+                              const typeId =
+                                widget.widget_type_id ||
+                                getTypeIdByName(widget.widget_type);
+                              return typeId ? !!widgetsLoading[typeId] : false;
+                            })()}
+                            isDisabled={
+                              !(
+                                widget.widget_type_id ||
+                                getTypeIdByName(widget.widget_type)
+                              )
+                            }
+                            value={(() => {
+                              const typeId =
+                                widget.widget_type_id ||
+                                getTypeIdByName(widget.widget_type);
+                              const options = widgetsByType[typeId] || [];
+                              const selected = options.find(
+                                (opt) => String(opt.name) === String(widget.widget_name),
+                              );
+                              return selected
+                                ? { value: selected.id, label: selected.name }
+                                : null;
+                            })()}
+                            options={(() => {
+                              const typeId =
+                                widget.widget_type_id ||
+                                getTypeIdByName(widget.widget_type);
+                              const options = widgetsByType[typeId] || [];
+                              return options.map((opt) => ({
+                                value: opt.id,
+                                label: opt.name,
+                                key: opt.key,
+                              }));
+                            })()}
+                            placeholder={(() => {
+                              const typeId =
+                                widget.widget_type_id ||
+                                getTypeIdByName(widget.widget_type);
+                              if (!typeId) return "Select type first";
+                              if (widgetsLoading[typeId]) return "Loading...";
+                              return "Select Widget";
+                            })()}
+                            onChange={(option) => {
+                              const typeId =
+                                widget.widget_type_id ||
+                                getTypeIdByName(widget.widget_type);
+                              const options = widgetsByType[typeId] || [];
+                              const selected = options.find(
+                                (opt) => String(opt.id) === String(option?.value),
+                              );
+                              updateWidget(
+                                sectionIndex,
+                                widgetIndex,
+                                "widget_name",
+                                selected?.name || "",
+                              );
+                              updateWidget(
+                                sectionIndex,
+                                widgetIndex,
+                                "widget_key",
+                                selected?.key || "",
+                              );
+                              updateWidget(
+                                sectionIndex,
+                                widgetIndex,
+                                "dashboard_widget_id",
+                                Number(selected?.id || 0),
+                              );
+                            }}
+                          />
+                        </div>
                         <div className="col-md-3">
                           <label className="form-label">Widget Key</label>
                           <input
                             className="form-control"
                             value={widget.widget_key || ""}
-                            onChange={(e) =>
-                              updateWidget(sectionIndex, widgetIndex, "widget_key", e.target.value)
-                            }
-                            placeholder="students"
+                            readOnly
                           />
-                        </div>
-                        <div className="col-md-3">
-                          <label className="form-label">Widget Name</label>
-                          <input
-                            className="form-control"
-                            value={widget.widget_name || ""}
-                            onChange={(e) =>
-                              updateWidget(sectionIndex, widgetIndex, "widget_name", e.target.value)
-                            }
-                            placeholder="Students"
-                          />
-                        </div>
-                        <div className="col-md-3">
-                          <label className="form-label">Widget Type</label>
-                          <select
-                            className="form-select"
-                            value={widget.widget_type || "Card"}
-                            onChange={(e) =>
-                              updateWidget(sectionIndex, widgetIndex, "widget_type", e.target.value)
-                            }
-                          >
-                            <option value="Card">Card</option>
-                            <option value="Chart">Chart</option>
-                            <option value="Table">Table</option>
-                            <option value="List">List</option>
-                          </select>
                         </div>
                       </div>
 
@@ -937,6 +1138,7 @@ const DashboardLayoutEditor = () => {
                             type="number"
                             className="form-control"
                             value={widget.layout?.x ?? 0}
+                            step="0.1"
                             onChange={(e) =>
                               updateLayoutField(sectionIndex, widgetIndex, "x", e.target.value)
                             }
@@ -948,6 +1150,7 @@ const DashboardLayoutEditor = () => {
                             type="number"
                             className="form-control"
                             value={widget.layout?.y ?? 0}
+                            step="0.1"
                             onChange={(e) =>
                               updateLayoutField(sectionIndex, widgetIndex, "y", e.target.value)
                             }
@@ -959,6 +1162,8 @@ const DashboardLayoutEditor = () => {
                             type="number"
                             className="form-control"
                             value={widget.layout?.w ?? 1}
+                            step="0.1"
+                            min="0.1"
                             onChange={(e) =>
                               updateLayoutField(sectionIndex, widgetIndex, "w", e.target.value)
                             }
@@ -970,6 +1175,8 @@ const DashboardLayoutEditor = () => {
                             type="number"
                             className="form-control"
                             value={widget.layout?.h ?? 1}
+                            step="0.1"
+                            min="0.1"
                             onChange={(e) =>
                               updateLayoutField(sectionIndex, widgetIndex, "h", e.target.value)
                             }
