@@ -452,8 +452,8 @@ function LessonPlan() {
       const params = {};
       if (classId) params.class_id = classId;
       if (sectionId) params.section_id = sectionId;
-      if (subjectId) params.subject_id = subjectId;
-      if (chapterId) params.chapter_id = chapterId;
+      if (subjectId) params.sm_id = subjectId;
+      if (chapterId) params.sub_subject = chapterId;
 
       console.log("Searching lesson plan with:", params);
 
@@ -464,7 +464,7 @@ function LessonPlan() {
 
       console.log("response lesson plan", response.data);
 
-      /* 🔥 FIX STARTS HERE */
+      /*  FIX STARTS HERE */
       const rawData = response?.data;
 
       const apiData = Array.isArray(rawData)

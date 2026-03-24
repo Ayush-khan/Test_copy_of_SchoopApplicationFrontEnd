@@ -207,102 +207,6 @@ const CreateLessonPlanTemplate = () => {
     }
   };
 
-  // const handleSearch = async () => {
-  //   setStudentError("");
-  //   setSubjectError("");
-  //   setChapterError("");
-
-  //   let hasError = false;
-  //   if (!selectedStudentId) {
-  //     setStudentError("Please select class.");
-  //     hasError = true;
-  //   }
-  //   if (!selectedSubjectId) {
-  //     setSubjectError("Please select subject.");
-  //     hasError = true;
-  //   }
-  //   if (!selectedChapterId) {
-  //     setChapterError("Please select chapter.");
-  //     hasError = true;
-  //   }
-  //   if (hasError) return;
-
-  //   setLoadingForSearch(true);
-  //   setLoading(true);
-
-  //   try {
-  //     const token = localStorage.getItem("authToken");
-  //     if (!token) {
-  //       toast.error("Authentication token missing. Please login again.");
-  //       return;
-  //     }
-
-  //     const params = {
-  //       class_id: selectedStudentId,
-  //       subject_id: selectedSubjectId,
-  //       chapter_id: selectedChapterId,
-  //       reg_id: roleIdValue,
-  //     };
-
-  //     const response = await axios.get(
-  //       `${API_URL}/api/get_lesson_plan_template`,
-  //       {
-  //         headers: { Authorization: `Bearer ${token}` },
-  //         params,
-  //       }
-  //     );
-
-  //     const data = response?.data?.data || [];
-
-  //     // Group by template ID
-  //     const groupedData = {};
-  //     if (data.length > 0) {
-  //       data.forEach((item) => {
-  //         const tempId = item.les_pln_temp_id;
-  //         if (!groupedData[tempId]) {
-  //           groupedData[tempId] = { les_pln_temp_id: tempId };
-  //         }
-  //         groupedData[tempId][item.lesson_plan_headings_id] = item.description;
-  //       });
-  //     }
-
-  //     const timetableForDisplay =
-  //       Object.values(groupedData).length > 0
-  //         ? Object.values(groupedData)
-  //         : [{ les_pln_temp_id: "new" }];
-
-  //     await fetchHeadings();
-
-  //     if (data.length > 0) {
-  //       const firstTemplateId = data[0].les_pln_temp_id; // <-- extract from response
-
-  //       navigate(`/lessonPlanTemplate/edit/${firstTemplateId}`, {
-  //         state: {
-  //           headings: heading,
-  //           timetable: timetableForDisplay,
-  //           selectedStudentId,
-  //           selectedSubjectId,
-  //           selectedChapterId,
-  //           selectedStudent,
-  //           selectedChapter,
-  //           selectedSubject,
-  //           les_pln_temp_id: firstTemplateId,
-  //         },
-  //       });
-  //     } else {
-  //       setStudentRemarks({});
-  //       setTimetable(timetableForDisplay);
-  //       setPageCount(Math.ceil(timetableForDisplay.length / pageSize));
-  //       setShowStudentReport(true);
-  //     }
-  //   } catch (error) {
-  //     toast.error("Error fetching Lesson Plan. Please try again.");
-  //   } finally {
-  //     setLoading(false);
-  //     setLoadingForSearch(false);
-  //   }
-  // };
-
   const handleSearch = async () => {
     setStudentError("");
     setSubjectError("");
@@ -680,14 +584,34 @@ const CreateLessonPlanTemplate = () => {
                               (opt) => opt.value === selectedStudent?.value,
                             ) || selectedStudent
                           }
+                          // onChange={(selected) => {
+                          //   setSelectedStudent(selected);
+                          //   setSelectedStudentId(
+                          //     selected ? selected.value : null,
+                          //   );
+                          //   if (selected) setStudentError("");
+                          //   // ✅ Clear error when class selected
+                          //   else setStudentError("Please select class."); // optional: if cleared again
+                          // }}
                           onChange={(selected) => {
                             setSelectedStudent(selected);
                             setSelectedStudentId(
                               selected ? selected.value : null,
                             );
-                            if (selected) setStudentError("");
-                            // ✅ Clear error when class selected
-                            else setStudentError("Please select class."); // optional: if cleared again
+
+                            if (selected) {
+                              setStudentError("");
+                            } else {
+                              setStudentError("Please select class");
+
+                              // Reset subject when student is removed
+                              setSelectedSubject(null);
+                              setSelectedSubjectId(null);
+                              setSelectedChapter(null);
+                              setSelectedChapterId(null);
+                              setSubjectError("Please select subject");
+                              setChapterError("Please select chapter");
+                            }
                           }}
                           placeholder={loadingExams ? "Loading..." : "Select"}
                           isSearchable
@@ -736,14 +660,31 @@ const CreateLessonPlanTemplate = () => {
                               (opt) => opt.value === selectedSubject?.value,
                             ) || selectedSubject
                           }
+                          // onChange={(selected) => {
+                          //   setSelectedSubject(selected);
+                          //   setSelectedSubjectId(
+                          //     selected ? selected.value : null,
+                          //   );
+                          //   if (selected)
+                          //     setSubjectError(""); //  Clear error
+                          //   else setSubjectError("Please select subject.");
+                          // }}
                           onChange={(selected) => {
                             setSelectedSubject(selected);
                             setSelectedSubjectId(
                               selected ? selected.value : null,
                             );
-                            if (selected)
-                              setSubjectError(""); //  Clear error
-                            else setSubjectError("Please select subject.");
+
+                            if (selected) {
+                              setSubjectError("");
+                            } else {
+                              setSubjectError("Please select subject");
+
+                              //  Reset chapter when subject is removed
+                              setSelectedChapter(null);
+                              setSelectedChapterId(null);
+                              setChapterError("Please select chapter");
+                            }
                           }}
                           placeholder={loadingExams ? "Loading..." : "Select"}
                           isSearchable
@@ -798,8 +739,8 @@ const CreateLessonPlanTemplate = () => {
                               selected ? selected.value : null,
                             );
                             if (selected)
-                              setChapterError(""); // ✅ Clear error
-                            else setChapterError("Please select chapter.");
+                              setChapterError(""); //  Clear error
+                            else setChapterError("Please select chapter");
                           }}
                           placeholder={loadingExams ? "Loading..." : "Select"}
                           isSearchable
