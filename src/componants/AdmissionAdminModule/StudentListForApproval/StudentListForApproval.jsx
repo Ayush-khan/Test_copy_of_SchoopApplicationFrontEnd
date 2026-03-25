@@ -461,6 +461,8 @@ const StudentListForApproval = () => {
 
       toast.success("Admission Form Approved Successfully.");
 
+      setSelectedRows([]);
+
       setTimeout(() => {
         handleSearch();
       }, [5000]);
