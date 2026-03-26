@@ -257,11 +257,21 @@ const CreateLessonPlanTemplate = () => {
         response?.data?.status === 200 &&
         response?.data?.isCreatedByRequestedUser === false
       ) {
-        toast.error(response?.data?.message || "Template already created!");
+        // toast.error(response?.data?.message || "Template already created!");
+        setTimeout(() => {
+          toast.info(response?.data?.message || "Template already created!");
+        }, 500);
         setLoading(false);
         setLoadingForSearch(false);
-        return; // stop further execution
+        // return;
       }
+
+      // add 25-03-2026
+      const isReadOnlyUser =
+        response?.data?.status === 200 &&
+        response?.data?.isCreatedByRequestedUser === false;
+
+      console.log("isreadonly", isReadOnlyUser);
 
       const data = response?.data?.data || [];
 
@@ -298,6 +308,9 @@ const CreateLessonPlanTemplate = () => {
             selectedChapter,
             selectedSubject,
             les_pln_temp_id: firstTemplateId,
+
+            // add this 25-03-2026  after lija mam discuss
+            isReadOnlyUser: isReadOnlyUser,
           },
         });
       } else {
@@ -325,14 +338,14 @@ const CreateLessonPlanTemplate = () => {
       return;
     }
 
-    // ✅ Only include headings where user entered something (either edited or existing)
+    //  Only include headings where user entered something (either edited or existing)
     const descriptions = heading
       .map((item) => {
         const userValue = studentRemarks[item.lesson_plan_headings_id]?.trim();
         const existingValue =
           timetable[0]?.[item.lesson_plan_headings_id]?.trim() || "";
 
-        // ✅ Use user input if available, otherwise skip empty fields
+        //  Use user input if available, otherwise skip empty fields
         if (userValue) {
           return {
             lesson_plan_headings_id: item.lesson_plan_headings_id,
@@ -344,7 +357,7 @@ const CreateLessonPlanTemplate = () => {
       })
       .filter((d) => d !== null);
 
-    // ✅ Check if at least one field was filled
+    //  Check if at least one field was filled
     if (descriptions.length === 0) {
       toast.error("Please enter at least one description before saving.");
       setIsSubmitting(false);

@@ -41,6 +41,10 @@ const EditLessonPlanTemplate = () => {
   const { id } = useParams();
   const { state } = useLocation();
 
+  const isReadOnlyUser = state?.isReadOnlyUser || false;
+
+  console.log("loaction read only", isReadOnlyUser);
+
   // console.log("Editing lesson plan ID:", id);
   // console.log("Passed data:", state);
 
@@ -872,46 +876,57 @@ const EditLessonPlanTemplate = () => {
   px-2
 "
                                   >
-                                    {publish === "N" ? (
+                                    {isReadOnlyUser === true ? (
                                       <>
                                         <button
-                                          onClick={handleUpdate}
-                                          className="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-4 py-2 rounded mr-2"
+                                          onClick={() =>
+                                            navigate("/lessonPlanTemplate")
+                                          }
+                                          className="bg-yellow-300 hover:bg-yellow-400 text-white font-semibold px-4 py-2 rounded"
                                         >
-                                          {loading ? "Updating" : "Update"}
-                                        </button>
-                                        <button
-                                          onClick={handleUpdatePublish}
-                                          className="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-4 py-2 rounded"
-                                        >
-                                          {loading
-                                            ? "Publishing"
-                                            : "Update & Publish"}
+                                          Back
                                         </button>
                                       </>
                                     ) : (
-                                      <button
-                                        onClick={handleUnpublish}
-                                        className="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-4 py-2 rounded"
-                                      >
-                                        {loading ? "Unpublishing" : "Unpublish"}
-                                      </button>
-                                    )}
+                                      <>
+                                        {publish === "N" ? (
+                                          <>
+                                            <button
+                                              onClick={handleUpdate}
+                                              className="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-4 py-2 rounded mr-2"
+                                            >
+                                              {loading ? "Updating" : "Update"}
+                                            </button>
+                                            <button
+                                              onClick={handleUpdatePublish}
+                                              className="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-4 py-2 rounded"
+                                            >
+                                              {loading
+                                                ? "Publishing"
+                                                : "Update & Publish"}
+                                            </button>
+                                          </>
+                                        ) : (
+                                          <button
+                                            onClick={handleUnpublish}
+                                            className="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-4 py-2 rounded"
+                                          >
+                                            {loading
+                                              ? "Unpublishing"
+                                              : "Unpublish"}
+                                          </button>
+                                        )}
 
-                                    {/* <button
-                          onClick={() => reset()}
-                          className="btn btn-danger text-white font-semibold px-4 py-2 rounded"
-                        >
-                          Reset
-                        </button> */}
-                                    <button
-                                      onClick={() =>
-                                        navigate("/lessonPlanTemplate")
-                                      }
-                                      className="bg-yellow-300 hover:bg-yellow-400 text-white font-semibold px-4 py-2 rounded"
-                                    >
-                                      Back
-                                    </button>
+                                        <button
+                                          onClick={() =>
+                                            navigate("/lessonPlanTemplate")
+                                          }
+                                          className="bg-yellow-300 hover:bg-yellow-400 text-white font-semibold px-4 py-2 rounded"
+                                        >
+                                          Back
+                                        </button>
+                                      </>
+                                    )}
                                   </div>
                                 </div>
                               </div>
