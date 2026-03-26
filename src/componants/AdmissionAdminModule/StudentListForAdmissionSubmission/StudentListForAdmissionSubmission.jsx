@@ -257,7 +257,7 @@ const StudentListForAdmissionSubmission = () => {
       );
 
       toast.success("Documents submitted successfully.");
-      // setSelectedRows([]);
+      setSelectedRows([]);
       handleSearch();
     } catch (error) {
       console.error(error);

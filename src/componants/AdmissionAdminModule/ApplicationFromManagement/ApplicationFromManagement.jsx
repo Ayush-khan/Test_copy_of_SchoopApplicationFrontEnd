@@ -57,8 +57,25 @@ function ApplicationForMangement() {
   const [formFeeError, setFormFeeError] = useState("");
   const [showViewModal, setShowViewModal] = useState(false);
 
+  const [bankAccountNames , setBankAccountNames] = useState([]);
+  const [account , setAccount] = useState({value: "" , label: "Select"});
+  const [accountError , setAccountError] = useState("");
+
+  const [accountType , setAccountType] = useState("");
+  const [accountTypeError , setAccountTypeError] = useState("");
+
+  const accountOptions = useMemo(
+    () =>
+      bankAccountNames.map((a) => ({
+        value: a.id,
+        label: `${a.account_name}`,
+      })),
+    [bankAccountNames],
+  );
+
   useEffect(() => {
     fetchExams();
+    fetchBankAccountNames();
   }, []);
 
   const fetchExams = async () => {
@@ -85,6 +102,15 @@ function ApplicationForMangement() {
     console.log("selected class", selectedOption);
     setSelectedClassId(selectedOption?.value);
   };
+
+  const handleAccountSelect = (selectedOption) => {
+    setAccountError("");
+    setAccount(selectedOption);
+  };
+
+  useEffect(() => {
+    console.log("Updated account:", account);
+  }, [account]);
 
   const classOptions = useMemo(
     () =>
@@ -120,6 +146,33 @@ function ApplicationForMangement() {
       console.log("the data of ", response.data.data);
 
       setSections(response.data.data);
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchBankAccountNames = async () => {
+    try {
+      const token = localStorage.getItem("authToken");
+
+      if (!token) {
+        throw new Error("No authentication token found");
+      }
+
+      const response = await axios.get(
+        `${API_URL}/api/admin/admission/bank-accounts`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          withCredentials: true,
+        },
+      );
+      console.log("FetchBankAccountNames Response: ", response.data.data);
+
+      setBankAccountNames(response.data.data);
     } catch (error) {
       setError(error.message);
     } finally {
@@ -204,6 +257,12 @@ function ApplicationForMangement() {
     setAgeStartDate(section.age_start_date);
     setAgeEndDate(section.age_end_date);
 
+    setAccount({
+      value: section.account_id ?? '',
+      label: section.account_name ?? "Select",
+    });
+    setAccountType(section.type);
+
     // FORM FEE
     setFormFee(section.application_form_fee);
 
@@ -215,18 +274,28 @@ function ApplicationForMangement() {
     setStartDateError("");
     setEndDateError("");
     setFormFeeError("");
+    setAccountTypeError("");
+    setAccountError("");
 
     // OPEN MODAL
     setShowEditModal(true);
   };
 
   const handleView = (section) => {
+    console.log('Selected Section: ' , section);
     setCurrentSection(section);
 
     setSelectedClass({
       label: section.class_name,
       value: section.class_id,
     });
+
+    setAccount({
+      label: section.account_name,
+      value: section.account_id,
+    });
+
+    setAccountType(section.type);
 
     setStartDate(section.start_date);
     setEndDate(section.end_date);
@@ -261,6 +330,8 @@ function ApplicationForMangement() {
     setFormFee("");
     setAgeEndDate("");
     setAgeStartDate("");
+    setAccountType("");
+    setAccount({value: "" , label: "Select"});
   };
 
   const handleSubmitAdd = async (e) => {
@@ -268,6 +339,8 @@ function ApplicationForMangement() {
 
     // Clear previous errors
     setClassError("");
+    setAccountError("");
+    setAccountTypeError("");
     setStartDateError("");
     setEndDateError("");
     setFormFeeError("");
@@ -276,6 +349,11 @@ function ApplicationForMangement() {
 
     if (!selectedClass) {
       setClassError("Please select class");
+      hasError = true;
+    }
+
+    if (account.value == "") {
+      setAccountError("Please select account");
       hasError = true;
     }
 
@@ -289,10 +367,6 @@ function ApplicationForMangement() {
       hasError = true;
     }
 
-    // if (!formFee) {
-    //   setFormFeeError("Please enter form fee");
-    //   hasError = true;
-    // }
     if (!formFee) {
       setFormFeeError("Please enter form fee");
       hasError = true;
@@ -319,6 +393,8 @@ function ApplicationForMangement() {
       publish: requiresAppointment === "Y" ? "Y" : "N",
       age_start_date: ageStartDate,
       age_end_date: ageEndDate,
+      account_id: account.value,
+      type: accountType,
     };
 
     try {
@@ -347,7 +423,8 @@ function ApplicationForMangement() {
 
   const handleSubmitEdit = async (e) => {
     e.preventDefault();
-
+    setAccountError("");
+    setAccountTypeError("");
     setStartDateError("");
     setEndDateError("");
     setFormFeeError("");
@@ -361,6 +438,11 @@ function ApplicationForMangement() {
 
     if (!endDate) {
       setEndDateError("Please select end date");
+      hasError = true;
+    }
+
+    if (!account) {
+      setAccountError("Please select account");
       hasError = true;
     }
 
@@ -395,6 +477,8 @@ function ApplicationForMangement() {
       publish: requiresAppointment === "Y" ? "Y" : "N",
       age_start_date: ageStartDate === "0000-00-00" ? "" : ageStartDate,
       age_end_date: ageEndDate === "0000-00-00" ? "" : ageEndDate,
+      account_id: account.value,
+      type: accountType,
     };
 
     try {
@@ -567,6 +651,12 @@ function ApplicationForMangement() {
                         Class
                       </th>
                       <th className="px-2 md:px-3 py-2 border border-gray-900 text-xs md:text-sm font-semibold text-center">
+                        Account
+                      </th>
+                      <th className="px-2 md:px-3 py-2 border border-gray-900 text-xs md:text-sm font-semibold text-center">
+                        Type
+                      </th>
+                      <th className="px-2 md:px-3 py-2 border border-gray-900 text-xs md:text-sm font-semibold text-center">
                         Start Date
                       </th>
                       <th className="px-2 md:px-3 py-2 border border-gray-900 text-xs md:text-sm font-semibold text-center">
@@ -620,6 +710,14 @@ function ApplicationForMangement() {
 
                           <td className="text-center px-2 md:px-3 py-2 border border-gray-900 text-xs md:text-sm">
                             {section?.class_name}
+                          </td>
+
+                          <td className="text-center px-2 md:px-3 py-2 border border-gray-900 text-xs md:text-sm">
+                            {section?.account_name}
+                          </td>
+
+                          <td className="text-center px-2 md:px-3 py-2 border border-gray-900 text-xs md:text-sm">
+                            {section?.type}
                           </td>
 
                           <td className="text-center px-2 md:px-3 py-2 border border-gray-900 text-xs md:text-sm">
@@ -778,6 +876,61 @@ function ApplicationForMangement() {
                         {classError && (
                           <div className="mt-1 text-red-500 text-xs">
                             {classError}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Account Name */}
+                    <div className="relative mb-3 flex items-center mx-4">
+                      <label htmlFor="accoutSelect" className="w-1/2 mt-2">
+                        Account <span className="text-red-500">*</span>
+                      </label>
+                      <div className="w-full md:w-[60%]">
+                        <Select
+                          id="accountSelect"
+                          options={accountOptions}
+                          value={account}
+                          onChange={handleAccountSelect}
+                          placeholder="Select"
+                          isSearchable
+                          isClearable
+                          className="text-sm"
+                          menuPortalTarget={document.body}
+                          menuPosition="fixed"
+                          styles={{
+                            menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+                          }}
+                        />
+
+                        {accountError && (
+                          <div className="mt-1 text-red-500 text-xs">
+                            {accountError}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Type */}
+                    <div className="relative mb-3 flex items-center mx-4">
+                      <label htmlFor="formFee" className="w-1/2 mt-2">
+                        Type
+                      </label>
+                      <div className="w-full md:w-[60%]">
+                        <input
+                          type="text"
+                          id="accountType"
+                          value={accountType ?? ""}
+                          onChange={(e) => {
+                            setAccountType(e.target.value);
+                            setAccountTypeError("");
+                          }}
+                          className="w-full border rounded px-3 py-2 text-sm"
+                          placeholder="Enter Type"
+                        />
+                        {accountTypeError && (
+                          <div className="mt-1 text-red-500 text-xs">
+                            {accountTypeError}
                           </div>
                         )}
                       </div>
@@ -996,6 +1149,61 @@ function ApplicationForMangement() {
                       {classError && (
                         <div className="mt-1 text-red-500 text-xs">
                           {classError}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Account Name */}
+                  <div className="relative mb-3 flex items-center mx-4">
+                    <label htmlFor="accoutSelect" className="w-1/2 mt-2">
+                      Account <span className="text-red-500">*</span>
+                    </label>
+                    <div className="w-full md:w-[60%]">
+                      <Select
+                        id="accountSelect"
+                        options={accountOptions}
+                        value={account}
+                        onChange={handleAccountSelect}
+                        placeholder="Select"
+                        isSearchable
+                        isClearable
+                        className="text-sm"
+                        menuPortalTarget={document.body}
+                        menuPosition="fixed"
+                        styles={{
+                          menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+                        }}
+                      />
+
+                      {accountError && (
+                        <div className="mt-1 text-red-500 text-xs">
+                          {accountError}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Type */}
+                  <div className="relative mb-3 flex items-center mx-4">
+                    <label htmlFor="formFee" className="w-1/2 mt-2">
+                      Type
+                    </label>
+                    <div className="w-full md:w-[60%]">
+                      <input
+                        type="text"
+                        id="accountType"
+                        value={accountType ?? ""}
+                        onChange={(e) => {
+                          setAccountType(e.target.value);
+                          setAccountTypeError("");
+                        }}
+                        className="w-full border rounded px-3 py-2 text-sm"
+                        placeholder="Enter Type"
+                      />
+                      {accountTypeError && (
+                        <div className="mt-1 text-red-500 text-xs">
+                          {accountTypeError}
                         </div>
                       )}
                     </div>
@@ -1248,6 +1456,40 @@ function ApplicationForMangement() {
                       <input
                         type="text"
                         value={selectedClass?.label || ""}
+                        readOnly
+                        disabled
+                        className="w-full bg-gray-100 border border-gray-300 rounded px-3 py-2 text-sm text-gray-700 cursor-not-allowed"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Account */}
+                  <div className="relative mb-3 flex items-center mx-4">
+                    <label  className="w-1/2 mt-2">
+                      Account
+                    </label>
+
+                    <div className="w-full md:w-[60%]">
+                      <input
+                        type="text"
+                        value={account?.label || ""}
+                        readOnly
+                        disabled
+                        className="w-full bg-gray-100 border border-gray-300 rounded px-3 py-2 text-sm text-gray-700 cursor-not-allowed"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Account */}
+                  <div className="relative mb-3 flex items-center mx-4">
+                    <label  className="w-1/2 mt-2">
+                      Type
+                    </label>
+
+                    <div className="w-full md:w-[60%]">
+                      <input
+                        type="text"
+                        value={accountType || ""}
                         readOnly
                         disabled
                         className="w-full bg-gray-100 border border-gray-300 rounded px-3 py-2 text-sm text-gray-700 cursor-not-allowed"

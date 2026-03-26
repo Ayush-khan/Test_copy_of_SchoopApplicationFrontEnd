@@ -386,7 +386,7 @@ const StudentListForSchedulingInterview = () => {
 
       toast.success("Interview scheduled successfully.");
       handleSearch();
-
+      setSelectedRows([]);
       setInterviewDate("");
       setTimeFrom("");
       setTimeTo("");
