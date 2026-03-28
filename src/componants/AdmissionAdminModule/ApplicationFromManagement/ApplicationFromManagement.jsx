@@ -430,7 +430,7 @@ function ApplicationForMangement() {
       age_start_date: ageStartDate,
       age_end_date: ageEndDate,
       account_id: account.value,
-      type: accountType.value,
+      type: accountType?.value ?? "",
     };
 
     try {
@@ -513,7 +513,7 @@ function ApplicationForMangement() {
       age_start_date: ageStartDate === "0000-00-00" ? "" : ageStartDate,
       age_end_date: ageEndDate === "0000-00-00" ? "" : ageEndDate,
       account_id: account.value,
-      type: accountType.value,
+      type: accountType?.value ?? "",
     };
 
     try {
