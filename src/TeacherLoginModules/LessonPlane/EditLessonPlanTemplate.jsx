@@ -695,7 +695,10 @@ const EditLessonPlanTemplate = () => {
                                                     //     })
                                                     //   );
                                                     // }}
-                                                    readOnly={publish === "Y"} // ⬅️ MAKE TEXTAREA READONLY
+                                                    readOnly={
+                                                      publish === "Y" ||
+                                                      isReadOnlyUser
+                                                    } // ⬅️ MAKE TEXTAREA READONLY
                                                     onChange={(e) => {
                                                       if (publish === "Y")
                                                         return; // ⬅️ PREVENT UPDATING STATE
@@ -713,6 +716,7 @@ const EditLessonPlanTemplate = () => {
                                                         ? "bg-gray-50"
                                                         : ""
                                                     }`}
+                                                    // disabled={isReadOnlyUser}
                                                     onKeyDown={(e) => {
                                                       const {
                                                         value,
