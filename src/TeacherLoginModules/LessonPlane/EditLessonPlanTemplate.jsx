@@ -712,11 +712,11 @@ const EditLessonPlanTemplate = () => {
                                                       );
                                                     }}
                                                     className={`w-full h-full resize-none p-2 border border-gray-300 focus:outline-none ${
-                                                      publish === "Y"
+                                                      publish === "Y" ||
+                                                      isReadOnlyUser
                                                         ? "bg-gray-50"
                                                         : ""
                                                     }`}
-                                                    // disabled={isReadOnlyUser}
                                                     onKeyDown={(e) => {
                                                       const {
                                                         value,
