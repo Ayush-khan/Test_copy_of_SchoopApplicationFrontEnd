@@ -947,15 +947,15 @@ const CreateLessonPlanTemplate = () => {
 
                       <div className="card-body w-full">
                         <div
-                          className=" lg:h-96 overflow-y-scroll "
-                          // overflow-x-scroll
+                          className=" h-96 overflow-y-scroll "
+                          // overflow-x-scroll  lg:h-96
                           style={{
                             scrollbarWidth: "thin",
                             scrollbarColor: "#C03178 transparent",
                           }}
                         >
                           {loading ? (
-                            <div className="bg-white absolute left-[4%] w-[100%] text-center flex justify-center items-center mt-14">
+                            <div className=" absolute left-[4%] w-[100%] text-center flex justify-center items-center mt-14">
                               <div className="text-center text-xl text-blue-700">
                                 Please wait while data is loading...
                               </div>
@@ -1296,32 +1296,6 @@ const CreateLessonPlanTemplate = () => {
                           )}
                         </div>
                       </div>
-                      {/* <div className="flex justify-end gap-2 pr-3 mb-4 mr-10">
-                        <button
-                          onClick={handleSubmit}
-                          className="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-4 py-2 rounded"
-                        >
-                          {isSubmitting ? "Saving" : "Save"}
-                        </button>
-                        <button
-                          onClick={handleSubmitPublish}
-                          className="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-4 py-2 rounded"
-                        >
-                          {isPublishing ? "Publishing" : "Save & Publish"}
-                        </button>
-                        <button
-                          onClick={() => reset()}
-                          className="btn btn-danger text-white font-semibold px-4 py-2 rounded"
-                        >
-                          Reset
-                        </button>
-                        <button
-                          onClick={() => setShowStudentReport(false)}
-                          className="bg-yellow-300 hover:bg-yellow-400 text-white font-semibold px-4 py-2 rounded"
-                        >
-                          Back
-                        </button>
-                      </div> */}
                     </div>
                   </div>
                 </>

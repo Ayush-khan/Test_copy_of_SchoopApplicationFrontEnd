@@ -37,6 +37,7 @@ const EditLessonPlanTemplate = () => {
   const [heading, setHeadings] = useState([]);
 
   const [timetable, setTimetable] = useState([]);
+  const [used, setUsed] = useState(false);
 
   const { id } = useParams();
   const { state } = useLocation();
@@ -160,6 +161,9 @@ const EditLessonPlanTemplate = () => {
 
         const data = response?.data?.data || [];
         const dataArray = Array.isArray(data) ? data : [data];
+
+        setUsed(dataArray[0].is_used);
+        console.log("lesson plan used", dataArray[0].is_used);
 
         setPublish(dataArray[0].publish);
         console.log("check pu", dataArray[0].publish);
@@ -586,7 +590,8 @@ const EditLessonPlanTemplate = () => {
 
                       <div className="card-body w-full">
                         <div
-                          className="lg:h-96 overflow-y-scroll "
+                          className="h-96 overflow-y-scroll "
+                          //lg:h-96
                           // overflow-x-scroll
                           style={{
                             scrollbarWidth: "thin",
@@ -594,7 +599,7 @@ const EditLessonPlanTemplate = () => {
                           }}
                         >
                           {loading ? (
-                            <div className="absolute left-[4%] w-[100%] text-center flex justify-center items-center mt-14">
+                            <div className="absolute left-[4%] w-[100%] text-center flex justify-center items-center md:mt-14">
                               <div className="text-center text-xl text-blue-700">
                                 Please wait while data is loading...
                               </div>
@@ -698,7 +703,7 @@ const EditLessonPlanTemplate = () => {
                                                     readOnly={
                                                       publish === "Y" ||
                                                       isReadOnlyUser
-                                                    } // ⬅️ MAKE TEXTAREA READONLY
+                                                    } // MAKE TEXTAREA READONLY
                                                     onChange={(e) => {
                                                       if (publish === "Y")
                                                         return; // ⬅️ PREVENT UPDATING STATE
@@ -911,14 +916,25 @@ const EditLessonPlanTemplate = () => {
                                             </button>
                                           </>
                                         ) : (
-                                          <button
-                                            onClick={handleUnpublish}
-                                            className="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-4 py-2 rounded"
-                                          >
-                                            {loading
-                                              ? "Unpublishing"
-                                              : "Unpublish"}
-                                          </button>
+                                          // <button
+                                          //   onClick={handleUnpublish}
+                                          //   className="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-4 py-2 rounded"
+                                          // >
+                                          //   {loading
+                                          //     ? "Unpublishing"
+                                          //     : "Unpublish"}
+                                          // </button>
+
+                                          !used && (
+                                            <button
+                                              onClick={handleUnpublish}
+                                              className="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-4 py-2 rounded"
+                                            >
+                                              {loading
+                                                ? "Unpublishing"
+                                                : "Unpublish"}
+                                            </button>
+                                          )
                                         )}
 
                                         <button

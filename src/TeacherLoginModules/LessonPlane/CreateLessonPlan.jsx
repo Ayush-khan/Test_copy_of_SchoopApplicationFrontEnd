@@ -96,6 +96,8 @@ const CreateLessonPlan = () => {
   const [toDate, setToDate] = useState(null);
   const datePickerRef = useRef(null);
 
+  const [lesPlanTempId, setLesPlanTempId] = useState("");
+
   const handleDateChange = (date) => {
     setFromDate(date);
     setWeekError("");
@@ -462,24 +464,6 @@ const CreateLessonPlan = () => {
       console.log("✅ present_data:", isPresent ? "true" : "false");
       console.log("📘 handleSearch API data:", apiData);
 
-      // if (isPresent && unqId) {
-      //   console.log("Existing lesson plan found. Navigating to Edit:", unqId);
-
-      //   navigate(`/lessonPlan/edit/${unqId}`, {
-      //     state: {
-      //       headings: heading,
-      //       selectedStudent,
-      //       selectedSubject,
-      //       selectedChapter,
-      //       selectedStudentId,
-      //       selectedSubjectId,
-      //       selectedChapterId,
-      //       unq_id: unqId,
-      //     },
-      //   });
-      //   return;
-      // }
-
       if (lessonPlanData.length === 0) {
         setTimetable([{ unq_id: "new" }]);
         setPageCount(1);
@@ -503,7 +487,10 @@ const CreateLessonPlan = () => {
           if (key !== "unq_id") remarks[key] = template[key];
         });
       });
-
+      // by mahima 31-02-2026
+      console.log("mahima lesson plan template", apiData.les_pln_temp_id);
+      setLesPlanTempId(apiData.les_pln_temp_id);
+      //
       setTimetable(timetableForDisplay);
       setStudentRemarks(remarks);
       setPageCount(Math.ceil(timetableForDisplay.length / pageSize));
@@ -628,27 +615,6 @@ const CreateLessonPlan = () => {
         descriptions[`description_${headingId}_1`] = formattedValue;
       });
 
-      // Loop daily headings (from textarea)
-      // (dailyHeading || []).forEach((item) => {
-      //   const headingId = item.lesson_plan_headings_id;
-      //   const descValue =
-      //     studentRemarks[`${headingId}_0`] ||
-      //     timetable?.[0]?.[`dc_description_${headingId}_1`] ||
-      //     "";
-
-      //   const formattedValue = descValue
-      //     .split("\n")
-      //     .map((line) => {
-      //       const trimmed = line.trim();
-      //       if (trimmed === "") return "";
-      //       return trimmed.startsWith("• ") ? trimmed : "• " + trimmed;
-      //     })
-      //     .join("\n")
-      //     .trim();
-
-      //   descriptions[`dc_description_${headingId}_1`] = formattedValue;
-      // });
-      // ✅ CodeIgniter-style daily change logic
       rows.forEach((row, rowIndex) => {
         (dailyHeading || []).forEach((item) => {
           const headingId = item.lesson_plan_headings_id;
@@ -666,7 +632,7 @@ const CreateLessonPlan = () => {
             .join("\n")
             .trim();
 
-          // 🔥 IMPORTANT: rowIndex + 1 (PHP starts from 1)
+          // IMPORTANT: rowIndex + 1 (PHP starts from 1)
           descriptions[`dc_description_${headingId}_${rowIndex + 1}`] =
             formattedValue;
         });
@@ -682,13 +648,6 @@ const CreateLessonPlan = () => {
         return;
       }
 
-      // 🔸 Validate teaching points (daily)
-      // const hasTeachingPoints = (dailyHeading || []).some((item) => {
-      //   const val =
-      //     descriptions[`dc_description_${item.lesson_plan_headings_id}_1`] ||
-      //     "";
-      //   return val.trim() !== "";
-      // });
       const hasTeachingPoints = rows.some((_, rowIndex) =>
         (dailyHeading || []).some((item) => {
           const val =
@@ -713,7 +672,7 @@ const CreateLessonPlan = () => {
         class_id_array: classIdArray,
         no_of_periods: numPeriods?.toString() || "1",
         weeklyDatePicker: weekRange,
-        les_pln_temp_id: timetable?.[0]?.les_pln_temp_id || "new",
+        les_pln_temp_id: lesPlanTempId || "new",
         approve: "N",
         lph_dc_row: rows.length.toString(),
         start_date: rows.map((row) => row.startDate),
