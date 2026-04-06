@@ -135,7 +135,7 @@ const WidgetsCrud = () => {
     setIsSubmitting(true);
     try {
       await api.post(
-        "/widget/add",
+        "/api/widget/add",
         {
           widget_key: formData.widget_key,
           widget_name: formData.widget_name,
@@ -165,8 +165,8 @@ const WidgetsCrud = () => {
     setIsSubmitting(true);
     try {
       const widgetId = getWidgetId(currentWidget);
-      await api.put(
-        "/widget/update",
+      await api.post(
+        "/api/widget/update",
         {
           widget_key: formData.widget_key,
           widget_name: formData.widget_name,
@@ -192,7 +192,7 @@ const WidgetsCrud = () => {
     try {
       const widgetId = getWidgetId(currentWidget);
       if (!widgetId) throw new Error("Widget ID is missing");
-      await api.delete(`/widget/delete/${widgetId}`, { withCredentials: true });
+      await api.delete(`/api/widget/delete/${widgetId}`, { withCredentials: true });
       await fetchWidgets();
       handleCloseModal();
       toast.success("Widget deleted successfully!");

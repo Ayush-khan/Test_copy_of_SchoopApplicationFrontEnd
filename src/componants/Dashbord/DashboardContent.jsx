@@ -50,6 +50,9 @@ const DashboardContent = () => {
         if (roleId === "M" && sortName === "SACS") {
             return api.get("/api/principal/dashboard/summary");
         }
+        if (roleId === "L") {
+            return api.get("/api/library/dashboard");
+        }
         return api.get("/api/admin/dashboard/summary");
     };
 
@@ -154,7 +157,7 @@ const DashboardContent = () => {
 
     return (
         <DashboardRenderer
-            sections={dashboardStructure.sections || []}
+            sections={dashboardStructure?.sections || []}
             dashboardData={dashboardData}
             sessionInfo={sessionInfo}
         />

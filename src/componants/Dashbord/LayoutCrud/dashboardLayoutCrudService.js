@@ -44,8 +44,13 @@ const stripClientKeys = (payload) => {
   cloned.sections = (cloned.sections || []).map((section) => ({
     ...section,
     widgets: (section.widgets || []).map((widget) => {
-      const { __clientKey, ...rest } = widget || {};
-      return rest;
+      const { __clientKey, widget_id, ...rest } = widget || {};
+      const dashboardWidgetId =
+        Number(rest?.dashboard_widget_id || 0) || Number(widget_id || 0) || 0;
+      return {
+        ...rest,
+        dashboard_widget_id: dashboardWidgetId,
+      };
     }),
   }));
   return cloned;
@@ -108,36 +113,15 @@ const normalizeLayout = (payload, sourceLayouts = []) => {
       return Math.max(max, sectionMax);
     }, 0) + 1;
 
-  const nextWidgetId =
-    sourceLayouts.reduce((max, layout) => {
-      const widgetMax = (layout?.sections || []).reduce(
-        (sectionMax, section) => {
-          const maxInSection = (section?.widgets || []).reduce(
-            (widgetMaxValue, widget) =>
-              Math.max(
-                widgetMaxValue,
-                Number(widget?.dashboard_widget_id || 0),
-              ),
-            0,
-          );
-          return Math.max(sectionMax, maxInSection);
-        },
-        0,
-      );
-      return Math.max(max, widgetMax);
-    }, 0) + 1;
-
   let sectionCounter = nextSectionId;
-  let widgetCounter = nextWidgetId;
 
   const normalizedSections = sections.map((section, sectionIndex) => {
     const widgets = Array.isArray(section?.widgets) ? section.widgets : [];
     const normalizedWidgets = widgets.map((widget) => {
       const layout = widget?.layout || {};
-      const dashboard_widget_id =
-        Number(widget?.dashboard_widget_id || 0) || widgetCounter++;
       return {
-        dashboard_widget_id,
+        dashboard_widget_id: Number(widget?.widget_id || 0),
+        widget_id: Number(widget?.widget_id || 0),
         widget_key: String(widget?.widget_key || "").trim(),
         widget_name: String(widget?.widget_name || "").trim(),
         widget_type: String(widget?.widget_type || "Card").trim(),
@@ -180,9 +164,11 @@ const fetchSessionInfo = async () => {
   return { roleId, sortName };
 };
 
-const fetchRemoteLayouts = async () => {
+const fetchRemoteLayouts = async ({ roleOverride, sortNameOverride } = {}) => {
   try {
-    const { roleId, sortName } = await fetchSessionInfo();
+    const sessionInfo = await fetchSessionInfo();
+    const roleId = roleOverride || sessionInfo.roleId;
+    const sortName = sortNameOverride || sessionInfo.sortName;
     if (!roleId) return [];
 
     const endpoints = [
@@ -243,7 +229,7 @@ const getMaxWidgetId = (layouts) =>
     const widgetMax = (layout?.sections || []).reduce((sectionMax, section) => {
       const maxInSection = (section?.widgets || []).reduce(
         (widgetMaxValue, widget) =>
-          Math.max(widgetMaxValue, Number(widget?.dashboard_widget_id || 0)),
+          Math.max(widgetMaxValue, Number(widget?.widget_id || 0)),
         0,
       );
       return Math.max(sectionMax, maxInSection);
@@ -258,11 +244,27 @@ export const dashboardLayoutCrudService = {
     return clone(mergeLayouts(remoteLayouts, store));
   },
 
-  async getById(id) {
+  async getById(id, options = {}) {
+    if (options?.roleOverride || options?.sortNameOverride) {
+      const remoteLayouts = await fetchRemoteLayouts(options);
+      const found =
+        remoteLayouts.find(
+          (item) => Number(item?.dashboard?.dashboard_id) === Number(id),
+        ) || remoteLayouts[0];
+      return found ? clone(found) : null;
+    }
+
     const layouts = await this.list();
-    const found = layouts.find(
+    let found = layouts.find(
       (item) => Number(item?.dashboard?.dashboard_id) === Number(id),
     );
+    if (found) return clone(found);
+
+    const remoteLayouts = await fetchRemoteLayouts(options);
+    found =
+      remoteLayouts.find(
+        (item) => Number(item?.dashboard?.dashboard_id) === Number(id),
+      ) || remoteLayouts[0];
     return found ? clone(found) : null;
   },
 

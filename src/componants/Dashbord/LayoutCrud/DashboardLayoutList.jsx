@@ -170,7 +170,7 @@ const DashboardLayoutList = () => {
                                 className="btn btn-sm btn-outline-primary"
                                 onClick={() =>
                                   navigate(
-                                    `/dashboard-layout-crud/${dashboardId}`,
+                                    `/dashboard-layout-crud/${dashboardId}?role=${dashboardRole || ""}`,
                                   )
                                 }
                                 title="Edit"

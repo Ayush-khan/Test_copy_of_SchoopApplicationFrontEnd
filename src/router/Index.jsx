@@ -323,6 +323,9 @@ import BookIssuedReport from "../componants/MasterModuleLibrarian/LibraryReports
 import BooksNonReturnReport from "../componants/MasterModuleLibrarian/LibraryReports/BooksNonReturnReport.jsx";
 import MonthlyBookIssueReport from "../componants/MasterModuleLibrarian/LibraryReports/MonthlyBookIssueReport.jsx";
 import HSCSStudentSubjectGroupReport from "../componants/Reports/HSCSStudentSubjectGroupReport.jsx";
+import PeriodicalsReminder from "../componants/MasterModuleLibrarian/LibraryDashboardListing/PeriodicalsReminder.jsx";
+import SubscriptionReminder from "../componants/MasterModuleLibrarian/LibraryDashboardListing/SubscriptionReminder.jsx";
+import BookReturnPending from "../componants/MasterModuleLibrarian/LibraryDashboardListing/BookReturnPending.jsx";
 function Index() {
   return (
     <Routes>
@@ -1651,6 +1654,18 @@ function Index() {
         <Route
           path="/returnBook"
           element={<PrivateRoute element={<ReturnBook />} />}
+        />
+        <Route
+          path="/subscriptionReminder"
+          element={<PrivateRoute element={<SubscriptionReminder />} />}
+        />
+        <Route
+          path="/periodicalsReminder"
+          element={<PrivateRoute element={<PeriodicalsReminder />} />}
+        />
+        <Route
+          path="/bookReturnPending"
+          element={<PrivateRoute element={<BookReturnPending />} />}
         />
         {/* Admission module for Admin */}
         {/* Admission module for Admin */}

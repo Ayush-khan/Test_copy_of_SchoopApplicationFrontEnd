@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { Responsive, useContainerWidth } from "react-grid-layout";
 import Select from "react-select";
 import { dashboardLayoutCrudService } from "./dashboardLayoutCrudService";
@@ -34,8 +34,9 @@ const unscaleFromGrid = (value) => {
   return Number.isFinite(numeric) ? roundTenth(numeric / GRID_SCALE) : 0;
 };
 
-const createWidgetWithId = (widgetId, clientKey) => ({
-  dashboard_widget_id: Number(widgetId) || 0,
+const createWidgetWithId = (_widgetId, clientKey) => ({
+  dashboard_widget_id: 0,
+  widget_id: 0,
   __clientKey: clientKey,
   widget_key: "",
   widget_name: "",
@@ -68,6 +69,7 @@ const toSectionLayouts = (widgets = []) => {
     const i = String(
       widget?.__clientKey ||
       widget?.dashboard_widget_id ||
+      widget?.widget_id ||
       `${widget?.widget_key}-${index}`,
     );
     return {
@@ -84,6 +86,7 @@ const toSectionLayouts = (widgets = []) => {
     const i = String(
       widget?.__clientKey ||
       widget?.dashboard_widget_id ||
+      widget?.widget_id ||
       `${widget?.widget_key}-${index}`,
     );
     return {
@@ -100,6 +103,7 @@ const toSectionLayouts = (widgets = []) => {
     const i = String(
       widget?.__clientKey ||
       widget?.dashboard_widget_id ||
+      widget?.widget_id ||
       `${widget?.widget_key}-${index}`,
     );
     return {
@@ -167,6 +171,7 @@ const SectionLayoutPreview = ({
             const key = String(
               widget?.__clientKey ||
               widget?.dashboard_widget_id ||
+              widget?.widget_id ||
               `${widget?.widget_key || "widget"}-${index}`,
             );
             return (
@@ -245,6 +250,8 @@ const DashboardLayoutPreviewPanel = ({
 
 const DashboardLayoutEditor = () => {
   const { id } = useParams();
+  const [searchParams] = useSearchParams();
+  const roleOverride = searchParams.get("role") || "";
   const navigate = useNavigate();
   const isCreate = !id || id === "new";
 
@@ -252,7 +259,6 @@ const DashboardLayoutEditor = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
-  const [nextWidgetId, setNextWidgetId] = useState(1);
   const [isPreviewMode, setIsPreviewMode] = useState(false);
   const [showFloatingSave, setShowFloatingSave] = useState(false);
   const clientKeyRef = useRef(0);
@@ -403,18 +409,25 @@ const DashboardLayoutEditor = () => {
   useEffect(() => {
     const load = async () => {
       setLoading(true);
-      const suggestedWidgetId = await dashboardLayoutCrudService.getNextWidgetId();
-      setNextWidgetId(suggestedWidgetId);
-
       if (isCreate) {
-        setForm(createLayoutWithWidgetId(suggestedWidgetId, makeClientKey()));
+        setForm(createLayoutWithWidgetId(0, makeClientKey()));
         setSectionDraft({ section_name: `Section ${1}`, section_order: 1 });
-        setNextWidgetId((prev) => prev + 1);
         setLoading(false);
         return;
       }
 
-      const found = await dashboardLayoutCrudService.getById(id);
+      let sortNameOverride = "";
+      if (!sessionInfo) {
+        const nextSession = await loadSessionInfo();
+        sortNameOverride = nextSession?.sortName || "";
+      } else {
+        sortNameOverride = sessionInfo?.sortName || "";
+      }
+
+      const found = await dashboardLayoutCrudService.getById(id, {
+        roleOverride: roleOverride || undefined,
+        sortNameOverride: sortNameOverride || undefined,
+      });
       if (!found) {
         setError("Dashboard layout not found.");
       } else {
@@ -449,6 +462,12 @@ const DashboardLayoutEditor = () => {
         ...section,
         widgets: (section.widgets || []).map((widget) => {
           if (widget.widget_type_id) return widget;
+          if (Number.isFinite(Number(widget.widget_type))) {
+            return {
+              ...widget,
+              widget_type_id: Number(widget.widget_type),
+            };
+          }
           const typeId = getTypeIdByName(widget.widget_type);
           return typeId ? { ...widget, widget_type_id: typeId } : widget;
         }),
@@ -460,7 +479,11 @@ const DashboardLayoutEditor = () => {
     const typeIds = new Set();
     (form.sections || []).forEach((section) => {
       (section.widgets || []).forEach((widget) => {
-        const typeId = widget.widget_type_id || getTypeIdByName(widget.widget_type);
+        const typeId =
+          widget.widget_type_id ||
+          (Number.isFinite(Number(widget.widget_type))
+            ? Number(widget.widget_type)
+            : getTypeIdByName(widget.widget_type));
         if (typeId) typeIds.add(String(typeId));
       });
     });
@@ -522,15 +545,13 @@ const DashboardLayoutEditor = () => {
   };
 
   const addSection = (options = {}) => {
-    const allocatedWidgetId = nextWidgetId;
-    setNextWidgetId((prev) => prev + 1);
     setForm((prev) => ({
       ...prev,
       sections: [
         ...prev.sections,
         createSectionWithWidgetId(
           prev.sections.length,
-          allocatedWidgetId,
+          0,
           options,
           makeClientKey(),
         ),
@@ -545,13 +566,12 @@ const DashboardLayoutEditor = () => {
   const removeSection = (sectionIndex) => {
     setForm((prev) => {
       const nextSections = prev.sections.filter((_, idx) => idx !== sectionIndex);
-      const fallbackSection = createSectionWithWidgetId(0, nextWidgetId, {}, makeClientKey());
+      const fallbackSection = createSectionWithWidgetId(0, 0, {}, makeClientKey());
       return {
         ...prev,
         sections: nextSections.length ? nextSections : [fallbackSection],
       };
     });
-    setNextWidgetId((prev) => prev + 1);
   };
 
   const handleCreateSectionFromDraft = () => {
@@ -572,25 +592,17 @@ const DashboardLayoutEditor = () => {
   };
 
   const addWidget = (sectionIndex) => {
-    const allocatedWidgetId = nextWidgetId;
-    setNextWidgetId((prev) => prev + 1);
     setForm((prev) => {
       const nextSections = [...prev.sections];
       nextSections[sectionIndex] = {
         ...nextSections[sectionIndex],
         widgets: [
           ...(nextSections[sectionIndex].widgets || []),
-          createWidgetWithId(allocatedWidgetId, makeClientKey()),
+          createWidgetWithId(0, makeClientKey()),
         ],
       };
       return { ...prev, sections: nextSections };
     });
-  };
-
-  const assignNextWidgetId = (sectionIndex, widgetIndex) => {
-    const allocatedWidgetId = nextWidgetId;
-    setNextWidgetId((prev) => prev + 1);
-    updateWidget(sectionIndex, widgetIndex, "dashboard_widget_id", allocatedWidgetId);
   };
 
   const removeWidget = (sectionIndex, widgetIndex) => {
@@ -602,11 +614,10 @@ const DashboardLayoutEditor = () => {
         ...nextSections[sectionIndex],
         widgets: nextWidgets.length
           ? nextWidgets
-          : [createWidgetWithId(nextWidgetId, makeClientKey())],
+          : [createWidgetWithId(0, makeClientKey())],
       };
       return { ...prev, sections: nextSections };
     });
-    setNextWidgetId((prev) => prev + 1);
   };
 
   const updateWidget = (sectionIndex, widgetIndex, key, value) => {
@@ -647,6 +658,7 @@ const DashboardLayoutEditor = () => {
         const key = String(
           widget?.__clientKey ||
           widget?.dashboard_widget_id ||
+          widget?.widget_id ||
           `${widget?.widget_key || "widget"}-${widgetIndex}`,
         );
         const nextItem = layoutMap.get(key);
@@ -670,7 +682,7 @@ const DashboardLayoutEditor = () => {
 
   const removeWidgetFromPreview = (sectionIndex, widget) => {
     const keyToRemove =
-      widget?.__clientKey || widget?.dashboard_widget_id || widget?.widget_key;
+      widget?.__clientKey || widget?.dashboard_widget_id || widget?.widget_id || widget?.widget_key;
     if (!keyToRemove) return;
 
     setForm((prev) => {
@@ -680,7 +692,7 @@ const DashboardLayoutEditor = () => {
 
       const nextWidgets = (section.widgets || []).filter((item) => {
         const key =
-          item?.__clientKey || item?.dashboard_widget_id || item?.widget_key;
+          item?.__clientKey || item?.dashboard_widget_id || item?.widget_id || item?.widget_key;
         return key !== keyToRemove;
       });
 
@@ -707,12 +719,12 @@ const DashboardLayoutEditor = () => {
         }
         if (!widget?.widget_name?.trim()) return "Each widget must have widget name.";
         if (!widget?.widget_key?.trim()) return "Each widget must have widget key.";
-        if (!Number(widget?.dashboard_widget_id || 0)) {
+        if (!Number(widget?.widget_id || 0)) {
           return "Each widget must have a valid widget id.";
         }
-        const widgetId = Number(widget?.dashboard_widget_id || 0);
-        if (!widgetId) return "Each widget must have a valid dashboard_widget_id.";
-        if (widgetIds.has(widgetId)) return "dashboard_widget_id must be unique.";
+        const widgetId = Number(widget?.widget_id || 0);
+        if (!widgetId) return "Each widget must have a valid widget id.";
+        if (widgetIds.has(widgetId)) return "widget_id must be unique.";
         widgetIds.add(widgetId);
       }
     }
@@ -980,14 +992,14 @@ const DashboardLayoutEditor = () => {
 
                   {(section.widgets || []).map((widget, widgetIndex) => (
                     <div
-                      key={`widget-${widget.dashboard_widget_id}-${widgetIndex}`}
+                      key={`widget-${widget.widget_id || widget.dashboard_widget_id}-${widgetIndex}`}
                       className="mb-3 rounded-xl border border-slate-200 bg-slate-50 p-3"
                     >
                       <div className="d-flex align-items-center justify-content-between mb-2">
                         <strong className="small">
                           Widget {widgetIndex + 1}{" "}
                           <span className="badge bg-light text-dark border">
-                            ID: {widget.dashboard_widget_id || "-"}
+                            ID: {widget.widget_id || "-"}
                           </span>
                         </strong>
                         <button
@@ -1006,7 +1018,7 @@ const DashboardLayoutEditor = () => {
                             <input
                               type="number"
                               className="form-control"
-                              value={widget.dashboard_widget_id || ""}
+                              value={widget.widget_id || ""}
                               readOnly
                             />
                           </div>
@@ -1018,9 +1030,12 @@ const DashboardLayoutEditor = () => {
                             classNamePrefix="react-select"
                             isLoading={widgetTypesLoading}
                             value={(() => {
-                              const typeId =
+                              const rawTypeId =
                                 widget.widget_type_id ||
-                                getTypeIdByName(widget.widget_type);
+                                (Number.isFinite(Number(widget.widget_type))
+                                  ? Number(widget.widget_type)
+                                  : "");
+                              const typeId = rawTypeId || getTypeIdByName(widget.widget_type);
                               const match = widgetTypes.find(
                                 (type) => String(type.id) === String(typeId),
                               );
@@ -1040,6 +1055,7 @@ const DashboardLayoutEditor = () => {
                               updateWidget(sectionIndex, widgetIndex, "widget_type", nextTypeName);
                               updateWidget(sectionIndex, widgetIndex, "widget_name", "");
                               updateWidget(sectionIndex, widgetIndex, "widget_key", "");
+                              updateWidget(sectionIndex, widgetIndex, "widget_id", 0);
                               updateWidget(sectionIndex, widgetIndex, "dashboard_widget_id", 0);
                               fetchWidgetsByType(nextTypeId);
                             }}
@@ -1050,33 +1066,50 @@ const DashboardLayoutEditor = () => {
                           <Select
                             classNamePrefix="react-select"
                             isLoading={(() => {
-                              const typeId =
+                              const rawTypeId =
                                 widget.widget_type_id ||
-                                getTypeIdByName(widget.widget_type);
+                                (Number.isFinite(Number(widget.widget_type))
+                                  ? Number(widget.widget_type)
+                                  : "");
+                              const typeId = rawTypeId || getTypeIdByName(widget.widget_type);
                               return typeId ? !!widgetsLoading[typeId] : false;
                             })()}
                             isDisabled={
                               !(
                                 widget.widget_type_id ||
+                                Number.isFinite(Number(widget.widget_type)) ||
                                 getTypeIdByName(widget.widget_type)
                               )
                             }
                             value={(() => {
-                              const typeId =
+                              const rawTypeId =
                                 widget.widget_type_id ||
-                                getTypeIdByName(widget.widget_type);
+                                (Number.isFinite(Number(widget.widget_type))
+                                  ? Number(widget.widget_type)
+                                  : "");
+                              const typeId = rawTypeId || getTypeIdByName(widget.widget_type);
                               const options = widgetsByType[typeId] || [];
-                              const selected = options.find(
-                                (opt) => String(opt.name) === String(widget.widget_name),
-                              );
+                              const selected =
+                                options.find(
+                                  (opt) => String(opt.id) === String(widget.widget_id),
+                                ) ||
+                                options.find(
+                                  (opt) => String(opt.name) === String(widget.widget_name),
+                                ) ||
+                                options.find(
+                                  (opt) => String(opt.key) === String(widget.widget_key),
+                                );
                               return selected
                                 ? { value: selected.id, label: selected.name }
                                 : null;
                             })()}
                             options={(() => {
-                              const typeId =
+                              const rawTypeId =
                                 widget.widget_type_id ||
-                                getTypeIdByName(widget.widget_type);
+                                (Number.isFinite(Number(widget.widget_type))
+                                  ? Number(widget.widget_type)
+                                  : "");
+                              const typeId = rawTypeId || getTypeIdByName(widget.widget_type);
                               const options = widgetsByType[typeId] || [];
                               return options.map((opt) => ({
                                 value: opt.id,
@@ -1085,17 +1118,23 @@ const DashboardLayoutEditor = () => {
                               }));
                             })()}
                             placeholder={(() => {
-                              const typeId =
+                              const rawTypeId =
                                 widget.widget_type_id ||
-                                getTypeIdByName(widget.widget_type);
+                                (Number.isFinite(Number(widget.widget_type))
+                                  ? Number(widget.widget_type)
+                                  : "");
+                              const typeId = rawTypeId || getTypeIdByName(widget.widget_type);
                               if (!typeId) return "Select type first";
                               if (widgetsLoading[typeId]) return "Loading...";
                               return "Select Widget";
                             })()}
                             onChange={(option) => {
-                              const typeId =
+                              const rawTypeId =
                                 widget.widget_type_id ||
-                                getTypeIdByName(widget.widget_type);
+                                (Number.isFinite(Number(widget.widget_type))
+                                  ? Number(widget.widget_type)
+                                  : "");
+                              const typeId = rawTypeId || getTypeIdByName(widget.widget_type);
                               const options = widgetsByType[typeId] || [];
                               const selected = options.find(
                                 (opt) => String(opt.id) === String(option?.value),
@@ -1115,7 +1154,7 @@ const DashboardLayoutEditor = () => {
                               updateWidget(
                                 sectionIndex,
                                 widgetIndex,
-                                "dashboard_widget_id",
+                                "widget_id",
                                 Number(selected?.id || 0),
                               );
                             }}
