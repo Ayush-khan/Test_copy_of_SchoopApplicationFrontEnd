@@ -232,7 +232,7 @@ const Card = ({
               )}
 
               <div
-                className={`${styles["card-title"]} text-gray-600`}
+                className={`${styles["card-title"]} text-gray-600 text-center`}
                 style={{ fontSize: ".8em", fontWeight: "600" }}
               >
                 {title}
