@@ -207,102 +207,6 @@ const CreateLessonPlanTemplate = () => {
     }
   };
 
-  // const handleSearch = async () => {
-  //   setStudentError("");
-  //   setSubjectError("");
-  //   setChapterError("");
-
-  //   let hasError = false;
-  //   if (!selectedStudentId) {
-  //     setStudentError("Please select class.");
-  //     hasError = true;
-  //   }
-  //   if (!selectedSubjectId) {
-  //     setSubjectError("Please select subject.");
-  //     hasError = true;
-  //   }
-  //   if (!selectedChapterId) {
-  //     setChapterError("Please select chapter.");
-  //     hasError = true;
-  //   }
-  //   if (hasError) return;
-
-  //   setLoadingForSearch(true);
-  //   setLoading(true);
-
-  //   try {
-  //     const token = localStorage.getItem("authToken");
-  //     if (!token) {
-  //       toast.error("Authentication token missing. Please login again.");
-  //       return;
-  //     }
-
-  //     const params = {
-  //       class_id: selectedStudentId,
-  //       subject_id: selectedSubjectId,
-  //       chapter_id: selectedChapterId,
-  //       reg_id: roleIdValue,
-  //     };
-
-  //     const response = await axios.get(
-  //       `${API_URL}/api/get_lesson_plan_template`,
-  //       {
-  //         headers: { Authorization: `Bearer ${token}` },
-  //         params,
-  //       }
-  //     );
-
-  //     const data = response?.data?.data || [];
-
-  //     // Group by template ID
-  //     const groupedData = {};
-  //     if (data.length > 0) {
-  //       data.forEach((item) => {
-  //         const tempId = item.les_pln_temp_id;
-  //         if (!groupedData[tempId]) {
-  //           groupedData[tempId] = { les_pln_temp_id: tempId };
-  //         }
-  //         groupedData[tempId][item.lesson_plan_headings_id] = item.description;
-  //       });
-  //     }
-
-  //     const timetableForDisplay =
-  //       Object.values(groupedData).length > 0
-  //         ? Object.values(groupedData)
-  //         : [{ les_pln_temp_id: "new" }];
-
-  //     await fetchHeadings();
-
-  //     if (data.length > 0) {
-  //       const firstTemplateId = data[0].les_pln_temp_id; // <-- extract from response
-
-  //       navigate(`/lessonPlanTemplate/edit/${firstTemplateId}`, {
-  //         state: {
-  //           headings: heading,
-  //           timetable: timetableForDisplay,
-  //           selectedStudentId,
-  //           selectedSubjectId,
-  //           selectedChapterId,
-  //           selectedStudent,
-  //           selectedChapter,
-  //           selectedSubject,
-  //           les_pln_temp_id: firstTemplateId,
-  //         },
-  //       });
-  //     } else {
-  //       setStudentRemarks({});
-  //       setTimetable(timetableForDisplay);
-  //       setPageCount(Math.ceil(timetableForDisplay.length / pageSize));
-  //       setShowStudentReport(true);
-  //     }
-  //   } catch (error) {
-  //     toast.error("Error fetching Lesson Plan. Please try again.");
-  //   } finally {
-  //     setLoading(false);
-  //     setLoadingForSearch(false);
-  //   }
-  // };
-
   const handleSearch = async () => {
     setStudentError("");
     setSubjectError("");
@@ -353,11 +257,21 @@ const CreateLessonPlanTemplate = () => {
         response?.data?.status === 200 &&
         response?.data?.isCreatedByRequestedUser === false
       ) {
-        toast.error(response?.data?.message || "Template already created!");
+        // toast.error(response?.data?.message || "Template already created!");
+        setTimeout(() => {
+          toast.info(response?.data?.message || "Template already created!");
+        }, 300);
         setLoading(false);
         setLoadingForSearch(false);
-        return; // stop further execution
+        // return;
       }
+
+      // add 25-03-2026
+      const isReadOnlyUser =
+        response?.data?.status === 200 &&
+        response?.data?.isCreatedByRequestedUser === false;
+
+      console.log("isreadonly", isReadOnlyUser);
 
       const data = response?.data?.data || [];
 
@@ -394,6 +308,9 @@ const CreateLessonPlanTemplate = () => {
             selectedChapter,
             selectedSubject,
             les_pln_temp_id: firstTemplateId,
+
+            // add this 25-03-2026  after lija mam discuss
+            isReadOnlyUser: isReadOnlyUser,
           },
         });
       } else {
@@ -421,14 +338,14 @@ const CreateLessonPlanTemplate = () => {
       return;
     }
 
-    // ✅ Only include headings where user entered something (either edited or existing)
+    //  Only include headings where user entered something (either edited or existing)
     const descriptions = heading
       .map((item) => {
         const userValue = studentRemarks[item.lesson_plan_headings_id]?.trim();
         const existingValue =
           timetable[0]?.[item.lesson_plan_headings_id]?.trim() || "";
 
-        // ✅ Use user input if available, otherwise skip empty fields
+        //  Use user input if available, otherwise skip empty fields
         if (userValue) {
           return {
             lesson_plan_headings_id: item.lesson_plan_headings_id,
@@ -440,7 +357,7 @@ const CreateLessonPlanTemplate = () => {
       })
       .filter((d) => d !== null);
 
-    // ✅ Check if at least one field was filled
+    //  Check if at least one field was filled
     if (descriptions.length === 0) {
       toast.error("Please enter at least one description before saving.");
       setIsSubmitting(false);
@@ -680,14 +597,34 @@ const CreateLessonPlanTemplate = () => {
                               (opt) => opt.value === selectedStudent?.value,
                             ) || selectedStudent
                           }
+                          // onChange={(selected) => {
+                          //   setSelectedStudent(selected);
+                          //   setSelectedStudentId(
+                          //     selected ? selected.value : null,
+                          //   );
+                          //   if (selected) setStudentError("");
+                          //   // ✅ Clear error when class selected
+                          //   else setStudentError("Please select class."); // optional: if cleared again
+                          // }}
                           onChange={(selected) => {
                             setSelectedStudent(selected);
                             setSelectedStudentId(
                               selected ? selected.value : null,
                             );
-                            if (selected) setStudentError("");
-                            // ✅ Clear error when class selected
-                            else setStudentError("Please select class."); // optional: if cleared again
+
+                            if (selected) {
+                              setStudentError("");
+                            } else {
+                              setStudentError("Please select class");
+
+                              // Reset subject when student is removed
+                              setSelectedSubject(null);
+                              setSelectedSubjectId(null);
+                              setSelectedChapter(null);
+                              setSelectedChapterId(null);
+                              setSubjectError("Please select subject");
+                              setChapterError("Please select chapter");
+                            }
                           }}
                           placeholder={loadingExams ? "Loading..." : "Select"}
                           isSearchable
@@ -736,14 +673,31 @@ const CreateLessonPlanTemplate = () => {
                               (opt) => opt.value === selectedSubject?.value,
                             ) || selectedSubject
                           }
+                          // onChange={(selected) => {
+                          //   setSelectedSubject(selected);
+                          //   setSelectedSubjectId(
+                          //     selected ? selected.value : null,
+                          //   );
+                          //   if (selected)
+                          //     setSubjectError(""); //  Clear error
+                          //   else setSubjectError("Please select subject.");
+                          // }}
                           onChange={(selected) => {
                             setSelectedSubject(selected);
                             setSelectedSubjectId(
                               selected ? selected.value : null,
                             );
-                            if (selected)
-                              setSubjectError(""); //  Clear error
-                            else setSubjectError("Please select subject.");
+
+                            if (selected) {
+                              setSubjectError("");
+                            } else {
+                              setSubjectError("Please select subject");
+
+                              //  Reset chapter when subject is removed
+                              setSelectedChapter(null);
+                              setSelectedChapterId(null);
+                              setChapterError("Please select chapter");
+                            }
                           }}
                           placeholder={loadingExams ? "Loading..." : "Select"}
                           isSearchable
@@ -798,8 +752,8 @@ const CreateLessonPlanTemplate = () => {
                               selected ? selected.value : null,
                             );
                             if (selected)
-                              setChapterError(""); // ✅ Clear error
-                            else setChapterError("Please select chapter.");
+                              setChapterError(""); //  Clear error
+                            else setChapterError("Please select chapter");
                           }}
                           placeholder={loadingExams ? "Loading..." : "Select"}
                           isSearchable
@@ -993,15 +947,15 @@ const CreateLessonPlanTemplate = () => {
 
                       <div className="card-body w-full">
                         <div
-                          className=" lg:h-96 overflow-y-scroll "
-                          // overflow-x-scroll
+                          className=" h-96 overflow-y-scroll "
+                          // overflow-x-scroll  lg:h-96
                           style={{
                             scrollbarWidth: "thin",
                             scrollbarColor: "#C03178 transparent",
                           }}
                         >
                           {loading ? (
-                            <div className="bg-white absolute left-[4%] w-[100%] text-center flex justify-center items-center mt-14">
+                            <div className=" absolute left-[4%] w-[100%] text-center flex justify-center items-center mt-14">
                               <div className="text-center text-xl text-blue-700">
                                 Please wait while data is loading...
                               </div>
@@ -1342,32 +1296,6 @@ const CreateLessonPlanTemplate = () => {
                           )}
                         </div>
                       </div>
-                      {/* <div className="flex justify-end gap-2 pr-3 mb-4 mr-10">
-                        <button
-                          onClick={handleSubmit}
-                          className="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-4 py-2 rounded"
-                        >
-                          {isSubmitting ? "Saving" : "Save"}
-                        </button>
-                        <button
-                          onClick={handleSubmitPublish}
-                          className="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-4 py-2 rounded"
-                        >
-                          {isPublishing ? "Publishing" : "Save & Publish"}
-                        </button>
-                        <button
-                          onClick={() => reset()}
-                          className="btn btn-danger text-white font-semibold px-4 py-2 rounded"
-                        >
-                          Reset
-                        </button>
-                        <button
-                          onClick={() => setShowStudentReport(false)}
-                          className="bg-yellow-300 hover:bg-yellow-400 text-white font-semibold px-4 py-2 rounded"
-                        >
-                          Back
-                        </button>
-                      </div> */}
                     </div>
                   </div>
                 </>

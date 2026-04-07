@@ -96,6 +96,8 @@ const CreateLessonPlan = () => {
   const [toDate, setToDate] = useState(null);
   const datePickerRef = useRef(null);
 
+  const [lesPlanTempId, setLesPlanTempId] = useState("");
+
   const handleDateChange = (date) => {
     setFromDate(date);
     setWeekError("");
@@ -462,24 +464,6 @@ const CreateLessonPlan = () => {
       console.log("✅ present_data:", isPresent ? "true" : "false");
       console.log("📘 handleSearch API data:", apiData);
 
-      // if (isPresent && unqId) {
-      //   console.log("Existing lesson plan found. Navigating to Edit:", unqId);
-
-      //   navigate(`/lessonPlan/edit/${unqId}`, {
-      //     state: {
-      //       headings: heading,
-      //       selectedStudent,
-      //       selectedSubject,
-      //       selectedChapter,
-      //       selectedStudentId,
-      //       selectedSubjectId,
-      //       selectedChapterId,
-      //       unq_id: unqId,
-      //     },
-      //   });
-      //   return;
-      // }
-
       if (lessonPlanData.length === 0) {
         setTimetable([{ unq_id: "new" }]);
         setPageCount(1);
@@ -503,7 +487,10 @@ const CreateLessonPlan = () => {
           if (key !== "unq_id") remarks[key] = template[key];
         });
       });
-
+      // by mahima 31-02-2026
+      console.log("mahima lesson plan template", apiData.les_pln_temp_id);
+      setLesPlanTempId(apiData.les_pln_temp_id);
+      //
       setTimetable(timetableForDisplay);
       setStudentRemarks(remarks);
       setPageCount(Math.ceil(timetableForDisplay.length / pageSize));
@@ -628,27 +615,6 @@ const CreateLessonPlan = () => {
         descriptions[`description_${headingId}_1`] = formattedValue;
       });
 
-      // Loop daily headings (from textarea)
-      // (dailyHeading || []).forEach((item) => {
-      //   const headingId = item.lesson_plan_headings_id;
-      //   const descValue =
-      //     studentRemarks[`${headingId}_0`] ||
-      //     timetable?.[0]?.[`dc_description_${headingId}_1`] ||
-      //     "";
-
-      //   const formattedValue = descValue
-      //     .split("\n")
-      //     .map((line) => {
-      //       const trimmed = line.trim();
-      //       if (trimmed === "") return "";
-      //       return trimmed.startsWith("• ") ? trimmed : "• " + trimmed;
-      //     })
-      //     .join("\n")
-      //     .trim();
-
-      //   descriptions[`dc_description_${headingId}_1`] = formattedValue;
-      // });
-      // ✅ CodeIgniter-style daily change logic
       rows.forEach((row, rowIndex) => {
         (dailyHeading || []).forEach((item) => {
           const headingId = item.lesson_plan_headings_id;
@@ -666,7 +632,7 @@ const CreateLessonPlan = () => {
             .join("\n")
             .trim();
 
-          // 🔥 IMPORTANT: rowIndex + 1 (PHP starts from 1)
+          // IMPORTANT: rowIndex + 1 (PHP starts from 1)
           descriptions[`dc_description_${headingId}_${rowIndex + 1}`] =
             formattedValue;
         });
@@ -682,13 +648,6 @@ const CreateLessonPlan = () => {
         return;
       }
 
-      // 🔸 Validate teaching points (daily)
-      // const hasTeachingPoints = (dailyHeading || []).some((item) => {
-      //   const val =
-      //     descriptions[`dc_description_${item.lesson_plan_headings_id}_1`] ||
-      //     "";
-      //   return val.trim() !== "";
-      // });
       const hasTeachingPoints = rows.some((_, rowIndex) =>
         (dailyHeading || []).some((item) => {
           const val =
@@ -713,7 +672,7 @@ const CreateLessonPlan = () => {
         class_id_array: classIdArray,
         no_of_periods: numPeriods?.toString() || "1",
         weeklyDatePicker: weekRange,
-        les_pln_temp_id: timetable?.[0]?.les_pln_temp_id || "new",
+        les_pln_temp_id: lesPlanTempId || "new",
         approve: "N",
         lph_dc_row: rows.length.toString(),
         start_date: rows.map((row) => row.startDate),
@@ -912,16 +871,18 @@ const CreateLessonPlan = () => {
                             if (!selected || selected.length === 0) {
                               setSelectedStudent([]);
                               setSelectedStudentId(null);
+                              setSelectedSubject([]);
+                              setSelectedSubjectId(null);
+                              setSelectedChapter([]);
+                              setSelectedChapterId(null);
                               return;
                             }
 
-                            // Extract CLASS IDs from all selected items
                             const classIds = selected.map((item) =>
                               Number(item.value.split("-")[0]),
                             );
                             const uniqueClassIds = [...new Set(classIds)];
 
-                            // Check if more than one class is selected
                             if (uniqueClassIds.length > 1) {
                               toast.warn(
                                 "Please select sections from the same class only!",
@@ -933,7 +894,6 @@ const CreateLessonPlan = () => {
                               return; // stop here
                             }
 
-                            // ✅ Valid selection (all students from the same class)
                             const classId = uniqueClassIds[0];
                             const sectionIds = selected.map((item) =>
                               Number(item.value.split("-")[1]),
@@ -992,8 +952,18 @@ const CreateLessonPlan = () => {
                               selected ? selected.value : null,
                             );
 
-                            if (selected) setSubjectError("");
-                            else setSubjectError("Please select subject.");
+                            // if (selected) setSubjectError("");
+                            // else setSubjectError("Please select subject.");
+                            if (selected) {
+                              setSubjectError("");
+                            } else {
+                              setSubjectError("Please select subject.");
+
+                              //Reset chapter when subject is removed
+                              setSelectedChapter(null);
+                              setSelectedChapterId(null);
+                              setChapterError("Please select chapter.");
+                            }
                           }}
                           isSearchable
                           isClearable
@@ -1127,233 +1097,6 @@ const CreateLessonPlan = () => {
                 <>
                   <div className="w-full  mx-auto transition-all duration-300">
                     <div className="card mx-auto shadow-lg">
-                      {/* <div className="p-2 px-3 bg-gray-100 border-none flex items-center justify-between">
-                        <div className="w-full flex flex-row items-center justify-between mr-0 md:mr-4 gap-x-1">
-                          <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap mr-6">
-                            Create Lesson Plan
-                          </h3>
-                          <div className="flex items-center w-full">
-                            <div
-                              className="bg-blue-50 border-l-2 border-r-2 text-[1em] border-pink-500 rounded-md shadow-md mx-auto px-6 py-2"
-                              style={{
-                                overflowX: "auto",
-                                whiteSpace: "nowrap",
-                              }}
-                            >
-                              <div
-                                className="flex items-center gap-x-4 text-blue-800 font-medium"
-                                style={{ flexWrap: "nowrap" }}
-                              >
-                                
-                                <div className="flex items-center gap-2">
-                                  <label
-                                    className="text-md whitespace-nowrap"
-                                    htmlFor="studentSelect"
-                                  >
-                                    Class{" "}
-                                    <span className="text-red-500">*</span>
-                                  </label>
-                                  <Select
-                                    menuPortalTarget={document.body}
-                                    menuPosition="fixed"
-                                    id="studentSelect"
-                                    isMulti={true}
-                                    options={studentOptions}
-                                    value={selectedStudent}
-                                    onChange={(selected) => {
-                                      setSelectedStudent(selected || []);
-                                      if (selected && selected.length > 0)
-                                        setStudentError("");
-                                      else
-                                        setStudentError("Please select class.");
-                                    }}
-                                    placeholder={
-                                      loadingExams ? "Loading..." : "Select"
-                                    }
-                                    isSearchable
-                                    isClearable
-                                    className="text-sm min-w-[180px]"
-                                    isDisabled={loadingExams}
-                                    closeMenuOnSelect={false}
-                                    hideSelectedOptions={false}
-                                    styles={{
-                                      control: (provided) => ({
-                                        ...provided,
-                                        fontSize: ".9em",
-                                        minHeight: "30px",
-                                      }),
-                                      menu: (provided) => ({
-                                        ...provided,
-                                        fontSize: "1em",
-                                      }),
-                                      option: (provided) => ({
-                                        ...provided,
-                                        fontSize: ".9em",
-                                      }),
-                                    }}
-                                    components={{ Option: CheckboxOption }}
-                                  />
-                                </div>
-
-                               
-                                <div className="flex items-center gap-3">
-                                  <label
-                                    className="text-md whitespace-nowrap"
-                                    htmlFor="monthSelect"
-                                  >
-                                    Subject{" "}
-                                    <span className="text-red-500">*</span>
-                                  </label>
-                                  <Select
-                                    menuPortalTarget={document.body}
-                                    menuPosition="fixed"
-                                    id="monthSelect"
-                                    options={subjectOptions}
-                                    value={
-                                      subjectOptions.find(
-                                        (opt) =>
-                                          opt.value === selectedSubject?.value,
-                                      ) || selectedSubject
-                                    }
-                                    onChange={(selected) => {
-                                      setSelectedSubject(selected);
-                                      setSelectedSubjectId(
-                                        selected ? selected.value : null,
-                                      );
-                                      if (selected)
-                                        setSubjectError(""); // ✅ Clear error
-                                      else
-                                        setSubjectError(
-                                          "Please select subject.",
-                                        );
-                                    }}
-                                    placeholder={
-                                      loadingExams ? "Loading..." : "Select"
-                                    }
-                                    isSearchable
-                                    isClearable
-                                    className="text-sm min-w-[180px]"
-                                    isDisabled={loadingExams}
-                                    styles={{
-                                      control: (provided) => ({
-                                        ...provided,
-                                        fontSize: ".9em",
-                                        minHeight: "30px",
-                                      }),
-                                      menu: (provided) => ({
-                                        ...provided,
-                                        fontSize: "1em",
-                                      }),
-                                      option: (provided) => ({
-                                        ...provided,
-                                        fontSize: ".9em",
-                                      }),
-                                    }}
-                                  />
-                                </div>
-
-                                <div className="flex items-center gap-3">
-                                  <label
-                                    className="text-md whitespace-nowrap"
-                                    htmlFor="chapterSelect"
-                                  >
-                                    Chpater{" "}
-                                    <span className="text-red-500">*</span>
-                                  </label>
-                                  <Select
-                                    menuPortalTarget={document.body}
-                                    menuPosition="fixed"
-                                    id="chapterSelect"
-                                    options={chapterOptions}
-                                    value={
-                                      chapterOptions.find(
-                                        (opt) =>
-                                          opt.value === selectedChapter?.value,
-                                      ) || selectedChapter
-                                    }
-                                    onChange={(selected) =>
-                                      setSelectedChapter(selected)
-                                    }
-                                    isLoading={loading}
-                                    placeholder={
-                                      loadingExams ? "Loading..." : "Select"
-                                    }
-                                    isSearchable
-                                    isClearable
-                                    className="text-sm min-w-[180px]"
-                                    isDisabled={loadingExams}
-                                    styles={{
-                                      control: (provided) => ({
-                                        ...provided,
-                                        fontSize: ".9em",
-                                        minHeight: "30px",
-                                      }),
-                                      menu: (provided) => ({
-                                        ...provided,
-                                        fontSize: "1em",
-                                      }),
-                                      option: (provided) => ({
-                                        ...provided,
-                                        fontSize: ".9em",
-                                      }),
-                                    }}
-                                  />
-                                </div>
-
-                               
-                                <div>
-                                  <button
-                                    type="search"
-                                    onClick={handleSearch}
-                                    style={{ backgroundColor: "#2196F3" }}
-                                    className={`btn h-8 w-auto btn-primary text-white font-bold py-1 border-1 border-blue-500 px-2 rounded ${
-                                      loadingForSearch
-                                        ? "opacity-50 cursor-not-allowed"
-                                        : ""
-                                    }`}
-                                    disabled={loadingForSearch}
-                                  >
-                                    {loadingForSearch ? (
-                                      <span className="flex items-center">
-                                        <svg
-                                          className="animate-spin h-4 w-4 mr-2 text-white"
-                                          xmlns="http://www.w3.org/2000/svg"
-                                          fill="none"
-                                          viewBox="0 0 24 24"
-                                        >
-                                          <circle
-                                            className="opacity-25"
-                                            cx="12"
-                                            cy="12"
-                                            r="10"
-                                            stroke="currentColor"
-                                            strokeWidth="4"
-                                          ></circle>
-                                          <path
-                                            className="opacity-75"
-                                            fill="currentColor"
-                                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                                          ></path>
-                                        </svg>
-                                        Browsing...
-                                      </span>
-                                    ) : (
-                                      "Browse"
-                                    )}
-                                  </button>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="flex mb-1.5 flex-col md:flex-row gap-x-6 justify-center md:justify-end ">
-                          <RxCross1
-                            className="text-base text-red-600 cursor-pointer hover:bg-red-100 rounded"
-                            onClick={() => setShowStudentReport(false)}
-                          />
-                        </div>
-                      </div> */}
                       <div className="p-2 px-3 bg-gray-100 border-none">
                         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
                           {/* Title */}
@@ -1380,12 +1123,51 @@ const CreateLessonPlan = () => {
                                     isMulti={true}
                                     options={studentOptions}
                                     value={selectedStudent}
+                                    // onChange={(selected) => {
+                                    //   setSelectedStudent(selected || []);
+                                    //   if (selected && selected.length > 0)
+                                    //     setStudentError("");
+                                    //   else
+                                    //     setStudentError("Please select class.");
+                                    // }}
                                     onChange={(selected) => {
-                                      setSelectedStudent(selected || []);
-                                      if (selected && selected.length > 0)
-                                        setStudentError("");
-                                      else
-                                        setStudentError("Please select class.");
+                                      if (!selected || selected.length === 0) {
+                                        setSelectedStudent([]);
+                                        setSelectedStudentId(null);
+                                        setSelectedSubject([]);
+                                        setSelectedSubjectId(null);
+                                        setSelectedChapter([]);
+                                        setSelectedChapterId(null);
+                                        return;
+                                      }
+
+                                      const classIds = selected.map((item) =>
+                                        Number(item.value.split("-")[0]),
+                                      );
+                                      const uniqueClassIds = [
+                                        ...new Set(classIds),
+                                      ];
+
+                                      if (uniqueClassIds.length > 1) {
+                                        toast.warn(
+                                          "Please select sections from the same class only!",
+                                          {
+                                            position: "top-center",
+                                            autoClose: 2000,
+                                          },
+                                        );
+                                        return; // stop here
+                                      }
+
+                                      const classId = uniqueClassIds[0];
+                                      const sectionIds = selected.map((item) =>
+                                        Number(item.value.split("-")[1]),
+                                      );
+
+                                      setSelectedStudent(selected); // store full selection
+                                      setSelectedStudentId(classId); // store the single classId
+
+                                      fetchSubjectNames(classId, sectionIds); // fetch subjects for this class & sections
                                     }}
                                     placeholder={
                                       loadingExams ? "Loading..." : "Select"
@@ -1434,17 +1216,38 @@ const CreateLessonPlan = () => {
                                           opt.value === selectedSubject?.value,
                                       ) || selectedSubject
                                     }
+                                    // onChange={(selected) => {
+                                    //   setSelectedSubject(selected);
+                                    //   setSelectedSubjectId(
+                                    //     selected ? selected.value : null,
+                                    //   );
+                                    //   if (selected)
+                                    //     setSubjectError(""); // ✅ Clear error
+                                    //   else
+                                    //     setSubjectError(
+                                    //       "Please select subject.",
+                                    //     );
+                                    // }}
                                     onChange={(selected) => {
                                       setSelectedSubject(selected);
                                       setSelectedSubjectId(
                                         selected ? selected.value : null,
                                       );
-                                      if (selected)
-                                        setSubjectError(""); // ✅ Clear error
-                                      else
+
+                                      if (selected) {
+                                        setSubjectError("");
+                                      } else {
                                         setSubjectError(
                                           "Please select subject.",
                                         );
+
+                                        //  Reset chapter when subject is removed
+                                        setSelectedChapter(null);
+                                        setSelectedChapterId(null);
+                                        setChapterError(
+                                          "Please select chapter.",
+                                        );
+                                      }
                                     }}
                                     placeholder={
                                       loadingExams ? "Loading..." : "Select"
@@ -1490,9 +1293,21 @@ const CreateLessonPlan = () => {
                                           opt.value === selectedChapter?.value,
                                       ) || selectedChapter
                                     }
-                                    onChange={(selected) =>
-                                      setSelectedChapter(selected)
-                                    }
+                                    // onChange={(selected) =>
+                                    //   setSelectedChapter(selected)
+                                    // }
+                                    onChange={(selected) => {
+                                      setSelectedChapter(selected);
+                                      setSelectedChapterId(
+                                        selected ? selected.value : null,
+                                      );
+
+                                      if (selected) setChapterError("");
+                                      else
+                                        setChapterError(
+                                          "Please select chapter.",
+                                        );
+                                    }}
                                     isLoading={loading}
                                     placeholder={
                                       loadingExams ? "Loading..." : "Select"
@@ -1599,75 +1414,6 @@ const CreateLessonPlan = () => {
                                 key={index}
                                 className="mb-10 border rounded-lg shadow-md p-1"
                               >
-                                {/* <div className="flex items-center justify-end gap-10 mr-10 mb-2 flex-wrap md:flex-nowrap">
-                                  <div className="flex items-center gap-2">
-                                    <label className="text-sm font-medium text-gray-700 whitespace-nowrap">
-                                      No. of Periods{" "}
-                                      <span className="text-red-500">*</span>
-                                    </label>
-                                    <input
-                                      type="number"
-                                      min="1"
-                                      placeholder="Enter periods"
-                                      className="w-32 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-400"
-                                      value={numPeriods}
-                                      onChange={(e) =>
-                                        setNumPeriods(e.target.value)
-                                      }
-                                      required
-                                    />
-                                  </div>
-
-                                  <div className="flex items-center gap-2 mr-10">
-                                    <label className="text-sm font-medium text-gray-700 whitespace-nowrap">
-                                      Date{" "}
-                                      <span className="text-red-500">*</span>
-                                    </label>
-
-                                    <div
-                                      className="text-sm text-gray-700 border border-gray-300 p-2.5 rounded-lg 
-                   flex items-center justify-between cursor-pointer bg-white 
-                   shadow-sm hover:border-gray-400 transition"
-                                      onClick={openDatePicker}
-                                    >
-                                      <div className="flex-1 flex items-center">
-                                        {weekRange ? (
-                                          <span className="truncate text-gray-800">
-                                            {weekRange}
-                                          </span>
-                                        ) : (
-                                          <span className="flex items-center text-gray-400">
-                                            <FaRegCalendarAlt className="mr-2 text-pink-500" />
-                                            Select Week
-                                          </span>
-                                        )}
-                                      </div>
-
-                                      {weekRange && (
-                                        <button
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            setFromDate(null);
-                                            setWeekRange("");
-                                          }}
-                                          className="text-gray-400 hover:text-red-500 ml-2 "
-                                        >
-                                          <RxCross1 className="text-xs text-red-600" />
-                                        </button>
-                                      )}
-                                    </div>
-
-                                    <DatePicker
-                                      ref={datePickerRef}
-                                      selected={fromDate}
-                                      onChange={handleDateChange}
-                                      dateFormat="dd-MM-yyyy"
-                                      className="hidden"
-                                      maxDate={maxDate}
-                                      minDate={minDate}
-                                    />
-                                  </div>
-                                </div> */}
                                 <div
                                   className="
     flex flex-col gap-3
