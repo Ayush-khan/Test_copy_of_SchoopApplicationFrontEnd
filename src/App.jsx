@@ -1,8 +1,10 @@
 // Simple file
 import { useEffect } from "react";
+import axios from "axios";
 
 import "./App.css";
 import Index from "./router/Index";
+import { DashboardStructureProvider } from "./context/DashboardStructureContext";
 
 function App() {
   // 🧹 Clear caches and unregister service workers for faster fresh loads
@@ -38,7 +40,11 @@ function App() {
     clearAllCaches();
   }, []);
 
-  return <Index />;
+  return (
+    <DashboardStructureProvider>
+      <Index />
+    </DashboardStructureProvider>
+  );
 }
 
 export default App;

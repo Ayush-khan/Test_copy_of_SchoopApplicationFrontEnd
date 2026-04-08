@@ -267,7 +267,7 @@ function NoticeBord() {
 
   return (
     // <div className={`  px-2 rounded-lg `}>
-    <div className="px-2 rounded-lg h-full flex flex-col">
+    <div className="px-2 rounded-lg h-full flex flex-col bg-white border border-gray-200 shadow-sm">
       {/* <div
         className={` flex justify-between sm:mb-2  w-full  sm:flex flex-row mb-2`}
       > */}

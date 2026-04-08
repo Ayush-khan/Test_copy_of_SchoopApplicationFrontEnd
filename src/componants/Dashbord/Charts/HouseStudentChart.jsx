@@ -1,6 +1,7 @@
 // Second try WIth API calling
 import { useState, useEffect } from "react";
 import { PieChart, Pie, Cell } from "recharts";
+import Select from "react-select";
 import axios from "axios";
 import styles from "../Charts/StudentStyle.module.css";
 import Loader from "../../common/LoaderFinal/DashboardLoadder/Loader";
@@ -102,10 +103,13 @@ const HouseStudentChart = () => {
     fetchData();
   }, [newDepartmentId]);
 
-  const handleChangeDepartmentId = (e) => {
-    const { value } = e.target;
+  const classOptions = classes.map((cls) => ({
+    value: cls.name,
+    label: cls.name,
+  }));
 
-    setNewDepartmentId(value);
+  const handleChangeDepartmentId = (option) => {
+    setNewDepartmentId(option?.value || "");
   };
 
   const renderPieChart = (section) => (
@@ -131,7 +135,7 @@ const HouseStudentChart = () => {
 
   return (
     <div
-      className={`${styles.studenChart} flex flex-col w-full   lg:h-[18.2rem]`}
+      className={`${styles.studenChart} flex flex-col w-full lg:h-[18.2rem] bg-white rounded-lg overflow-hidden`}
     >
       <div className="flex flex-row justify-between items-center bg-gray-200 p-1">
         <span className="lg:text-lg sm:text-xs sm:font-semibold text-gray-500">
@@ -144,32 +148,38 @@ const HouseStudentChart = () => {
           >
             Select Class:
           </label>
-          <select
-            id="class-select"
-            value={newDepartmentId}
-            onChange={handleChangeDepartmentId}
-            className="block h-fit px-2 bg-gray-100 border border-gray-950 rounded-md shadow-sm hover:cursor-pointer focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm font-semibold"
-          >
-            <option value="">Select </option>
-            {/* {classes.map((cls, index) => (
-                          <option key={index} value={cls}>
-                            {cls}
-                          </option>
-                        ))} */}
-            {classes.length === 0 ? (
-              <option value="">No classes available</option>
-            ) : (
-              classes.map((cls) => (
-                <option
-                  key={cls.class_id}
-                  value={cls.name}
-                  className="max-h-20 overflow-y-scroll "
-                >
-                  {cls.name}
-                </option>
-              ))
-            )}
-          </select>
+          <div className="min-w-[160px]">
+            <Select
+              classNamePrefix="react-select"
+              value={
+                classOptions.find((opt) => opt.value === newDepartmentId) || null
+              }
+              onChange={handleChangeDepartmentId}
+              options={classOptions}
+              placeholder={classes.length ? "Select" : "No classes"}
+              isDisabled={!classes.length}
+              isSearchable
+              styles={{
+                control: (base) => ({
+                  ...base,
+                  minHeight: "30px",
+                  fontSize: "12px",
+                }),
+                dropdownIndicator: (base) => ({
+                  ...base,
+                  padding: "2px 6px",
+                }),
+                valueContainer: (base) => ({
+                  ...base,
+                  padding: "0 6px",
+                }),
+                indicatorsContainer: (base) => ({
+                  ...base,
+                  height: "30px",
+                }),
+              }}
+            />
+          </div>
         </div>
       </div>
       {/* {error && <p className="text-red-500 ">{error}</p>} */}

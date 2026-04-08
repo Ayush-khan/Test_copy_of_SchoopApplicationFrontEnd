@@ -214,49 +214,38 @@ const LocationwiseBookReport = () => {
       ${timetable
         .map((student, index) => {
           return `
-          <tr style="background-color: ${
-            index % 2 === 0 ? "#fff" : "#f9fafb"
-          };">
+          <tr style="background-color: ${index % 2 === 0 ? "#fff" : "#f9fafb"
+            };">
             <td style="border: 1px solid #ccc; padding: 6px;">${index + 1}</td>
-            <td style="border: 1px solid #ccc; padding: 6px;">${
-              student.copy_id || ""
+            <td style="border: 1px solid #ccc; padding: 6px;">${student.copy_id || ""
             }</td>
             <td style="border: 1px solid #ccc; padding: 6px;">${formatDate(
               student.added_date || "",
             )}</td>
-            <td style="border: 1px solid #ccc; padding: 6px;">${
-              student.book_title || ""
+            <td style="border: 1px solid #ccc; padding: 6px;">${student.book_title || ""
             }</td>
            
             <td style="border: 1px solid #ccc; padding: 6px;">${formatDate(
               student.author || "",
             )}</td>
              
-             <td style="border: 1px solid #ccc; padding: 6px;">${
-               student.publisher || ""
-             }</td>
-             <td style="border: 1px solid #ccc; padding: 6px;">${
-               student.year || ""
-             }</td>
+             <td style="border: 1px solid #ccc; padding: 6px;">${student.publisher || ""
+            }</td>
+             <td style="border: 1px solid #ccc; padding: 6px;">${student.year || ""
+            }</td>
 
-              <td style="border: 1px solid #ccc; padding: 6px;">${
-                student.edition || ""
-              }</td>
-               <td style="border: 1px solid #ccc; padding: 6px;">${
-                 student.no_of_pages || ""
-               }</td>
-                <td style="border: 1px solid #ccc; padding: 6px;">${
-                  student.source_of_book || ""
-                }</td>
-             <td style="border: 1px solid #ccc; padding: 6px;">${
-               student.price || ""
-             }</td>
-              <td style="border: 1px solid #ccc; padding: 6px;">${
-                student.isbn || ""
-              }</td>
-             <td style="border: 1px solid #ccc; padding: 6px;">${
-               student.location_of_book || ""
-             }</td>
+              <td style="border: 1px solid #ccc; padding: 6px;">${student.edition || ""
+            }</td>
+               <td style="border: 1px solid #ccc; padding: 6px;">${student.no_of_pages || ""
+            }</td>
+                <td style="border: 1px solid #ccc; padding: 6px;">${student.source_of_book || ""
+            }</td>
+             <td style="border: 1px solid #ccc; padding: 6px;">${student.price || ""
+            }</td>
+              <td style="border: 1px solid #ccc; padding: 6px;">${student.isbn || ""
+            }</td>
+             <td style="border: 1px solid #ccc; padding: 6px;">${student.location_of_book || ""
+            }</td>
           
           </tr>
         `;
@@ -420,10 +409,10 @@ const LocationwiseBookReport = () => {
   const formatDate = (dateStr) =>
     dateStr && dateStr !== "0000-00-00"
       ? new Date(dateStr).toLocaleDateString("en-GB", {
-          day: "2-digit",
-          month: "2-digit",
-          year: "2-digit",
-        })
+        day: "2-digit",
+        month: "2-digit",
+        year: "2-digit",
+      })
       : "";
 
   const handlePageClick = (data) => {
@@ -765,14 +754,14 @@ const LocationwiseBookReport = () => {
                                   <td className="px-2 py-2 text-center border">
                                     {student?.author
                                       ? student.author
-                                          .toLowerCase()
-                                          .split(" ")
-                                          .map(
-                                            (w) =>
-                                              w.charAt(0).toUpperCase() +
-                                              w.slice(1),
-                                          )
-                                          .join(" ")
+                                        .toLowerCase()
+                                        .split(" ")
+                                        .map(
+                                          (w) =>
+                                            w.charAt(0).toUpperCase() +
+                                            w.slice(1),
+                                        )
+                                        .join(" ")
                                       : "-"}
                                   </td>
                                   <td className="px-2 py-2 text-center border">

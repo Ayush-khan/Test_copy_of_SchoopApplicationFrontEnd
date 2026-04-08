@@ -223,13 +223,13 @@ const BookIssuedReport = () => {
     const params =
       selectedType === "student"
         ? {
-            mtype: "S",
-            class_id: selectedStudentId,
-            section_id: selectedSectionId,
-          }
+          mtype: "S",
+          class_id: selectedStudentId,
+          section_id: selectedSectionId,
+        }
         : {
-            mtype: "T",
-          };
+          mtype: "T",
+        };
 
     try {
       const response = await axios.post(
@@ -404,15 +404,12 @@ const BookIssuedReport = () => {
       ${timetable
         .map((student, index) => {
           return `
-          <tr style="background-color: ${
-            index % 2 === 0 ? "#fff" : "#f9fafb"
-          };">
+          <tr style="background-color: ${index % 2 === 0 ? "#fff" : "#f9fafb"
+            };">
             <td style="border: 1px solid #ccc; padding: 6px;">${index + 1}</td>
-            <td style="border: 1px solid #ccc; padding: 6px;">${
-              student.copy_id || ""
+            <td style="border: 1px solid #ccc; padding: 6px;">${student.copy_id || ""
             }</td>
-            <td style="border: 1px solid #ccc; padding: 6px;">${
-              student.book_title || ""
+            <td style="border: 1px solid #ccc; padding: 6px;">${student.book_title || ""
             }</td>
             <td style="border: 1px solid #ccc; padding: 6px;">
              ${student?.first_name || "-"}  ${student?.mid_name || "-"}  ${student?.last_name || "-"}  ${student?.name || "-"}
@@ -422,11 +419,11 @@ const BookIssuedReport = () => {
             )}</td>
              
              <td style="border: 1px solid #ccc; padding: 6px;">${formatDate(
-               student.due_date || "",
-             )}</td>
+              student.due_date || "",
+            )}</td>
              <td style="border: 1px solid #ccc; padding: 6px;">${formatDate(
-               student.return_date || "",
-             )}</td>
+              student.return_date || "",
+            )}</td>
           </tr>
         `;
         })
@@ -592,10 +589,10 @@ const BookIssuedReport = () => {
     return isNaN(date.getTime())
       ? ""
       : date.toLocaleDateString("en-GB", {
-          day: "2-digit",
-          month: "2-digit",
-          year: "2-digit",
-        });
+        day: "2-digit",
+        month: "2-digit",
+        year: "2-digit",
+      });
   };
   const handlePageClick = (data) => {
     setCurrentPage(data.selected);

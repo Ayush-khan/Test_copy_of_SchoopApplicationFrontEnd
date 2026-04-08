@@ -160,6 +160,7 @@
 // export default ListFinal;
 // This is try up for total
 import { useEffect, useState } from "react";
+import Select from "react-select";
 import axios from "axios";
 
 const formatAmount = (amount) =>
@@ -233,8 +234,8 @@ function ListFinal() {
   const filteredInstallments = selectedAccount
     ? installments[selectedAccount] || []
     : Object.entries(installments).flatMap(([account, data]) =>
-        data.map((installment) => ({ ...installment, account }))
-      );
+      data.map((installment) => ({ ...installment, account }))
+    );
 
   const parseAmount = (amt) => parseFloat(amt.replace(/,/g, "")) || 0;
 
@@ -249,25 +250,49 @@ function ListFinal() {
     0
   );
 
+  const accountOptions = accounts.map((account) => ({
+    value: account.account_name,
+    label: account.account_name,
+  }));
+
   return (
-    <div className="container m-0 p-2 lg:h-[18.2rem]">
+    <div className="container m-0 p-2 lg:h-[18.2rem] bg-white rounded-lg shadow-sm">
       <div className="header flex justify-between items-center bg-gray-200 rounded-t-lg mb-1 px-2 py-1">
         <span className="lg:text-lg sm:text-xs font-semibold text-gray-500">
           Fee-Collection
         </span>
 
-        <select
-          className="px-2 py-1 text-sm text-gray-700 font-semibold bg-gray-50 border rounded-md"
-          value={selectedAccount}
-          onChange={(e) => setSelectedAccount(e.target.value)}
-        >
-          <option value="">Select Account</option>
-          {accounts.map((account) => (
-            <option key={account.id} value={account.account_name}>
-              {account.account_name}
-            </option>
-          ))}
-        </select>
+        <div className="min-w-[160px]">
+          <Select
+            classNamePrefix="react-select"
+            value={
+              accountOptions.find((opt) => opt.value === selectedAccount) || null
+            }
+            onChange={(option) => setSelectedAccount(option?.value || "")}
+            options={accountOptions}
+            placeholder="Select Account"
+            isSearchable
+            styles={{
+              control: (base) => ({
+                ...base,
+                minHeight: "30px",
+                fontSize: "12px",
+              }),
+              dropdownIndicator: (base) => ({
+                ...base,
+                padding: "2px 6px",
+              }),
+              valueContainer: (base) => ({
+                ...base,
+                padding: "0 6px",
+              }),
+              indicatorsContainer: (base) => ({
+                ...base,
+                height: "30px",
+              }),
+            }}
+          />
+        </div>
       </div>
 
       <div className="table-container rounded-lg shadow-md overflow-hidden">
@@ -338,17 +363,15 @@ function ListFinal() {
               filteredInstallments.map((installment, index) => (
                 <div
                   key={`${installment.account}-${installment.installment}-${index}`}
-                  className={`grid grid-cols-3 px-2 py-2 border-b border-gray-200 ${
-                    index % 2 === 0 ? "bg-white" : "bg-gray-100"
-                  }`}
+                  className={`grid grid-cols-3 px-2 py-2 border-b border-gray-200 ${index % 2 === 0 ? "bg-white" : "bg-gray-100"
+                    }`}
                 >
                   {!selectedAccount && (
                     <div className="text-black/80">{installment.account}</div>
                   )}
                   <div
-                    className={`text-black/80 ${
-                      selectedAccount ? "col-start-1" : "text-center"
-                    }`}
+                    className={`text-black/80 ${selectedAccount ? "col-start-1" : "text-center"
+                      }`}
                   >
                     {installment.installment}
                   </div>

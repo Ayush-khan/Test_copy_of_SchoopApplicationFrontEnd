@@ -668,9 +668,8 @@ function ClassList() {
           ></div>
           <div className="card-body w-full">
             <div
-              className={`h-96 lg:h-96 overflow-y-scroll lg:overflow-x-hidden mx-auto ${
-                roleId === "U" ? "w-full md:w-[84%]" : "w-full md:w-[75%]"
-              }`}
+              className={`h-96 lg:h-96 overflow-y-scroll lg:overflow-x-hidden mx-auto ${roleId === "U" ? "w-full md:w-[84%]" : "w-full md:w-[75%]"
+                }`}
             >
               <div className="bg-white rounded-lg shadow-xs">
                 {!roleId ? (
@@ -718,9 +717,8 @@ function ClassList() {
                         displayedClasses.map((classItem, index) => (
                           <tr
                             key={classItem.class_id}
-                            className={`${
-                              index % 2 === 0 ? "bg-white" : "bg-gray-100"
-                            } hover:bg-gray-50`}
+                            className={`${index % 2 === 0 ? "bg-white" : "bg-gray-100"
+                              } hover:bg-gray-50`}
                           >
                             <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
                               <p className="text-gray-900 whitespace-no-wrap relative top-2">
@@ -851,7 +849,7 @@ function ClassList() {
                       onChange={handleChangeSectionName}
                       onBlur={handleBlur}
 
-                      // onChange={(e) => setNewClassName(e.target.value)}
+                    // onChange={(e) => setNewClassName(e.target.value)}
                     />
                     <div className="absolute  top-9 left-1/3">
                       {!nameAvailable && (
@@ -953,7 +951,7 @@ function ClassList() {
                       // onChange={handleChangeDepartmentId}
                       onChange={handleChangeSectionName}
 
-                      // onChange={(e) => setNewClassName(e.target.value)}
+                    // onChange={(e) => setNewClassName(e.target.value)}
                     />
                     <div className="absolute top-9 left-1/3 ">
                       {backendErrors.name && (
