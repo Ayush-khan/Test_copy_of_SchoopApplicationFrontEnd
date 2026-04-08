@@ -255,9 +255,8 @@ function ManageRoleAccess() {
                       {displayedMenus.map((menu, index) => (
                         <tr
                           key={menu.menu_id}
-                          className={`  ${
-                            index % 2 === 0 ? "bg-white" : "bg-gray-100"
-                          } hover:bg-gray-50`}
+                          className={`  ${index % 2 === 0 ? "bg-white" : "bg-gray-100"
+                            } hover:bg-gray-50`}
                         >
                           <td className="text-center px-3 py-2 border border-gray-950 text-sm">
                             {menu.menu_id}
