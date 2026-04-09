@@ -34,6 +34,30 @@ const PendingStudentIdCardReport = () => {
     fetchExams();
   }, []);
 
+  const [houses, setHouses] = useState([]);
+
+  useEffect(() => {
+    fetchHouses();
+  }, []);
+
+  const fetchHouses = async () => {
+    try {
+      const token = localStorage.getItem("authToken");
+      const response = await axios.get(`${API_URL}/api/get_all_houses`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setHouses(response.data.data);
+      console.log("house", response.data.data);
+    } catch (error) {
+      toast.error("Error fetching class names");
+    }
+  };
+
+  const getHouses = (houseId) => {
+    const house = houses.find((h) => h.house_id === houseId);
+    return house ? house.house_name : "";
+  };
+
   const fetchExams = async () => {
     try {
       setLoadingExams(true);
@@ -64,21 +88,21 @@ const PendingStudentIdCardReport = () => {
         value: cls?.section_id,
         label: `${cls.get_class.name} ${cls.name}`,
       })),
-    [studentNameWithClassId]
+    [studentNameWithClassId],
   );
 
-  const houses = [
-    { value: "D", label: "Diamond" },
-    { value: "R", label: "Ruby" },
-    { value: "S", label: "Sapphire" },
-    { value: "E", label: "Emerald" },
-  ];
+  // const houses = [
+  //   { value: "D", label: "Diamond" },
+  //   { value: "R", label: "Ruby" },
+  //   { value: "S", label: "Sapphire" },
+  //   { value: "E", label: "Emerald" },
+  // ];
 
-  // Get the label for the student's house value
-  const getHouses = (houseValue) => {
-    const house = houses.find((h) => h.value === houseValue);
-    return house ? house.label : "";
-  };
+  // // Get the label for the student's house value
+  // const getHouses = (houseValue) => {
+  //   const house = houses.find((h) => h.value === houseValue);
+  //   return house ? house.label : "";
+  // };
 
   // Handle search and fetch parent information
 
@@ -102,7 +126,7 @@ const PendingStudentIdCardReport = () => {
         {
           headers: { Authorization: `Bearer ${token}` },
           params,
-        }
+        },
       );
 
       if (!response?.data?.data || response?.data?.data?.length === 0) {
@@ -115,7 +139,7 @@ const PendingStudentIdCardReport = () => {
     } catch (error) {
       console.error("Error fetching Pending Students Id Card Report:", error);
       toast.error(
-        "Error fetching Pending Students Id Card Report. Please try again."
+        "Error fetching Pending Students Id Card Report. Please try again.",
       );
     } finally {
       setIsSubmitting(false); // Re-enable the button after the operation
@@ -162,8 +186,8 @@ const PendingStudentIdCardReport = () => {
                 }</td>
                 <td class="px-2 text-center py-2 border border-black">
                 ${subject?.first_name || " "}${subject?.mid_name || " "} ${
-                subject?.last_name || " "
-              } </td>
+                  subject?.last_name || " "
+                } </td>
                 <td class="px-2 text-center py-2 border border-black">${
                   subject?.class_name || " "
                 } ${subject?.sec_name || " "}</td>
@@ -191,7 +215,7 @@ const PendingStudentIdCardReport = () => {
                       <td class="px-2 text-center py-2 border border-black">${
                         subject?.m_mobile || " "
                       }</td>
-              </tr>`
+              </tr>`,
             )
             .join("")}
         </tbody>
@@ -363,7 +387,9 @@ const PendingStudentIdCardReport = () => {
     const dateofBirth = formatDate(student?.dob).toLowerCase();
     const permanantAddress = student?.permant_add?.toLowerCase() || "";
     const bloodGroup = student?.blood_group?.toLowerCase() || "";
-    const house = student?.house?.toLowerCase() || "";
+    // const house = student?.house?.toLowerCase() || "";
+    const houseObj = houses.find((h) => h.house_id === student.house);
+    const house = houseObj ? houseObj.house_name.toLowerCase() : "";
     const parentName = student?.father_name?.toLowerCase() || "";
     const motherMobile = student?.m_mobile?.toLowerCase() || "";
     const fatherMobile = student?.f_mobile?.toLowerCase() || "";
@@ -591,7 +617,7 @@ const PendingStudentIdCardReport = () => {
                                   <td className="px-2 py-2 text-center border border-gray-300">
                                     {student.dob
                                       ? new Date(
-                                          student.dob
+                                          student.dob,
                                         ).toLocaleDateString("en-GB")
                                       : " "}
                                   </td>
@@ -619,7 +645,7 @@ const PendingStudentIdCardReport = () => {
                             ) : (
                               <div className=" absolute left-[1%] w-[100%]  text-center flex justify-center items-center mt-14">
                                 <div className=" text-center text-xl text-red-700">
-                                  Oops! No data found..
+                                  No data found.
                                 </div>
                               </div>
                             )}

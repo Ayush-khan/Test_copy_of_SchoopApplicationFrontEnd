@@ -32,26 +32,86 @@ const ConsolidatedLeave = () => {
   const [pageCount, setPageCount] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
 
+  const [category, setCategory] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [selectedCategoryId, setSelectedCategoryId] = useState(null);
+  const [categoryError, setCategoryError] = useState("");
+
   useEffect(() => {
-    fetchExams();
+    // fetchExams();
+    fetchCategory();
     // handleSearch();
   }, []);
+
+  useEffect(() => {
+    fetchExams();
+  }, [selectedCategoryId]);
+
+  // const fetchExams = async () => {
+  //   try {
+  //     setLoadingExams(true);
+  //     const token = localStorage.getItem("authToken");
+
+  //     const response = await axios.get(`${API_URL}/api/staff_list`, {
+  //       headers: { Authorization: `Bearer ${token}` },
+  //     });
+  //     console.log("Class", response);
+  //     setStudentNameWithClassId(response?.data || []);
+  //   } catch (error) {
+  //     toast.error("Error fetching Classes");
+  //     console.error("Error fetching Classes:", error);
+  //   } finally {
+  //     setLoadingExams(false);
+  //   }
+  // };
 
   const fetchExams = async () => {
     try {
       setLoadingExams(true);
       const token = localStorage.getItem("authToken");
 
-      const response = await axios.get(`${API_URL}/api/staff_list`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      console.log("Class", response);
+      // ✅ Prepare params conditionally
+      let params = {};
+
+      if (selectedCategoryId) {
+        params.tc_id = selectedCategoryId; // pass only when selected
+      }
+
+      const response = await axios.get(
+        `${API_URL}/api/get_teaching_nonteaching_staff_list`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          params: params, // attach params here
+        },
+      );
+
+      console.log("Staff List", response);
       setStudentNameWithClassId(response?.data || []);
     } catch (error) {
-      toast.error("Error fetching Classes");
-      console.error("Error fetching Classes:", error);
+      toast.error("Error fetching Staff");
+      console.error("Error fetching Staff:", error);
     } finally {
       setLoadingExams(false);
+    }
+  };
+
+  const fetchCategory = async () => {
+    setLoading(true);
+    try {
+      const token = localStorage.getItem("authToken");
+      if (!token) throw new Error("No authentication token found");
+
+      const response = await axios.get(`${API_URL}/api/get_teachercategory`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const data = response.data.data || [];
+      setCategory(data);
+      console.log("category datta", data);
+    } catch (error) {
+      toast.error(error.message || "Error fetching data");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -77,16 +137,42 @@ const ConsolidatedLeave = () => {
         value: cls?.teacher_id,
         label: `${cls.name}`,
       })),
-    [studentNameWithClassId]
+    [studentNameWithClassId],
+  );
+
+  const handleCategorySelect = (selectedOption) => {
+    setSelectedStudent(null);
+    setSelectedStudentId(null);
+    setSelectedCategory(selectedOption);
+    setSelectedCategoryId(selectedOption?.value);
+  };
+
+  const categoryOptions = useMemo(
+    () =>
+      category.map((cls) => ({
+        value: cls?.tc_id,
+        label: `${cls.name}`,
+      })),
+    [category],
   );
 
   // Handle search and fetch parent information
 
   const handleSearch = async () => {
     setLoadingForSearch(false);
-    if (!selectedStudentId) {
-      setStudentError("Please select Staff Name.");
-      setLoadingForSearch(false);
+    // if (!selectedStudentId) {
+    //   setStudentError("Please select Staff Name.");
+    //   setLoadingForSearch(false);
+    //   return;
+    // }
+    // if (!selectedCategoryId) {
+    //   setCategoryError("Please select category.");
+    //   setLoadingForSearch(false);
+    //   return;
+    // }
+
+    if (!selectedCategoryId && !selectedStudentId) {
+      toast.error("Please select at least one mandatory field.");
       return;
     }
     setSearchTerm("");
@@ -96,6 +182,7 @@ const ConsolidatedLeave = () => {
       const token = localStorage.getItem("authToken");
       const params = {};
       if (selectedStudentId) params.staff_id = selectedStudentId;
+      if (selectedCategoryId) params.tc_id = selectedCategoryId;
       if (fromDate) params.from_date = fromDate;
       if (toDate) params.to_date = toDate;
       const response = await axios.get(
@@ -103,7 +190,7 @@ const ConsolidatedLeave = () => {
         {
           headers: { Authorization: `Bearer ${token}` },
           params,
-        }
+        },
       );
 
       if (!response?.data?.data || response?.data?.data?.length === 0) {
@@ -116,7 +203,7 @@ const ConsolidatedLeave = () => {
     } catch (error) {
       console.error("Error fetching Consolidated Leave Report:", error);
       toast.error(
-        "Error fetching Consolidated Leave Report. Please try again."
+        "Error fetching Consolidated Leave Report. Please try again.",
       );
     } finally {
       setIsSubmitting(false); // Re-enable the button after the operation
@@ -170,7 +257,7 @@ const ConsolidatedLeave = () => {
                 ${
                   subject?.leave_start_date
                     ? new Date(subject?.leave_start_date).toLocaleDateString(
-                        "en-GB"
+                        "en-GB",
                       )
                     : ""
                 }</td>
@@ -178,7 +265,7 @@ const ConsolidatedLeave = () => {
                  ${
                    subject?.leave_start_date
                      ? new Date(subject?.leave_start_date).toLocaleDateString(
-                         "en-GB"
+                         "en-GB",
                        )
                      : ""
                  }</td>
@@ -191,7 +278,7 @@ const ConsolidatedLeave = () => {
                     <td class="px-2 text-center py-2 border border-black">${
                       subject?.ApprovedBy || " "
                     }</td>
-              </tr>`
+              </tr>`,
             )
             .join("")}
         </tbody>
@@ -438,6 +525,13 @@ const ConsolidatedLeave = () => {
   });
 
   const displayedSections = filteredSections.slice(currentPage * pageSize);
+
+  const camelCase = (str) =>
+    str
+      ?.toLowerCase()
+      .split(" ")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
   return (
     <>
       <div className="w-full md:w-[100%] mx-auto p-4 ">
@@ -462,17 +556,15 @@ const ConsolidatedLeave = () => {
           ></div>
 
           <>
-            <div className=" w-full md:w-[85%]   flex justify-center flex-col md:flex-row gap-x-1     ml-0    p-2">
+            {/* <div className=" w-full md:w-[85%]   flex justify-center flex-col md:flex-row gap-x-1     ml-0    p-2">
               <div className="w-full md:w-[99%] flex md:flex-row justify-between items-center mt-0 md:mt-4">
                 <div className="w-full  gap-x-0 md:gap-x-12 flex flex-col gap-y-2 md:gap-y-0 md:flex-row">
-                  {/* Class Dropdown */}
                   <div className="w-full  md:w-[50%] gap-x-2 justify-around my-1 md:my-4 flex md:flex-row">
                     <label
                       className="w-full md:w-[25%] text-md pl-0 md:pl-5 mt-1.5"
                       htmlFor="studentSelect"
                     >
                       Staff <span className="text-red-500">*</span>
-                      {/* Staff */}
                     </label>
                     <div className="w-full md:w-[65%]">
                       <Select
@@ -511,7 +603,50 @@ const ConsolidatedLeave = () => {
                     </div>
                   </div>
 
-                  {/* From Date Dropdown */}
+                  <div className="w-full  md:w-[50%] gap-x-2 justify-around my-1 md:my-4 flex md:flex-row">
+                    <label
+                      className="w-full md:w-[35%] text-md pl-0 md:pl-5 mt-1.5"
+                      htmlFor="studentSelect"
+                    >
+                      Category
+                    </label>
+                    <div className="w-full md:w-[70%]">
+                      <Select
+                        menuPortalTarget={document.body}
+                        menuPosition="fixed"
+                        id="studentSelect"
+                        value={selectedCategory}
+                        onChange={handleCategorySelect}
+                        options={categoryOptions}
+                        placeholder={loadingExams ? "Loading..." : "Select"}
+                        isSearchable
+                        isClearable
+                        className="text-sm"
+                        isDisabled={loadingExams}
+                        styles={{
+                          control: (provided) => ({
+                            ...provided,
+                            fontSize: ".9em", // Adjust font size for selected value
+                            minHeight: "30px", // Reduce height
+                          }),
+                          menu: (provided) => ({
+                            ...provided,
+                            fontSize: "1em", // Adjust font size for dropdown options
+                          }),
+                          option: (provided) => ({
+                            ...provided,
+                            fontSize: ".9em", // Adjust font size for each option
+                          }),
+                        }}
+                      />
+                    </div>
+                    {categoryError && (
+                      <div className="h-8 relative ml-1 text-danger text-xs">
+                        {categoryError}
+                      </div>
+                    )}
+                  </div>
+
                   <div className="w-full   md:w-[50%] gap-x-4 justify-between my-1 md:my-4 flex md:flex-row">
                     <label
                       className="ml-0 md:ml-4 w-full md:w-[50%] text-md mt-1.5"
@@ -530,7 +665,6 @@ const ConsolidatedLeave = () => {
                     </div>
                   </div>
 
-                  {/* To Date Dropdown */}
                   <div className="w-full  md:w-[45%] gap-x-4 justify-between my-1 md:my-4 flex md:flex-row">
                     <label
                       className="ml-0 md:ml-4 w-full md:w-[50%] text-md mt-1.5"
@@ -549,7 +683,6 @@ const ConsolidatedLeave = () => {
                     </div>
                   </div>
 
-                  {/* Browse Button */}
                   <div className="mt-1">
                     <button
                       type="search"
@@ -589,15 +722,264 @@ const ConsolidatedLeave = () => {
                       )}
                     </button>
                   </div>
+
+                  <div className="w-full flex flex-wrap items-end gap-4">
+                    <div className="flex flex-col w-full md:w-[18%]">
+                      <label className="text-sm mb-1">Category</label>
+                      <Select
+                        value={selectedCategory}
+                        onChange={handleCategorySelect}
+                        options={categoryOptions}
+                        placeholder="Select"
+                        isSearchable
+                        isClearable
+                        className="text-sm"
+                      />
+                      {categoryError && (
+                        <div className="h-8 relative ml-1 text-danger text-xs">
+                          {categoryError}
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="flex flex-col w-full md:w-[18%]">
+                      <label className="text-sm mb-1">Staff</label>
+                      <Select
+                        menuPortalTarget={document.body}
+                        menuPosition="fixed"
+                        value={selectedStudent}
+                        onChange={handleStudentSelect}
+                        options={studentOptions}
+                        placeholder={loadingExams ? "Loading..." : "Select"}
+                        isSearchable
+                        isClearable
+                        isDisabled={loadingExams}
+                        className="text-sm"
+                      />
+                      {studentError && (
+                        <span className="text-xs text-red-500 mt-1">
+                          {studentError}
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="flex flex-col w-full md:w-[18%]">
+                      <label className="text-sm mb-1">From Date</label>
+                      <input
+                        type="date"
+                        value={fromDate}
+                        onChange={(e) => setFromDate(e.target.value)}
+                        className="h-[38px] border border-gray-300 rounded px-2 text-sm"
+                      />
+                    </div>
+
+                    <div className="flex flex-col w-full md:w-[18%]">
+                      <label className="text-sm mb-1">To Date</label>
+                      <input
+                        type="date"
+                        value={toDate}
+                        onChange={(e) => setToDate(e.target.value)}
+                        className="h-[38px] border border-gray-300 rounded px-2 text-sm"
+                      />
+                    </div>
+
+                    <div className="flex items-end w-full md:w-[15%]">
+                      <button
+                        type="button"
+                        onClick={handleSearch}
+                        disabled={loadingForSearch}
+                        className={`w-full h-[38px] rounded text-white font-medium 
+                        bg-blue-500 hover:bg-blue-600 transition flex items-center justify-center
+                        ${loadingForSearch ? "opacity-50 cursor-not-allowed" : ""}`}
+                      >
+                        {loadingForSearch ? (
+                          <>
+                            <svg
+                              className="animate-spin h-4 w-4 mr-2"
+                              xmlns="http://www.w3.org/2000/svg"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                            >
+                              <circle
+                                className="opacity-25"
+                                cx="12"
+                                cy="12"
+                                r="10"
+                                stroke="currentColor"
+                                strokeWidth="4"
+                              />
+                              <path
+                                className="opacity-75"
+                                fill="currentColor"
+                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                              />
+                            </svg>
+                            Browsing...
+                          </>
+                        ) : (
+                          "Browse"
+                        )}
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
+            </div> */}
+
+            <div
+              className={`w-full flex flex-col md:flex-row md:items-end gap-4 p-2 ${
+                timetable.length > 0 ? "md:w-[100%]" : "md:w-[95%]"
+              }`}
+            >
+              <div className="w-full md:w-[100%] flex md:flex-row justify-between items-center mt-0 md:mt-4">
+                {/* <div className="w-full  gap-x-0 md:gap-x-12 flex flex-col gap-y-2 md:gap-y-0 md:flex-row"> */}
+                <div
+                  className={`  w-full gap-x-0 md:gap-x-8  flex flex-col gap-y-2 md:gap-y-0 md:flex-row ${
+                    timetable.length > 0
+                      ? "w-full md:w-[100%]  wrelative left-0"
+                      : " w-full md:w-[95%] relative left-10"
+                  }`}
+                >
+                  <div className="w-full flex flex-wrap items-end gap-4">
+                    {/* Category */}
+                    <div className="flex flex-col w-full md:w-[18%]">
+                      <label className="text-sm mb-1">
+                        Category <span className=" text-red-500">*</span>
+                      </label>
+                      <Select
+                        value={selectedCategory}
+                        onChange={handleCategorySelect}
+                        options={categoryOptions}
+                        placeholder="Select"
+                        isSearchable
+                        isClearable
+                        className="text-sm"
+                      />
+                      {categoryError && (
+                        <div className="h-8 relative ml-1 text-danger text-xs">
+                          {categoryError}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Staff */}
+                    <div className="flex flex-col w-full md:w-[18%]">
+                      <label className="text-sm mb-1">
+                        Staff <span className=" text-red-500">*</span>
+                      </label>
+                      <Select
+                        menuPortalTarget={document.body}
+                        menuPosition="fixed"
+                        value={selectedStudent}
+                        onChange={handleStudentSelect}
+                        options={studentOptions}
+                        placeholder={loadingExams ? "Loading..." : "Select"}
+                        isSearchable
+                        isClearable
+                        isDisabled={loadingExams}
+                        className="text-sm"
+                      />
+                      {studentError && (
+                        <span className="text-xs text-red-500 mt-1">
+                          {studentError}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* From Date */}
+                    <div className="flex flex-col w-full md:w-[18%]">
+                      <label className="text-sm mb-1">From Date</label>
+                      <input
+                        type="date"
+                        value={fromDate}
+                        onChange={(e) => setFromDate(e.target.value)}
+                        className="h-[38px] border border-gray-300 rounded px-2 text-sm"
+                      />
+                    </div>
+
+                    {/* To Date */}
+                    <div className="flex flex-col w-full md:w-[18%]">
+                      <label className="text-sm mb-1">To Date</label>
+                      <input
+                        type="date"
+                        value={toDate}
+                        onChange={(e) => setToDate(e.target.value)}
+                        className="h-[38px] border border-gray-300 rounded px-2 text-sm"
+                      />
+                    </div>
+
+                    {/* Button */}
+                    <div className="flex items-end w-full md:w-[15%]">
+                      <button
+                        type="button"
+                        onClick={handleSearch}
+                        disabled={loadingForSearch}
+                        className={`w-full h-[38px] rounded text-white font-medium 
+                  bg-blue-500 hover:bg-blue-600 transition flex items-center justify-center
+                  ${loadingForSearch ? "opacity-50 cursor-not-allowed" : ""}`}
+                      >
+                        {loadingForSearch ? (
+                          <>
+                            <svg
+                              className="animate-spin h-4 w-4 mr-2"
+                              xmlns="http://www.w3.org/2000/svg"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                            >
+                              <circle
+                                className="opacity-25"
+                                cx="12"
+                                cy="12"
+                                r="10"
+                                stroke="currentColor"
+                                strokeWidth="4"
+                              />
+                              <path
+                                className="opacity-75"
+                                fill="currentColor"
+                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                              />
+                            </svg>
+                            Browsing...
+                          </>
+                        ) : (
+                          "Browse"
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              {timetable.length > 0 && (
+                <div className="flex gap-2 items-end  bg-gray-100 p-2">
+                  <input
+                    type="text"
+                    className="form-control border border-gray-300 rounded px-2 py-1 text-sm"
+                    placeholder="Search"
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+                  <button
+                    type="button"
+                    onClick={handleDownloadEXL}
+                    className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded"
+                  >
+                    <FaFileExcel />
+                  </button>
+                  <button
+                    onClick={handlePrint}
+                    className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded"
+                  >
+                    <FiPrinter />
+                  </button>
+                </div>
+              )}
             </div>
 
             {timetable.length > 0 && (
               <>
                 <div className="w-full  mt-4">
                   <div className="card mx-auto lg:w-full shadow-lg">
-                    <div className="p-2 px-3 bg-gray-100 border-none flex justify-between items-center">
+                    {/* <div className="p-2 px-3 bg-gray-100 border-none flex justify-between items-center">
                       <div className="w-full   flex flex-row justify-between mr-0 md:mr-4 ">
                         <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
                           List Of Consolidated Leave Report
@@ -640,7 +1022,7 @@ const ConsolidatedLeave = () => {
                       style={{
                         backgroundColor: "#C03078",
                       }}
-                    ></div>
+                    ></div> */}
 
                     <div className="card-body w-full">
                       <div
@@ -655,6 +1037,7 @@ const ConsolidatedLeave = () => {
                             <tr className="bg-gray-100">
                               {[
                                 "Sr No.",
+                                "Staff Name",
                                 "Phone No.",
                                 "Leave Type",
                                 "Start Date",
@@ -683,9 +1066,9 @@ const ConsolidatedLeave = () => {
                                   <td className="px-2 py-2 text-center border border-gray-300">
                                     {index + 1}
                                   </td>
-                                  {/* <td className="px-2 py-2 text-center border border-gray-300">
-                                    {student?.StaffName || " "}
-                                  </td> */}
+                                  <td className="px-2 py-2 text-center border border-gray-300">
+                                    {camelCase(student?.StaffName || " ")}
+                                  </td>
 
                                   <td className="px-2 py-2 text-center border border-gray-300">
                                     {student?.phone || " "}
@@ -696,7 +1079,7 @@ const ConsolidatedLeave = () => {
                                   <td className="px-2 py-2 text-center border border-gray-300">
                                     {student?.leave_start_date
                                       ? new Date(
-                                          student?.leave_start_date
+                                          student?.leave_start_date,
                                         ).toLocaleDateString("en-GB")
                                       : ""}
                                   </td>
@@ -704,7 +1087,7 @@ const ConsolidatedLeave = () => {
                                   <td className="px-2 py-2 text-center border border-gray-300">
                                     {student?.leave_end_date
                                       ? new Date(
-                                          student?.leave_end_date
+                                          student?.leave_end_date,
                                         ).toLocaleDateString("en-GB")
                                       : ""}
                                   </td>
@@ -716,7 +1099,7 @@ const ConsolidatedLeave = () => {
                                     {statusMap[student?.status] || " "}
                                   </td>
                                   <td className="px-2 py-2 text-center border border-gray-300">
-                                    {student?.ApprovedBy || " "}
+                                    {camelCase(student?.ApprovedBy || " ")}
                                   </td>
                                 </tr>
                               ))

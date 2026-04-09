@@ -36,6 +36,30 @@ const PendingStudentId = () => {
   const previousPageRef = useRef(0);
   const prevSearchTermRef = useRef("");
 
+  const [houses, setHouses] = useState([]);
+
+  useEffect(() => {
+    fetchHouses();
+  }, []);
+
+  const fetchHouses = async () => {
+    try {
+      const token = localStorage.getItem("authToken");
+      const response = await axios.get(`${API_URL}/api/get_all_houses`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setHouses(response.data.data);
+      console.log("house", response.data.data);
+    } catch (error) {
+      toast.error("Error fetching class names");
+    }
+  };
+
+  const getHouseName = (houseId) => {
+    const house = houses.find((h) => h.house_id === houseId);
+    return house ? house.house_name : "";
+  };
+
   // Custom styles for the close button
   const classOptions = useMemo(
     () =>
@@ -43,7 +67,7 @@ const PendingStudentId = () => {
         value: { class_id: cls.class_id, section_id: cls.section_id }, // Store both values
         label: `${cls?.get_class?.name} ${cls.name}`, // Display class name & section
       })),
-    [classes]
+    [classes],
   );
 
   const handleClassSelect = (selectedOption) => {
@@ -60,7 +84,7 @@ const PendingStudentId = () => {
       const token = localStorage.getItem("authToken");
       const classResponse = await axios.get(
         `${API_URL}/api/getallClassWithStudentCount`,
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
       setClasses(classResponse.data || []);
     } catch (error) {
@@ -109,7 +133,7 @@ const PendingStudentId = () => {
         `${API_URL}/api/get_pendingstudentidcard?class_id=${class_id}&section_id=${section_id}`,
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
 
       const studentData = response.data?.data;
@@ -129,7 +153,7 @@ const PendingStudentId = () => {
       console.error("Error fetching student details:", error);
       toast.error(
         error.response?.data?.message ||
-          "Failed to fetch student details. Please try again."
+          "Failed to fetch student details. Please try again.",
       );
     } finally {
       setLoading(false);
@@ -167,8 +191,8 @@ const PendingStudentId = () => {
                 [field]: value,
               },
             }
-          : student
-      )
+          : student,
+      ),
     );
   };
 
@@ -200,12 +224,12 @@ const PendingStudentId = () => {
                             ...sibling,
                             [field]: value, // update the sibling's field
                           }
-                        : sibling // return unchanged sibling if it's not the one being updated
+                        : sibling, // return unchanged sibling if it's not the one being updated
                   ),
                 },
               }
-            : student // return unchanged student if it's not the one being updated
-      )
+            : student, // return unchanged student if it's not the one being updated
+      ),
     );
   };
 
@@ -260,14 +284,14 @@ const PendingStudentId = () => {
 
     // ✅ Filter parentsData based on selected parent IDs
     let filteredParentsData = parentsData.filter((parent) =>
-      selectedParentIds.has(Number(parent.parent_id))
+      selectedParentIds.has(Number(parent.parent_id)),
     );
 
     // 🔥 Remove duplicates using a Map (ensures unique `parent_id`s)
     filteredParentsData = Array.from(
       new Map(
-        filteredParentsData.map((parent) => [parent.parent_id, parent])
-      ).values()
+        filteredParentsData.map((parent) => [parent.parent_id, parent]),
+      ).values(),
     );
 
     console.log("Filtered Parents Data for Submission:", filteredParentsData);
@@ -287,7 +311,7 @@ const PendingStudentId = () => {
       for (const student of parent.students || []) {
         if (!student.permant_add || !student.blood_group || !student.house) {
           toast.error(
-            "Permanent Address, Blood Group, and House are required for all students."
+            "Permanent Address, Blood Group, and House are required for all students.",
           );
           return;
         }
@@ -324,7 +348,7 @@ const PendingStudentId = () => {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json", // Ensure JSON format
           },
-        }
+        },
       );
 
       if (response.status === 200) {
@@ -376,7 +400,7 @@ const PendingStudentId = () => {
                 sibling.last_name ?? ""
               }`
                 .trim()
-                .toLowerCase()
+                .toLowerCase(),
             )
             .join(" ") ?? "";
         // Joins them into a single string for searching
@@ -396,7 +420,7 @@ const PendingStudentId = () => {
   console.log(filteredSections);
   const displayedSections = filteredSections.slice(
     currentPage * pageSize,
-    (currentPage + 1) * pageSize
+    (currentPage + 1) * pageSize,
   );
 
   // handle allot pendingstudent close model
@@ -566,13 +590,15 @@ const PendingStudentId = () => {
                                     <input
                                       type="checkbox"
                                       checked={selectedFathers.includes(
-                                        Number(pendingstudent.parent?.parent_id)
+                                        Number(
+                                          pendingstudent.parent?.parent_id,
+                                        ),
                                       )} // Ensure number comparison
                                       onChange={() =>
                                         handleSelectFather(
                                           Number(
-                                            pendingstudent.parent?.parent_id
-                                          )
+                                            pendingstudent.parent?.parent_id,
+                                          ),
                                         )
                                       } // Pass number
                                       className="mb-1" // Adds spacing between checkbox and name
@@ -580,7 +606,7 @@ const PendingStudentId = () => {
 
                                     <span>
                                       {capitalizeFirstLetter(
-                                        pendingstudent.parent?.father_name
+                                        pendingstudent.parent?.father_name,
                                       )}
                                     </span>
                                   </div>
@@ -642,13 +668,13 @@ const PendingStudentId = () => {
                                               {/* Name (20%) */}
                                               <div className="w-[20%] break-words text-center lg:px-3 py-2 text-sm">
                                                 {capitalizeFirstLetter(
-                                                  sibling.first_name
+                                                  sibling.first_name,
                                                 )}{" "}
                                                 {capitalizeFirstLetter(
-                                                  sibling.mid_name
+                                                  sibling.mid_name,
                                                 )}{" "}
                                                 {capitalizeFirstLetter(
-                                                  sibling.last_name
+                                                  sibling.last_name,
                                                 )}
                                               </div>
 
@@ -676,7 +702,7 @@ const PendingStudentId = () => {
                                                       e,
                                                       "permant_add",
                                                       index,
-                                                      sIndex
+                                                      sIndex,
                                                     )
                                                   }
                                                   className="w-full text-xs bg-white border border-gray-400 rounded-md p-1"
@@ -703,7 +729,7 @@ const PendingStudentId = () => {
                                                       e,
                                                       "blood_group",
                                                       index,
-                                                      sIndex
+                                                      sIndex,
                                                     )
                                                   }
                                                   className="w-full border border-gray-400 rounded-md py-2 px-3 bg-white text-xs"
@@ -744,13 +770,13 @@ const PendingStudentId = () => {
                                                       e,
                                                       "house",
                                                       index,
-                                                      sIndex
+                                                      sIndex,
                                                     )
                                                   }
                                                   className="w-full border border-gray-400 rounded-md py-2 px-3 bg-white text-xs"
                                                   required
                                                 >
-                                                  <option value="">
+                                                  {/* <option value="">
                                                     Select
                                                   </option>
                                                   <option value="D">
@@ -764,7 +790,18 @@ const PendingStudentId = () => {
                                                   </option>
                                                   <option value="S">
                                                     Sapphire
+                                                  </option> */}
+                                                  <option value="">
+                                                    Select
                                                   </option>
+                                                  {houses.map((house) => (
+                                                    <option
+                                                      key={house.house_id}
+                                                      value={house.house_id}
+                                                    >
+                                                      {house.house_name}
+                                                    </option>
+                                                  ))}
                                                 </select>
                                                 {errors[
                                                   `${index}-${sIndex}-house`
@@ -776,7 +813,7 @@ const PendingStudentId = () => {
                                                 )}
                                               </div>
                                             </div>
-                                          )
+                                          ),
                                         )
                                       : "No Siblings"}
                                   </div>
@@ -789,7 +826,7 @@ const PendingStudentId = () => {
                                 colSpan="10"
                                 className="text-center text-red-700 py-4"
                               >
-                                Oops! No data found..
+                                No data found.
                               </td>
                             </tr>
                           )}

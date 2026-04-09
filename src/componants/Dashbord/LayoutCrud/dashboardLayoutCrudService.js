@@ -1,4 +1,14 @@
-import api from "../api";
+import React from 'react';
+  
+  const DashboardLayoutCrudService = () =>  {
+	return (
+	  <div>
+	  </div>
+	);
+  }
+  
+  export default DashboardLayoutCrudService;
+  import api from "../api";
 
 const STORAGE_KEY = "dashboard_layout_crud_overrides_v2";
 

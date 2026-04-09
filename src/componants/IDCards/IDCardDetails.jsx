@@ -74,7 +74,7 @@ const IDCardDetails = () => {
         }
         const response = await axios.get(
           `${API_URL}/api/get_studentidcarddetails?student_id=${idToFetch}`,
-          { headers: { Authorization: `Bearer ${token}` } }
+          { headers: { Authorization: `Bearer ${token}` } },
         );
         const fetchedData = response?.data?.data || [];
         setData(fetchedData);
@@ -93,7 +93,7 @@ const IDCardDetails = () => {
     const fetchHouses = async () => {
       try {
         const token = localStorage.getItem("authToken");
-        const response = await axios.get(`${API_URL}/api/get_houses`, {
+        const response = await axios.get(`${API_URL}/api/get_all_houses`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -113,8 +113,8 @@ const IDCardDetails = () => {
     const { name, value } = e.target;
     setStudents((prev) =>
       prev.map((student, i) =>
-        i === index ? { ...student, [name]: value } : student
-      )
+        i === index ? { ...student, [name]: value } : student,
+      ),
     );
   };
 
@@ -123,11 +123,11 @@ const IDCardDetails = () => {
       prev.map((student, i) =>
         i === index
           ? { ...student, image_base: croppedImageData || "" }
-          : student
-      )
+          : student,
+      ),
     );
     setFormErrors((prevErrors) =>
-      prevErrors.filter((err) => err.field !== `student_image_base_${index}`)
+      prevErrors.filter((err) => err.field !== `student_image_base_${index}`),
     );
   };
 
@@ -184,7 +184,7 @@ const IDCardDetails = () => {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       if (response.status === 200) {
@@ -264,13 +264,13 @@ const IDCardDetails = () => {
                         }
                       />
                       {formErrors.some(
-                        (err) => err.field === `student_image_base_${index}`
+                        (err) => err.field === `student_image_base_${index}`,
                       ) && (
                         <p className="text-red-500 text-xs ml-3">
                           {
                             formErrors.find(
                               (err) =>
-                                err.field === `student_image_base_${index}`
+                                err.field === `student_image_base_${index}`,
                             )?.message
                           }
                         </p>
@@ -318,17 +318,17 @@ const IDCardDetails = () => {
                           <option key={bg} value={bg}>
                             {bg}
                           </option>
-                        )
+                        ),
                       )}
                     </select>
                     {formErrors.some(
-                      (err) => err.field === `student_blood_group_${index}`
+                      (err) => err.field === `student_blood_group_${index}`,
                     ) && (
                       <p className="text-red-500 text-xs">
                         {
                           formErrors.find(
                             (err) =>
-                              err.field === `student_blood_group_${index}`
+                              err.field === `student_blood_group_${index}`,
                           )?.message
                         }
                       </p>
@@ -386,12 +386,12 @@ const IDCardDetails = () => {
                       className="w-full border rounded-md p-2 shadow-inner"
                     />
                     {formErrors.some(
-                      (err) => err.field === `student_address_${index}`
+                      (err) => err.field === `student_address_${index}`,
                     ) && (
                       <p className="text-red-500 text-xs">
                         {
                           formErrors.find(
-                            (err) => err.field === `student_address_${index}`
+                            (err) => err.field === `student_address_${index}`,
                           )?.message
                         }
                       </p>

@@ -33,30 +33,71 @@ const StaffLeaveReport = () => {
   const [leaveData, setLeaveData] = useState([]);
   const [leaveTypes, setLeaveTypes] = useState([]);
 
+  const [category, setCategory] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [selectedCategoryId, setSelectedCategoryId] = useState(null);
+
   useEffect(() => {
-    fetchExams();
+    // fetchExams();
     fetchLeaveType();
     handleSearch();
+    fetchCategory();
   }, []);
+
+  useEffect(() => {
+    fetchExams();
+  }, [selectedCategoryId]);
+  // const fetchExams = async () => {
+  //   try {
+  //     setLoadingExams(true);
+  //     const token = localStorage.getItem("authToken");
+
+  //     const response = await axios.get(
+  //       // API -> staff_list
+  //       `${API_URL}/api/get_teaching_nonteaching_staff_list`,
+  //       {
+  //         headers: { Authorization: `Bearer ${token}` },
+  //       },
+  //     );
+  //     console.log("Class", response);
+  //     setStudentNameWithClassId(response?.data || []);
+  //   } catch (error) {
+  //     toast.error("Error fetching Classes");
+  //     console.error("Error fetching Classes:", error);
+  //   } finally {
+  //     setLoadingExams(false);
+  //   }
+  // };
 
   const fetchExams = async () => {
     try {
       setLoadingExams(true);
       const token = localStorage.getItem("authToken");
 
-      const response = await axios.get(`${API_URL}/api/staff_list`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      console.log("Class", response);
+      // ✅ Prepare params conditionally
+      let params = {};
+
+      if (selectedCategoryId) {
+        params.tc_id = selectedCategoryId; // pass only when selected
+      }
+
+      const response = await axios.get(
+        `${API_URL}/api/get_teaching_nonteaching_staff_list`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          params: params, // attach params here
+        },
+      );
+
+      console.log("Staff List", response);
       setStudentNameWithClassId(response?.data || []);
     } catch (error) {
-      toast.error("Error fetching Classes");
-      console.error("Error fetching Classes:", error);
+      toast.error("Error fetching Staff");
+      console.error("Error fetching Staff:", error);
     } finally {
       setLoadingExams(false);
     }
   };
-
   const fetchLeaveType = async () => {
     setLoading(true);
     try {
@@ -78,6 +119,26 @@ const StaffLeaveReport = () => {
     }
   };
 
+  const fetchCategory = async () => {
+    setLoading(true);
+    try {
+      const token = localStorage.getItem("authToken");
+      if (!token) throw new Error("No authentication token found");
+
+      const response = await axios.get(`${API_URL}/api/get_teachercategory`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const data = response.data.data || [];
+      setCategory(data);
+      console.log("category datta", data);
+    } catch (error) {
+      toast.error(error.message || "Error fetching data");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleStudentSelect = (selectedOption) => {
     setStudentError(""); // Reset error if student is select.
     setSelectedStudent(selectedOption);
@@ -90,7 +151,23 @@ const StaffLeaveReport = () => {
         value: cls?.teacher_id,
         label: `${cls.name}`,
       })),
-    [studentNameWithClassId]
+    [studentNameWithClassId],
+  );
+
+  const handleCategorySelect = (selectedOption) => {
+    setSelectedStudent(null);
+    setSelectedStudentId(null);
+    setSelectedCategory(selectedOption);
+    setSelectedCategoryId(selectedOption?.value);
+  };
+
+  const categoryOptions = useMemo(
+    () =>
+      category.map((cls) => ({
+        value: cls?.tc_id,
+        label: `${cls.name}`,
+      })),
+    [category],
   );
 
   const handleSearch = async () => {
@@ -115,6 +192,7 @@ const StaffLeaveReport = () => {
       // Prepare query params
       const params = {};
       if (selectedStudentId) params.staff_id = selectedStudentId;
+      if (selectedCategoryId) params.tc_id = selectedCategoryId;
       if (fromDate) params.from_date = fromDate;
       if (toDate) params.to_date = toDate;
 
@@ -143,7 +221,7 @@ const StaffLeaveReport = () => {
       console.error("Error fetching Staff Leave Report:", error);
       toast.error(
         error?.response?.data?.message ||
-          "Error fetching Staff Leave Report. Please try again."
+          "Error fetching Staff Leave Report. Please try again.",
       );
     } finally {
       setIsSubmitting(false);
@@ -172,7 +250,7 @@ const StaffLeaveReport = () => {
             ${leaveTypes
               .map(
                 (type) =>
-                  `<th class="px-2 text-center py-2 border border-black text-sm font-semibold">${type}</th>`
+                  `<th class="px-2 text-center py-2 border border-black text-sm font-semibold">${type}</th>`,
               )
               .join("")}
             <th class="px-2 text-center py-2 border border-black text-sm font-semibold">Total</th>
@@ -195,13 +273,13 @@ const StaffLeaveReport = () => {
                     (type) =>
                       `<td class="px-2 text-center py-2 border border-black">${
                         subject.leaves?.[type] ?? 0
-                      }</td>`
+                      }</td>`,
                   )
                   .join("")}
                   <td class="px-2 text-center py-2 border border-black">${
                     subject?.total || "0"
                   }</td>
-              </tr>`
+              </tr>`,
             )
             .join("")}
         </tbody>
@@ -350,8 +428,8 @@ const StaffLeaveReport = () => {
       <div
         className={`mx-auto p-4 transition-all duration-700 ease-[cubic-bezier(0.4, 0, 0.2, 1)] transform ${
           timetable.length > 0
-            ? "w-full md:w-[90%] scale-100"
-            : "w-full md:w-[80%] scale-[0.98]"
+            ? "w-full md:w-[100%] scale-100"
+            : "w-full md:w-[95%] scale-[0.98]"
         }`}
       >
         <ToastContainer />
@@ -378,7 +456,7 @@ const StaffLeaveReport = () => {
             {/* <div className=" w-full md:w-[95%] flex justify-center flex-col md:flex-row gap-x-1 ml-0 p-2"> */}
             <div
               className={`w-full flex flex-col md:flex-row md:items-end gap-4 p-2 ${
-                timetable.length > 0 ? "md:w-[100%]" : "md:w-[90%]"
+                timetable.length > 0 ? "md:w-[100%]" : "md:w-[95%]"
               }`}
             >
               <div className="w-full md:w-[100%] flex md:flex-row justify-between items-center mt-0 md:mt-4">
@@ -390,8 +468,7 @@ const StaffLeaveReport = () => {
                       : " w-full md:w-[95%] relative left-10"
                   }`}
                 >
-                  {/* Class Dropdown */}
-                  <div className="w-full  md:w-[70%] gap-x-2 justify-around my-1 md:my-4 flex md:flex-row">
+                  {/* <div className="w-full  md:w-[70%] gap-x-2 justify-around my-1 md:my-4 flex md:flex-row">
                     <label
                       className="w-full md:w-[27%] text-md pl-0 md:pl-5 mt-1.5"
                       htmlFor="studentSelect"
@@ -435,7 +512,45 @@ const StaffLeaveReport = () => {
                     </div>
                   </div>
 
-                  {/* From Date Dropdown */}
+                  <div className="w-full  md:w-[70%] gap-x-2 justify-around my-1 md:my-4 flex md:flex-row">
+                    <label
+                      className="w-full md:w-[35%] text-md pl-0 md:pl-5 mt-1.5"
+                      htmlFor="studentSelect"
+                    >
+                      Category
+                    </label>
+                    <div className="w-full md:w-[70%]">
+                      <Select
+                        menuPortalTarget={document.body}
+                        menuPosition="fixed"
+                        id="studentSelect"
+                        value={selectedCategory}
+                        onChange={handleCategorySelect}
+                        options={categoryOptions}
+                        placeholder={loadingExams ? "Loading..." : "Select"}
+                        isSearchable
+                        isClearable
+                        className="text-sm"
+                        isDisabled={loadingExams}
+                        styles={{
+                          control: (provided) => ({
+                            ...provided,
+                            fontSize: ".9em", // Adjust font size for selected value
+                            minHeight: "30px", // Reduce height
+                          }),
+                          menu: (provided) => ({
+                            ...provided,
+                            fontSize: "1em", // Adjust font size for dropdown options
+                          }),
+                          option: (provided) => ({
+                            ...provided,
+                            fontSize: ".9em", // Adjust font size for each option
+                          }),
+                        }}
+                      />
+                    </div>
+                  </div>
+
                   <div className="w-full   md:w-[70%] gap-x-2 justify-between my-1 md:my-4 flex md:flex-row">
                     <label
                       className="ml-0 md:ml-4 w-full md:w-[70%] text-md mt-1.5"
@@ -454,7 +569,6 @@ const StaffLeaveReport = () => {
                     </div>
                   </div>
 
-                  {/* To Date Dropdown */}
                   <div className="w-full  md:w-[70%] gap-x-2 justify-between my-1 md:my-4 flex md:flex-row">
                     <label
                       className="ml-0 md:ml-4 w-full md:w-[50%] text-md mt-1.5"
@@ -473,7 +587,6 @@ const StaffLeaveReport = () => {
                     </div>
                   </div>
 
-                  {/* Browse Button */}
                   <div className="mt-1">
                     <button
                       type="search"
@@ -512,6 +625,105 @@ const StaffLeaveReport = () => {
                         "Browse"
                       )}
                     </button>
+                  </div> */}
+                  <div className="w-full flex flex-wrap items-end gap-4">
+                    {/* Category */}
+                    <div className="flex flex-col w-full md:w-[18%]">
+                      <label className="text-sm mb-1">Category</label>
+                      <Select
+                        value={selectedCategory}
+                        onChange={handleCategorySelect}
+                        options={categoryOptions}
+                        placeholder="Select"
+                        isSearchable
+                        isClearable
+                        className="text-sm"
+                      />
+                    </div>
+
+                    {/* Staff */}
+                    <div className="flex flex-col w-full md:w-[18%]">
+                      <label className="text-sm mb-1">Staff</label>
+                      <Select
+                        menuPortalTarget={document.body}
+                        menuPosition="fixed"
+                        value={selectedStudent}
+                        onChange={handleStudentSelect}
+                        options={studentOptions}
+                        placeholder={loadingExams ? "Loading..." : "Select"}
+                        isSearchable
+                        isClearable
+                        isDisabled={loadingExams}
+                        className="text-sm"
+                      />
+                      {studentError && (
+                        <span className="text-xs text-red-500 mt-1">
+                          {studentError}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* From Date */}
+                    <div className="flex flex-col w-full md:w-[18%]">
+                      <label className="text-sm mb-1">From Date</label>
+                      <input
+                        type="date"
+                        value={fromDate}
+                        onChange={(e) => setFromDate(e.target.value)}
+                        className="h-[38px] border border-gray-300 rounded px-2 text-sm"
+                      />
+                    </div>
+
+                    {/* To Date */}
+                    <div className="flex flex-col w-full md:w-[18%]">
+                      <label className="text-sm mb-1">To Date</label>
+                      <input
+                        type="date"
+                        value={toDate}
+                        onChange={(e) => setToDate(e.target.value)}
+                        className="h-[38px] border border-gray-300 rounded px-2 text-sm"
+                      />
+                    </div>
+
+                    {/* Button */}
+                    <div className="flex items-end w-full md:w-[15%]">
+                      <button
+                        type="button"
+                        onClick={handleSearch}
+                        disabled={loadingForSearch}
+                        className={`w-full h-[38px] rounded text-white font-medium 
+      bg-blue-500 hover:bg-blue-600 transition flex items-center justify-center
+      ${loadingForSearch ? "opacity-50 cursor-not-allowed" : ""}`}
+                      >
+                        {loadingForSearch ? (
+                          <>
+                            <svg
+                              className="animate-spin h-4 w-4 mr-2"
+                              xmlns="http://www.w3.org/2000/svg"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                            >
+                              <circle
+                                className="opacity-25"
+                                cx="12"
+                                cy="12"
+                                r="10"
+                                stroke="currentColor"
+                                strokeWidth="4"
+                              />
+                              <path
+                                className="opacity-75"
+                                fill="currentColor"
+                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                              />
+                            </svg>
+                            Browsing...
+                          </>
+                        ) : (
+                          "Browse"
+                        )}
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -643,9 +855,9 @@ const StaffLeaveReport = () => {
                                               .map(
                                                 (part) =>
                                                   part.charAt(0).toUpperCase() +
-                                                  part.slice(1)
+                                                  part.slice(1),
                                               )
-                                              .join("'")
+                                              .join("'"),
                                           )
                                           .join(" ")
                                       : " "}
@@ -667,7 +879,7 @@ const StaffLeaveReport = () => {
                             ) : (
                               <div className=" absolute left-[1%] w-[100%]  text-center flex justify-center items-center mt-14">
                                 <div className=" text-center text-xl text-red-700">
-                                  Oops! No data found..
+                                  Result not found!
                                 </div>
                               </div>
                             )}
