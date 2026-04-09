@@ -56,6 +56,7 @@ function Form() {
         toast.error("Error fetching class names");
       }
     };
+
     const fetchHouses = async () => {
       try {
         const token = localStorage.getItem("authToken");
@@ -75,7 +76,6 @@ function Form() {
         toast.error("Error fetching houses");
       }
     };
-
     fetchHouses();
     fetchClassNames();
   }, [API_URL]);
@@ -97,7 +97,7 @@ function Form() {
         `${API_URL}/api/get_divisions/${selectedClassId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
       setDivisions(response.data.divisions); // Update divisions based on selected class
     } catch (error) {
@@ -275,7 +275,7 @@ function Form() {
           // Base64 Image (optional)
           // student_image: student.student_image || "",
         },
-        setSelectedClass(student?.get_class?.name)
+        setSelectedClass(student?.get_class?.name),
       );
 
       // Set the initial state for father's and mother's mobile preferences based on prefilled data
@@ -303,7 +303,7 @@ function Form() {
         setPhotoPreview(
           // `${API_URL}/path/to/images/${student.teacher_image_name}`
           // `https://sms.evolvu.in/storage/app/public/student_images/${student.image_name}`
-          `${student.image_name}`
+          `${student.image_name}`,
         );
       }
     }
@@ -319,7 +319,7 @@ function Form() {
             `${API_URL}/api/get_divisions/${selectedClass}`,
             {
               headers: { Authorization: `Bearer ${token}` },
-            }
+            },
           );
           setDivisions(response.data.divisions); // Update divisions
         } catch (error) {
@@ -475,7 +475,7 @@ function Form() {
         `${API_URL}/api/check-user-id/${studentId}/${userId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
 
       return response?.data?.exists;
@@ -572,7 +572,7 @@ function Form() {
     await handleSetUsernameSelection(
       "FatherMob",
       formData.f_mobile,
-      "fatherMobile"
+      "fatherMobile",
     );
   };
 
@@ -586,7 +586,7 @@ function Form() {
     await handleSetUsernameSelection(
       "MotherMob",
       formData.m_mobile,
-      "motherMobile"
+      "motherMobile",
     );
   };
 
@@ -610,7 +610,7 @@ function Form() {
     await handleSetUsernameSelection(
       "Mother",
       formData.m_emailid,
-      "motherEmail"
+      "motherEmail",
     );
   };
 
@@ -1183,7 +1183,7 @@ function Form() {
     // Get user ID and its corresponding error key
     const { value: userIdForCheck, key: errorKey } = getUserIdDetails(
       formData,
-      selectedUsername
+      selectedUsername,
     );
 
     // Prevent if user ID is empty
@@ -1199,7 +1199,7 @@ function Form() {
     // Check username uniqueness
     const usernameExists = await checkUserId(
       student.student_id,
-      userIdForCheck
+      userIdForCheck,
     );
     if (usernameExists) {
       setUsernameErrors((prevErrors) => ({
@@ -1231,7 +1231,7 @@ function Form() {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       if (response.status === 200) {
@@ -1245,11 +1245,11 @@ function Form() {
       if (error.response?.data?.errors) {
         setBackendErrors(error.response.data.errors || {});
         toast.error(
-          "Some fields contain duplicate data. Please ensure all values are unique."
+          "Some fields contain duplicate data. Please ensure all values are unique.",
         );
       } else {
         toast.error(
-          error.message || "Backend error occurred while updating data."
+          error.message || "Backend error occurred while updating data.",
         );
       }
     } finally {
