@@ -11,7 +11,7 @@
     "dev:test": "vite --mode test --config vite.config.test.js",
     "dev:live": "vite --mode live --config vite.config.js",
     "dev:commoncode": "vite --mode commoncode",
-    "build:test": "vite build --mode test --config vite.config.test.js",
+    "build:test": "node --max-old-space-size=8192 ./node_modules/vite/bin/vite.js build --mode test --config vite.config.test.js",
     "build:live": "node --max-old-space-size=8192 ./node_modules/vite/bin/vite.js build --mode live --config vite.config.js",
     "build:commoncode": "node --max-old-space-size=8192 ./node_modules/vite/bin/vite.js build --mode commoncode --config vite.config.js"
   },
