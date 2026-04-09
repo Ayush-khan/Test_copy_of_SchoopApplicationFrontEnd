@@ -32,26 +32,89 @@ const Balanceleave = () => {
   const [pageCount, setPageCount] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
 
+  const [category, setCategory] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [selectedCategoryId, setSelectedCategoryId] = useState(null);
+  const [categoryError, setCategoryError] = useState("");
+
   useEffect(() => {
-    fetchExams();
+    // fetchExams();
+    fetchCategory();
     // handleSearch();
   }, []);
+
+  useEffect(() => {
+    fetchExams();
+  }, [selectedCategoryId]);
+
+  // const fetchExams = async () => {
+  //   try {
+  //     setLoadingExams(true);
+  //     const token = localStorage.getItem("authToken");
+
+  //     // API :- staff_list
+  //     const response = await axios.get(
+  //       `${API_URL}/api/get_teaching_nonteaching_staff_list`,
+  //       {
+  //         headers: { Authorization: `Bearer ${token}` },
+  //       },
+  //     );
+  //     console.log("Class", response);
+  //     setStudentNameWithClassId(response?.data || []);
+  //   } catch (error) {
+  //     toast.error("Error fetching Classes");
+  //     console.error("Error fetching Classes:", error);
+  //   } finally {
+  //     setLoadingExams(false);
+  //   }
+  // };
 
   const fetchExams = async () => {
     try {
       setLoadingExams(true);
       const token = localStorage.getItem("authToken");
 
-      const response = await axios.get(`${API_URL}/api/staff_list`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      console.log("Class", response);
+      // ✅ Prepare params conditionally
+      let params = {};
+
+      if (selectedCategoryId) {
+        params.tc_id = selectedCategoryId; // pass only when selected
+      }
+
+      const response = await axios.get(
+        `${API_URL}/api/get_teaching_nonteaching_staff_list`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          params: params, // attach params here
+        },
+      );
+
+      console.log("Staff List", response);
       setStudentNameWithClassId(response?.data || []);
     } catch (error) {
-      toast.error("Error fetching Classes");
-      console.error("Error fetching Classes:", error);
+      toast.error("Error fetching Staff");
+      console.error("Error fetching Staff:", error);
     } finally {
       setLoadingExams(false);
+    }
+  };
+  const fetchCategory = async () => {
+    setLoading(true);
+    try {
+      const token = localStorage.getItem("authToken");
+      if (!token) throw new Error("No authentication token found");
+
+      const response = await axios.get(`${API_URL}/api/get_teachercategory`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const data = response.data.data || [];
+      setCategory(data);
+      console.log("category datta", data);
+    } catch (error) {
+      toast.error(error.message || "Error fetching data");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -67,16 +130,42 @@ const Balanceleave = () => {
         value: cls?.teacher_id,
         label: `${cls.name}`,
       })),
-    [studentNameWithClassId]
+    [studentNameWithClassId],
+  );
+
+  const handleCategorySelect = (selectedOption) => {
+    setSelectedStudent(null);
+    setSelectedStudentId(null);
+    setSelectedCategory(selectedOption);
+    setSelectedCategoryId(selectedOption?.value);
+  };
+
+  const categoryOptions = useMemo(
+    () =>
+      category.map((cls) => ({
+        value: cls?.tc_id,
+        label: `${cls.name}`,
+      })),
+    [category],
   );
 
   // Handle search and fetch parent information
 
   const handleSearch = async () => {
     setLoadingForSearch(false);
-    if (!selectedStudentId) {
-      setStudentError("Please select Staff Name.");
-      setLoadingForSearch(false);
+    // if (!selectedCategoryId) {
+    //   setCategoryError("Plase select category.");
+    //   setLoadingForSearch(false);
+    //   return;
+    // }
+    // if (!selectedStudentId) {
+    //   setStudentError("Please select staff name.");
+    //   setLoadingForSearch(false);
+    //   return;
+    // }
+
+    if (!selectedCategoryId && !selectedStudentId) {
+      toast.error("Please select at least one search criteria.");
       return;
     }
 
@@ -87,13 +176,14 @@ const Balanceleave = () => {
       const token = localStorage.getItem("authToken");
       const params = {};
       if (selectedStudentId) params.staff_id = selectedStudentId;
+      if (selectedCategoryId) params.tc_id = selectedCategoryId;
 
       const response = await axios.get(
         `${API_URL}/api/get_balanceleavereport`,
         {
           headers: { Authorization: `Bearer ${token}` },
           params,
-        }
+        },
       );
 
       if (!response?.data?.data || response?.data?.data?.length === 0) {
@@ -246,7 +336,7 @@ const Balanceleave = () => {
                 <td class="px-2 text-center py-2 border border-black">${
                   subject?.balance_leave || " "
                 }</td>
-              </tr>`
+              </tr>`,
             )
             .join("")}
         </tbody>
@@ -413,20 +503,31 @@ const Balanceleave = () => {
     // Extract relevant fields and convert them to lowercase for case-insensitive search
     const formId = section?.staffname?.toLowerCase() || "";
     const studentDOB = section?.name?.toLowerCase() || "";
+    const balanceLeave =
+      section?.balance_leave?.toString()?.toLowerCase() || "";
 
     // const orderId = section?.balance_leave || "";
 
     // Check if the search term is present in any of the specified fields
     return (
-      formId.includes(searchLower) || studentDOB.includes(searchLower)
-      //   || orderId.includes(searchLower)
+      formId.includes(searchLower) ||
+      studentDOB.includes(searchLower) ||
+      balanceLeave.includes(searchLower)
     );
   });
 
   const displayedSections = filteredSections.slice(currentPage * pageSize);
+
+  const camelCase = (str) =>
+    str
+      ?.toLowerCase()
+      .split(" ")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
+
   return (
     <>
-      <div className="w-full md:w-[70%] mx-auto p-4 ">
+      <div className="w-full md:w-[90%] mx-auto p-4 ">
         <ToastContainer />
         <div className="card p-2 rounded-md ">
           <div className=" card-header mb-4 flex justify-between items-center ">
@@ -448,9 +549,53 @@ const Balanceleave = () => {
           ></div>
 
           <>
-            <div className=" w-full md:w-[90%]   flex justify-center flex-col md:flex-row gap-x-1     ml-0    p-2">
+            <div className=" w-full md:w-[99%]   flex justify-center flex-col md:flex-row gap-x-1     ml-0    p-2">
               <div className="w-full md:w-[99%] flex md:flex-row justify-between items-center mt-0 md:mt-4">
-                <div className="w-full md:w-[70%] gap-x-0 md:gap-x-12  flex flex-col gap-y-2 md:gap-y-0 md:flex-row">
+                <div className="w-full md:w-[99%] gap-x-0 md:gap-x-12  flex flex-col gap-y-2 md:gap-y-0 md:flex-row">
+                  <div className="w-full md:w-[70%] gap-x-2   justify-around  my-1 md:my-4 flex md:flex-row ">
+                    <label
+                      className="md:w-[40%] text-md pl-0 md:pl-5 mt-1.5"
+                      htmlFor="categorySelect"
+                    >
+                      Category <span className="text-red-500">*</span>
+                    </label>
+                    <div className=" w-full md:w-[65%]">
+                      <Select
+                        menuPortalTarget={document.body}
+                        menuPosition="fixed"
+                        id="categorySelect"
+                        value={selectedCategory}
+                        onChange={handleCategorySelect}
+                        options={categoryOptions}
+                        placeholder={loadingExams ? "Loading..." : "Select"}
+                        isSearchable
+                        isClearable
+                        isDisabled={loadingExams}
+                        styles={{
+                          control: (provided) => ({
+                            ...provided,
+                            fontSize: ".9em", // Adjust font size for selected value
+                            minHeight: "30px", // Reduce height
+                          }),
+                          menu: (provided) => ({
+                            ...provided,
+                            fontSize: "1em", // Adjust font size for dropdown options
+                          }),
+                          option: (provided) => ({
+                            ...provided,
+                            fontSize: ".9em", // Adjust font size for each option
+                          }),
+                        }}
+                      />
+
+                      {categoryError && (
+                        <div className="h-8 relative ml-1 text-danger text-xs">
+                          {categoryError}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
                   <div className="w-full md:w-[70%] gap-x-2   justify-around  my-1 md:my-4 flex md:flex-row ">
                     <label
                       className="md:w-[40%] text-md pl-0 md:pl-5 mt-1.5"
@@ -536,13 +681,36 @@ const Balanceleave = () => {
                   </div>
                 </div>{" "}
               </div>
+              {timetable.length > 0 && (
+                <div className="flex gap-2 items-end  bg-gray-100 p-2">
+                  <input
+                    type="text"
+                    className="form-control border border-gray-300 rounded px-2 py-1 text-sm"
+                    placeholder="Search"
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+                  <button
+                    type="button"
+                    onClick={handleDownloadEXL}
+                    className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded"
+                  >
+                    <FaFileExcel />
+                  </button>
+                  <button
+                    onClick={handlePrint}
+                    className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded"
+                  >
+                    <FiPrinter />
+                  </button>
+                </div>
+              )}
             </div>
 
             {timetable.length > 0 && (
               <>
                 <div className="w-full  mt-4">
                   <div className="card mx-auto lg:w-full shadow-lg">
-                    <div className="p-2 px-3 bg-gray-100 border-none flex justify-between items-center">
+                    {/* <div className="p-2 px-3 bg-gray-100 border-none flex justify-between items-center">
                       <div className="w-full   flex flex-row justify-between mr-0 md:mr-4 ">
                         <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
                           Balance Leave Report List
@@ -585,7 +753,7 @@ const Balanceleave = () => {
                       style={{
                         backgroundColor: "#C03078",
                       }}
-                    ></div>
+                    ></div> */}
 
                     <div className="card-body w-full">
                       <div
@@ -648,25 +816,29 @@ const Balanceleave = () => {
                           <table className="min-w-[80%] leading-normal table-auto border border-gray-300">
                             <thead>
                               <tr className="bg-gray-100">
-                                {["Sr No.", "Leave Type", "Balance Leave"].map(
-                                  (header, index) => {
-                                    let columnWidth = "min-w-[120px] px-2"; // default width
+                                {[
+                                  "Sr No.",
+                                  "Staff Name",
+                                  "Leave Type",
 
-                                    if (header === "Sr No.")
-                                      columnWidth = "min-w-[50px]";
-                                    else if (header === "Balance Leave")
-                                      columnWidth = "min-w-[50px]";
+                                  "Balance Leave",
+                                ].map((header, index) => {
+                                  let columnWidth = "min-w-[120px] px-2"; // default width
 
-                                    return (
-                                      <th
-                                        key={index}
-                                        className={`text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider ${columnWidth}`}
-                                      >
-                                        {header}
-                                      </th>
-                                    );
-                                  }
-                                )}
+                                  if (header === "Sr No.")
+                                    columnWidth = "min-w-[50px]";
+                                  else if (header === "Balance Leave")
+                                    columnWidth = "min-w-[50px]";
+
+                                  return (
+                                    <th
+                                      key={index}
+                                      className={`text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider ${columnWidth}`}
+                                    >
+                                      {header}
+                                    </th>
+                                  );
+                                })}
                               </tr>
                             </thead>
 
@@ -680,9 +852,9 @@ const Balanceleave = () => {
                                     <td className="px-2 py-2 text-center border border-gray-300">
                                       {index + 1}
                                     </td>
-                                    {/* <td className="px-2 py-2 text-center border border-gray-300">
-                                      {student?.staffname || " "}
-                                    </td> */}
+                                    <td className="px-2 py-2 text-center border border-gray-300">
+                                      {camelCase(student?.staffname || " ")}
+                                    </td>
                                     <td className="px-2 py-2 text-center border border-gray-300">
                                       {student?.name || " "}
                                     </td>
@@ -695,7 +867,7 @@ const Balanceleave = () => {
                                 <tr>
                                   <td colSpan={4}>
                                     <div className="w-full text-center text-xl text-red-700 py-6">
-                                      Oops! No data found..
+                                      Result not found!
                                     </div>
                                   </td>
                                 </tr>
