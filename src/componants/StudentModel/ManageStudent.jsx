@@ -811,6 +811,7 @@ function ManageSubjectList() {
     setCurrestSubjectNameForDelete(
       currentSection?.CurrentSection?.student_name,
     );
+    setShowDeleteModal(true);
   };
 
   const handleActiveAndInactive = (subjectIsPass) => {
