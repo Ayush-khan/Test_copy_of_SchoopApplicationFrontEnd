@@ -36,6 +36,30 @@ function ViewStudentLC() {
     fetchClassNames();
   }, [API_URL]);
 
+  const [houses, setHouses] = useState([]);
+
+  useEffect(() => {
+    fetchHouses();
+  }, []);
+
+  const fetchHouses = async () => {
+    try {
+      const token = localStorage.getItem("authToken");
+      const response = await axios.get(`${API_URL}/api/get_all_houses`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setHouses(response.data.data);
+      console.log("house", response.data.data);
+    } catch (error) {
+      toast.error("Error fetching class names");
+    }
+  };
+
+  const getHouseName = (houseId) => {
+    const house = houses.find((h) => h.house_id === houseId);
+    return house ? house.house_name : "";
+  };
+
   const [formData, setFormData] = useState({
     // Student fields
     first_name: "",
@@ -116,7 +140,7 @@ function ViewStudentLC() {
             headers: {
               Authorization: `Bearer ${token}`,
             },
-          }
+          },
         );
 
         if (response.data.success) {
@@ -403,8 +427,8 @@ function ViewStudentLC() {
                   formData.gender === "F"
                     ? "Female"
                     : formData.gender === "M"
-                    ? "Male"
-                    : ""
+                      ? "Male"
+                      : ""
                 }
                 className=" block w-full  rounded-md py-1 px-3 bg-gray-300 "
 
@@ -611,17 +635,20 @@ function ViewStudentLC() {
               <input
                 type="text"
                 disabled
-                value={
-                  formData.house === "D"
-                    ? "Diamond"
-                    : formData.house === "E"
-                    ? "Emerald"
-                    : formData.house === "R"
-                    ? "Ruby"
-                    : formData.house === "S"
-                    ? "Sapphire"
-                    : ""
-                }
+                // Ayush
+                // value={
+                //   formData.house === "D"
+                //     ? "Diamond"
+                //     : formData.house === "E"
+                //       ? "Emerald"
+                //       : formData.house === "R"
+                //         ? "Ruby"
+                //         : formData.house === "S"
+                //           ? "Sapphire"
+                //           : ""
+                // }
+                // Mahima 08-04-2026
+                value={getHouseName(formData.house)}
                 className=" block w-full  rounded-md py-1 px-3 bg-gray-300 "
 
                 // onBlur={handleBlur}
