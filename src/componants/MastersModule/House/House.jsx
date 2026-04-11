@@ -461,9 +461,10 @@ function House() {
         toast.error(response.data.message || "Failed to delete Division");
       }
     } catch (error) {
-      console.error("Error deleting Subject:", error);
-      if (error.response && error.response.data && error.response.data.error) {
-        toast.error(error.response.data.error);
+      console.error("Error deleting House:", error);
+
+      if (error.response?.data?.message) {
+        toast.error(error.response.data.message);
       } else {
         toast.error("Server error. Please try again later.");
       }
@@ -488,6 +489,12 @@ function House() {
       .split(" ")
       .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
       .join(" ");
+  // const camelCase = (str) =>
+  //   str
+  //     ?.toLowerCase()
+  //     .split(/[\s.]+/) // split by space OR dot
+  //     .map((word) => (word ? word.charAt(0).toUpperCase() + word.slice(1) : ""))
+  //     .join(" ");
 
   return (
     <>
@@ -601,7 +608,8 @@ function House() {
                             </td>
                             <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
                               <p className="text-gray-900 whitespace-no-wrap relative top-2">
-                                {camelCase(section?.house_name)}
+                                {/* {camelCase(section?.house_name)} */}
+                                {section?.house_name}
                               </p>
                             </td>
                             <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
