@@ -21,6 +21,30 @@ function ViewStudent() {
   const section_id = location.state?.section_id || null;
   console.log("view student for back navigation:", section_id);
 
+  const [houses, setHouses] = useState([]);
+
+  useEffect(() => {
+    fetchHouses();
+  }, []);
+
+  const fetchHouses = async () => {
+    try {
+      const token = localStorage.getItem("authToken");
+      const response = await axios.get(`${API_URL}/api/get_all_houses`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setHouses(response.data.data);
+      console.log("house", response.data.data);
+    } catch (error) {
+      toast.error("Error fetching class names");
+    }
+  };
+
+  const getHouseName = (houseId) => {
+    const house = houses.find((h) => h.house_id === houseId);
+    return house ? house.house_name : "";
+  };
+
   // Fetch class names
   useEffect(() => {
     const fetchClassNames = async () => {
@@ -178,7 +202,7 @@ function ViewStudent() {
         setPhotoPreview(
           // `${API_URL}/path/to/images/${student.teacher_image_name}`
           // `https://sms.evolvu.in/storage/app/public/student_images/${student.image_name}`
-          `${student?.image_name}`
+          `${student?.image_name}`,
         );
       }
     }
@@ -315,8 +339,8 @@ function ViewStudent() {
                   formData.gender === "F"
                     ? "Female"
                     : formData.gender === "M"
-                    ? "Male"
-                    : ""
+                      ? "Male"
+                      : ""
                 }
                 className=" block w-full  rounded-md py-1 px-3 bg-gray-300 "
 
@@ -523,17 +547,20 @@ function ViewStudent() {
               <input
                 type="text"
                 disabled
-                value={
-                  formData.house === "D"
-                    ? "Diamond"
-                    : formData.house === "E"
-                    ? "Emerald"
-                    : formData.house === "R"
-                    ? "Ruby"
-                    : formData.house === "S"
-                    ? "Sapphire"
-                    : ""
-                }
+                // Ayush
+                // value={
+                //   formData.house === "D"
+                //     ? "Diamond"
+                //     : formData.house === "E"
+                //       ? "Emerald"
+                //       : formData.house === "R"
+                //         ? "Ruby"
+                //         : formData.house === "S"
+                //           ? "Sapphire"
+                //           : ""
+                // }
+                // Mahima
+                value={getHouseName(formData.house)}
                 className=" block w-full  rounded-md py-1 px-3 bg-gray-300 "
 
                 // onBlur={handleBlur}

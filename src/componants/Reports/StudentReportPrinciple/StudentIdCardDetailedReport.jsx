@@ -295,7 +295,7 @@ const StudentIdCardDetailedReport = () => {
     XLSX.utils.book_append_sheet(
       workbook,
       worksheet,
-      "Student ID Card Report Data"
+      "Student ID Card Report Data",
     );
 
     // Generate and download the Excel file
@@ -352,8 +352,8 @@ const StudentIdCardDetailedReport = () => {
               
                  <td class="px-2 text-center py-2 border border-black">
                  ${subject?.first_name || ""} ${subject?.mid_name || ""} ${
-                subject?.last_name || ""
-              }
+                   subject?.last_name || ""
+                 }
                 </td>
                  <td class="px-2 text-center py-2 border border-black">
                  ${
@@ -387,7 +387,7 @@ const StudentIdCardDetailedReport = () => {
                 <td class="px-2 text-center py-2 border border-black">
                 ${subject?.image_name || " "}
                 </td>
-              </tr>`
+              </tr>`,
             )
             .join("")}
         </tbody>
@@ -486,7 +486,7 @@ const StudentIdCardDetailedReport = () => {
 
         {
           state: { staff: student },
-        }
+        },
       );
     }
   };
@@ -860,13 +860,13 @@ const StudentIdCardDetailedReport = () => {
                                     {camelCase(
                                       `${student?.first_name || ""} ${
                                         student?.mid_name || ""
-                                      } ${student?.last_name || ""}`
+                                      } ${student?.last_name || ""}`,
                                     )}
                                   </td>
                                   <td className="px-2 py-2 text-center border border-gray-300">
                                     {student.dob
                                       ? new Date(
-                                          student.dob
+                                          student.dob,
                                         ).toLocaleDateString("en-GB")
                                       : ""}
                                   </td>
@@ -910,7 +910,7 @@ const StudentIdCardDetailedReport = () => {
                             ) : (
                               <div className="absolute left-[1%] w-[100%] text-center flex justify-center items-center mt-14">
                                 <div className="text-center text-xl text-red-700">
-                                  Oops! No data found..
+                                  No data found.
                                 </div>
                               </div>
                             )}

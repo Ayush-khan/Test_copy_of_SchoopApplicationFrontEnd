@@ -59,7 +59,7 @@ const StudentIdCard = () => {
         `${API_URL}/api/getallClassWithStudentCount`,
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
       console.log("Class", response);
       setStudentNameWithClassId(response?.data || []);
@@ -85,13 +85,13 @@ const StudentIdCard = () => {
         value: cls?.section_id,
         label: `${cls?.get_class?.name} ${cls.name}`,
       })),
-    [studentNameWithClassId]
+    [studentNameWithClassId],
   );
 
   useEffect(() => {
     if (sectionID && studentOptions.length > 0) {
       const selectedOption = studentOptions.find(
-        (opt) => opt.value === sectionID
+        (opt) => opt.value === sectionID,
       );
       if (selectedOption) {
         setSelectedStudent(selectedOption);
@@ -136,7 +136,7 @@ const StudentIdCard = () => {
         `${API_URL}/api/get_studentidcard?section_id=${idToUse}`,
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
 
       if (!response?.data?.data || response?.data?.data.length === 0) {
@@ -348,7 +348,7 @@ const StudentIdCard = () => {
   const handleDownloadEXL = () => {
     if (!displayedSections || displayedSections.length === 0) {
       toast.error(
-        "No data available to download Excel sheet of Student ID Card."
+        "No data available to download Excel sheet of Student ID Card.",
       );
       return;
     }
@@ -408,7 +408,7 @@ const StudentIdCard = () => {
 
     XLSX.writeFile(
       workbook,
-      `Student idCard list of ${selectedStudent.label}.xlsx`
+      `Student idCard list of ${selectedStudent.label}.xlsx`,
     );
   };
 
@@ -435,7 +435,7 @@ const StudentIdCard = () => {
             Authorization: `Bearer ${token}`,
           },
           responseType: "blob", // Important for handling binary data
-        }
+        },
       );
 
       if (!response.data) {
@@ -452,7 +452,7 @@ const StudentIdCard = () => {
       link.href = url;
       link.setAttribute(
         "download",
-        `Student idCard list of ${selectedStudent.label}.zip`
+        `Student idCard list of ${selectedStudent.label}.zip`,
       );
       document.body.appendChild(link);
       link.click();
@@ -558,7 +558,7 @@ const StudentIdCard = () => {
                 <td class="px-2 text-center py-2 border border-black">${
                   subject?.image_name || " "
                 }</td>
-              </tr>`
+              </tr>`,
             )
             .join("")}
         </tbody>
@@ -647,7 +647,7 @@ h5 + * { /* Targets the element after h5 */
 
         {
           state: { staff: subject },
-        }
+        },
       );
     }
   };
@@ -931,7 +931,7 @@ h5 + * { /* Targets the element after h5 */
                                   <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm py-1">
                                     {console.log(
                                       "the teacher image",
-                                      `${subject?.image_url}`
+                                      `${subject?.image_url}`,
                                     )}
 
                                     <img
@@ -959,7 +959,7 @@ h5 + * { /* Targets the element after h5 */
                                   <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                     {subject?.dob
                                       ? new Date(
-                                          subject.dob
+                                          subject.dob,
                                         ).toLocaleDateString("en-GB")
                                       : ""}
                                   </td>

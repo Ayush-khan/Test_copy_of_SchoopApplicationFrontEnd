@@ -300,7 +300,7 @@ import StudentListForAdmissionSubmission from "../componants/AdmissionAdminModul
 import StudentListForSchedulingInterview from "../componants/AdmissionAdminModule/StudentListForSchedulingInterview/StudentListForSchedulingInterview.jsx";
 import StudentListForVerification from "../componants/AdmissionAdminModule/StudentListForVerification/StudentListForVerification.jsx";
 import StudentListForApproval from "../componants/AdmissionAdminModule/StudentListForApproval/StudentListForApproval.jsx";
-import ApplicationFromManagement from "../componants/AdmissionAdminModule/ApplicationFromManagement/ApplicationFromManagement.jsx"
+import ApplicationFromManagement from "../componants/AdmissionAdminModule/ApplicationFromManagement/ApplicationFromManagement.jsx";
 import DynamicMailer from "../componants/AdmissionAdminModule/DynamicMailer/DynamicMailer.jsx";
 import LessonPlanData from "../componants/Dashbord/PrinciplalDashboardSACS/LessonPlanData.jsx";
 import TodayStaffList from "../componants/AllTableList/TodayStaffList.jsx";
@@ -321,6 +321,9 @@ import BooksNonReturnReport from "../componants/MasterModuleLibrarian/LibraryRep
 import MonthlyBookIssueReport from "../componants/MasterModuleLibrarian/LibraryReports/MonthlyBookIssueReport.jsx";
 // import HSCSStudentSubjectGroupReport from "../componants/Reports/HSCSStudentSubjectGroupReport.jsx";
 // import ShowReportCard from "../componants/StudentSearchUsingGRN/ShowReportCard.jsx";
+
+import House from "../componants/MastersModule/House/House.jsx";
+
 function Index() {
   return (
     <Routes>
@@ -946,7 +949,9 @@ function Index() {
         {/* Teacher ID Card Module */}
         <Route
           path="/teacherIdCard"
-          element={<PrivateRoute element={<TeacherIdCard key={Date.now()} />} />}
+          element={
+            <PrivateRoute element={<TeacherIdCard key={Date.now()} />} />
+          }
         />
         <Route
           path="/createteacherIdCardDetails"
@@ -1687,7 +1692,6 @@ function Index() {
           path="/superadmin/impersonate"
           element={<PrivateRoute element={<ImpersonateListing />} />}
         />
-
         {/* Librabry modules of mahima */}
         <Route
           path="/send_reminder_remark_non_returned_book"
@@ -1742,17 +1746,16 @@ function Index() {
           path="/monthlyBookIssuedReport"
           element={<PrivateRoute element={<MonthlyBookIssueReport />} />}
         />
-
         <Route
           path="/all_application_status_report"
           element={<PrivateRoute element={<AllApplicationFeeStatusReport />} />}
         />
-
         {/* <Route
           path="/show_report_card"
           element={<PrivateRoute element={<ShowReportCard />} />}
         /> */}
-
+        {/* House  */}
+        <Route path="/house" element={<PrivateRoute element={<House />} />} />
       </Route>
 
       {/* Page Not FOund Routes */}

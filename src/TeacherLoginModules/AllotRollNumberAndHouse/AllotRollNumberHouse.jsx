@@ -51,7 +51,7 @@ const AllotRollNumberHouse = () => {
           headers: { Authorization: `Bearer ${token}` },
         });
 
-        const roleId = sessionRes?.data?.user?.name;
+        const roleId = sessionRes?.data?.user?.role_id;
         const regId = sessionRes?.data?.user?.reg_id;
         if (!roleId || !regId) {
           toast.error("Invalid session data received");
@@ -60,19 +60,50 @@ const AllotRollNumberHouse = () => {
         setRoleId(roleId);
         setRegId(regId);
         setLoadingClasses(true);
-        const responseForClass = await axios.get(
-          `${API_URL}/api/get_classes_of_classteacher?teacher_id=${regId}`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
+        // const responseForClass = await axios.get(
+        //   `${API_URL}/api/get_classes_of_classteacher?teacher_id=${regId}`,
+        //   {
+        //     headers: { Authorization: `Bearer ${token}` },
+        //   },
+        // );
 
-        const mappedData =
-          responseForClass.data?.data?.map((item) => ({
-            value: item.class_id,
-            sectionId: item?.section_id,
-            label: `${item?.classname} ${item?.sectionname}`,
-          })) || [];
+        // const mappedData =
+        //   responseForClass.data?.data?.map((item) => ({
+        //     value: item.class_id,
+        //     sectionId: item?.section_id,
+        //     label: `${item?.classname} ${item?.sectionname}`,
+        //   })) || [];
+
+        const url =
+          roleId === "T"
+            ? `${API_URL}/api/get_classes_of_classteacher?teacher_id=${regId}`
+            : `${API_URL}/api/getallClassWithStudentCount`;
+
+        const response = await axios.get(url, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        let mappedData = [];
+
+        if (roleId === "T") {
+          //  Class Teacher API mapping
+          mappedData =
+            response.data?.data?.map((item) => ({
+              value: item.section_id,
+              class_id: item.class_id,
+              section_id: item.section_id,
+              label: `${item.classname} ${item.sectionname}`,
+            })) || [];
+        } else {
+          //  All Classes API mapping
+          mappedData =
+            response.data?.map((item) => ({
+              value: item.section_id,
+              class_id: item.class_id,
+              section_id: item.section_id,
+              label: `${item?.get_class?.name} ${item.name} (${item.students_count})`,
+            })) || [];
+        }
 
         setStudentNameWithClassId(mappedData);
       } catch (error) {
@@ -126,7 +157,7 @@ const AllotRollNumberHouse = () => {
       setLoadingForSearch(true);
       const response = await axios.get(
         `${API_URL}/api/get_studentallotrollnohouse/${selectedClass?.value}/${selectedClass?.sectionId}`,
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
       if (response.data?.data) {
         setstudentInformation(response.data.data);
@@ -147,8 +178,8 @@ const AllotRollNumberHouse = () => {
     // 1️⃣ Update studentInformation
     setstudentInformation((prev) =>
       prev.map((stu) =>
-        stu.student_id === studentId ? { ...stu, [field]: value } : stu
-      )
+        stu.student_id === studentId ? { ...stu, [field]: value } : stu,
+      ),
     );
 
     // 2️⃣ Remove error for that specific field if user fixes it
@@ -571,7 +602,7 @@ const AllotRollNumberHouse = () => {
         const duplicateRolls = Array.from(duplicateRollsSet);
 
         toast.error(
-          `Duplicate Roll Numbers found: ${duplicateRolls.join(", ")}`
+          `Duplicate Roll Numbers found: ${duplicateRolls.join(", ")}`,
         );
 
         setErrors({ ...newErrors, ...duplicateErrors });
@@ -608,7 +639,7 @@ const AllotRollNumberHouse = () => {
         payload,
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
 
       if (res.status === 200) {
@@ -725,8 +756,9 @@ const AllotRollNumberHouse = () => {
                   type="search"
                   onClick={handleSearch}
                   style={{ backgroundColor: "#2196F3" }}
-                  className={`my-1 md:my-4 btn h-10 w-18 md:w-auto btn-primary text-white font-bold py-1 border-1 border-blue-500 px-4 rounded ${loadingForSearch ? "opacity-50 cursor-not-allowed" : ""
-                    }`}
+                  className={`my-1 md:my-4 btn h-10 w-18 md:w-auto btn-primary text-white font-bold py-1 border-1 border-blue-500 px-4 rounded ${
+                    loadingForSearch ? "opacity-50 cursor-not-allowed" : ""
+                  }`}
                   disabled={loadingForSearch}
                 >
                   {loadingForSearch ? (
@@ -766,7 +798,7 @@ const AllotRollNumberHouse = () => {
               <div className="card mx-auto w-full shadow-lg">
                 <div className="p-1 px-3 bg-gray-100 flex justify-between items-center">
                   <h6 className="text-gray-700 mt-1   text-nowrap">
-                    Select Students for allot GR & Aadhaar No.
+                    Students list for allot Roll No. & House
                   </h6>
                   <div className="box-border flex md:gap-x-2  ">
                     <div className=" w-1/2 md:w-fit mr-1">
@@ -832,7 +864,7 @@ const AllotRollNumberHouse = () => {
                                       handleInputChange(
                                         e,
                                         stu.student_id,
-                                        "roll_no"
+                                        "roll_no",
                                       )
                                     }
                                   />
@@ -849,7 +881,7 @@ const AllotRollNumberHouse = () => {
                                       handleInputChange(
                                         e,
                                         stu.student_id,
-                                        "house"
+                                        "house",
                                       )
                                     }
                                     className="w-full border rounded text-center"
@@ -878,7 +910,7 @@ const AllotRollNumberHouse = () => {
                                 colSpan="4"
                                 className="text-center text-red-700 p-4 font-semibold"
                               >
-                                Oops! No data found..
+                                No data found.
                               </td>
                             </tr>
                           )}
@@ -891,10 +923,11 @@ const AllotRollNumberHouse = () => {
                       type="submit"
                       onClick={handleSubmit}
                       disabled={submitTeacherNote}
-                      className={`text-white font-bold py-1 px-4 rounded ${submitTeacherNote
+                      className={`text-white font-bold py-1 px-4 rounded ${
+                        submitTeacherNote
                           ? "opacity-50 cursor-not-allowed bg-blue-400"
                           : "bg-blue-600 hover:bg-blue-700"
-                        }`}
+                      }`}
                     >
                       {submitTeacherNote ? (
                         <span className="flex items-center">

@@ -55,7 +55,7 @@ const UpdateStudentIdCards = () => {
         value: { class_id: cls.class_id, section_id: cls.section_id }, // Store both values
         label: `${cls?.get_class?.name} ${cls.name}`, // Display class name & section
       })),
-    [classes]
+    [classes],
   );
 
   const handleClassSelect = (selectedOption) => {
@@ -72,7 +72,7 @@ const UpdateStudentIdCards = () => {
       const token = localStorage.getItem("authToken");
       const classResponse = await axios.get(
         `${API_URL}/api/getallClassWithStudentCount`,
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
       setClasses(classResponse.data || []);
     } catch (error) {
@@ -141,7 +141,7 @@ const UpdateStudentIdCards = () => {
         `${API_URL}/api/get_update_idcard_data_by_teacher?section_id=${section_id}`,
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
 
       const studentData = response.data?.data;
@@ -163,7 +163,7 @@ const UpdateStudentIdCards = () => {
       console.error("Error fetching student details:", error);
       toast.error(
         error.response?.data?.message ||
-          "Failed to fetch student details. Please try again."
+          "Failed to fetch student details. Please try again.",
       );
     } finally {
       setLoading(false);
@@ -231,8 +231,8 @@ const UpdateStudentIdCards = () => {
               [field]: value,
               parent_id: parent_id || student.parent_id,
             }
-          : student
-      )
+          : student,
+      ),
     );
   };
 
@@ -330,7 +330,7 @@ const UpdateStudentIdCards = () => {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
-        }
+        },
       );
 
       if (response.status === 200) {
@@ -603,7 +603,7 @@ const UpdateStudentIdCards = () => {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
-        }
+        },
       );
 
       if (response.status === 200) {
@@ -673,7 +673,7 @@ const UpdateStudentIdCards = () => {
 
   console.log("filteredsections", filteredSections);
   const displayedSections = filteredSections.slice(
-    currentPage * pageSize
+    currentPage * pageSize,
     // , (currentPage + 1) * pageSize
   );
 
@@ -874,7 +874,7 @@ const UpdateStudentIdCards = () => {
                                           handleInputChange(
                                             e,
                                             "permant_add",
-                                            index
+                                            index,
                                           )
                                         }
                                         ref={(el) =>
@@ -911,7 +911,7 @@ const UpdateStudentIdCards = () => {
                                         handleInputChange(
                                           e,
                                           "blood_group",
-                                          index
+                                          index,
                                         )
                                       }
                                       ref={(el) =>
@@ -1123,7 +1123,7 @@ const UpdateStudentIdCards = () => {
                                 colSpan="10"
                                 className="text-center text-red-700 py-4"
                               >
-                                Oops! No data found..
+                                No data found.
                               </td>
                             </tr>
                           )}
