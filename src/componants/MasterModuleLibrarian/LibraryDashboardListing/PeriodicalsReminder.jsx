@@ -285,36 +285,100 @@ function PeriodicalsReminder() {
     }
   };
 
+  // const handleSubmit = async (event) => {
+  //   event.preventDefault();
+
+  //   let hasError = false;
+  //   if (selectedIds.length === 0) {
+  //     toast.error(
+  //       "Please select at least one periodicals to send message to the team.",
+  //     );
+  //     hasError = true;
+  //   }
+
+  //   // Exit if there are validation errors
+  //   if (hasError) return;
+
+  //   try {
+  //     setLoading(true); // Start loading
+
+  //     const token = localStorage.getItem("authToken");
+  //     if (!token) {
+  //       throw new Error("No authentication token is found");
+  //     }
+
+  //     // console.log("selectedIds", selectedIds);
+  //     // console.log("message", message);
+
+  //     const postData = {
+  //       periodicalId: selectedIds,
+  //       message: message,
+  //     };
+
+  //     // Make the API call
+  //     const response = await axios.post(
+  //       `${API_URL}/api/periodicals/reminder/mail`,
+  //       postData,
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //       },
+  //     );
+
+  //     // Handle successful response
+  //     if (response.status === 200) {
+  //       toast.success("Message sent successfully!");
+
+  //       setMessage("");
+
+  //       setSelectedIds([]);
+  //     }
+  //   } catch (error) {
+  //     console.error("Error:", error.response?.data);
+
+  //     // Display error message
+  //     toast.error("An error occurred while sending message.");
+
+  //     if (error.response && error.response.data) {
+  //       setBackendErrors(error.response.data || {});
+  //     }
+  //   } finally {
+  //     setLoading(false); // Stop loading
+  //   }
+  // };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
 
     let hasError = false;
+
     if (selectedIds.length === 0) {
-      toast.error(
-        "Please select at least one periodicals to send message to the team.",
-      );
+      toast.error("Please select at least one periodical.");
+      hasError = true;
+      return;
+    }
+
+    if (!message || message.trim() === "") {
+      toast.error("Please enter a message.");
       hasError = true;
     }
-    // Exit if there are validation errors
+
     if (hasError) return;
 
     try {
-      setLoading(true); // Start loading
+      setLoading(true);
 
       const token = localStorage.getItem("authToken");
       if (!token) {
-        throw new Error("No authentication token is found");
+        throw new Error("No authentication token found");
       }
-
-      // console.log("selectedIds", selectedIds);
-      // console.log("message", message);
 
       const postData = {
         periodicalId: selectedIds,
-        message: message,
+        message: message.trim(),
       };
 
-      // Make the API call
       const response = await axios.post(
         `${API_URL}/api/periodicals/reminder/mail`,
         postData,
@@ -325,25 +389,20 @@ function PeriodicalsReminder() {
         },
       );
 
-      // Handle successful response
       if (response.status === 200) {
         toast.success("Message sent successfully!");
-
         setMessage("");
-
         setSelectedIds([]);
       }
     } catch (error) {
       console.error("Error:", error.response?.data);
-
-      // Display error message
       toast.error("An error occurred while sending message.");
 
       if (error.response && error.response.data) {
         setBackendErrors(error.response.data || {});
       }
     } finally {
-      setLoading(false); // Stop loading
+      setLoading(false);
     }
   };
 
@@ -416,8 +475,8 @@ function PeriodicalsReminder() {
             <div className="mb-1 flex items-center gap-2 px-3 py-1 bg-blue-50 border border-blue-300 text-blue-800 text-xs md:text-sm rounded whitespace-nowrap">
               <FaInfoCircle size={16} />
               <span>
-                A default email will be sent to the selected vendor if no custom
-                message is entered.
+                Please enter a custom message. Only this message will be sent to
+                the selected vendor.
               </span>
             </div>
             {showSearch && (

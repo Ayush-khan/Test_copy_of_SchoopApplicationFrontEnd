@@ -339,9 +339,13 @@ function SubscriptionReminder() {
 
     let hasError = false;
     if (selectedIds.length === 0) {
-      toast.error(
-        "Please select at least one subscription to send message to the team.",
-      );
+      toast.error("Please select at least one subscription.");
+      hasError = true;
+      return;
+    }
+
+    if (!message || message.trim() === "") {
+      toast.error("Please enter a message.");
       hasError = true;
     }
     // Exit if there are validation errors
@@ -465,8 +469,10 @@ function SubscriptionReminder() {
             <div className="mb-1 flex items-center gap-2 px-3 py-1 bg-blue-50 border border-blue-300 text-blue-800 text-xs md:text-sm rounded whitespace-nowrap">
               <FaInfoCircle size={16} />
               <span>
-                A default email will be sent to the selected vendor if no custom
-                message is entered.
+                {/* A default email will be sent to the selected vendor if no custom
+                message is entered. */}
+                Please enter a custom message. Only this message will be sent to
+                the selected vendor.
               </span>
             </div>
             {showSearch && (
