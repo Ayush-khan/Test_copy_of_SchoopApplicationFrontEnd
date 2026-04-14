@@ -651,10 +651,10 @@ function BookReturnPending() {
   const formatDate = (dateStr) =>
     dateStr
       ? new Date(dateStr).toLocaleDateString("en-GB", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "2-digit",
-      })
+          day: "2-digit",
+          month: "2-digit",
+          year: "2-digit",
+        })
       : "";
 
   const filteredPresentTeachers = presentTeachers.filter((student) => {
@@ -768,9 +768,9 @@ function BookReturnPending() {
   const selectedCount =
     activeTab === "Student"
       ? filteredAbsentTeachers.filter((t) => selectedIds.includes(t.member_id))
-        .length
+          .length
       : filteredPresentTeachers.filter((t) => selectedIds.includes(t.member_id))
-        .length;
+          .length;
 
   const handleCheckboxChange = (id) => {
     setSelectedIds((prev) =>
@@ -895,8 +895,9 @@ function BookReturnPending() {
           ].map((tab) => (
             <li
               key={tab.label}
-              className={`md:-ml-7 shadow-md ${activeTab === tab.label ? "text-blue-500 font-bold" : ""
-                }`}
+              className={`md:-ml-7 shadow-md ${
+                activeTab === tab.label ? "text-blue-500 font-bold" : ""
+              }`}
             >
               <button
                 onClick={() => handleTabChange(tab.label)}
@@ -971,6 +972,9 @@ function BookReturnPending() {
                         Borrower
                       </th>
                       <th className="px-0.5 text-center  lg:px-1 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                        Phone No.
+                      </th>
+                      <th className="px-0.5 text-center  lg:px-1 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                         Issue Date
                       </th>
                       <th className="px-0.5 text-center  lg:px-1 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
@@ -983,8 +987,9 @@ function BookReturnPending() {
                       displayedData.map((student, index) => (
                         <tr
                           key={student.student_id}
-                          className={`${index % 2 === 0 ? "bg-white" : "bg-gray-100"
-                            } hover:bg-gray-50`}
+                          className={`${
+                            index % 2 === 0 ? "bg-white" : "bg-gray-100"
+                          } hover:bg-gray-50`}
                         >
                           <td className="sm:px-0.5 text-center lg:px-1 border border-gray-950 text-sm">
                             {currentPage * pageSize + index + 1}
@@ -996,7 +1001,7 @@ function BookReturnPending() {
                               onChange={() =>
                                 handleCheckboxChange(student.member_id)
                               }
-                            // className="w-4 h-4 cursor-pointer accent-blue-500"
+                              // className="w-4 h-4 cursor-pointer accent-blue-500"
                             />
                           </td>
                           <td className="px-2 text-center lg:px-2 py-2 border border-gray-950 text-sm">
@@ -1011,6 +1016,9 @@ function BookReturnPending() {
                             {camelCase(
                               `${student.first_name || ""} ${student?.mid_name || ""} ${student?.last_name || ""}`,
                             )}
+                          </td>
+                          <td className="text-center px-2 lg:px-2 border border-gray-950 text-sm">
+                            {student?.phone_no}
                           </td>
                           <td className="text-center px-2 lg:px-2 border border-gray-950 text-sm">
                             {formatDate(student?.issue_date)}
@@ -1074,6 +1082,9 @@ function BookReturnPending() {
                         Borrower
                       </th>
                       <th className="px-0.5 text-center  lg:px-1 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                        Phone No.
+                      </th>
+                      <th className="px-0.5 text-center  lg:px-1 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                         Issue Date
                       </th>
                       <th className="px-0.5 text-center  lg:px-1 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
@@ -1086,8 +1097,9 @@ function BookReturnPending() {
                       displayedData.map((student, index) => (
                         <tr
                           key={student.student_id}
-                          className={`${index % 2 === 0 ? "bg-white" : "bg-gray-100"
-                            } hover:bg-gray-50`}
+                          className={`${
+                            index % 2 === 0 ? "bg-white" : "bg-gray-100"
+                          } hover:bg-gray-50`}
                         >
                           <td className="sm:px-0.5 text-center lg:px-1 border border-gray-950 text-sm">
                             {currentPage * pageSize + index + 1}
@@ -1099,7 +1111,7 @@ function BookReturnPending() {
                               onChange={() =>
                                 handleCheckboxChange(student.member_id)
                               }
-                            // className="w-4 h-4 cursor-pointer accent-blue-500"
+                              // className="w-4 h-4 cursor-pointer accent-blue-500"
                             />
                           </td>
                           <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
@@ -1114,6 +1126,9 @@ function BookReturnPending() {
                             {camelCase(
                               `${student.first_name || ""} ${student?.mid_name || ""} ${student?.last_name || ""}`,
                             )}
+                          </td>
+                          <td className="text-center px-2 lg:px-2 py-2 border border-gray-950 text-sm">
+                            {student?.phone_no}
                           </td>
                           <td className="text-center px-2 lg:px-2 border border-gray-950 text-sm">
                             {formatDate(student?.issue_date)}
@@ -1203,8 +1218,9 @@ function BookReturnPending() {
                       type="submit"
                       onClick={handleSubmit}
                       style={{ backgroundColor: "#2196F3" }}
-                      className={`text-white font-bold py-2 px-4 rounded whitespace-nowrap ${loading ? "opacity-50 cursor-not-allowed" : ""
-                        }`}
+                      className={`text-white font-bold py-2 px-4 rounded whitespace-nowrap ${
+                        loading ? "opacity-50 cursor-not-allowed" : ""
+                      }`}
                       disabled={loading}
                     >
                       {loading ? (

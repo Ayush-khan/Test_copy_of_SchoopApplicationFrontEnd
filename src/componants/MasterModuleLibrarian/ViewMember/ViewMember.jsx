@@ -162,9 +162,12 @@ const ViewMember = () => {
     setLoadingExams(true);
 
     try {
-      const response = await axios.get(`${API_URL}/api/staff_list `, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await axios.get(
+        `${API_URL}/api/get_teaching_nonteaching_staff_list `,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
 
       // console.log("response staff", response.data);
 

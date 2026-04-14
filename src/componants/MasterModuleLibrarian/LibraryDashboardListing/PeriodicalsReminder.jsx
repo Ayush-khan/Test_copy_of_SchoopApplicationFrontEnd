@@ -66,10 +66,10 @@ function PeriodicalsReminder() {
   const formatDate = (dateStr) =>
     dateStr
       ? new Date(dateStr).toLocaleDateString("en-GB", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "2-digit",
-      })
+          day: "2-digit",
+          month: "2-digit",
+          year: "2-digit",
+        })
       : "";
 
   useEffect(() => {
@@ -89,24 +89,24 @@ function PeriodicalsReminder() {
 
   const filteredSections = Array.isArray(sections)
     ? sections.filter((section) => {
-      const searchLower = searchTerm.toLowerCase();
+        const searchLower = searchTerm.toLowerCase();
 
-      const title = `${section?.title || ""}`.trim().toString().toLowerCase();
-      const date = formatDate(section?.receive_by_date?.toLowerCase() || "");
-      const subcriptionNo = section?.subscription_no?.toLowerCase() || "";
-      const frequency = section?.frequency?.toLowerCase() || "";
-      const volume = section?.volume?.toLowerCase() || "";
-      const issue = section?.issue?.toString().toLowerCase() || "";
+        const title = `${section?.title || ""}`.trim().toString().toLowerCase();
+        const date = formatDate(section?.receive_by_date?.toLowerCase() || "");
+        const subcriptionNo = section?.subscription_no?.toLowerCase() || "";
+        const frequency = section?.frequency?.toLowerCase() || "";
+        const volume = section?.volume?.toLowerCase() || "";
+        const issue = section?.issue?.toString().toLowerCase() || "";
 
-      return (
-        title.includes(searchLower) ||
-        date.includes(searchLower) ||
-        subcriptionNo.includes(searchLower) ||
-        frequency.includes(searchLower) ||
-        volume.includes(searchLower) ||
-        issue.includes(searchLower)
-      );
-    })
+        return (
+          title.includes(searchLower) ||
+          date.includes(searchLower) ||
+          subcriptionNo.includes(searchLower) ||
+          frequency.includes(searchLower) ||
+          volume.includes(searchLower) ||
+          issue.includes(searchLower)
+        );
+      })
     : [];
 
   useEffect(() => {
@@ -130,10 +130,10 @@ function PeriodicalsReminder() {
     const formatDate = (dateStr) =>
       dateStr
         ? new Date(dateStr).toLocaleDateString("en-GB", {
-          day: "2-digit",
-          month: "2-digit",
-          year: "2-digit",
-        })
+            day: "2-digit",
+            month: "2-digit",
+            year: "2-digit",
+          })
         : "";
 
     const headers = [
@@ -150,8 +150,8 @@ function PeriodicalsReminder() {
     <thead style="background-color: #e5e7eb; font-weight: bold;">
       <tr>
         ${headers
-        .map((h) => `<th style="border: 1px  #ccc; padding: 6px;">${h}</th>`)
-        .join("")}
+          .map((h) => `<th style="border: 1px  #ccc; padding: 6px;">${h}</th>`)
+          .join("")}
       </tr>
     </thead>
   `;
@@ -161,22 +161,28 @@ function PeriodicalsReminder() {
       ${sections
         .map((student, index) => {
           return `
-          <tr style="background-color: ${index % 2 === 0 ? "#fff" : "#f9fafb"
-            };">
+          <tr style="background-color: ${
+            index % 2 === 0 ? "#fff" : "#f9fafb"
+          };">
             <td style="border: 1px solid #ccc; padding: 6px;">${index + 1}</td>
-            <td style="border: 1px solid #ccc; padding: 6px;">${student.title || ""
+            <td style="border: 1px solid #ccc; padding: 6px;">${
+              student.title || ""
             }</td>
-            <td style="border: 1px solid #ccc; padding: 6px;">${student.subscription_no || ""
+            <td style="border: 1px solid #ccc; padding: 6px;">${
+              student.subscription_no || ""
             }</td>
             <td style="border: 1px solid #ccc; padding: 6px;">${formatDate(
               student.receive_by_date || "",
             )}</td>
-             <td style="border: 1px solid #ccc; padding: 6px;">${student.frequency || ""
-            }</td>
-             <td style="border: 1px solid #ccc; padding: 6px;">${student.volume || ""
-            }</td>
-             <td style="border: 1px solid #ccc; padding: 6px;">${student.issue || ""
-            }</td>
+             <td style="border: 1px solid #ccc; padding: 6px;">${
+               student.frequency || ""
+             }</td>
+             <td style="border: 1px solid #ccc; padding: 6px;">${
+               student.volume || ""
+             }</td>
+             <td style="border: 1px solid #ccc; padding: 6px;">${
+               student.issue || ""
+             }</td>
           
           </tr>
         `;
@@ -240,7 +246,7 @@ function PeriodicalsReminder() {
     ];
 
     // Convert displayedSections data to array format for Excel
-    const data = displayedSections.map((student, index) => [
+    const data = filteredSections.map((student, index) => [
       index + 1,
 
       `${student.title}`.trim(),
@@ -458,8 +464,12 @@ function PeriodicalsReminder() {
                         Subscription No.
                       </th>
                       <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                        Email
+                      </th>
+                      <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                         Receiving Date
                       </th>
+
                       <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                         Type
                       </th>
@@ -508,6 +518,9 @@ function PeriodicalsReminder() {
                           </td>
                           <td className="px-2 py-2 text-center border border-gray-300">
                             {student.subscription_no || ""}
+                          </td>
+                          <td className="px-2 py-2 text-center border border-gray-300">
+                            {student.email_ids || ""}
                           </td>
                           <td className="px-2 py-2 text-center border border-gray-300">
                             {formatDate(student.receive_by_date || "")}
@@ -598,8 +611,9 @@ function PeriodicalsReminder() {
                         type="submit"
                         onClick={handleSubmit}
                         style={{ backgroundColor: "#2196F3" }}
-                        className={`text-white font-bold py-2 px-4 rounded whitespace-nowrap ${loading ? "opacity-50 cursor-not-allowed" : ""
-                          }`}
+                        className={`text-white font-bold py-2 px-4 rounded whitespace-nowrap ${
+                          loading ? "opacity-50 cursor-not-allowed" : ""
+                        }`}
                         disabled={loading}
                       >
                         {loading ? (
