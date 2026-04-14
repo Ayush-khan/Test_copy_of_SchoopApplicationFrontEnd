@@ -411,32 +411,16 @@ function BulkStaffUpload() {
             return;
         }
 
-        const fileName = String(selectedFile.name || "").trim().toLowerCase();
-        const classNameForBulkUploadForCheck = classNameForBulkUpload.trim(); // Trim the class name for comparison
+        const fileName = String(selectedFile.name || "").trim();
         const isStaffTemplate =
             fileName === "teachers_template.csv" ||
             fileName === "teachers_template.xls" ||
-            fileName === "teachers_template.xlsx" ||
-            fileName.includes("teachers_template");
+            fileName === "teachers_template.xlsx";
 
-        // Only enforce name match if a class name is selected and file is not staff template
-        if (classNameForBulkUploadForCheck && !isStaffTemplate) {
-            const fileNameWithoutExtension = fileName
-                .split(".")[0]
-                .split("_")[0]
-                .trim();
-
-            if (fileNameWithoutExtension !== classNameForBulkUploadForCheck.toLowerCase()) {
-                toast.warning(
-                    "⚠️Invalid file! Please select the downloaded template without renaming it or modifying the first four columns."
-                );
-                return;
-            }
+        if (!isStaffTemplate) {
+            toast.warning("Invalid file! Please select the downloaded template without renaming it or modifying the first four columns.");
+            return;
         }
-        // if (fileNameWithoutExtension !== classNameForBulkUploadForCheck) {
-        //   toast.error("Do not change the file name please");
-        //   return;
-        // }
         setLoading(true); // Show loader
         const formData = new FormData();
         formData.append("file", selectedFile); // Append the selected file
@@ -464,22 +448,29 @@ function BulkStaffUpload() {
                 setSelectedFile(null);
             }
         } catch (error) {
-            const showErrorForUploading =
-                error?.response?.data?.message || error?.message || "Upload failed.";
-            const showErrorForUploadingUrl = error?.response?.data?.invalid_rows;
-            console.log("Upload error:", error);
-            setErrorMessage(
-                showErrorForUploading
-                    ? `Error-Message: ${showErrorForUploading}.`
-                    : "Failed to upload file. Please try again..."
-            );
-            setErrorMessageUrl(showErrorForUploadingUrl ? `${showErrorForUploadingUrl}` : "");
+            setLoading(false); // Hide loader
 
-            toast.error(showErrorForUploading || "Error uploading file.");
+            const showErrorForUploading = error?.response?.data?.message;
+            const showErrorForUploadingUrl = error?.response?.data?.invalid_rows;
+            console.log("showErrorForUploadingURL", showErrorForUploading);
+            setErrorMessage(
+                !showErrorForUploading
+                    ? "Failed to upload file. Please try again..."
+                    : `Error-Message: ${showErrorForUploading}.`
+            );
+            // const fullURLFOrErrorMessage = `${API_URL}${showErrorForUploadingUrl}`;
+            const fullURLFOrErrorMessage = `${showErrorForUploadingUrl}`;
+
+            setErrorMessageUrl(fullURLFOrErrorMessage);
+            console.log("showerrormessage Full url", errorMessageUrl);
+
+            toast.error(
+                !showErrorForUploading
+                    ? "Error uploading file."
+                    : error?.response?.data?.message
+            );
 
             console.error("Error uploading file:", showErrorForUploading);
-        } finally {
-            setLoading(false); // Hide loader
         }
     };
 
@@ -919,3 +910,5 @@ function BulkStaffUpload() {
 }
 
 export default BulkStaffUpload;
+
+
