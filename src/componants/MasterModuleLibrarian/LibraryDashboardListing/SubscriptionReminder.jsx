@@ -7,7 +7,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { RxCross1 } from "react-icons/rx";
 import { useNavigate } from "react-router-dom";
-import { FaFileExcel } from "react-icons/fa";
+import { FaFileExcel, FaInfoCircle } from "react-icons/fa";
 import { FiPrinter, FiSearch } from "react-icons/fi";
 import * as XLSX from "xlsx";
 
@@ -65,10 +65,10 @@ function SubscriptionReminder() {
   const formatDate = (dateStr) =>
     dateStr
       ? new Date(dateStr).toLocaleDateString("en-GB", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "2-digit",
-      })
+          day: "2-digit",
+          month: "2-digit",
+          year: "2-digit",
+        })
       : "";
 
   useEffect(() => {
@@ -161,21 +161,25 @@ function SubscriptionReminder() {
       ${sections
         .map((student, index) => {
           return `
-          <tr style="background-color: ${index % 2 === 0 ? "#fff" : "#f9fafb"
-            };">
+          <tr style="background-color: ${
+            index % 2 === 0 ? "#fff" : "#f9fafb"
+          };">
             <td style="border: 1px solid #ccc; padding: 6px;">${index + 1}</td>
-            <td style="border: 1px solid #ccc; padding: 6px;">${student.title || ""
+            <td style="border: 1px solid #ccc; padding: 6px;">${
+              student.title || ""
             }</td>
-            <td style="border: 1px solid #ccc; padding: 6px;">${student.subscription_no || ""
+            <td style="border: 1px solid #ccc; padding: 6px;">${
+              student.subscription_no || ""
             }</td>
             <td style="border: 1px solid #ccc; padding: 6px;">${formatDate(
               student.from_date || "",
             )}</td>
               <td style="border: 1px solid #ccc; padding: 6px;">${formatDate(
-              student.to_date || "",
-            )}</td>
-             <td style="border: 1px solid #ccc; padding: 6px;">${student.email_ids || ""
-            }</td>
+                student.to_date || "",
+              )}</td>
+             <td style="border: 1px solid #ccc; padding: 6px;">${
+               student.email_ids || ""
+             }</td>
           </tr>
         `;
         })
@@ -458,6 +462,13 @@ function SubscriptionReminder() {
           ></div>
 
           <div className="card-body w-full">
+            <div className="mb-1 flex items-center gap-2 px-3 py-1 bg-blue-50 border border-blue-300 text-blue-800 text-xs md:text-sm rounded whitespace-nowrap">
+              <FaInfoCircle size={16} />
+              <span>
+                A default email will be sent to the selected vendor if no custom
+                message is entered.
+              </span>
+            </div>
             {showSearch && (
               <>
                 <div className="p-1 px-3 mb-1 bg-gray-100 border-none">
@@ -547,7 +558,7 @@ function SubscriptionReminder() {
                               onChange={() =>
                                 handleCheckboxChange(section.subscription_id)
                               }
-                            // className="w-4 h-4 cursor-pointer accent-blue-500"
+                              // className="w-4 h-4 cursor-pointer accent-blue-500"
                             />
                           </td>
 
@@ -648,8 +659,9 @@ function SubscriptionReminder() {
                         type="submit"
                         onClick={handleSubmit}
                         style={{ backgroundColor: "#2196F3" }}
-                        className={`text-white font-bold py-2 px-4 rounded whitespace-nowrap ${loading ? "opacity-50 cursor-not-allowed" : ""
-                          }`}
+                        className={`text-white font-bold py-2 px-4 rounded whitespace-nowrap ${
+                          loading ? "opacity-50 cursor-not-allowed" : ""
+                        }`}
                         disabled={loading}
                       >
                         {loading ? (

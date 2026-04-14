@@ -7,7 +7,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { RxCross1 } from "react-icons/rx";
 import { useNavigate } from "react-router-dom";
-import { FaFileExcel } from "react-icons/fa";
+import { FaFileExcel, FaInfoCircle } from "react-icons/fa";
 import { FiPrinter, FiSearch } from "react-icons/fi";
 import * as XLSX from "xlsx";
 
@@ -413,6 +413,13 @@ function PeriodicalsReminder() {
           ></div>
 
           <div className="card-body w-full">
+            <div className="mb-1 flex items-center gap-2 px-3 py-1 bg-blue-50 border border-blue-300 text-blue-800 text-xs md:text-sm rounded whitespace-nowrap">
+              <FaInfoCircle size={16} />
+              <span>
+                A default email will be sent to the selected vendor if no custom
+                message is entered.
+              </span>
+            </div>
             {showSearch && (
               <>
                 <div className="p-1 px-3 mb-1 bg-gray-100 border-none">
