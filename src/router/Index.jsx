@@ -329,6 +329,8 @@ import ShowReportCard from "../componants/StudentSearchUsingGRN/ShowReportCard.j
 import PeriodicalsReminder from "../componants/MasterModuleLibrarian/LibraryDashboardListing/PeriodicalsReminder.jsx";
 import SubscriptionReminder from "../componants/MasterModuleLibrarian/LibraryDashboardListing/SubscriptionReminder.jsx";
 import BookReturnPending from "../componants/MasterModuleLibrarian/LibraryDashboardListing/BookReturnPending.jsx";
+import BulkStaffUpload from "../componants/StaffComponents/BulkStaffUpload.jsx";
+import BulkCaretackerUpload from "../componants/CareTacker/BulkCaretackerUpload.jsx";
 
 import House from "../componants/MastersModule/House/House.jsx";
 
@@ -545,6 +547,10 @@ function Index() {
         />
         {/* Staff endPoints */}
         <Route
+          path="/bulkStaffUpload"
+          element={<PrivateRoute element={<BulkStaffUpload />} />}
+        />
+        <Route
           path="/StaffList"
           element={<PrivateRoute element={<StaffList />} />}
         />
@@ -616,6 +622,10 @@ function Index() {
           element={<PrivateRoute element={<HolidayList />} />}
         />
         {/* CareTacker */}
+        <Route
+          path="/bulkCaretackerUpload"
+          element={<PrivateRoute element={<BulkCaretackerUpload />} />}
+        />
         <Route
           path="/careTacker"
           element={<PrivateRoute element={<CareTacker />} />}

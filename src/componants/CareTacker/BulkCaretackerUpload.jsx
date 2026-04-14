@@ -14,7 +14,7 @@ import { FaCheck } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import "@fortawesome/fontawesome-free/css/all.min.css";
 
-function BulkStaffUpload() {
+function BulkCaretackerUpload() {
     const API_URL = import.meta.env.VITE_API_URL; // URL for host
     const [classes, setClasses] = useState([]);
     const [subjects, setSubjects] = useState([]);
@@ -411,32 +411,16 @@ function BulkStaffUpload() {
             return;
         }
 
-        const fileName = String(selectedFile.name || "").trim().toLowerCase();
-        const classNameForBulkUploadForCheck = classNameForBulkUpload.trim(); // Trim the class name for comparison
+        const fileName = String(selectedFile.name || "").trim();
         const isStaffTemplate =
             fileName === "teachers_template.csv" ||
             fileName === "teachers_template.xls" ||
-            fileName === "teachers_template.xlsx" ||
-            fileName.includes("teachers_template");
+            fileName === "teachers_template.xlsx";
 
-        // Only enforce name match if a class name is selected and file is not staff template
-        if (classNameForBulkUploadForCheck && !isStaffTemplate) {
-            const fileNameWithoutExtension = fileName
-                .split(".")[0]
-                .split("_")[0]
-                .trim();
-
-            if (fileNameWithoutExtension !== classNameForBulkUploadForCheck.toLowerCase()) {
-                toast.warning(
-                    "⚠️Invalid file! Please select the downloaded template without renaming it or modifying the first four columns."
-                );
-                return;
-            }
+        if (!isStaffTemplate) {
+            toast.warning("Invalid file! Please select the downloaded template without renaming it or modifying the first four columns.");
+            return;
         }
-        // if (fileNameWithoutExtension !== classNameForBulkUploadForCheck) {
-        //   toast.error("Do not change the file name please");
-        //   return;
-        // }
         setLoading(true); // Show loader
         const formData = new FormData();
         formData.append("file", selectedFile); // Append the selected file
@@ -464,22 +448,29 @@ function BulkStaffUpload() {
                 setSelectedFile(null);
             }
         } catch (error) {
-            const showErrorForUploading =
-                error?.response?.data?.message || error?.message || "Upload failed.";
-            const showErrorForUploadingUrl = error?.response?.data?.invalid_rows;
-            console.log("Upload error:", error);
-            setErrorMessage(
-                showErrorForUploading
-                    ? `Error-Message: ${showErrorForUploading}.`
-                    : "Failed to upload file. Please try again..."
-            );
-            setErrorMessageUrl(showErrorForUploadingUrl ? `${showErrorForUploadingUrl}` : "");
+            setLoading(false); // Hide loader
 
-            toast.error(showErrorForUploading || "Error uploading file.");
+            const showErrorForUploading = error?.response?.data?.message;
+            const showErrorForUploadingUrl = error?.response?.data?.invalid_rows;
+            console.log("showErrorForUploadingURL", showErrorForUploading);
+            setErrorMessage(
+                !showErrorForUploading
+                    ? "Failed to upload file. Please try again..."
+                    : `Error-Message: ${showErrorForUploading}.`
+            );
+            // const fullURLFOrErrorMessage = `${API_URL}${showErrorForUploadingUrl}`;
+            const fullURLFOrErrorMessage = `${showErrorForUploadingUrl}`;
+
+            setErrorMessageUrl(fullURLFOrErrorMessage);
+            console.log("showerrormessage Full url", errorMessageUrl);
+
+            toast.error(
+                !showErrorForUploading
+                    ? "Error uploading file."
+                    : error?.response?.data?.message
+            );
 
             console.error("Error uploading file:", showErrorForUploading);
-        } finally {
-            setLoading(false); // Hide loader
         }
     };
 
@@ -546,7 +537,7 @@ function BulkStaffUpload() {
             <div className="md:mx-auto md:w-[85%] px-2 bg-white mt-4 ">
                 <div className=" card-header  flex justify-between items-center  ">
                     <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
-                        Staff Bulk Uploads
+                        Caretaker Bulk Uploads
                     </h3>
                     <RxCross1
                         className="float-end relative  right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
@@ -575,7 +566,7 @@ function BulkStaffUpload() {
                                     <div className="max-w-full bg-white shadow-md rounded-lg border border-gray-300 mx-auto  p-6">
 
                                         <h2 className="text-center text-2xl font-semibold mb-8 text-blue-600">
-                                            Upload Staff Data from Excel Sheet
+                                            Upload Caretaker Data from Excel Sheet
                                         </h2>
 
                                         {/* <h5 className="  text-center mx-auto font-semibold mb-3 text-gray-500 ">
@@ -635,10 +626,10 @@ function BulkStaffUpload() {
                                             {/* Register New Students */}
                                             <div className="flex flex-col items-center p-4 bg-gray-100 rounded-md">
                                                 <h5 className="font-semibold mb-3 text-gray-800">
-                                                    Register New Staff
+                                                    Register New Caretaker
                                                 </h5>
                                                 <p className="text-sm text-gray-600 mb-4">
-                                                    # Click upload to register staff.
+                                                    # Click upload to register Caretaker.
                                                     <br /># Students will be registered in the
                                                     application. Their userid and password will be sent as
                                                     email at the email id's provided.
@@ -918,4 +909,6 @@ function BulkStaffUpload() {
     );
 }
 
-export default BulkStaffUpload;
+export default BulkCaretackerUpload;
+
+
