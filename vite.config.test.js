@@ -5,7 +5,9 @@ import react from "@vitejs/plugin-react";
 export default defineConfig({
   plugins: [react()],
   build: {
+    // target: "es2016",
     target: "es2015",
+    // minify: "main",
     minify: "terser",
   },
 });
