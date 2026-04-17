@@ -109,7 +109,7 @@ const CreateRemarkObservation = ({ onSaveSuccess }) => {
         const token = localStorage.getItem("authToken");
         const res = await axios.get(
           `${API_URL}/api/getStudentListBySectionData?section_id=${sectionIdForStudentList}`,
-          { headers: { Authorization: `Bearer ${token}` } }
+          { headers: { Authorization: `Bearer ${token}` } },
         );
 
         if (res.data.success) {
@@ -137,7 +137,7 @@ const CreateRemarkObservation = ({ onSaveSuccess }) => {
         `${API_URL}/api/get_subjectbyclasssection/${classId}/${sectionId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
 
       // Handle the subject data here
@@ -156,10 +156,13 @@ const CreateRemarkObservation = ({ onSaveSuccess }) => {
 
       const token = localStorage.getItem("authToken");
 
-      const classApiUrl =
-        roleId === "T"
-          ? `${API_URL}/api/get_teacherclasseswithclassteacher?teacher_id=${roleIdValue}`
-          : `${API_URL}/api/getallClassWithStudentCount`;
+      // const classApiUrl =
+      //   roleId === "T"
+      //     ? `${API_URL}/api/get_teacherclasseswithclassteacher?teacher_id=${roleIdValue}`
+      //     : `${API_URL}/api/getallClassWithStudentCount`;
+      const classApiUrl = ["T", "L"].includes(roleId)
+        ? `${API_URL}/api/get_teacherclasseswithclassteacher?teacher_id=${roleIdValue}`
+        : `${API_URL}/api/getallClassWithStudentCount`;
 
       const [classResponse] = await Promise.all([
         axios.get(classApiUrl, {
@@ -167,10 +170,14 @@ const CreateRemarkObservation = ({ onSaveSuccess }) => {
         }),
       ]);
 
-      const classData =
-        roleId === "T"
-          ? classResponse.data.data || []
-          : classResponse.data || [];
+      // const classData =
+      //   roleId === "T"
+      //     ? classResponse.data.data || []
+      //     : classResponse.data || [];
+
+      const classData = ["T", "L"].includes(roleId)
+        ? classResponse?.data?.data || []
+        : classResponse?.data || [];
 
       setAllClasses(classData);
     } catch (error) {
@@ -183,7 +190,7 @@ const CreateRemarkObservation = ({ onSaveSuccess }) => {
 
   const classOptions = useMemo(() => {
     return allClasses.map((cls) => {
-      if (roleId === "T") {
+      if (roleId === "T" || roleId === "L") {
         return {
           value: cls.section_id,
           label: `${cls.classname} ${cls.sectionname}`,
@@ -340,7 +347,7 @@ const CreateRemarkObservation = ({ onSaveSuccess }) => {
 
   const handleRemoveFile = (indexToRemove) => {
     setAttachedFiles((prevFiles) =>
-      prevFiles.filter((_, index) => index !== indexToRemove)
+      prevFiles.filter((_, index) => index !== indexToRemove),
     );
   };
 
@@ -436,14 +443,14 @@ const CreateRemarkObservation = ({ onSaveSuccess }) => {
             Authorization: `Bearer ${token}`,
             "Content-Type": "multipart/form-data",
           },
-        }
+        },
       );
 
       if (response.data.success) {
         toast.success(
           publish
             ? "Remark Saved & published successfully!"
-            : "Remark saved successfully!"
+            : "Remark saved successfully!",
         );
         resetForm();
 
@@ -499,7 +506,7 @@ const CreateRemarkObservation = ({ onSaveSuccess }) => {
                             key={selectedClass ? selectedClass.value : "reset"}
                             options={classOptions}
                             value={classOptions.find(
-                              (option) => option.value === selectedClass?.value
+                              (option) => option.value === selectedClass?.value,
                             )}
                             onChange={handleClassSelect}
                             className="w-[40%]"
@@ -543,11 +550,11 @@ const CreateRemarkObservation = ({ onSaveSuccess }) => {
                                         type="checkbox"
                                         id={checkboxId}
                                         checked={selectedStudents.includes(
-                                          student.student_id
+                                          student.student_id,
                                         )}
                                         onChange={() =>
                                           handleStudentToggle(
-                                            student.student_id
+                                            student.student_id,
                                           )
                                         }
                                         className="cursor-pointer flex-shrink-0"

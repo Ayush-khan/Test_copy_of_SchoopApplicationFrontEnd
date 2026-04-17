@@ -5,6 +5,7 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom";
 import { RxCross1 } from "react-icons/rx";
+import { FaInfoCircle } from "react-icons/fa";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEdit, faTrash, faPlus } from "@fortawesome/free-solid-svg-icons";
@@ -399,6 +400,21 @@ const BookDetails = () => {
           ></div>
 
           <>
+            {timetable.length === 0 && !loadingForSearch && (
+              <div className="md:absolute md:right-2 md:top-[9%] mb-5 text-gray-500">
+                <div className="mx-auto w-fit px-2 py-1 bg-blue-50 border border-blue-300 text-blue-800 text-sm rounded flex items-center gap-2">
+                  <FaInfoCircle className="text-blue-800" />
+
+                  <span>
+                    Please select at least one field. Click on the <b>Browse</b>{" "}
+                    button to view book details.
+                  </span>
+                </div>
+              </div>
+            )}
+          </>
+
+          <>
             {/* <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 pl-4 pb-4">
               
               <div className="flex flex-col">
@@ -472,7 +488,7 @@ const BookDetails = () => {
                 handleSearch();
               }}
             >
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 pl-4 pb-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 pl-4 pb-4 mt-2">
                 <div className="flex flex-col">
                   <label className="text-md mb-1">
                     Enter/Scan AccessionNo.
@@ -531,7 +547,7 @@ const BookDetails = () => {
                     }`}
                     disabled={loadingForSearch}
                   >
-                    {loadingForSearch ? "Searching..." : "Search"}
+                    {loadingForSearch ? "Browsing..." : "Browse"}
                   </button>
                 </div>
               </div>

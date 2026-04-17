@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { RxCross1 } from "react-icons/rx";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBook, faTimes, faCheck } from "@fortawesome/free-solid-svg-icons";
+import { FaInfoCircle } from "react-icons/fa";
 
 const ReturnBook = () => {
   const API_URL = import.meta.env.VITE_API_URL;
@@ -68,6 +69,7 @@ const ReturnBook = () => {
   const [error, setError] = useState("");
 
   const [autoSelectedCopy, setAutoSelectedCopy] = useState(null);
+  const [manuallyChanged, setManuallyChanged] = useState(false);
 
   const camelCase = (str) =>
     str
@@ -329,8 +331,10 @@ const ReturnBook = () => {
     ---------------------------------- */
       if (isAccessionEntered || isGrnNo) {
         const url = isAccessionEntered
-          ? `${API_URL}/api/issue_book_details?type=accession&copy_id=${accessionNo}`
-          : `${API_URL}/api/issue_book_details?type=grno&grn_no=${grn_no}&reg_no=${grn_no}`;
+          ? //  `${API_URL}/api/issue_book_details?type=accession&copy_id=${accessionNo}`
+            // : `${API_URL}/api/issue_book_details?type=grno&grn_no=${grn_no}&reg_no=${grn_no}`;
+            `${API_URL}/api/issue_book_details?copy_id=${accessionNo}`
+          : `${API_URL}/api/issue_book_details?grn_no=${grn_no}&reg_no=${grn_no}`;
 
         const res = await axios.get(url, {
           headers: { Authorization: `Bearer ${token}` },
@@ -423,8 +427,32 @@ const ReturnBook = () => {
 
   const displayedSections = filteredSections.slice(currentPage * pageSize);
 
+  // const handleCheckboxChange = (copy_id) => {
+  //   setAutoSelectedCopy(null);
+  //   setSelectedCopies((prev) => {
+  //     if (prev.includes(copy_id)) {
+  //       return prev.filter((x) => x !== copy_id); // unselect
+  //     } else {
+  //       return [...prev, copy_id]; // select
+  //     }
+  //   });
+  // };
+
+  // const handleSelectAll = () => {
+  //   if (selectedCopies.length === displayedSections.length) {
+  //     setSelectedCopies([]); // unselect all
+  //   } else {
+  //     setSelectedCopies(displayedSections.map((item) => item.copy_id));
+  //   }
+  // };
+
+  // const isAllSelected =
+  //   displayedSections.length > 0 &&
+  //   selectedCopies.length === displayedSections.length;
+
   const handleCheckboxChange = (copy_id) => {
-    setAutoSelectedCopy(null);
+    setManuallyChanged(true); // 👈 IMPORTANT
+
     setSelectedCopies((prev) => {
       if (prev.includes(copy_id)) {
         return prev.filter((x) => x !== copy_id); // unselect
@@ -432,44 +460,73 @@ const ReturnBook = () => {
         return [...prev, copy_id]; // select
       }
     });
-  };
 
+    setAutoSelectedCopy((prev) => (prev === copy_id ? null : prev));
+  };
+  // const handleCheckboxChange = (copy_id) => {
+  //   setSelectedCopies((prev) => {
+  //     let updated;
+
+  //     if (prev.includes(copy_id)) {
+  //       updated = prev.filter((x) => x !== copy_id); // unselect
+  //     } else {
+  //       updated = [...prev, copy_id]; // select
+  //     }
+
+  //     return updated;
+  //   });
+
+  //   // only clear autoSelected if user is manually interacting
+  //   setAutoSelectedCopy((prev) => (prev === copy_id ? null : prev));
+  // };
   const handleSelectAll = () => {
-    if (selectedCopies.length === displayedSections.length) {
-      setSelectedCopies([]); // unselect all
+    const allIds = displayedSections.map((item) => item.copy_id);
+
+    const isAllSelected = allIds.every((id) => selectedCopies.includes(id));
+
+    if (isAllSelected) {
+      // remove only visible ones
+      setSelectedCopies((prev) => prev.filter((id) => !allIds.includes(id)));
     } else {
-      setSelectedCopies(displayedSections.map((item) => item.copy_id)); // select all
+      // add only visible ones
+      setSelectedCopies((prev) => [...new Set([...prev, ...allIds])]);
     }
   };
 
   const isAllSelected =
     displayedSections.length > 0 &&
-    selectedCopies.length === displayedSections.length;
+    displayedSections.every((item) => selectedCopies.includes(item.copy_id));
 
   // useEffect(() => {
-  //   if (!accessionNo) return;
+  //   if (!accessionNo) {
+  //     setAutoSelectedCopy(null);
+  //     return;
+  //   }
 
-  //   const exists = displayedSections.some(
-  //     (item) => item.copy_id === accessionNo,
+  //   const matched = displayedSections.find(
+  //     (item) => String(item.copy_id) === String(accessionNo),
   //   );
 
-  //   if (!exists) return;
+  //   if (!matched) return;
 
+  //   setAutoSelectedCopy(matched.copy_id);
+
+  //   //  ADD instead of replacing
   //   setSelectedCopies((prev) => {
-  //     // 🚨 THIS LINE STOPS INFINITE LOOP
-  //     if (prev.length === 1 && prev[0] === accessionNo) {
-  //       return prev; // no state update
-  //     }
-  //     return [accessionNo];
+  //     if (prev.includes(matched.copy_id)) return prev;
+  //     return [...prev, matched.copy_id];
   //   });
   // }, [accessionNo, displayedSections]);
 
   useEffect(() => {
     if (!accessionNo) {
-      // 🔥 clear ONLY auto-selection
       setAutoSelectedCopy(null);
+      setManuallyChanged(false); // reset when search cleared
       return;
     }
+
+    //  STOP if user already interacted
+    if (manuallyChanged) return;
 
     const matched = displayedSections.find(
       (item) => String(item.copy_id) === String(accessionNo),
@@ -480,13 +537,33 @@ const ReturnBook = () => {
     setAutoSelectedCopy(matched.copy_id);
 
     setSelectedCopies((prev) => {
-      // prevent infinite loop & override
-      if (prev.length === 1 && prev[0] === matched.copy_id) {
-        return prev;
-      }
-      return [matched.copy_id];
+      if (prev.includes(matched.copy_id)) return prev;
+      return [...prev, matched.copy_id];
     });
-  }, [accessionNo, displayedSections]);
+  }, [accessionNo, displayedSections, manuallyChanged]);
+  // useEffect(() => {
+  //   if (!accessionNo) {
+  //     // 🔥 clear ONLY auto-selection
+  //     setAutoSelectedCopy(null);
+  //     return;
+  //   }
+
+  //   const matched = displayedSections.find(
+  //     (item) => String(item.copy_id) === String(accessionNo),
+  //   );
+
+  //   if (!matched) return;
+
+  //   setAutoSelectedCopy(matched.copy_id);
+
+  //   setSelectedCopies((prev) => {
+  //     // prevent infinite loop & override
+  //     if (prev.length === 1 && prev[0] === matched.copy_id) {
+  //       return prev;
+  //     }
+  //     return [matched.copy_id];
+  //   });
+  // }, [accessionNo, displayedSections]);
 
   const handleReturnBook = async ({
     selectedCopyIds,
@@ -501,7 +578,12 @@ const ReturnBook = () => {
       return;
     }
 
-    if (!memberId || !memberType) {
+    // if (!memberId || !memberType) {
+    //   // console.log("MEMBER MISSING");
+    //   toast.error("Member information is missing");
+    //   return;
+    // }
+    if (!memberDetails.member_type) {
       // console.log("MEMBER MISSING");
       toast.error("Member information is missing");
       return;
@@ -523,8 +605,9 @@ const ReturnBook = () => {
       const payload = {
         operation: "return",
         selector: selectedCopyIds,
-        member_id: memberId,
-        member_type: memberType, // "S" for student, "T" for teacher/staff
+        member_id: memberDetails.member_id,
+        // member_type: memberType, // "S" for student, "T" for teacher/staff
+        member_type: memberDetails.member_type,
         dateofreturn: dateOfReturn,
       };
 
@@ -538,6 +621,12 @@ const ReturnBook = () => {
       toast.success("Book Returned Successfully");
       setShowStudentReport(false);
       setSelectedCopies([]); // reset selections
+      setSelectedStudentId("");
+      setSelectedStudent("");
+      setSelectedSectionId("");
+      setGrnNo("");
+      setAccessionNo("");
+      setSelectedStaffId("");
     } catch (err) {
       toast.error(err.response?.data?.message || err.message);
     } finally {
@@ -558,13 +647,19 @@ const ReturnBook = () => {
       return;
     }
 
-    if (!bookIds || bookIds.length !== selectedCopyIds.length) {
-      // console.log("BOOK IDS MISSING OR MISMATCHED");
-      toast.error("Book IDs are missing or do not match selected copies");
-      return;
-    }
+    // if (!bookIds || bookIds.length !== selectedCopyIds.length) {
+    //   // console.log("BOOK IDS MISSING OR MISMATCHED");
+    //   toast.error("Book IDs are missing or do not match selected copies");
+    //   return;
+    // }
 
-    if (!memberId || !memberType) {
+    // if (!memberId || !memberType) {
+    //   // console.log("MEMBER MISSING");
+    //   toast.error("Member information is missing");
+    //   return;
+    // }
+
+    if (!memberDetails.member_type) {
       // console.log("MEMBER MISSING");
       toast.error("Member information is missing");
       return;
@@ -586,8 +681,10 @@ const ReturnBook = () => {
         operation: "reissue",
         selector: selectedCopyIds,
         book_id: bookIds, // <-- send the book IDs array
-        member_id: memberId,
-        member_type: memberType,
+        // member_id: memberId,
+        // member_type: memberType,
+        member_id: memberDetails.member_id,
+        member_type: memberDetails.member_type,
         dateofreturn: dateOfReturn,
       };
 
@@ -602,6 +699,12 @@ const ReturnBook = () => {
 
       setSelectedCopies([]);
       setShowStudentReport(false);
+      setSelectedStudentId("");
+      setSelectedStudent("");
+      setSelectedSectionId("");
+      setGrnNo("");
+      setAccessionNo("");
+      setSelectedStaffId("");
       return response.data;
     } catch (err) {
       console.error(err);
@@ -644,6 +747,23 @@ const ReturnBook = () => {
             </>
           )}
 
+          {!showStudentReport && (
+            <>
+              {/* {timetable.length === 0 && !loadingForSearch && ( */}
+              <div className="md:absolute md:right-2 md:top-[32%] mb-5 text-gray-500">
+                <div className="mx-auto w-fit px-2 py-1 bg-blue-50 border border-blue-300 text-blue-800 text-sm rounded flex items-center gap-2">
+                  <FaInfoCircle className="text-blue-800" />
+
+                  <span>
+                    Please enter accession no or select mandatory fields. Click
+                    on the <b>Browse</b> button to Return books.
+                  </span>
+                </div>
+              </div>
+              {/* )} */}
+            </>
+          )}
+
           <>
             {!showStudentReport && (
               <form
@@ -651,7 +771,7 @@ const ReturnBook = () => {
                   e.preventDefault(); // prevent page reload
                   handleSearch();
                 }}
-                className="w-full px-6 py-2"
+                className="w-full px-6 py-4"
               >
                 <div className="w-full flex flex-col md:flex-row md:items-start gap-6">
                   <div className="flex flex-col w-full md:w-auto">
@@ -798,125 +918,88 @@ const ReturnBook = () => {
               <>
                 <div className="w-full">
                   <div className="card mx-auto lg:w-full shadow-lg">
-                    <div className="p-2 px-3 bg-gray-100 border-none flex items-center justify-between">
-                      <div className="w-full flex flex-row items-center justify-between ">
-                        <h3 className="text-gray-700 mt-1 text-[1.1em] lg:text-xl text-nowrap mr-2">
-                          Return Book
-                        </h3>
-                        <div
-                          className="flex items-center w-full"
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter") {
-                              e.preventDefault();
-                              handleSearch();
-                            }
-                          }}
-                        >
+                    <div className="p-2 px-3 bg-gray-100 border-none">
+                      <div className="w-full flex flex-col lg:flex-row lg:items-center lg:justify-between gap-2">
+                        <div className="flex flex-col lg:flex-row lg:items-center gap-2 w-full">
+                          <h3 className="text-gray-700 text-[1.1em] lg:text-xl whitespace-nowrap">
+                            Return Book
+                          </h3>
+
                           <div
-                            className="bg-blue-50 border-l-2 border-r-2 text-[0.9em] border-pink-500 rounded-md shadow-md mx-auto px-6 py-2"
-                            style={{
-                              overflowX: "auto",
-                              whiteSpace: "nowrap",
+                            className="flex flex-wrap items-center w-full gap-3 bg-blue-50 border-l-2 border-r-2 border-pink-500 rounded-md shadow-md px-3 py-2"
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") {
+                                e.preventDefault();
+                                handleSearch();
+                              }
                             }}
                           >
-                            <div
-                              className="flex items-center gap-x-1 text-blue-800 font-medium"
-                              style={{ flexWrap: "nowrap" }}
-                            ></div>
-                            <div className="flex items-center gap-x-4 flex-wrap">
-                              <div className="flex items-center gap-x-1">
-                                <label className="text-sm whitespace-nowrap">
-                                  Accession No.
+                            <div className="flex items-center gap-2">
+                              <label className="text-sm whitespace-nowrap">
+                                Accession No.
+                              </label>
+                              <input
+                                type="text"
+                                maxLength={8}
+                                value={accessionNo}
+                                onChange={(e) => setAccessionNo(e.target.value)}
+                                className="border border-gray-300 rounded px-2 py-1 text-sm w-full sm:w-[120px]"
+                                placeholder="Enter"
+                              />
+                            </div>
+
+                            <div className="flex items-center">
+                              <label className="text-red-500 font-semibold">
+                                OR
+                              </label>
+                            </div>
+
+                            <div className="flex items-center gap-2">
+                              <label className="text-sm whitespace-nowrap">
+                                Member Type{" "}
+                                <span className="text-red-500">*</span>
+                              </label>
+
+                              <div className="flex items-center border border-gray-300 rounded-md px-2 py-1 bg-white text-sm">
+                                <label className="flex items-center gap-1 cursor-pointer">
+                                  <input
+                                    type="radio"
+                                    name="userType"
+                                    value="student"
+                                    checked={selectedType === "student"}
+                                    onChange={() => setSelectedType("student")}
+                                    className="accent-pink-600"
+                                  />
+                                  <span>Student</span>
                                 </label>
-                                <input
-                                  type="text"
-                                  maxLength={8}
-                                  value={accessionNo}
-                                  onChange={(e) =>
-                                    setAccessionNo(e.target.value)
-                                  }
-                                  className="border border-gray-300 rounded px-1 py-2 text-sm w-[80px]"
-                                  placeholder="Enter"
-                                />
+
+                                <label className="flex items-center gap-1 ml-3 cursor-pointer">
+                                  <input
+                                    type="radio"
+                                    name="userType"
+                                    value="staff"
+                                    checked={selectedType === "staff"}
+                                    onChange={() => setSelectedType("staff")}
+                                    className="accent-pink-600"
+                                  />
+                                  <span>Staff</span>
+                                </label>
                               </div>
-                              <div className="flex flex-col w-full md:w-auto">
-                                <label className="text-red-500 font-semibold mt-1">
-                                  OR
-                                </label>
-                              </div>
+                            </div>
 
-                              <div className="flex items-center gap-x-1">
+                            {selectedType === "student" && (
+                              <div className="flex items-center gap-2">
                                 <label className="text-sm whitespace-nowrap">
-                                  Member Type{" "}
-                                  <span className="text-red-500">*</span>
+                                  Class <span className="text-red-500">*</span>
                                 </label>
 
-                                <div className="flex items-center border border-gray-300 rounded-md px-2 py-2 bg-white text-sm">
-                                  <label className="flex items-center gap-1 cursor-pointer">
-                                    <input
-                                      type="radio"
-                                      name="userType"
-                                      value="student"
-                                      checked={selectedType === "student"}
-                                      onChange={() =>
-                                        setSelectedType("student")
-                                      }
-                                      className="accent-pink-600"
-                                    />
-                                    <span>Student</span>
-                                  </label>
-
-                                  <label className="flex items-center gap-1 ml-3 cursor-pointer">
-                                    <input
-                                      type="radio"
-                                      name="userType"
-                                      value="staff"
-                                      checked={selectedType === "staff"}
-                                      onChange={() => setSelectedType("staff")}
-                                      className="accent-pink-600"
-                                    />
-                                    <span>Staff</span>
-                                  </label>
-                                </div>
-                              </div>
-
-                              {selectedType === "student" && (
-                                <>
-                                  <div className="flex items-center gap-x-1">
-                                    <label className="text-sm whitespace-nowrap">
-                                      Class{" "}
-                                      <span className="text-red-500">*</span>
-                                    </label>
-
-                                    <div className="w-[100px]">
-                                      <Select
-                                        menuPortalTarget={document.body}
-                                        menuPosition="fixed"
-                                        value={selectedStudent}
-                                        onChange={handleStudentSelect}
-                                        options={studentOptions}
-                                        placeholder="Select"
-                                        isClearable
-                                        isSearchable
-                                        className="text-sm"
-                                      />
-                                    </div>
-                                  </div>
-                                </>
-                              )}
-
-                              <div className="flex items-center gap-x-1">
-                                <label className="text-sm whitespace-nowrap">
-                                  Name <span className="text-red-500">*</span>
-                                </label>
-
-                                <div className="w-[100px]">
+                                <div className="w-full sm:w-[140px]">
                                   <Select
                                     menuPortalTarget={document.body}
                                     menuPosition="fixed"
-                                    value={selectedStaff}
-                                    onChange={handleMemberSelect}
-                                    options={staffOptions}
+                                    value={selectedStudent}
+                                    onChange={handleStudentSelect}
+                                    options={studentOptions}
                                     placeholder="Select"
                                     isClearable
                                     isSearchable
@@ -924,43 +1007,70 @@ const ReturnBook = () => {
                                   />
                                 </div>
                               </div>
+                            )}
 
-                              {selectedType === "student" && (
-                                <>
-                                  <div className="flex items-center gap-x-1">
-                                    <label className="text-sm whitespace-nowrap">
-                                      GRN No.
-                                    </label>
-                                    <input
-                                      type="text"
-                                      maxLength={8}
-                                      value={grn_no}
-                                      onChange={(e) => setGrnNo(e.target.value)}
-                                      className="border border-gray-300 rounded px-1 py-2 text-sm w-[80px]"
-                                      placeholder="Enter"
-                                    />
-                                  </div>
-                                </>
-                              )}
+                            <div className="flex items-center gap-2">
+                              <label className="text-sm whitespace-nowrap">
+                                Name <span className="text-red-500">*</span>
+                              </label>
 
-                              <button
-                                type="button"
-                                onClick={handleSearch}
-                                className="h-8 text-white px-1 rounded font-medium text-sm"
-                                style={{ backgroundColor: "#2196F3" }}
-                              >
-                                {loadingForSearch ? "Browsing.." : "Browse"}
-                              </button>
+                              <div className="w-full">
+                                <Select
+                                  menuPortalTarget={document.body}
+                                  menuPosition="fixed"
+                                  value={selectedStaff}
+                                  onChange={handleMemberSelect}
+                                  options={staffOptions}
+                                  placeholder="Select"
+                                  isClearable
+                                  isSearchable
+                                  className="text-sm"
+                                />
+                              </div>
                             </div>
+
+                            {selectedType === "student" && (
+                              <div className="flex items-center gap-2">
+                                <label className="text-sm whitespace-nowrap">
+                                  GRN No.
+                                </label>
+                                <input
+                                  type="text"
+                                  maxLength={8}
+                                  value={grn_no}
+                                  onChange={(e) => setGrnNo(e.target.value)}
+                                  className="border border-gray-300 rounded px-2 py-1 text-sm w-full sm:w-[100px]"
+                                  placeholder="Enter"
+                                />
+                              </div>
+                            )}
+
+                            <button
+                              type="button"
+                              onClick={handleSearch}
+                              className="h-9 text-white px-4 rounded font-medium text-sm whitespace-nowrap"
+                              style={{ backgroundColor: "#2196F3" }}
+                            >
+                              {loadingForSearch ? "Browsing..." : "Browse"}
+                            </button>
                           </div>
                         </div>
-                      </div>
 
-                      <div className="flex mb-1.5 flex-col md:flex-row gap-x-6 justify-center md:justify-end ml-2">
-                        <RxCross1
-                          className="text-base text-red-600 cursor-pointer hover:bg-red-100 rounded"
-                          onClick={() => setShowStudentReport(false)}
-                        />
+                        <div className="flex justify-end lg:justify-start">
+                          <RxCross1
+                            className="text-base text-red-600 cursor-pointer hover:bg-red-100 rounded"
+                            onClick={() => {
+                              setShowStudentReport(false);
+                              setSelectedStaff("");
+                              setSelectedStaffId(null);
+                              setSelectedStudent("");
+                              setSelectedSectionId(null);
+                              setSelectedStudentId("");
+                              setGrnNo("");
+                              setAccessionNo("");
+                            }}
+                          />
+                        </div>
                       </div>
                     </div>
 
@@ -1108,9 +1218,13 @@ const ReturnBook = () => {
                                 <td className="px-2 py-1 text-center border">
                                   <input
                                     type="checkbox"
-                                    checked={selectedCopies.includes(
-                                      item.copy_id,
-                                    )}
+                                    // checked={selectedCopies.includes(
+                                    //   item.copy_id,
+                                    // )}
+                                    checked={
+                                      selectedCopies.includes(item.copy_id) ||
+                                      autoSelectedCopy === item.copy_id
+                                    }
                                     onChange={() =>
                                       handleCheckboxChange(item.copy_id)
                                     }

@@ -5,6 +5,7 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom";
 import { RxCross1 } from "react-icons/rx";
+import { FaInfoCircle } from "react-icons/fa";
 
 const CreateMember = () => {
   const API_URL = import.meta.env.VITE_API_URL;
@@ -338,10 +339,26 @@ const CreateMember = () => {
               ></div>
             </>
           )}
+          {!showStudentReport && (
+            <>
+              {/* {timetable.length === 0 && !loadingForSearch && ( */}
+              <div className="md:absolute md:right-2 md:top-[40%] mb-5 text-gray-500">
+                <div className="mx-auto w-fit px-2 py-1 bg-blue-50 border border-blue-300 text-blue-800 text-sm rounded flex items-center gap-2">
+                  <FaInfoCircle className="text-blue-800" />
+
+                  <span>
+                    Please select mandatory fields. Click on the <b>Browse</b>{" "}
+                    button to create member.
+                  </span>
+                </div>
+              </div>
+              {/* )} */}
+            </>
+          )}
 
           <>
             {!showStudentReport && (
-              <div className=" w-full md:w-[100%] flex justify-center flex-col md:flex-row gap-x-1 ml-0 p-2">
+              <div className=" w-full md:w-[100%] flex justify-center flex-col md:flex-row gap-x-1 ml-0 p-2 mt-3">
                 <div className="w-full md:w-[99%] flex md:flex-row justify-between items-center mt-0 md:mt-4">
                   <div className="w-full md:w-[99%]  gap-x-0 md:gap-x-4 flex flex-col gap-y-2 md:gap-y-0 md:flex-row">
                     <div className="w-full md:w-[50%] gap-x-2 justify-around my-1 md:my-4 flex md:flex-row">

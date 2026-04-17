@@ -146,7 +146,8 @@ function RemarkObservationStudent() {
         setPageCount(Math.ceil(updatedNotices.length / pageSize));
       } else {
         setNotices([]);
-        toast.error("No remarks found.");
+        // toast.error("No remarks found.");
+        // console.log("n")
       }
     } catch (error) {
       console.error("Error fetching remarks:", error);

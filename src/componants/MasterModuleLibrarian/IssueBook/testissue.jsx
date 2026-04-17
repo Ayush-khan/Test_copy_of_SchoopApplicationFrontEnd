@@ -108,7 +108,7 @@ const IssueBook = () => {
         `${API_URL}/api/get_teacherclasseswithclassteacher?teacher_id=${regId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
 
       console.log("response", response.data.data);
@@ -241,18 +241,18 @@ const IssueBook = () => {
       const params =
         selectedType === "student"
           ? {
-            m_type: "S",
-            class_id: selectedStudentId,
-            section_id: selectedSectionId,
-            name: name || "",
-            grn_no: grn_no || "",
-            academic_yr: academicYear,
-          }
+              m_type: "S",
+              class_id: selectedStudentId,
+              section_id: selectedSectionId,
+              name: name || "",
+              grn_no: grn_no || "",
+              academic_yr: academicYear,
+            }
           : {
-            m_type: "T",
-            name: selectedStaffname,
-            academic_yr: academicYear,
-          };
+              m_type: "T",
+              name: selectedStaffname,
+              academic_yr: academicYear,
+            };
 
       const response = await axios.get(`${API_URL}/api/library-members`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -320,7 +320,7 @@ const IssueBook = () => {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
-        }
+        },
       );
 
       if (response.status === 200 || response.status === 201) {
@@ -455,7 +455,7 @@ const IssueBook = () => {
       const accessionNo = student?.copy_id || "";
 
       return accessionNo.includes(searchLower);
-    }
+    },
   );
 
   //   const displayedSections = filteredSections.slice(currentPage * pageSize);
@@ -484,10 +484,11 @@ const IssueBook = () => {
   return (
     <>
       <div
-        className={`mx-auto p-4 transition-all duration-700 ease-[cubic-bezier(0.4, 0, 0.2, 1)] transform ${timetable.length > 0
+        className={`mx-auto p-4 transition-all duration-700 ease-[cubic-bezier(0.4, 0, 0.2, 1)] transform ${
+          timetable.length > 0
             ? "w-full md:w-[100%] scale-100"
             : "w-full md:w-[100%] scale-[0.98]"
-          }`}
+        }`}
       >
         <ToastContainer />
         <div className="card rounded-md ">
@@ -511,8 +512,9 @@ const IssueBook = () => {
 
           <>
             <div
-              className={`w-full flex flex-col md:flex-row md:items-end gap-4 pl-4 pr-4 ${timetable.length > 0 ? "md:w-[100%]" : "md:w-[100%]"
-                }`}
+              className={`w-full flex flex-col md:flex-row md:items-end gap-4 pl-4 pr-4 ${
+                timetable.length > 0 ? "md:w-[100%]" : "md:w-[100%]"
+              }`}
             >
               {/* <div className="w-full  flex md:flex-row justify-between items-center mt-0 md:mt-4 md:mb-4">
                 <div
@@ -641,8 +643,9 @@ const IssueBook = () => {
 
               <div className="w-full flex flex-col md:flex-row justify-between items-start mt-0 md:mt-4 md:mb-4">
                 <div
-                  className={`w-full md:w-[90%] flex flex-col md:flex-row gap-y-4 md:gap-x-8 ${timetable.length > 0 ? "left-0" : "relative left-10"
-                    }`}
+                  className={`w-full md:w-[90%] flex flex-col md:flex-row gap-y-4 md:gap-x-8 ${
+                    timetable.length > 0 ? "left-0" : "relative left-10"
+                  }`}
                 >
                   {/* Member Type */}
                   <div className="flex flex-col w-full md:w-auto">
@@ -1021,10 +1024,11 @@ const IssueBook = () => {
                               <button
                                 type="submit"
                                 style={{ backgroundColor: "#2196F3" }}
-                                className={`h-10 text-white font-bold px-6 rounded ${loadingForSearch
+                                className={`h-10 text-white font-bold px-6 rounded ${
+                                  loadingForSearch
                                     ? "opacity-50 cursor-not-allowed"
                                     : ""
-                                  }`}
+                                }`}
                                 disabled={loadingForSearch}
                               >
                                 {loadingForSearch ? "Adding" : "Add"}
