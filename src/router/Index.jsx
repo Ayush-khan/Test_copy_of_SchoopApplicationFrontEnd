@@ -333,6 +333,7 @@ import BulkStaffUpload from "../componants/StaffComponents/BulkStaffUpload.jsx";
 import BulkCaretackerUpload from "../componants/CareTacker/BulkCaretackerUpload.jsx";
 
 import House from "../componants/MastersModule/House/House.jsx";
+import SpecialUserAllotment from "../componants/AdmissionAdminModule/SpecialUserAllotment/SpecialUserAllotment.jsx";
 
 function Index() {
   return (
@@ -1802,6 +1803,11 @@ function Index() {
         />
         {/* House  */}
         <Route path="/house" element={<PrivateRoute element={<House />} />} />
+        {/* Special Role Allotment */}
+        <Route
+          path="/specialUserAdmissionAllotment"
+          element={<PrivateRoute element={<SpecialUserAllotment />} />}
+        />
       </Route>
 
       {/* Page Not FOund Routes */}
