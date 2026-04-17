@@ -7,6 +7,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { RxCross1 } from "react-icons/rx";
 import { MdOutlineRemoveRedEye } from "react-icons/md";
 import { FiSearch } from "react-icons/fi";
+import { FaInfoCircle } from "react-icons/fa";
 
 const SendRemainderRemark = () => {
   const API_URL = import.meta.env.VITE_API_URL;
@@ -577,12 +578,21 @@ Library`;
             />
           </>
           {timetable.length === 0 && !loadingForSearch && (
-            <p className=" md:absolute md:right-2 md:top-[48%] mb-5  text-gray-500 ">
-              <div className="mx-auto w-fit px-2 py-1 bg-blue-50 border border-blue-300 text-blue-800 text-sm rounded text-center">
-                <strong>Note:</strong> Click on the <b>Browse</b> button to view
-                data.
+            // <p className=" md:absolute md:right-2 md:top-[48%] mb-5  text-gray-500 ">
+            //   <div className="mx-auto w-fit px-2 py-1 bg-blue-50 border border-blue-300 text-blue-800 text-sm rounded text-center">
+            //     <strong>Note:</strong> Click on the <b>Browse</b> button to view
+            //     data.
+            //   </div>
+            // </p>
+            <div className="md:absolute md:right-2 md:top-[48%] mb-5 text-gray-500">
+              <div className="mx-auto w-fit px-2 py-1 bg-blue-50 border border-blue-300 text-blue-800 text-sm rounded flex items-center gap-2">
+                <FaInfoCircle className="text-blue-800" />
+
+                <span>
+                  Click on the <b>Browse</b> button to view
+                </span>
               </div>
-            </p>
+            </div>
           )}
           <div className="w-full px-2 md:px-4 mb-3">
             <div className="flex flex-col md:flex-row md:flex-wrap md:items-center gap-6 md:gap-8 md:ml-4">

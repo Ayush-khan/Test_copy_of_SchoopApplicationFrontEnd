@@ -7,6 +7,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { RxCross1 } from "react-icons/rx";
 import { MdOutlineRemoveRedEye } from "react-icons/md";
 import { FiSearch } from "react-icons/fi";
+import { FaInfoCircle } from "react-icons/fa";
 
 const ChangePeriodicalsStatus = () => {
   const API_URL = import.meta.env.VITE_API_URL;
@@ -521,6 +522,22 @@ Library`;
               style={{ backgroundColor: "#C03078" }}
             />
           </>
+
+          <>
+            {timetable.length === 0 && !loadingForSearch && (
+              <div className="md:absolute md:right-2 md:top-[40%] mb-5 text-gray-500">
+                <div className="mx-auto w-fit px-2 py-1 bg-blue-50 border border-blue-300 text-blue-800 text-sm rounded flex items-center gap-2">
+                  <FaInfoCircle className="text-blue-800" />
+
+                  <span>
+                    Please select mandatory fields. Click on the <b>Browse</b>{" "}
+                    button to change periodicals status.
+                  </span>
+                </div>
+              </div>
+            )}
+          </>
+
           <div className="w-full px-2 md:px-4 mb-3">
             <div className="flex flex-col md:flex-row md:flex-wrap md:items-start gap-6 md:gap-8 md:ml-4">
               {/* Periodic Name */}

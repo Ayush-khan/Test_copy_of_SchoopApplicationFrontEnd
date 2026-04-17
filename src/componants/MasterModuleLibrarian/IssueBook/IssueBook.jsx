@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { RxCross1 } from "react-icons/rx";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBook, faTimes, faCheck } from "@fortawesome/free-solid-svg-icons";
+import { FaInfoCircle } from "react-icons/fa";
 
 const IssueBook = () => {
   const API_URL = import.meta.env.VITE_API_URL;
@@ -550,7 +551,10 @@ const IssueBook = () => {
         toast.success("Book Issued Successfully!");
         setBookList([]);
         setBookDetails(null);
-        setAccessionNo("");
+        // setAccessionNo("");
+        // setSelectedStudentId("");
+        // setGrnNo("");
+        // setSelectedStaffId("");
         handleSearch();
         const today = new Date().toISOString().slice(0, 10);
         setIssuedDate(today);
@@ -781,6 +785,11 @@ const IssueBook = () => {
         }
 
         book = response.data[0];
+
+        if (book.status !== "A") {
+          toast.error("This book is already issued.");
+          return;
+        }
       }
 
       const dueDate = await fetchDueDate();
@@ -839,10 +848,27 @@ const IssueBook = () => {
             </>
           )}
 
+          {!showStudentReport && (
+            <>
+              {/* {timetable.length === 0 && !loadingForSearch && ( */}
+              <div className="md:absolute md:right-2 md:top-[32%] mb-5 text-gray-500">
+                <div className="mx-auto w-fit px-2 py-1 bg-blue-50 border border-blue-300 text-blue-800 text-sm rounded flex items-center gap-2">
+                  <FaInfoCircle className="text-blue-800" />
+
+                  <span>
+                    Please select mandatory fields. Click on the <b>Browse</b>{" "}
+                    button to issue books.
+                  </span>
+                </div>
+              </div>
+              {/* )} */}
+            </>
+          )}
+
           <>
             {!showStudentReport && (
               <div
-                className="w-full px-6 py-2"
+                className="w-full px-6 py-4 "
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
                     e.preventDefault();
@@ -1024,170 +1050,149 @@ const IssueBook = () => {
               <>
                 <div className="w-full">
                   <div className="card mx-auto lg:w-full shadow-lg">
-                    <div className="p-2 px-3 bg-gray-100 border-none flex items-center justify-between">
-                      <div className="w-full flex flex-row items-center justify-between ">
-                        <h3 className="text-gray-700 mt-1 text-[1.1em] lg:text-xl text-nowrap mr-2">
-                          Issue Book
-                        </h3>
-                        <div
-                          className="flex items-center w-full"
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter") {
-                              e.preventDefault();
-                              handleSearch();
-                            }
-                          }}
-                        >
+                    <div className="p-2 px-3 bg-gray-100 border-none">
+                      <div className="w-full flex flex-col lg:flex-row lg:items-center lg:justify-between gap-2">
+                        <div className="flex flex-col lg:flex-row lg:items-center gap-2 w-full">
+                          <h3 className="text-gray-700 text-[1.1em] lg:text-xl whitespace-nowrap">
+                            Issue Book
+                          </h3>
+
                           <div
-                            className="bg-blue-50 border-l-2 border-r-2 text-[0.9em] border-pink-500 rounded-md shadow-md mx-auto px-6 py-2"
-                            style={{
-                              overflowX: "auto",
-                              whiteSpace: "nowrap",
+                            className="flex flex-wrap items-center w-full gap-2 bg-blue-50 border-l-2 border-r-2 border-pink-500 rounded-md shadow-md px-3 py-2"
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") {
+                                e.preventDefault();
+                                handleSearch();
+                              }
                             }}
                           >
-                            <div
-                              className="flex items-center gap-x-1 text-blue-800 font-medium"
-                              style={{ flexWrap: "nowrap" }}
-                            >
-                              <div className="flex items-center gap-x-2 flex-wrap">
-                                <div className="flex items-center gap-x-1">
-                                  <label className="text-sm whitespace-nowrap">
-                                    Member Type{" "}
-                                    <span className="text-red-500">*</span>
-                                  </label>
+                            <div className="flex items-center gap-2">
+                              <label className="text-sm whitespace-nowrap">
+                                Member Type{" "}
+                                <span className="text-red-500">*</span>
+                              </label>
 
-                                  <div className="flex items-center border border-gray-300 rounded-md px-2 py-2 bg-white text-sm">
-                                    <label className="flex items-center gap-1 cursor-pointer">
-                                      <input
-                                        type="radio"
-                                        name="userType"
-                                        value="student"
-                                        checked={selectedType === "student"}
-                                        onChange={() =>
-                                          setSelectedType("student")
-                                        }
-                                        className="accent-pink-600"
-                                      />
-                                      <span>Student</span>
-                                    </label>
-
-                                    <label className="flex items-center gap-1 ml-3 cursor-pointer">
-                                      <input
-                                        type="radio"
-                                        name="userType"
-                                        value="staff"
-                                        checked={selectedType === "staff"}
-                                        onChange={() =>
-                                          setSelectedType("staff")
-                                        }
-                                        className="accent-pink-600"
-                                      />
-                                      <span>Staff</span>
-                                    </label>
-                                  </div>
-                                </div>
-
-                                {selectedType === "student" && (
-                                  <>
-                                    <div className="flex items-center gap-x-1">
-                                      <label className="text-sm whitespace-nowrap">
-                                        Class{" "}
-                                        <span className="text-red-500">*</span>
-                                      </label>
-
-                                      <div className="w-[110px]">
-                                        <Select
-                                          menuPortalTarget={document.body}
-                                          menuPosition="fixed"
-                                          value={selectedStudent}
-                                          onChange={handleStudentSelect}
-                                          options={studentOptions}
-                                          placeholder="Select"
-                                          isClearable
-                                          isSearchable
-                                          className="text-sm"
-                                        />
-                                      </div>
-                                    </div>
-                                  </>
-                                )}
-
-                                <div className="flex items-center gap-x-1">
-                                  <label className="text-sm whitespace-nowrap">
-                                    Name <span className="text-red-500">*</span>
-                                  </label>
-
-                                  <div className="w-[140px]">
-                                    <Select
-                                      menuPortalTarget={document.body}
-                                      menuPosition="fixed"
-                                      value={selectedStaff}
-                                      onChange={handleMemberSelect}
-                                      options={staffOptions}
-                                      placeholder="Select"
-                                      isClearable
-                                      isSearchable
-                                      className="text-sm"
-                                    />
-                                  </div>
-                                </div>
-
-                                <div className="flex items-center gap-x-1">
-                                  <label className="text-sm whitespace-nowrap">
-                                    Issue Date
-                                  </label>
+                              <div className="flex items-center border border-gray-300 rounded-md px-2 py-1 bg-white text-sm">
+                                <label className="flex items-center gap-1 cursor-pointer">
                                   <input
-                                    type="date"
-                                    value={issuedDate}
-                                    onChange={(e) =>
-                                      setIssuedDate(e.target.value)
-                                    }
-                                    className="border border-gray-300 rounded px-1 py-2 text-sm w-[100px]"
+                                    type="radio"
+                                    name="userType"
+                                    value="student"
+                                    checked={selectedType === "student"}
+                                    onChange={() => setSelectedType("student")}
+                                    className="accent-pink-600"
                                   />
-                                </div>
+                                  <span>Student</span>
+                                </label>
 
-                                {selectedType === "student" && (
-                                  <>
-                                    <div className="flex items-center gap-x-1">
-                                      <label className="text-sm whitespace-nowrap">
-                                        GRN No.
-                                      </label>
-                                      <input
-                                        type="text"
-                                        maxLength={8}
-                                        value={grn_no}
-                                        onChange={(e) =>
-                                          setGrnNo(e.target.value)
-                                        }
-                                        className="border border-gray-300 rounded px-1 py-2 text-sm w-[80px]"
-                                        placeholder="Enter"
-                                      />
-                                    </div>
-                                  </>
-                                )}
-
-                                <button
-                                  type="button"
-                                  onClick={handleSearch}
-                                  className="h-8 text-white px-1 rounded font-medium text-sm"
-                                  style={{ backgroundColor: "#2196F3" }}
-                                >
-                                  {loadingForSearch ? "Browsing.." : "Browse"}
-                                </button>
+                                <label className="flex items-center gap-1 ml-3 cursor-pointer">
+                                  <input
+                                    type="radio"
+                                    name="userType"
+                                    value="staff"
+                                    checked={selectedType === "staff"}
+                                    onChange={() => setSelectedType("staff")}
+                                    className="accent-pink-600"
+                                  />
+                                  <span>Staff</span>
+                                </label>
                               </div>
                             </div>
+
+                            {selectedType === "student" && (
+                              <div className="flex items-center gap-2">
+                                <label className="text-sm whitespace-nowrap">
+                                  Class <span className="text-red-500">*</span>
+                                </label>
+
+                                <div className="w-full sm:w-[140px]">
+                                  <Select
+                                    menuPortalTarget={document.body}
+                                    menuPosition="fixed"
+                                    value={selectedStudent}
+                                    onChange={handleStudentSelect}
+                                    options={studentOptions}
+                                    placeholder="Select"
+                                    isClearable
+                                    isSearchable
+                                    className="text-sm"
+                                  />
+                                </div>
+                              </div>
+                            )}
+
+                            <div className="flex items-center gap-2">
+                              <label className="text-sm whitespace-nowrap">
+                                Name <span className="text-red-500">*</span>
+                              </label>
+
+                              <div className="w-full ">
+                                <Select
+                                  menuPortalTarget={document.body}
+                                  menuPosition="fixed"
+                                  value={selectedStaff}
+                                  onChange={handleMemberSelect}
+                                  options={staffOptions}
+                                  placeholder="Select"
+                                  isClearable
+                                  isSearchable
+                                  className="text-sm"
+                                />
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-2">
+                              <label className="text-sm whitespace-nowrap">
+                                Issue Date
+                              </label>
+                              <input
+                                type="date"
+                                value={issuedDate}
+                                onChange={(e) => setIssuedDate(e.target.value)}
+                                className="border border-gray-300 rounded px-2 py-1 text-sm w-full sm:w-[140px]"
+                              />
+                            </div>
+
+                            {selectedType === "student" && (
+                              <div className="flex items-center gap-2">
+                                <label className="text-sm whitespace-nowrap">
+                                  GRN No.
+                                </label>
+                                <input
+                                  type="text"
+                                  maxLength={8}
+                                  value={grn_no}
+                                  onChange={(e) => setGrnNo(e.target.value)}
+                                  className="border border-gray-300 rounded px-2 py-1 text-sm w-full sm:w-[100px]"
+                                  placeholder="Enter"
+                                />
+                              </div>
+                            )}
+
+                            {/* Button */}
+                            <button
+                              type="button"
+                              onClick={handleSearch}
+                              className="h-9 text-white px-4 rounded font-medium text-sm whitespace-nowrap"
+                              style={{ backgroundColor: "#2196F3" }}
+                            >
+                              {loadingForSearch ? "Browsing..." : "Browse"}
+                            </button>
                           </div>
                         </div>
-                      </div>
 
-                      <div className="flex mb-1.5 flex-col md:flex-row gap-x-6 justify-center md:justify-end ml-2">
-                        <RxCross1
-                          className="text-base text-red-600 cursor-pointer hover:bg-red-100 rounded"
-                          onClick={() => {
-                            setShowStudentReport(false); // close the report
-                            setBookList([]); // clear the book list
-                          }}
-                        />
+                        <div className="flex justify-end lg:justify-start">
+                          <RxCross1
+                            className="text-base text-red-600 cursor-pointer hover:bg-red-100 rounded"
+                            onClick={() => {
+                              setShowStudentReport(false);
+                              setBookList([]);
+                              setSelectedStaff("");
+                              setSelectedStudent("");
+                              setGrnNo("");
+                            }}
+                          />
+                        </div>
                       </div>
                     </div>
 
