@@ -174,7 +174,7 @@ const PrincipalDashboard = ({ dashboard, roleId, sortName }) => {
                         ))}
                     </div>
 
-                    <div className="w-full lg:w-1/3 bg-slate-100 rounded-lg shadow-md">
+                    <div className="w-full lg:w-1/3 bg-slate-50 overflow-y-auto rounded-lg shadow-md">
                         <EventCard />
                     </div>
                 </div>

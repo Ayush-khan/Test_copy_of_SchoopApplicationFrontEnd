@@ -7,7 +7,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { RxCross1 } from "react-icons/rx";
 import { useNavigate } from "react-router-dom";
-import { FaFileExcel } from "react-icons/fa";
+import { FaFileExcel, FaInfoCircle } from "react-icons/fa";
 import { FiPrinter, FiSearch } from "react-icons/fi";
 import * as XLSX from "xlsx";
 
@@ -246,7 +246,7 @@ function PeriodicalsReminder() {
     ];
 
     // Convert displayedSections data to array format for Excel
-    const data = displayedSections.map((student, index) => [
+    const data = filteredSections.map((student, index) => [
       index + 1,
 
       `${student.title}`.trim(),
@@ -285,36 +285,100 @@ function PeriodicalsReminder() {
     }
   };
 
+  // const handleSubmit = async (event) => {
+  //   event.preventDefault();
+
+  //   let hasError = false;
+  //   if (selectedIds.length === 0) {
+  //     toast.error(
+  //       "Please select at least one periodicals to send message to the team.",
+  //     );
+  //     hasError = true;
+  //   }
+
+  //   // Exit if there are validation errors
+  //   if (hasError) return;
+
+  //   try {
+  //     setLoading(true); // Start loading
+
+  //     const token = localStorage.getItem("authToken");
+  //     if (!token) {
+  //       throw new Error("No authentication token is found");
+  //     }
+
+  //     // console.log("selectedIds", selectedIds);
+  //     // console.log("message", message);
+
+  //     const postData = {
+  //       periodicalId: selectedIds,
+  //       message: message,
+  //     };
+
+  //     // Make the API call
+  //     const response = await axios.post(
+  //       `${API_URL}/api/periodicals/reminder/mail`,
+  //       postData,
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //       },
+  //     );
+
+  //     // Handle successful response
+  //     if (response.status === 200) {
+  //       toast.success("Message sent successfully!");
+
+  //       setMessage("");
+
+  //       setSelectedIds([]);
+  //     }
+  //   } catch (error) {
+  //     console.error("Error:", error.response?.data);
+
+  //     // Display error message
+  //     toast.error("An error occurred while sending message.");
+
+  //     if (error.response && error.response.data) {
+  //       setBackendErrors(error.response.data || {});
+  //     }
+  //   } finally {
+  //     setLoading(false); // Stop loading
+  //   }
+  // };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
 
     let hasError = false;
+
     if (selectedIds.length === 0) {
-      toast.error(
-        "Please select at least one periodicals to send message to the team.",
-      );
+      toast.error("Please select at least one periodical.");
+      hasError = true;
+      return;
+    }
+
+    if (!message || message.trim() === "") {
+      toast.error("Please enter a message.");
       hasError = true;
     }
-    // Exit if there are validation errors
+
     if (hasError) return;
 
     try {
-      setLoading(true); // Start loading
+      setLoading(true);
 
       const token = localStorage.getItem("authToken");
       if (!token) {
-        throw new Error("No authentication token is found");
+        throw new Error("No authentication token found");
       }
-
-      // console.log("selectedIds", selectedIds);
-      // console.log("message", message);
 
       const postData = {
         periodicalId: selectedIds,
-        message: message,
+        message: message.trim(),
       };
 
-      // Make the API call
       const response = await axios.post(
         `${API_URL}/api/periodicals/reminder/mail`,
         postData,
@@ -325,25 +389,20 @@ function PeriodicalsReminder() {
         },
       );
 
-      // Handle successful response
       if (response.status === 200) {
         toast.success("Message sent successfully!");
-
         setMessage("");
-
         setSelectedIds([]);
       }
     } catch (error) {
       console.error("Error:", error.response?.data);
-
-      // Display error message
       toast.error("An error occurred while sending message.");
 
       if (error.response && error.response.data) {
         setBackendErrors(error.response.data || {});
       }
     } finally {
-      setLoading(false); // Stop loading
+      setLoading(false);
     }
   };
 
@@ -413,6 +472,13 @@ function PeriodicalsReminder() {
           ></div>
 
           <div className="card-body w-full">
+            <div className="mb-1 flex items-center gap-2 px-3 py-1 bg-blue-50 border border-blue-300 text-blue-800 text-xs md:text-sm rounded whitespace-nowrap">
+              <FaInfoCircle size={16} />
+              <span>
+                Please enter a custom message. Only this message will be sent to
+                the selected vendor.
+              </span>
+            </div>
             {showSearch && (
               <>
                 <div className="p-1 px-3 mb-1 bg-gray-100 border-none">
@@ -464,8 +530,12 @@ function PeriodicalsReminder() {
                         Subscription No.
                       </th>
                       <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                        Email
+                      </th>
+                      <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                         Receiving Date
                       </th>
+
                       <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                         Type
                       </th>
@@ -514,6 +584,9 @@ function PeriodicalsReminder() {
                           </td>
                           <td className="px-2 py-2 text-center border border-gray-300">
                             {student.subscription_no || ""}
+                          </td>
+                          <td className="px-2 py-2 text-center border border-gray-300">
+                            {student.email_ids || ""}
                           </td>
                           <td className="px-2 py-2 text-center border border-gray-300">
                             {formatDate(student.receive_by_date || "")}

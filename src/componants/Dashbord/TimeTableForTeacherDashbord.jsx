@@ -219,7 +219,7 @@ const TimeTableForTeacherDashbord = () => {
   };
 
   return (
-    <div className=" flex flex-col h-[360px]">
+    <div className="flex flex-col h-[360px] bg-white rounded-lg shadow">
       <div className="bg-gray-200 px-3 py-2 rounded-t-lg flex-shrink-0">
         <span className="text-xs sm:text-sm lg:text-lg font-semibold text-gray-600">
           Today's Timetable

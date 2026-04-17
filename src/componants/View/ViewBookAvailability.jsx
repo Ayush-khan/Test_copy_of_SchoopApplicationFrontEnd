@@ -468,7 +468,7 @@ const ViewBookAvailability = () => {
     const studentName = normalize(student?.book_title);
     const accessionNo = normalize(student?.accession_no);
     const className = normalize(student?.author);
-    const status = normalize(student?.Status_code);
+    const status = normalize(statusMap[student?.status || " "]);
     const amount = normalize(student?.copy_id);
     const receiptNo = normalize(student?.location_of_book);
     const combined = normalize(

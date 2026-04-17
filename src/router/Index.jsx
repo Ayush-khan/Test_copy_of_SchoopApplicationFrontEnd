@@ -8,6 +8,8 @@ import NavBar from "../Layouts/NavBar";
 import UserProfile from "../componants/UserProfile";
 import LandingPage from "../componants/LandingPage";
 import AdminDashboard from "../componants/Dashbord/AdminDashboard";
+import DashboardLayoutList from "../componants/Dashbord/LayoutCrud/DashboardLayoutList.jsx";
+import DashboardLayoutEditor from "../componants/Dashbord/LayoutCrud/DashboardLayoutEditor.jsx";
 import EventCard from "../componants/Dashbord/EventCard";
 import NoticeBord from "../componants/Dashbord/NoticeBord";
 import StudentsChart from "../componants/Dashbord/Charts/StudentsChart";
@@ -29,6 +31,7 @@ import ShowRolesWithMenu from "../componants/RoleMangement/ShowRolesWithMenu.jsx
 import Roles from "../componants/RoleMangement/Roles.jsx";
 import ManageRoleAccess from "../componants/RoleMangement/ManageRoleAccess.jsx";
 import Menus from "../componants/RoleMangement/Menus.jsx";
+import WidgetsCrud from "../componants/WidgetCrud/WidgetsCrud.jsx";
 import DivisionList from "../componants/MastersModule/Division/DivisionLIst.jsx";
 import SubjectList from "../componants/MastersModule/Subject/SubjectList.jsx";
 import ManageSubjectList from "../componants/MastersModule/SubjectAllotment/ManageSubjectList.jsx";
@@ -319,10 +322,18 @@ import BooksIssuedHistoryReport from "../componants/MasterModuleLibrarian/Librar
 import BookIssuedReport from "../componants/MasterModuleLibrarian/LibraryReports/BooksIssuedReport.jsx";
 import BooksNonReturnReport from "../componants/MasterModuleLibrarian/LibraryReports/BooksNonReturnReport.jsx";
 import MonthlyBookIssueReport from "../componants/MasterModuleLibrarian/LibraryReports/MonthlyBookIssueReport.jsx";
-// import HSCSStudentSubjectGroupReport from "../componants/Reports/HSCSStudentSubjectGroupReport.jsx";
-// import ShowReportCard from "../componants/StudentSearchUsingGRN/ShowReportCard.jsx";
+import HSCSStudentSubjectGroupReport from "../componants/Reports/HSCSStudentSubjectGroupReport.jsx";
+
+import ShowReportCard from "../componants/StudentSearchUsingGRN/ShowReportCard.jsx";
+
+import PeriodicalsReminder from "../componants/MasterModuleLibrarian/LibraryDashboardListing/PeriodicalsReminder.jsx";
+import SubscriptionReminder from "../componants/MasterModuleLibrarian/LibraryDashboardListing/SubscriptionReminder.jsx";
+import BookReturnPending from "../componants/MasterModuleLibrarian/LibraryDashboardListing/BookReturnPending.jsx";
+import BulkStaffUpload from "../componants/StaffComponents/BulkStaffUpload.jsx";
+import BulkCaretackerUpload from "../componants/CareTacker/BulkCaretackerUpload.jsx";
 
 import House from "../componants/MastersModule/House/House.jsx";
+import SpecialUserAllotment from "../componants/AdmissionAdminModule/SpecialUserAllotment/SpecialUserAllotment.jsx";
 
 function Index() {
   return (
@@ -339,6 +350,10 @@ function Index() {
         <Route
           path="/manageMenus"
           element={<PrivateRoute element={<Menus />} />}
+        />
+        <Route
+          path="/manageWidgets"
+          element={<PrivateRoute element={<WidgetsCrud />} />}
         />
         {/* background changer component */}
         <Route
@@ -533,6 +548,10 @@ function Index() {
         />
         {/* Staff endPoints */}
         <Route
+          path="/bulkStaffUpload"
+          element={<PrivateRoute element={<BulkStaffUpload />} />}
+        />
+        <Route
           path="/StaffList"
           element={<PrivateRoute element={<StaffList />} />}
         />
@@ -605,6 +624,10 @@ function Index() {
         />
         {/* CareTacker */}
         <Route
+          path="/bulkCaretackerUpload"
+          element={<PrivateRoute element={<BulkCaretackerUpload />} />}
+        />
+        <Route
           path="/careTacker"
           element={<PrivateRoute element={<CareTacker />} />}
         />
@@ -649,6 +672,18 @@ function Index() {
         <Route
           path="/dashboard"
           element={<PrivateRoute element={<AdminDashboard />} />}
+        />
+        <Route
+          path="/dashboard-layout-crud"
+          element={<PrivateRoute element={<DashboardLayoutList />} />}
+        />
+        <Route
+          path="/dashboard-layout-crud/new"
+          element={<PrivateRoute element={<DashboardLayoutEditor />} />}
+        />
+        <Route
+          path="/dashboard-layout-crud/:id"
+          element={<PrivateRoute element={<DashboardLayoutEditor />} />}
         />
         {/* Teacher login  dashboard*/}
         <Route
@@ -1639,6 +1674,18 @@ function Index() {
           path="/returnBook"
           element={<PrivateRoute element={<ReturnBook />} />}
         />
+        <Route
+          path="/subscriptionReminder"
+          element={<PrivateRoute element={<SubscriptionReminder />} />}
+        />
+        <Route
+          path="/periodicalsReminder"
+          element={<PrivateRoute element={<PeriodicalsReminder />} />}
+        />
+        <Route
+          path="/bookReturnPending"
+          element={<PrivateRoute element={<BookReturnPending />} />}
+        />
         {/* Admission module for Admin */}
         {/* Admission module for Admin */}
         <Route
@@ -1750,12 +1797,17 @@ function Index() {
           path="/all_application_status_report"
           element={<PrivateRoute element={<AllApplicationFeeStatusReport />} />}
         />
-        {/* <Route
+        <Route
           path="/show_report_card"
           element={<PrivateRoute element={<ShowReportCard />} />}
-        /> */}
+        />
         {/* House  */}
         <Route path="/house" element={<PrivateRoute element={<House />} />} />
+        {/* Special Role Allotment */}
+        <Route
+          path="/specialUserAdmissionAllotment"
+          element={<PrivateRoute element={<SpecialUserAllotment />} />}
+        />
       </Route>
 
       {/* Page Not FOund Routes */}

@@ -70,6 +70,13 @@ function ManageRoleAccess() {
     });
   };
 
+  // const handleSelectAllChange = (event) => {
+  //   if (event.target.checked) {
+  //     setSelectedMenus(new Set(menuList.map((menu) => menu.menu_id)));
+  //   } else {
+  //     setSelectedMenus(new Set());
+  //   }
+  // };
   const handleSelectAllChange = (event) => {
     if (event.target.checked) {
       setSelectedMenus(new Set(menuList.map((menu) => menu.menu_id)));
@@ -77,7 +84,6 @@ function ManageRoleAccess() {
       setSelectedMenus(new Set());
     }
   };
-
   const handleSubmit = async (event) => {
     event.preventDefault();
 
@@ -236,9 +242,15 @@ function ManageRoleAccess() {
                                 id="select_all"
                                 className="sr-only peer"
                                 onChange={handleSelectAllChange}
+                                // checked={
+                                //   displayedMenus.length > 0 &&
+                                //   displayedMenus.every((menu) =>
+                                //     selectedMenus.has(menu.menu_id)
+                                //   )
+                                // }
                                 checked={
-                                  displayedMenus.length > 0 &&
-                                  displayedMenus.every((menu) =>
+                                  menuList.length > 0 &&
+                                  menuList.every((menu) =>
                                     selectedMenus.has(menu.menu_id)
                                   )
                                 }
@@ -255,9 +267,8 @@ function ManageRoleAccess() {
                       {displayedMenus.map((menu, index) => (
                         <tr
                           key={menu.menu_id}
-                          className={`  ${
-                            index % 2 === 0 ? "bg-white" : "bg-gray-100"
-                          } hover:bg-gray-50`}
+                          className={`  ${index % 2 === 0 ? "bg-white" : "bg-gray-100"
+                            } hover:bg-gray-50`}
                         >
                           <td className="text-center px-3 py-2 border border-gray-950 text-sm">
                             {menu.menu_id}

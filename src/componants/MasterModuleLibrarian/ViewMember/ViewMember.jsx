@@ -5,6 +5,7 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom";
 import { RxCross1 } from "react-icons/rx";
+import { FaInfoCircle } from "react-icons/fa";
 
 const ViewMember = () => {
   const API_URL = import.meta.env.VITE_API_URL;
@@ -162,9 +163,12 @@ const ViewMember = () => {
     setLoadingExams(true);
 
     try {
-      const response = await axios.get(`${API_URL}/api/staff_list `, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await axios.get(
+        `${API_URL}/api/get_teaching_nonteaching_staff_list `,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
 
       // console.log("response staff", response.data);
 
@@ -380,9 +384,25 @@ const ViewMember = () => {
             </>
           )}
 
+          {!showStudentReport && (
+            <>
+              {/* {timetable.length === 0 && !loadingForSearch && ( */}
+              <div className="md:absolute md:right-2 md:top-[40%] mb-5 text-gray-500">
+                <div className="mx-auto w-fit px-2 py-1 bg-blue-50 border border-blue-300 text-blue-800 text-sm rounded flex items-center gap-2">
+                  <FaInfoCircle className="text-blue-800" />
+
+                  <span>
+                    Click on the <b>Browse</b> button to view members.
+                  </span>
+                </div>
+              </div>
+              {/* )} */}
+            </>
+          )}
+
           <>
             {!showStudentReport && (
-              <div className="w-full flex flex-col md:flex-row items-center gap-4 p-2">
+              <div className="w-full flex flex-col md:flex-row items-center gap-4 pr-2 pl-2 pt-4 pb-2">
                 {/* Member Type */}
                 <div className="flex items-center gap-2 w-full md:w-auto">
                   <label className="text-md whitespace-nowrap">

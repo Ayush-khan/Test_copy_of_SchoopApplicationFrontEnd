@@ -294,7 +294,7 @@ const StudentListForVerification = () => {
 
       setSelectedRows([]);
       handleSearch();
-
+      setSelectedRows([]);
       setErrors({});
     } catch (error) {
       console.error(error);

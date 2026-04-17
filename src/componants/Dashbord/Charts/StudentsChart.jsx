@@ -908,7 +908,7 @@ const StudentsChart = () => {
   ];
 
   return (
-    <>
+    <div className="h-full w-full bg-white rounded-lg overflow-hidden">
       {loading ? (
         <p className="text-center relative top-[50%] w-10 m-auto">
           <Loader />
@@ -971,7 +971,7 @@ const StudentsChart = () => {
           </BarChart>
         </ResponsiveContainer>
       )}
-    </>
+    </div>
   );
 };
 

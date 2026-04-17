@@ -112,8 +112,28 @@ function DivisionList() {
   useEffect(() => {
     fetchSections();
     fetchDataRoleId();
+    // fetchDummy();
   }, []);
+  const fetchDummy = async () => {
+    const token = localStorage.getItem("authToken");
 
+    if (!token) {
+      console.error("No authentication token found");
+      return;
+    }
+
+    try {
+      // Fetch session data
+      const sessionResponse = await axios.get(`${API_URL}/api/get_dashboardstructure?short_name=SACS&role=M`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
   useEffect(() => {
     const trimmedSearch = searchTerm.trim().toLowerCase();
 
@@ -495,9 +515,8 @@ function DivisionList() {
 
           <div className="card-body w-full">
             <div
-              className={`h-96 lg:h-96 overflow-y-scroll lg:overflow-x-hidden mx-auto ${
-                roleId === "M" ? "w-full md:w-[55%]" : "w-full md:w-[84%]"
-              }`}
+              className={`h-96 lg:h-96 overflow-y-scroll lg:overflow-x-hidden mx-auto ${roleId === "M" ? "w-full md:w-[55%]" : "w-full md:w-[84%]"
+                }`}
             >
               <div className="bg-white  rounded-lg shadow-xs ">
                 {!roleId ? (
@@ -551,9 +570,8 @@ function DivisionList() {
                         displayedSections.map((section, index) => (
                           <tr
                             key={section.section_id}
-                            className={`${
-                              index % 2 === 0 ? "bg-white" : "bg-gray-100"
-                            } hover:bg-gray-50`}
+                            className={`${index % 2 === 0 ? "bg-white" : "bg-gray-100"
+                              } hover:bg-gray-50`}
                           >
                             <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
                               <p className="text-gray-900 whitespace-no-wrap relative top-2">

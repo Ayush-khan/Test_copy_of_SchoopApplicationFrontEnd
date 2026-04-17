@@ -12,10 +12,15 @@ import { FaCalendarAlt } from "react-icons/fa";
 const DailyAttendance = () => {
   const API_URL = import.meta.env.VITE_API_URL;
   const [selectedStudent, setSelectedStudent] = useState(null);
-  const [fromDate, setFromDate] = useState(null);
-  const [formattedFromDate, setFormattedFromDate] = useState("");
 
   const today = new Date().toISOString().split("T")[0];
+  const [fromDate, setFromDate] = useState(today);
+
+  // const [formattedFromDate, setFormattedFromDate] = useState("");
+  const [formattedFromDate, setFormattedFromDate] = useState(() => {
+    const [year, month, day] = today.split("-");
+    return `${day}-${month}-${year.slice(2)}`;
+  });
 
   const [students, setStudents] = useState([]);
   const [attendanceMap, setAttendanceMap] = useState({});
@@ -65,6 +70,13 @@ const DailyAttendance = () => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeletePModal, setShowDeletePModal] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (fromDate) {
+      const [year, month, day] = fromDate.split("-");
+      setFormattedFromDate(`${day}-${month}-${year.slice(2)}`);
+    }
+  }, [fromDate]);
 
   const camelCase = (str) =>
     str
@@ -694,8 +706,9 @@ const DailyAttendance = () => {
     <>
       {/* <div className="w-full md:w-[85%]  mx-auto p-4 "> */}
       <div
-        className={` transition-all duration-500 w-[85%]  mx-auto p-4 ${showStudentReport ? "w-[75%] " : "w-[85%] "
-          }`}
+        className={` transition-all duration-500 w-[85%]  mx-auto p-4 ${
+          showStudentReport ? "w-[75%] " : "w-[85%] "
+        }`}
       >
         <ToastContainer />
         <div className="card  rounded-md ">
@@ -811,10 +824,11 @@ const DailyAttendance = () => {
                         type="search"
                         onClick={handleSearch}
                         style={{ backgroundColor: "#2196F3" }}
-                        className={`btn h-10 w-18 md:w-auto btn-primary text-white font-bold py-1 border-1 border-blue-500 px-4 rounded ${loadingForSearch
+                        className={`btn h-10 w-18 md:w-auto btn-primary text-white font-bold py-1 border-1 border-blue-500 px-4 rounded ${
+                          loadingForSearch
                             ? "opacity-50 cursor-not-allowed"
                             : ""
-                          }`}
+                        }`}
                         disabled={loadingForSearch}
                       >
                         {loadingForSearch ? (
@@ -1082,15 +1096,15 @@ const DailyAttendance = () => {
                                             setTimetable((prev) =>
                                               prev.map((s) =>
                                                 s.student_id ===
-                                                  student.student_id
+                                                student.student_id
                                                   ? {
-                                                    ...s,
-                                                    isChecked: checked,
-                                                    // CI rule: unchecked student = no attendance
-                                                    isAbsent: checked
-                                                      ? s.isAbsent
-                                                      : false,
-                                                  }
+                                                      ...s,
+                                                      isChecked: checked,
+                                                      // CI rule: unchecked student = no attendance
+                                                      isAbsent: checked
+                                                        ? s.isAbsent
+                                                        : false,
+                                                    }
                                                   : s,
                                               ),
                                             );
@@ -1125,7 +1139,8 @@ const DailyAttendance = () => {
 
                                       <td className="px-2 py-2 text-center border border-gray-300">
                                         {camelCase(
-                                          `${student?.first_name || ""} ${student?.mid_name || ""
+                                          `${student?.first_name || ""} ${
+                                            student?.mid_name || ""
                                           } ${student?.last_name || ""}`,
                                         )}
                                       </td>
@@ -1141,13 +1156,13 @@ const DailyAttendance = () => {
                                             setTimetable((prev) =>
                                               prev.map((s) =>
                                                 s.student_id ===
-                                                  student.student_id
+                                                student.student_id
                                                   ? {
-                                                    ...s,
-                                                    // 🔥 CI rule: absent ONLY if student selected
-                                                    isAbsent:
-                                                      checked && s.isChecked,
-                                                  }
+                                                      ...s,
+                                                      // 🔥 CI rule: absent ONLY if student selected
+                                                      isAbsent:
+                                                        checked && s.isChecked,
+                                                    }
                                                   : s,
                                               ),
                                             );

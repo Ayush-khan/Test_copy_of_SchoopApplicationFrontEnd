@@ -63,6 +63,7 @@ function MainLayout() {
               }
           );
 
+          localStorage.setItem("academicYr" , sessionResponse?.data?.custom_claims?.academic_year);
           setSessionData(sessionResponse.data ?? null);
           localStorage.setItem("academicYr" , sessionResponse?.data?.custom_claims?.academic_year);
           console.log("SESSION DATA INSIDE MAINLAYOUT" , sessionResponse.data);

@@ -817,7 +817,8 @@ const EditLessonPlan = () => {
                           <div className="flex justify-end">
                             <RxCross1
                               className="text-base text-red-600 cursor-pointer hover:bg-red-100 rounded"
-                              onClick={() => setShowStudentReport(false)}
+                              // onClick={() => setShowStudentReport(false)}
+                              onClick={() => navigate("/lessonPlan")}
                             />
                           </div>
                         </div>

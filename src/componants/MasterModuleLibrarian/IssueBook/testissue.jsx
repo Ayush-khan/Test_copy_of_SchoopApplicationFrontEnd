@@ -108,7 +108,7 @@ const IssueBook = () => {
         `${API_URL}/api/get_teacherclasseswithclassteacher?teacher_id=${regId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
 
       console.log("response", response.data.data);
@@ -320,7 +320,7 @@ const IssueBook = () => {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
-        }
+        },
       );
 
       if (response.status === 200 || response.status === 201) {
@@ -455,7 +455,7 @@ const IssueBook = () => {
       const accessionNo = student?.copy_id || "";
 
       return accessionNo.includes(searchLower);
-    }
+    },
   );
 
   //   const displayedSections = filteredSections.slice(currentPage * pageSize);

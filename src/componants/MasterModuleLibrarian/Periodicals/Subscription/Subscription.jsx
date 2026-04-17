@@ -812,7 +812,7 @@ function Subscription() {
                     ) : displayedSections.length > 0 ? (
                       displayedSections.map((section, index) => (
                         <tr
-                          key={section.periodical_id}
+                          key={section.subscription_id}
                           className={`${index % 2 === 0 ? "bg-white" : "bg-gray-100"} hover:bg-gray-50`}
                         >
                           <td className="text-center px-2 py-2 border border-gray-950 text-sm">

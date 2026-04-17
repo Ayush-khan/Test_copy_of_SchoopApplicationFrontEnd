@@ -260,7 +260,7 @@ const CreateLessonPlanTemplate = () => {
         // toast.error(response?.data?.message || "Template already created!");
         setTimeout(() => {
           toast.info(response?.data?.message || "Template already created!");
-        }, 300);
+        }, 500);
         setLoading(false);
         setLoadingForSearch(false);
         // return;
