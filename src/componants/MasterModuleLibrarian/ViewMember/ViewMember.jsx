@@ -562,7 +562,16 @@ const ViewMember = () => {
                         <div className="flex mb-1.5 flex-col md:flex-row gap-x-6 justify-center md:justify-end ml-2">
                           <RxCross1
                             className="text-base text-red-600 cursor-pointer hover:bg-red-100 rounded"
-                            onClick={() => setShowStudentReport(false)}
+                            // onClick={() => setShowStudentReport(false)}
+                            onClick={() => {
+                              setShowStudentReport(false);
+                              setGrnNo("");
+                              setSelectedStaffId("");
+                              setSelectedStudentId("");
+                              setSelectedStaff("");
+                              setSelectedStudent("");
+                              setName("");
+                            }}
                           />
                         </div>
                       </div>

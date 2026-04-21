@@ -571,6 +571,7 @@ const IssueBook = () => {
         // setSelectedStudentId("");
         // setGrnNo("");
         // setSelectedStaffId("");
+        grnInputRef.current?.focus();
         handleSearch();
         const today = new Date().toISOString().slice(0, 10);
         setIssuedDate(today);
@@ -802,12 +803,27 @@ const IssueBook = () => {
 
         book = response.data[0];
 
+        // if (book.status !== "A") {
+        //   toast.error("This book is already issued.");
+        //   return;
+        // }
+        // if (book.status !== "L") {
+        //   toast.error("This book is not available.");
+        //   return;
+        // }
+
         if (book.status !== "A") {
-          toast.error("This book is already issued.");
-          return;
-        }
-        if (book.status !== "L") {
-          toast.error("This book is not available.");
+          let message = "This book is already issued.";
+
+          if (book.status === "L") {
+            message = "This book is not available.";
+          } else if (book.status === "O") {
+            message = "This book is not available.";
+          } else if (book.status === "D") {
+            message = "This book is not available.";
+          }
+
+          toast.error(message);
           return;
         }
       }
@@ -1211,6 +1227,9 @@ const IssueBook = () => {
                               setSelectedStaff("");
                               setSelectedStudent("");
                               setGrnNo("");
+                              setTimeout(() => {
+                                grnInputRef.current?.focus();
+                              }, 0);
                             }}
                           />
                         </div>
