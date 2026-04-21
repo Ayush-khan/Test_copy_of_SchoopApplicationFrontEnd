@@ -36,8 +36,8 @@ function MainLayout() {
   const defaultBackground = "linear-gradient(to bottom, #E91E63, #2196F3)";
   const [background, setBackground] = useState(null);
   const API_URL = import.meta.env.VITE_API_URL;
-  const [sessionData , setSessionData] = useState(null);
-  const [isExitingImpersonate , setIsExitingImpersonate] = useState(false);
+  const [sessionData, setSessionData] = useState(null);
+  const [isExitingImpersonate, setIsExitingImpersonate] = useState(false);
 
   const getCookie = (name) => {
     const cookieValue = document.cookie
@@ -48,27 +48,30 @@ function MainLayout() {
 
   // Logic to check if the impersonation is on or not. 
   const fetchSessionData = async () => {
-      const token = localStorage.getItem("authToken");
+    const token = localStorage.getItem("authToken");
 
-      if (!token) {
-          console.error("No authentication token found");
-          return;
-      }
+    if (!token) {
+      console.error("No authentication token found");
+      return;
+    }
 
-      try {
-          const sessionResponse = await axios.get(
-              `${API_URL}/api/sessionData`,
-              {
-                  headers: { Authorization: `Bearer ${token}` },
-              }
-          );
+    try {
+      const sessionResponse = await axios.get(
+        `${API_URL}/api/sessionData`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
 
-          localStorage.setItem("academicYr" , sessionResponse?.data?.custom_claims?.academic_year);
-          setSessionData(sessionResponse.data ?? null);
-          console.log("SESSION DATA INSIDE MAINLAYOUT" , sessionResponse.data);
-      } catch (error) {
-          console.error("Error fetching data:", error);
-      }
+
+      localStorage.setItem("academicYr", sessionResponse?.data?.custom_claims?.academic_year);
+      setSessionData(sessionResponse.data ?? null);
+      localStorage.setItem("academicYr", sessionResponse?.data?.custom_claims?.academic_year);
+      console.log("SESSION DATA INSIDE MAINLAYOUT", sessionResponse.data);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+
   };
 
   useEffect(() => {
@@ -153,25 +156,25 @@ function MainLayout() {
       // 1. call the api to get new token
       const token = localStorage.getItem("authToken");
       if (!token) {
-          setIsExitingImpersonate(false);
-          return;
+        setIsExitingImpersonate(false);
+        return;
       }
 
       const response = await axios.post(
-          `${API_URL}/api/impersonate/exit`, {},
-          {
-              headers: {
-                  Authorization: `Bearer ${token}`,
-              },
-          }
+        `${API_URL}/api/impersonate/exit`, {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
 
       const { success } = response.data;
 
       if (!success) {
-          toast.error("Exiting failed");
-          setIsExitingImpersonate(false);
-          return;
+        toast.error("Exiting failed");
+        setIsExitingImpersonate(false);
+        return;
       }
 
       // 2. replace authToken with new token
@@ -184,7 +187,7 @@ function MainLayout() {
       // 4. redirect to /dashboard 
       window.location.href = "/dashboard";
 
-    } catch(e) {
+    } catch (e) {
       console.log(e);
       toast.error("Something went wrong");
     }
@@ -201,13 +204,13 @@ function MainLayout() {
       }}
     >
       {sessionData?.custom_claims?.impersonation && <ImpersonationBanner
-          data={sessionData}
-          onExit={exitImpersonation}
-          loading={isExitingImpersonate}
-        />}
+        data={sessionData}
+        onExit={exitImpersonation}
+        loading={isExitingImpersonate}
+      />}
       <NavBar />
       <div className="content w-screen overflow-x-hidden h-screen pb-4 mt-[10%] pt-[16%] md:pt-1 md:mt-[7%]">
-        
+
         <Outlet />
       </div>
       <Footer />

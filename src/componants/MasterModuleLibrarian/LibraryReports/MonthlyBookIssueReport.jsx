@@ -155,16 +155,20 @@ const MonthlyBookIssueReport = () => {
       ${timetable
         .map((student, index) => {
           return `
-          <tr style="background-color: ${index % 2 === 0 ? "#fff" : "#f9fafb"
-            };">
+          <tr style="background-color: ${
+            index % 2 === 0 ? "#fff" : "#f9fafb"
+          };">
             <td style="border: 1px solid #ccc; padding: 6px;">${index + 1}</td>
-            <td style="border: 1px solid #ccc; padding: 6px;">${student.copy_id || ""
+            <td style="border: 1px solid #ccc; padding: 6px;">${
+              student.copy_id || ""
             }</td>
           
-            <td style="border: 1px solid #ccc; padding: 6px;">${student.book_title || ""
+            <td style="border: 1px solid #ccc; padding: 6px;">${
+              student.book_title || ""
             }</td>
 
-            <td style="border: 1px solid #ccc; padding: 6px;">${student.member_type === "S" ? "Student" : "Teacher"
+            <td style="border: 1px solid #ccc; padding: 6px;">${
+              student.member_type === "S" ? "Student" : "Teacher"
             }</td>
            
             <td style="border: 1px solid #ccc; padding: 6px;">
@@ -172,8 +176,8 @@ const MonthlyBookIssueReport = () => {
             </td>
              
              <td style="border: 1px solid #ccc; padding: 6px;">${formatDate(
-              student.issue_date || "",
-            )}</td>
+               student.issue_date || "",
+             )}</td>
            
           </tr>
         `;
@@ -321,10 +325,10 @@ const MonthlyBookIssueReport = () => {
   const formatDate = (dateStr) =>
     dateStr && dateStr !== "0000-00-00"
       ? new Date(dateStr).toLocaleDateString("en-GB", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "2-digit",
-      })
+          day: "2-digit",
+          month: "2-digit",
+          year: "2-digit",
+        })
       : "";
 
   const handlePageClick = (data) => {

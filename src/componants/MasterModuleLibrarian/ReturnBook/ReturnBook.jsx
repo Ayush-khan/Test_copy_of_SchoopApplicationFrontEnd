@@ -513,75 +513,7 @@ const ReturnBook = () => {
 
   const isAllSelected =
     displayedSections.length > 0 &&
-    displayedSections.every((item) => selectedCopies.includes(item.copy_id));
-
-  // useEffect(() => {
-  //   if (!accessionNo) {
-  //     setAutoSelectedCopy(null);
-  //     return;
-  //   }
-
-  //   const matched = displayedSections.find(
-  //     (item) => String(item.copy_id) === String(accessionNo),
-  //   );
-
-  //   if (!matched) return;
-
-  //   setAutoSelectedCopy(matched.copy_id);
-
-  //   //  ADD instead of replacing
-  //   setSelectedCopies((prev) => {
-  //     if (prev.includes(matched.copy_id)) return prev;
-  //     return [...prev, matched.copy_id];
-  //   });
-  // }, [accessionNo, displayedSections]);
-
-  useEffect(() => {
-    if (!accessionNo) {
-      setAutoSelectedCopy(null);
-      setManuallyChanged(false); // reset when search cleared
-      return;
-    }
-
-    //  STOP if user already interacted
-    if (manuallyChanged) return;
-
-    const matched = displayedSections.find(
-      (item) => String(item.copy_id) === String(accessionNo),
-    );
-
-    if (!matched) return;
-
-    setAutoSelectedCopy(matched.copy_id);
-
-    setSelectedCopies((prev) => {
-      if (prev.includes(matched.copy_id)) return prev;
-      return [...prev, matched.copy_id];
-    });
-  }, [accessionNo, displayedSections, manuallyChanged]);
-  // useEffect(() => {
-  //   if (!accessionNo) {
-  //     // 🔥 clear ONLY auto-selection
-  //     setAutoSelectedCopy(null);
-  //     return;
-  //   }
-
-  //   const matched = displayedSections.find(
-  //     (item) => String(item.copy_id) === String(accessionNo),
-  //   );
-
-  //   if (!matched) return;
-
-  //   setAutoSelectedCopy(matched.copy_id);
-
-  //   setSelectedCopies((prev) => {
-  //     // prevent infinite loop & override
-  //     if (prev.length === 1 && prev[0] === matched.copy_id) {
-  //       return prev;
-  //     }
-  //     return [matched.copy_id];
-  //   });
-  // }, [accessionNo, displayedSections]);
+    selectedCopies.length === displayedSections.length;
 
   const handleReturnBook = async ({
     selectedCopyIds,

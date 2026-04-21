@@ -291,6 +291,8 @@ const StudentListForVerification = () => {
       );
 
       toast.success("Admission Form Successfully Verified.");
+
+      setSelectedRows([]);
       handleSearch();
       setSelectedRows([]);
       setErrors({});
