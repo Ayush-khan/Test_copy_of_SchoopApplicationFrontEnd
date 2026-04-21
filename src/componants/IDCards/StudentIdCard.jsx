@@ -396,9 +396,9 @@ const StudentIdCard = () => {
         worksheet[cellRef] = {
           t: "s",
           v: subject.image_name, // Visible text in Excel (like "1604.jpg")
-          l: {
-            Target: `http://localhost:5173/iDCardDetails/${subject?.student_id}`, // Clickable link
-          },
+          // l: {
+          //   Target: `http://localhost:5173/iDCardDetails/${subject?.student_id}`, // Clickable link
+          // },
         };
       }
     });

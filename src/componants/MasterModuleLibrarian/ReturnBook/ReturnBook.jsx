@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import axios from "axios";
 import Select from "react-select";
 import { toast, ToastContainer } from "react-toastify";
@@ -71,12 +71,20 @@ const ReturnBook = () => {
   const [autoSelectedCopy, setAutoSelectedCopy] = useState(null);
   const [manuallyChanged, setManuallyChanged] = useState(false);
 
+  const [memberIdType, setMemberIdType] = useState([]);
+
   const camelCase = (str) =>
     str
       ?.toLowerCase()
       .split(" ")
       .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
       .join(" ");
+
+  const accessionInputRef = useRef(null);
+
+  useEffect(() => {
+    accessionInputRef.current?.focus();
+  }, []);
 
   useEffect(() => {
     fetchDataRoleId();
@@ -303,7 +311,7 @@ const ReturnBook = () => {
       const isGrnNo = grn_no?.trim() !== "";
       const isClassSelected = !!selectedStudentId;
 
-      // 1️⃣ No search criteria at all
+      //  No search criteria at all
       if (
         !isAccessionEntered &&
         !isGrnNo &&
@@ -314,7 +322,7 @@ const ReturnBook = () => {
         return;
       }
 
-      // 2️⃣ If class selected but member not selected
+      // If class selected but member not selected
       if (
         selectedType === "student" &&
         isClassSelected &&
@@ -355,7 +363,7 @@ const ReturnBook = () => {
         setShowMemberType(member?.member_type);
       } else if (selectedType && selectedStaffId) {
         /* ----------------------------------
-       🔍 MEMBER SEARCH
+      MEMBER SEARCH
     ---------------------------------- */
         const mType = selectedType === "student" ? "S" : "T";
 
@@ -414,6 +422,16 @@ const ReturnBook = () => {
       setIsSubmitting(false);
     }
   };
+
+  const classSection = useMemo(() => {
+    if (!memberDetails || !studentOptions.length) return null;
+
+    return studentOptions.find(
+      (item) =>
+        String(item.class_id) === String(memberDetails.class_id) &&
+        String(item.section_id) === String(memberDetails.section_id),
+    );
+  }, [memberDetails, studentOptions]);
 
   const filteredSections = (Array.isArray(timetable) ? timetable : []).filter(
     (student) => {
@@ -503,31 +521,18 @@ const ReturnBook = () => {
     memberType,
     dateOfReturn,
   }) => {
-    // validation
     if (!selectedCopyIds || selectedCopyIds.length === 0) {
-      // console.log("NO BOOKS SELECTED");
       toast.error("Please select at least one book");
       return;
     }
 
-    // if (!memberId || !memberType) {
-    //   // console.log("MEMBER MISSING");
-    //   toast.error("Member information is missing");
-    //   return;
-    // }
-    if (!memberDetails.member_type) {
-      // console.log("MEMBER MISSING");
-      toast.error("Member information is missing");
-      return;
-    }
-
     if (!dateOfReturn) {
-      // console.log("DATE MISSING");
       toast.error("Date of return is required");
       return;
     }
 
-    // console.log("VALIDATION PASSED");
+    const finalMemberId = memberId || memberDetails?.member_id || "";
+    const finalMemberType = memberType || memberDetails?.member_type || "";
 
     setLoading(true);
 
@@ -537,10 +542,9 @@ const ReturnBook = () => {
       const payload = {
         operation: "return",
         selector: selectedCopyIds,
-        member_id: memberDetails.member_id,
-        // member_type: memberType, // "S" for student, "T" for teacher/staff
-        member_type: memberDetails.member_type,
         dateofreturn: dateOfReturn,
+        ...(finalMemberId && { member_id: finalMemberId }),
+        ...(finalMemberType && { member_type: finalMemberType }),
       };
 
       const response = await axios.post(
@@ -549,16 +553,19 @@ const ReturnBook = () => {
         { headers: { Authorization: `Bearer ${token}` } },
       );
 
-      // console.log("response", response);
       toast.success("Book Returned Successfully");
+
       setShowStudentReport(false);
-      setSelectedCopies([]); // reset selections
+      setSelectedCopies([]);
       setSelectedStudentId("");
       setSelectedStudent("");
       setSelectedSectionId("");
+      setSelectedStaff("");
       setGrnNo("");
       setAccessionNo("");
       setSelectedStaffId("");
+
+      accessionInputRef.current?.focus();
     } catch (err) {
       toast.error(err.response?.data?.message || err.message);
     } finally {
@@ -566,42 +573,99 @@ const ReturnBook = () => {
     }
   };
 
+  // const handleReissueBook = async ({
+  //   selectedCopyIds,
+  //   bookIds,
+  //   memberId,
+  //   memberType,
+  //   dateOfReturn,
+  // }) => {
+  //   if (!selectedCopyIds || selectedCopyIds.length === 0) {
+  //     toast.error("Please select at least one book");
+  //     return;
+  //   }
+
+  //   if (!dateOfReturn) {
+  //     toast.error("Date of return is required");
+  //     return;
+  //   }
+
+  //   // fallback handling
+  //   const finalMemberId = memberId || memberDetails?.member_id || "";
+  //   const finalMemberType = memberType || memberDetails?.member_type || "";
+
+  //   setError("");
+  //   setLoading(true);
+
+  //   try {
+  //     const token = localStorage.getItem("authToken");
+
+  //     const payload = {
+  //       operation: "reissue",
+  //       selector: selectedCopyIds,
+  //       ...(bookIds?.length && { book_id: bookIds }), // safe check
+  //       ...(finalMemberId && { member_id: finalMemberId }),
+  //       ...(finalMemberType && { member_type: finalMemberType }),
+  //       dateofreturn: dateOfReturn,
+  //     };
+
+  //     const response = await axios.post(
+  //       `${API_URL}/api/library/reissue_book`,
+  //       payload,
+  //       { headers: { Authorization: `Bearer ${token}` } },
+  //     );
+
+  //     toast.success("Book Reissued Successfully");
+
+  //     // reset state
+  //     setSelectedCopies([]);
+  //     setShowStudentReport(false);
+  //     setSelectedStudentId("");
+  //     setSelectedStudent("");
+  //     setSelectedSectionId("");
+  //     setSelectedStaff("");
+  //     setGrnNo("");
+  //     setAccessionNo("");
+  //     setSelectedStaffId("");
+
+  //     // focus input again (optional but good UX)
+  //     accessionInputRef.current?.focus();
+
+  //     return response.data;
+  //   } catch (err) {
+  //     console.error(err);
+  //     setError(err.response?.data?.message || err.message);
+  //     toast.error(err.response?.data?.message || err.message);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
   const handleReissueBook = async ({
     selectedCopyIds,
-    bookIds, // <-- new array
+    bookIds,
     memberId,
     memberType,
     dateOfReturn,
   }) => {
     if (!selectedCopyIds || selectedCopyIds.length === 0) {
-      // console.log("NO BOOKS SELECTED");
       toast.error("Please select at least one book");
       return;
     }
 
-    // if (!bookIds || bookIds.length !== selectedCopyIds.length) {
-    //   // console.log("BOOK IDS MISSING OR MISMATCHED");
-    //   toast.error("Book IDs are missing or do not match selected copies");
-    //   return;
-    // }
-
-    // if (!memberId || !memberType) {
-    //   // console.log("MEMBER MISSING");
-    //   toast.error("Member information is missing");
-    //   return;
-    // }
-
-    if (!memberDetails.member_type) {
-      // console.log("MEMBER MISSING");
-      toast.error("Member information is missing");
-      return;
-    }
-
     if (!dateOfReturn) {
-      // console.log("DATE MISSING");
       toast.error("Date of return is required");
       return;
     }
+
+    // critical validation
+    if (!bookIds || bookIds.length !== selectedCopyIds.length) {
+      toast.error("Mismatch between selected books and copies");
+      return;
+    }
+
+    const finalMemberId = memberId || memberDetails?.member_id || "";
+    const finalMemberType = memberType || memberDetails?.member_type || "";
 
     setError("");
     setLoading(true);
@@ -612,13 +676,13 @@ const ReturnBook = () => {
       const payload = {
         operation: "reissue",
         selector: selectedCopyIds,
-        book_id: bookIds, // <-- send the book IDs array
-        // member_id: memberId,
-        // member_type: memberType,
-        member_id: memberDetails.member_id,
-        member_type: memberDetails.member_type,
+        book_id: bookIds, // always send (since validated)
+        ...(finalMemberId && { member_id: finalMemberId }),
+        ...(finalMemberType && { member_type: finalMemberType }),
         dateofreturn: dateOfReturn,
       };
+
+      console.log("Payload:", payload); // 🔍 debug
 
       const response = await axios.post(
         `${API_URL}/api/library/reissue_book`,
@@ -626,25 +690,181 @@ const ReturnBook = () => {
         { headers: { Authorization: `Bearer ${token}` } },
       );
 
-      // console.log("API Response:", response.data);
-      toast.success("Book Reissue Successfully..");
+      toast.success("Book Reissued Successfully");
 
+      // reset state
       setSelectedCopies([]);
       setShowStudentReport(false);
       setSelectedStudentId("");
       setSelectedStudent("");
       setSelectedSectionId("");
+      setSelectedStaff("");
       setGrnNo("");
       setAccessionNo("");
       setSelectedStaffId("");
+
+      accessionInputRef.current?.focus();
+
       return response.data;
     } catch (err) {
       console.error(err);
       setError(err.response?.data?.message || err.message);
+      toast.error(err.response?.data?.message || err.message);
     } finally {
       setLoading(false);
     }
   };
+
+  // const handleReturnBook = async ({
+  //   selectedCopyIds,
+  //   memberId,
+  //   memberType,
+  //   dateOfReturn,
+  // }) => {
+  //   // validation
+  //   if (!selectedCopyIds || selectedCopyIds.length === 0) {
+  //     // console.log("NO BOOKS SELECTED");
+  //     toast.error("Please select at least one book");
+  //     return;
+  //   }
+
+  //   // if (!memberId || !memberType) {
+  //   //   // console.log("MEMBER MISSING");
+  //   //   toast.error("Member information is missing");
+  //   //   return;
+  //   // }
+  //   if (!memberDetails.member_type) {
+  //     // console.log("MEMBER MISSING");
+  //     toast.error("Member information is missing");
+  //     // return;
+  //   }
+
+  //   if (!dateOfReturn) {
+  //     // console.log("DATE MISSING");
+  //     toast.error("Date of return is required");
+  //     return;
+  //   }
+
+  //   // console.log("VALIDATION PASSED");
+
+  //   setLoading(true);
+
+  //   try {
+  //     const token = localStorage.getItem("authToken");
+
+  //     const payload = {
+  //       operation: "return",
+  //       selector: selectedCopyIds,
+  //       member_id: memberDetails.member_id,
+  //       // member_type: memberType, // "S" for student, "T" for teacher/staff
+  //       member_type: memberDetails.member_type,
+  //       dateofreturn: dateOfReturn,
+  //     };
+
+  //     const response = await axios.post(
+  //       `${API_URL}/api/library/return_book`,
+  //       payload,
+  //       { headers: { Authorization: `Bearer ${token}` } },
+  //     );
+
+  //     // console.log("response", response);
+  //     toast.success("Book Returned Successfully");
+  //     setShowStudentReport(false);
+  //     setSelectedCopies([]); // reset selections
+  //     setSelectedStudentId("");
+  //     setSelectedStudent("");
+  //     setSelectedSectionId("");
+  //     setGrnNo("");
+  //     setAccessionNo("");
+  //     setSelectedStaffId("");
+  //     accessionInputRef.current?.focus();
+  //   } catch (err) {
+  //     toast.error(err.response?.data?.message || err.message);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
+  // const handleReissueBook = async ({
+  //   selectedCopyIds,
+  //   bookIds, // <-- new array
+  //   memberId,
+  //   memberType,
+  //   dateOfReturn,
+  // }) => {
+  //   if (!selectedCopyIds || selectedCopyIds.length === 0) {
+  //     // console.log("NO BOOKS SELECTED");
+  //     toast.error("Please select at least one book");
+  //     return;
+  //   }
+
+  //   if (!bookIds || bookIds.length !== selectedCopyIds.length) {
+  //     // console.log("BOOK IDS MISSING OR MISMATCHED");
+  //     toast.error("Book IDs are missing or do not match selected copies");
+  //     return;
+  //   }
+
+  //   // if (!memberId || !memberType) {
+  //   //   // console.log("MEMBER MISSING");
+  //   //   toast.error("Member information is missing");
+  //   //   return;
+  //   // }
+
+  //   // if (!memberDetails.member_type) {
+  //   //   // console.log("MEMBER MISSING");
+  //   //   toast.error("Member information is missing");
+  //   //   return;
+  //   // }
+
+  //   if (!dateOfReturn) {
+  //     // console.log("DATE MISSING");
+  //     toast.error("Date of return is required");
+  //     return;
+  //   }
+
+  //   setError("");
+  //   setLoading(true);
+
+  //   try {
+  //     const token = localStorage.getItem("authToken");
+
+  //     const payload = {
+  //       operation: "reissue",
+  //       selector: selectedCopyIds,
+  //       book_id: bookIds, // <-- send the book IDs array
+  //       // member_id: memberId,
+  //       // member_type: memberType,
+  //       member_id: memberDetails.member_id,
+  //       member_type: memberDetails.member_type,
+  //       dateofreturn: dateOfReturn,
+  //     };
+
+  //     const response = await axios.post(
+  //       `${API_URL}/api/library/reissue_book`,
+  //       payload,
+  //       { headers: { Authorization: `Bearer ${token}` } },
+  //     );
+
+  //     // console.log("API Response:", response.data);
+  //     toast.success("Book Reissue Successfully..");
+
+  //     setSelectedCopies([]);
+  //     setShowStudentReport(false);
+  //     setSelectedStudentId("");
+  //     setSelectedStudent("");
+  //     setSelectedSectionId("");
+  //     setSelectedStaff("");
+  //     setGrnNo("");
+  //     setAccessionNo("");
+  //     setSelectedStaffId("");
+  //     return response.data;
+  //   } catch (err) {
+  //     console.error(err);
+  //     setError(err.response?.data?.message || err.message);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   return (
     <>
@@ -710,6 +930,7 @@ const ReturnBook = () => {
                     <label className="text-md mb-1">Accession No.</label>
                     <input
                       type="text"
+                      ref={accessionInputRef}
                       value={accessionNo}
                       onChange={(e) => setAccessionNo(e.target.value)}
                       placeholder="Enter"
@@ -1000,6 +1221,9 @@ const ReturnBook = () => {
                               setSelectedStudentId("");
                               setGrnNo("");
                               setAccessionNo("");
+                               setTimeout(() => {
+                                 accessionInputRef.current?.focus();
+                               }, 0);
                             }}
                           />
                         </div>
@@ -1068,7 +1292,9 @@ const ReturnBook = () => {
                                     </td>
 
                                     <td className="px-2 py-1 text-center border">
-                                      {memberDetails.class_id}
+                                      {classSection
+                                        ? `${classSection.classname} ${classSection.sectionname}`
+                                        : " "}
                                     </td>
                                   </>
                                 )}
@@ -1193,24 +1419,20 @@ const ReturnBook = () => {
                             type="button"
                             className="bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-2 rounded mr-2"
                             onClick={() => {
-                              // console.log("Return button clicked");
-                              // console.log(
-                              //   "selectedCopies state:",
-                              //   selectedCopies,
-                              // );
-                              // console.log(
-                              //   "selectedStaffId:",
-                              //   memberDetails.member_id,
-                              // );
-                              // console.log("selectedType:", selectedType);
-                              // console.log("issuedDate:", issuedDate);
+                              // handleReturnBook({
+                              //   selectedCopyIds: selectedCopies,
+                              //   memberId:
+                              //     selectedStaffId || memberDetails.member_id,
+                              //   memberType:
+                              //     selectedType === "student" ? "S" : "T",
+                              //   dateOfReturn: issuedDate,
+                              // });
+                              console.log("timetable state:", timetable);
 
                               handleReturnBook({
                                 selectedCopyIds: selectedCopies,
-                                memberId:
-                                  selectedStaffId || memberDetails.member_id,
-                                memberType:
-                                  selectedType === "student" ? "S" : "T",
+                                memberId: timetable?.[0]?.member_id || "",
+                                memberType: timetable?.[0]?.member_type || "",
                                 dateOfReturn: issuedDate,
                               });
                             }}
@@ -1222,20 +1444,36 @@ const ReturnBook = () => {
                             type="button"
                             className="bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-2 rounded mr-2"
                             onClick={() => {
-                              // Map selected copy IDs to their corresponding book IDs
-                              const selectedBookIds = displayedSections
-                                .filter((item) =>
-                                  selectedCopies.includes(item.copy_id),
-                                )
-                                .map((item) => item.book_id);
+                              // const selectedBookIds = displayedSections
+                              //   .filter((item) =>
+                              //     selectedCopies.includes(item.copy_id),
+                              //   )
+                              //   .map((item) => item.book_id);
 
+                              // handleReissueBook({
+                              //   selectedCopyIds: selectedCopies,
+                              //   bookIds: selectedBookIds, // <-- send matching book IDs
+                              //   memberId:
+                              //     selectedStaffId || memberDetails?.member_id,
+                              //   memberType:
+                              //     selectedType === "student" ? "S" : "T",
+                              //   dateOfReturn: issuedDate,
+                              // });
+
+                              const selectedBookIds = selectedCopies.map(
+                                (copyId) => {
+                                  const match = displayedSections.find(
+                                    (item) =>
+                                      String(item.copy_id) === String(copyId),
+                                  );
+                                  return match?.book_id || null;
+                                },
+                              );
                               handleReissueBook({
                                 selectedCopyIds: selectedCopies,
-                                bookIds: selectedBookIds, // <-- send matching book IDs
-                                memberId:
-                                  selectedStaffId || memberDetails?.member_id,
-                                memberType:
-                                  selectedType === "student" ? "S" : "T",
+                                bookIds: selectedBookIds,
+                                memberId: timetable?.[0]?.member_id || "",
+                                memberType: timetable?.[0]?.member_type || "",
                                 dateOfReturn: issuedDate,
                               });
                             }}

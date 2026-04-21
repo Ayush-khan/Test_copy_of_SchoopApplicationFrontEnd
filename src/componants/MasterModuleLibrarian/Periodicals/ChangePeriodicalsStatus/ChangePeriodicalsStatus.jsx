@@ -475,8 +475,13 @@ Library`;
 
       toast.success("Subscription status updated successfully");
 
-      // Optional: refresh list
-      handleSearch();
+      // // Optional: refresh list
+      // handleSearch();
+      setSelectedClass("");
+      setSelectedClassId("");
+      setSelectedVolume("");
+      setSelectedVolumeId("");
+      setTimetable([]);
     } catch (error) {
       console.error("Submit error:", error);
       toast.error("Failed to update subscription status");

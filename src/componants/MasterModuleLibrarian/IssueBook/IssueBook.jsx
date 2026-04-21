@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import axios from "axios";
 import Select from "react-select";
 import { toast, ToastContainer } from "react-toastify";
@@ -64,6 +64,12 @@ const IssueBook = () => {
   const [bookPreview, setBookPreview] = useState(null);
 
   const [memberDetails, setMemberDetails] = useState("");
+
+  const grnInputRef = useRef(null);
+
+  useEffect(() => {
+    grnInputRef.current?.focus();
+  }, []);
 
   const camelCase = (str) =>
     str
@@ -384,6 +390,16 @@ const IssueBook = () => {
       setIsSubmitting(false);
     }
   };
+
+  const classSection = useMemo(() => {
+    if (!memberDetails || !studentOptions.length) return null;
+
+    return studentOptions.find(
+      (item) =>
+        String(item.class_id) === String(memberDetails.class_id) &&
+        String(item.section_id) === String(memberDetails.section_id),
+    );
+  }, [memberDetails, studentOptions]);
   // const fetchDueDate = async () => {
   //   try {
   //     const token = localStorage.getItem("authToken");
@@ -555,6 +571,7 @@ const IssueBook = () => {
         // setSelectedStudentId("");
         // setGrnNo("");
         // setSelectedStaffId("");
+        grnInputRef.current?.focus();
         handleSearch();
         const today = new Date().toISOString().slice(0, 10);
         setIssuedDate(today);
@@ -786,8 +803,27 @@ const IssueBook = () => {
 
         book = response.data[0];
 
+        // if (book.status !== "A") {
+        //   toast.error("This book is already issued.");
+        //   return;
+        // }
+        // if (book.status !== "L") {
+        //   toast.error("This book is not available.");
+        //   return;
+        // }
+
         if (book.status !== "A") {
-          toast.error("This book is already issued.");
+          let message = "This book is already issued.";
+
+          if (book.status === "L") {
+            message = "This book is not available.";
+          } else if (book.status === "O") {
+            message = "This book is not available.";
+          } else if (book.status === "D") {
+            message = "This book is not available.";
+          }
+
+          toast.error(message);
           return;
         }
       }
@@ -985,6 +1021,7 @@ const IssueBook = () => {
                         </label>
                         <input
                           type="text"
+                          ref={grnInputRef}
                           value={grn_no}
                           onChange={(e) => setGrnNo(e.target.value)}
                           placeholder="Enter"
@@ -1190,6 +1227,9 @@ const IssueBook = () => {
                               setSelectedStaff("");
                               setSelectedStudent("");
                               setGrnNo("");
+                              setTimeout(() => {
+                                grnInputRef.current?.focus();
+                              }, 0);
                             }}
                           />
                         </div>
@@ -1222,6 +1262,16 @@ const IssueBook = () => {
 
                             <span className="font-semibold text-pink-800 text-sm md:text-base">
                               GRN No: {memberDetails.reg_no}
+                            </span>
+                            <span className="font-semibold text-blue-800 text-sm md:text-base">
+                              |
+                            </span>
+
+                            <span className="font-semibold text-pink-800 text-sm md:text-base">
+                              Class:{" "}
+                              {classSection
+                                ? `${classSection.classname} ${classSection.sectionname}`
+                                : " "}
                             </span>
                           </div>
                         </div>
