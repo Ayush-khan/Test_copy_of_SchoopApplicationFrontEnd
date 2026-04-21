@@ -521,9 +521,14 @@ Library`;
       });
 
       toast.success("Remark sent successfully.");
+      setTimetable([]);
+      setSelectedClass("");
+      setSelectedClassId("");
       setSelectedRows([]);
       setRemark("");
-      handleSearch();
+      setTodayReturn(false);
+
+      // handleSearch();
     } catch (error) {
       console.error(error);
       toast.error("Failed to send remark.");
