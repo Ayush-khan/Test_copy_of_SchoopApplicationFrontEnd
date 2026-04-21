@@ -1242,10 +1242,10 @@ function Index() {
           element={<PrivateRoute element={<HSCStudentsSubjectsReport />} />}
         />
         {/* {HSCS Student Subject Group Report } */}
-        <Route
+        {/* <Route
           path="/hSCStudentSubjectGroupRepo"
           element={<PrivateRoute element={<HSCSStudentSubjectGroupReport />} />}
-        />
+        /> */}
         {/* Fee payment report module */}
         <Route
           path="/feePaymentRepo"

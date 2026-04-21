@@ -734,6 +734,89 @@ const GenerateBarcode = () => {
     return canvas.toDataURL("image/png");
   };
 
+  // const handlePrint = () => {
+  //   const printTitle = `List of Barcode ${fromDate} to ${toDate}`;
+
+  //   // Build rows with 2 barcodes per row
+  //   const barcodeRows = (() => {
+  //     let rows = "";
+  //     for (let i = 0; i < displayedSections.length; i += 2) {
+  //       const first = displayedSections[i];
+  //       const second = displayedSections[i + 1];
+
+  //       const firstBarcode = generateBarcodeBase64(String(first.copy_id));
+  //       const secondBarcode = second
+  //         ? generateBarcodeBase64(String(second.copy_id))
+  //         : null;
+
+  //       rows += `
+  //     <tr style="border:1px solid black;">
+  //       <td style="padding:10px; text-align:center;">
+  //         <img src="${firstBarcode}" style="width:200px; height:150px;" />
+
+  //       </td>
+
+  //       <td style="padding:10px; text-align:center;">
+  //         ${
+  //           secondBarcode
+  //             ? `<img src="${secondBarcode}" style="width:200px; height:150px;" />`
+  //             : ""
+  //         }
+  //       </td>
+  //     </tr>
+  //   `;
+  //     }
+  //     return rows;
+  //   })();
+
+  //   // Main HTML for printing
+  //   const printContent = `
+  //   <div style="width:100%; text-align:center;">
+  //     <h3 style="font-weight:bold; font-size:20px; margin-bottom:10px;">
+  //       ${printTitle}
+  //     </h3>
+
+  //     <table style=" solid black; border-collapse; width:80%; margin:auto;">
+  //       <tbody>
+  //         ${barcodeRows}
+  //       </tbody>
+  //     </table>
+  //   </div>
+  // `;
+
+  //   // Open print window
+  //   const printWindow = window.open("", "_blank", "width=1000,height=800");
+
+  //   printWindow.document.write(`
+  //   <html>
+  //     <head>
+  //       <title>${printTitle}</title>
+  //       <style>
+  //         body { font-family: Arial, sans-serif; margin: 20px; }
+  //         table { width: 80%; margin: auto; border-collapse; }
+  //         td, th { solid #000; padding: 8px; text-align: center; }
+  //         img { display:block; margin:auto; }
+  //         @page { size: A4; margin: 10mm; }
+  //       </style>
+  //     </head>
+
+  //     <body>
+  //       ${printContent}
+  //     </body>
+  //   </html>
+  // `);
+
+  //   printWindow.document.close();
+
+  //   printWindow.onload = function () {
+  //     printWindow.focus();
+  //     printWindow.print();
+  //     printWindow.close();
+  //   };
+  // };
+
+  // console.log("row", timetable);
+
   const handlePrint = () => {
     const printTitle = `List of Barcode ${fromDate} to ${toDate}`;
     let pagesHtml = "";

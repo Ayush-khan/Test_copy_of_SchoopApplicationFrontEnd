@@ -53,7 +53,7 @@ function EditOfNewStudentList() {
             headers: {
               Authorization: `Bearer ${token}`,
             },
-          }
+          },
         );
 
         if (response.data?.success && Array.isArray(response.data.data)) {
@@ -100,7 +100,7 @@ function EditOfNewStudentList() {
         `${API_URL}/api/get_divisions/${selectedClassId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
       setDivisions(response.data.divisions); // Update divisions based on selected class
     } catch (error) {
@@ -299,7 +299,7 @@ function EditOfNewStudentList() {
         setPhotoPreview(
           // `${API_URL}/path/to/images/${student.teacher_image_name}`
           // `https://sms.evolvu.in/storage/app/public/student_images/${student.image_name}`
-          `${student.image_name}`
+          `${student.image_name}`,
         );
       }
     }
@@ -367,7 +367,7 @@ function EditOfNewStudentList() {
         label: `${cls?.get_class?.name || " "} ${cls.name || " "}`,
         key: `${cls.class_id}-${cls.section_id}`, // Add key here for uniqueness
       })),
-    [classesforForm]
+    [classesforForm],
   );
 
   // Custom styles for student dropdown
@@ -379,7 +379,7 @@ function EditOfNewStudentList() {
           stu.last_name || " "
         }`,
       })),
-    [studentNameWithClassId]
+    [studentNameWithClassId],
   );
 
   // Handle class selection
@@ -417,7 +417,7 @@ function EditOfNewStudentList() {
       if (selectedStudentId) {
         response = await axios.get(
           `${API_URL}/api/getParentInfoOfStudent/${selectedStudentId}`,
-          { headers: { Authorization: `Bearer ${token}` } }
+          { headers: { Authorization: `Bearer ${token}` } },
         );
       }
       console.log("Response:", response.data);
@@ -576,7 +576,7 @@ function EditOfNewStudentList() {
       const token = localStorage.getItem("authToken");
       const classResponse = await axios.get(
         `${API_URL}/api/getallClassWithStudentCount`,
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
       setClassesforForm(classResponse.data || []);
     } catch (error) {
@@ -594,7 +594,7 @@ function EditOfNewStudentList() {
         {
           headers: { Authorization: `Bearer ${token}` },
           params,
-        }
+        },
       );
       setStudentNameWithClassId(response?.data?.data || []);
     } catch (error) {
@@ -617,7 +617,7 @@ function EditOfNewStudentList() {
             `${API_URL}/api/get_divisions/${selectedClass}`,
             {
               headers: { Authorization: `Bearer ${token}` },
-            }
+            },
           );
           setDivisions(response?.data?.divisions); // Update divisions
         } catch (error) {
@@ -671,7 +671,7 @@ function EditOfNewStudentList() {
         `${API_URL}/api/check-user-id/${studentId}/${userId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
 
       return response?.data?.exists;
@@ -717,7 +717,7 @@ function EditOfNewStudentList() {
     await handleSetUsernameSelection(
       "FatherMob",
       formData.f_mobile,
-      "fatherMobile"
+      "fatherMobile",
     );
   };
 
@@ -730,7 +730,7 @@ function EditOfNewStudentList() {
     await handleSetUsernameSelection(
       "MotherMob",
       formData.m_mobile,
-      "motherMobile"
+      "motherMobile",
     );
   };
 
@@ -754,7 +754,7 @@ function EditOfNewStudentList() {
     await handleSetUsernameSelection(
       "Mother",
       formData.m_emailid,
-      "motherEmail"
+      "motherEmail",
     );
   };
 
@@ -1261,7 +1261,7 @@ function EditOfNewStudentList() {
       // ✅ Derive user ID and related error key
       const { value: userIdForCheck, key: errorKey } = getUserIdDetails(
         formData,
-        selectedUsername
+        selectedUsername,
       );
 
       // ✅ Check for username presence
@@ -1277,7 +1277,7 @@ function EditOfNewStudentList() {
       // ✅ Check uniqueness
       const usernameExists = await checkUserId(
         student.student_id,
-        userIdForCheck
+        userIdForCheck,
       );
       if (usernameExists) {
         setUsernameErrors((prevErrors) => ({
@@ -1312,7 +1312,7 @@ function EditOfNewStudentList() {
         updatedFormData,
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
 
       if (response.status === 200) {
@@ -1326,11 +1326,11 @@ function EditOfNewStudentList() {
       if (error.response?.data?.errors) {
         setBackendErrors(error.response.data.errors);
         toast.error(
-          "Some fields contain duplicate data. Please ensure all values are unique."
+          "Some fields contain duplicate data. Please ensure all values are unique.",
         );
       } else {
         toast.error(
-          error.message || "Backend error occurred while updating data."
+          error.message || "Backend error occurred while updating data.",
         );
       }
     } finally {

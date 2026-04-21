@@ -188,20 +188,23 @@ const BooksIssuedHistoryReport = () => {
       ${timetable
         .map((student, index) => {
           return `
-          <tr style="background-color: ${index % 2 === 0 ? "#fff" : "#f9fafb"
-            };">
+          <tr style="background-color: ${
+            index % 2 === 0 ? "#fff" : "#f9fafb"
+          };">
             <td style="border: 1px solid #ccc; padding: 6px;">${index + 1}</td>
-            <td style="border: 1px solid #ccc; padding: 6px;">${student.book_title || ""
+            <td style="border: 1px solid #ccc; padding: 6px;">${
+              student.book_title || ""
             }</td>
             <td style="border: 1px solid #ccc; padding: 6px;">${formatDate(
               student.issue_date || "",
             )}</td>
              <td style="border: 1px solid #ccc; padding: 6px;">${formatDate(
-              student.return_date || "",
-            )}</td>
+               student.return_date || "",
+             )}</td>
 
-              <td style="border: 1px solid #ccc; padding: 6px;">${student.member_type === "S" ? "Student" : "Staff"
-            }</td>
+              <td style="border: 1px solid #ccc; padding: 6px;">${
+                student.member_type === "S" ? "Student" : "Staff"
+              }</td>
            
             <td style="border: 1px solid #ccc; padding: 6px;">
              ${student?.first_name || ""}  ${student?.mid_name || "-"}  ${student?.last_name || "-"}
@@ -372,10 +375,10 @@ const BooksIssuedHistoryReport = () => {
     return isNaN(date.getTime())
       ? ""
       : date.toLocaleDateString("en-GB", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "2-digit",
-      });
+          day: "2-digit",
+          month: "2-digit",
+          year: "2-digit",
+        });
   };
 
   const handlePageClick = (data) => {
