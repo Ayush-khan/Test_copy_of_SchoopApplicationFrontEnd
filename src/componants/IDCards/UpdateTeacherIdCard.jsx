@@ -151,8 +151,9 @@ const UpdateTeacherIdCard = () => {
       const finalData = Array.isArray(apiData)
         ? apiData
         : apiData
-        ? [apiData]
-        : [];
+
+          ? [apiData]
+          : [];
 
       if (finalData.length === 0) {
         toast.error("No Staff ID card data found.");
@@ -347,10 +348,12 @@ const UpdateTeacherIdCard = () => {
             prev.map((teacher) =>
               teacher.teacher_id === teacher_id
                 ? {
-                    ...teacher,
-                    teacher_image_url: imageData.teacher_image_url,
-                    base64: null,
-                  }
+
+                  ...teacher,
+                  teacher_image_url: imageData.teacher_image_url,
+                  base64: null,
+                }
+
                 : teacher
             )
           );
@@ -401,25 +404,27 @@ const UpdateTeacherIdCard = () => {
 
   const filteredSections = Array.isArray(timetable)
     ? timetable.filter((section) => {
-        const searchLower = searchTerm.toLowerCase();
 
-        const studentRollNo =
-          section?.employee_id?.toString().toLowerCase() || "";
-        const studentName = `${section?.name}`.toLowerCase() || "";
-        const studentDOB = section?.phone?.toLowerCase() || "";
-        const studentBloodGroup = section?.blood_group?.toLowerCase() || "";
-        const studentGrnNo = section?.sex?.toLowerCase() || "";
-        const studentClass = `${section?.address}`.toLowerCase() || "";
+      const searchLower = searchTerm.toLowerCase();
 
-        return (
-          studentRollNo.includes(searchLower) ||
-          studentName.includes(searchLower) ||
-          studentDOB.includes(searchLower) ||
-          studentBloodGroup.includes(searchLower) ||
-          studentGrnNo.includes(searchLower) ||
-          studentClass.includes(searchLower)
-        );
-      })
+      const studentRollNo =
+        section?.employee_id?.toString().toLowerCase() || "";
+      const studentName = `${section?.name}`.toLowerCase() || "";
+      const studentDOB = section?.phone?.toLowerCase() || "";
+      const studentBloodGroup = section?.blood_group?.toLowerCase() || "";
+      const studentGrnNo = section?.sex?.toLowerCase() || "";
+      const studentClass = `${section?.address}`.toLowerCase() || "";
+
+      return (
+        studentRollNo.includes(searchLower) ||
+        studentName.includes(searchLower) ||
+        studentDOB.includes(searchLower) ||
+        studentBloodGroup.includes(searchLower) ||
+        studentGrnNo.includes(searchLower) ||
+        studentClass.includes(searchLower)
+      );
+    })
+
     : [];
 
   useEffect(() => {
@@ -449,7 +454,9 @@ const UpdateTeacherIdCard = () => {
             />
           </div>
           <div
+
             className=" relative w-full -top-6 h-1  mx-auto bg-red-700"
+
             style={{
               backgroundColor: "#C03078",
             }}
@@ -634,20 +641,19 @@ const UpdateTeacherIdCard = () => {
                                           photoPreview={
                                             localPreviewMap[subject.teacher_id] // 1️⃣ priority to local preview
                                               ? localPreviewMap[
-                                                  subject.teacher_id
-                                                ]
+
+                                              subject.teacher_id
+                                              ]
                                               : subject?.teacher_image_url
-                                              ? `${
-                                                  subject.teacher_image_url
-                                                }?v=${
-                                                  subject.updated_at ||
-                                                  Date.now()
+                                                ? `${subject.teacher_image_url
+                                                }?v=${subject.updated_at ||
+                                                Date.now()
                                                 }`
-                                              : subject?.teacer_image_name
-                                              ? `${
-                                                  subject.teacer_image_name
-                                                }?v=${Date.now()}`
-                                              : subject?.image_base
+                                                : subject?.teacer_image_name
+                                                  ? `${subject.teacer_image_name
+                                                  }?v=${Date.now()}`
+                                                  : subject?.image_base
+
                                           }
                                           onImageCropped={(croppedImage) =>
                                             handleStaffImageCropped(
@@ -662,16 +668,18 @@ const UpdateTeacherIdCard = () => {
                                             err.field ===
                                             `student_image_base_${index}`
                                         ) && (
-                                          <p className="text-red-500 text-xs ml-3">
-                                            {
-                                              formErrors.find(
-                                                (err) =>
-                                                  err.field ===
-                                                  `student_image_base_${index}`
-                                              )?.message
-                                            }
-                                          </p>
-                                        )}
+
+                                            <p className="text-red-500 text-xs ml-3">
+                                              {
+                                                formErrors.find(
+                                                  (err) =>
+                                                    err.field ===
+                                                    `student_image_base_${index}`
+                                                )?.message
+                                              }
+                                            </p>
+                                          )}
+
                                       </div>
                                     </td>
                                   </tr>
