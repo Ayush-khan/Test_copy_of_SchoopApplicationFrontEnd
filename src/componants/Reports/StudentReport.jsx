@@ -240,6 +240,7 @@ const StudentReport = () => {
       "Religion",
       "Caste",
       "Category",
+      "House",
       "Emergency name",
       "Emergency Address",
       "Emergency Contact",
@@ -334,6 +335,9 @@ const StudentReport = () => {
             <td style="border: 1px solid #ccc; padding: 6px;">${
               student.category || ""
             }</td>
+            <td style="border: 1px solid #ccc; padding: 6px;">${capitalize(
+              student.housename,
+            )}</td>
             <td style="border: 1px solid #ccc; padding: 6px;">${capitalize(
               student.emergency_name,
             )}</td>
@@ -490,6 +494,7 @@ const StudentReport = () => {
       "Religion",
       "Caste",
       "Category",
+      "House",
       "Emergency name",
       "Emergency Address",
       "Emergency Contact",
@@ -548,6 +553,7 @@ const StudentReport = () => {
       capitalizeFirst(student?.religion) || " ",
       capitalizeFirst(student?.caste) || " ",
       student?.category || " ",
+      capitalizeFirst(student?.housename) || " ",
       capitalizeFirst(student?.emergency_name) || " ",
       capitalizeFirst(student?.emergency_add) || " ",
       student?.emergency_contact || " ",
@@ -847,6 +853,7 @@ const StudentReport = () => {
                                 "Religion",
                                 "Caste",
                                 "Category",
+                                "House",
                                 "Emergency name",
                                 "Emergency Address",
                                 "Emergency Contact",
@@ -959,6 +966,9 @@ const StudentReport = () => {
 
                                   <td className="px-2 py-2 text-center border border-gray-300">
                                     {student.category || " "}
+                                  </td>
+                                  <td className="px-2 py-2 text-center border border-gray-300">
+                                    {capitalizeFirst(student.housename) || " "}
                                   </td>
                                   <td className="px-2 py-2 text-center border border-gray-300">
                                     {capitalizeFirst(student.emergency_name) ||
