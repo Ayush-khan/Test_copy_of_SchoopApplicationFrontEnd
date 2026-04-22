@@ -240,6 +240,7 @@ const StudentReport = () => {
       "Religion",
       "Caste",
       "Category",
+      "House",
       "Emergency name",
       "Emergency Address",
       "Emergency Contact",
@@ -334,6 +335,9 @@ const StudentReport = () => {
             <td style="border: 1px solid #ccc; padding: 6px;">${
               student.category || ""
             }</td>
+            <td style="border: 1px solid #ccc; padding: 6px;">${capitalize(
+              student.housename,
+            )}</td>
             <td style="border: 1px solid #ccc; padding: 6px;">${capitalize(
               student.emergency_name,
             )}</td>
@@ -490,6 +494,7 @@ const StudentReport = () => {
       "Religion",
       "Caste",
       "Category",
+      "House",
       "Emergency name",
       "Emergency Address",
       "Emergency Contact",
@@ -548,6 +553,7 @@ const StudentReport = () => {
       capitalizeFirst(student?.religion) || " ",
       capitalizeFirst(student?.caste) || " ",
       student?.category || " ",
+      capitalizeFirst(student?.housename) || " ",
       capitalizeFirst(student?.emergency_name) || " ",
       capitalizeFirst(student?.emergency_add) || " ",
       student?.emergency_contact || " ",
@@ -623,6 +629,7 @@ const StudentReport = () => {
     const parentAadhaar = section?.parent_adhar_no?.toLowerCase() || "";
     const totalPercent = section?.total_percent?.toLowerCase() || "";
     const totalAttendance = section?.total_attendance?.toLowerCase() || "";
+    const houseName = section?.housename?.toLowerCase() || "";
 
     // Check if the search term is present in any of the specified fields
     return (
@@ -654,7 +661,8 @@ const StudentReport = () => {
       motherEmail.includes(searchLower) ||
       parentAadhaar.includes(searchLower) ||
       totalPercent.includes(searchLower) ||
-      totalAttendance.includes(searchLower)
+      totalAttendance.includes(searchLower) ||
+      houseName.includes(searchLower)
     );
   });
 
@@ -847,6 +855,7 @@ const StudentReport = () => {
                                 "Religion",
                                 "Caste",
                                 "Category",
+                                "House",
                                 "Emergency name",
                                 "Emergency Address",
                                 "Emergency Contact",
@@ -961,6 +970,9 @@ const StudentReport = () => {
                                     {student.category || " "}
                                   </td>
                                   <td className="px-2 py-2 text-center border border-gray-300">
+                                    {capitalizeFirst(student.housename) || " "}
+                                  </td>
+                                  <td className="px-2 py-2 text-center border border-gray-300">
                                     {capitalizeFirst(student.emergency_name) ||
                                       " "}
                                   </td>
@@ -1009,10 +1021,16 @@ const StudentReport = () => {
                                   </td>
                                 </tr>
                               ))
+                            ) : timetable.length === 0 ? (
+                              <div className="absolute left-[1%] w-[100%] text-center flex justify-center items-center mt-14">
+                                <div className="text-center text-xl text-red-700">
+                                  No data found
+                                </div>
+                              </div>
                             ) : (
                               <div className="absolute left-[1%] w-[100%] text-center flex justify-center items-center mt-14">
                                 <div className="text-center text-xl text-red-700">
-                                  Oops! No data found..
+                                  Result not found!
                                 </div>
                               </div>
                             )}
