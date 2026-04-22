@@ -130,15 +130,21 @@ const AllotRollNumberHouse = () => {
       console.error("Error fetching houses:", err);
     }
   };
+
   const handleClassSelect = (selectedOption) => {
+    // console.log("selected class", selectedClass);
     setSelectedClass(selectedOption);
     setSelectedDivision(null); // Reset division dropdown
     setDivisionForForm([]); // Clear division options
     setClassIdForSearch(selectedOption?.value);
+    // console.log("value", selectedClass.value);
+    // console.log("class", selectedClass.class_id);
+    // console.log("section", selectedClass.section_id);
   };
 
-  // 🔹 Handle search (already similar to your logic)
   const handleSearch = async () => {
+    console.log("selected class", selectedClass?.value);
+    console.log("selected class section", selectedClass?.sectionId);
     setNameError("");
     setSearchTerm("");
     setNameErrorForClass("");
@@ -156,7 +162,7 @@ const AllotRollNumberHouse = () => {
     try {
       setLoadingForSearch(true);
       const response = await axios.get(
-        `${API_URL}/api/get_studentallotrollnohouse/${selectedClass?.value}/${selectedClass?.sectionId}`,
+        `${API_URL}/api/get_studentallotrollnohouse/${selectedClass?.class_id}/${selectedClass?.section_id}`,
         { headers: { Authorization: `Bearer ${token}` } },
       );
       if (response.data?.data) {
@@ -171,7 +177,6 @@ const AllotRollNumberHouse = () => {
     }
   };
 
-  // 🔹 Handle change for Roll No or House
   const handleInputChange = (e, studentId, field) => {
     const { value } = e.target;
 
