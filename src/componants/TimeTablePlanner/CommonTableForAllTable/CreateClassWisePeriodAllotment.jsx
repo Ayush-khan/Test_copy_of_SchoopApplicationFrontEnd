@@ -221,9 +221,9 @@ const CreateClassWisePeriodAllotment = () => {
     if (!periods["mon-fri"]) {
       newErrors["mon-fri"] = "Mon-Fri Periods are required.";
     }
-    if (!periods["sat"]) {
-      newErrors["sat"] = "Saturday Periods are required.";
-    }
+    // if (!periods["sat"]) {
+    //   newErrors["sat"] = "Saturday Periods are required.";
+    // }
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
@@ -576,7 +576,7 @@ const CreateClassWisePeriodAllotment = () => {
                                         className="form-checkbox h-3 w-3 text-green-600"
                                         checked={
                                           !!selectedCheckboxes[
-                                            section.section_id
+                                          section.section_id
                                           ]
                                         }
                                         onChange={() =>
@@ -637,7 +637,7 @@ const CreateClassWisePeriodAllotment = () => {
                                 htmlFor="satSelect"
                               >
                                 Sat Periods{" "}
-                                <span className="text-sm text-red-500">*</span>
+
                               </label>
                               <div className="w-full md:w-[65%]">
                                 <input
@@ -665,11 +665,10 @@ const CreateClassWisePeriodAllotment = () => {
                                 type="submit"
                                 onClick={handleSubmit}
                                 style={{ backgroundColor: "#2196F3" }}
-                                className={` btn h-10 w-18 md:w-auto btn-primary text-white font-bold py-1 border-1 border-blue-500 px-4 rounded ${
-                                  loadingForSearch
-                                    ? "opacity-50 cursor-not-allowed"
-                                    : ""
-                                }`}
+                                className={` btn h-10 w-18 md:w-auto btn-primary text-white font-bold py-1 border-1 border-blue-500 px-4 rounded ${loadingForSearch
+                                  ? "opacity-50 cursor-not-allowed"
+                                  : ""
+                                  }`}
                                 disabled={loadingForSearch}
                               >
                                 {loadingForSearch ? (
