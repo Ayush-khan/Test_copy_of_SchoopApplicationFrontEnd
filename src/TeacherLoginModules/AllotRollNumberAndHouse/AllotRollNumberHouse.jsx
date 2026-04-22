@@ -561,21 +561,21 @@ const AllotRollNumberHouse = () => {
       /* 🔹 Step 1: Basic Validation */
       const newErrors = {};
 
-      studentInformation.forEach((stu) => {
-        if (!stu.roll_no) {
-          newErrors[stu.student_id] = {
-            ...(newErrors[stu.student_id] || {}),
-            roll_no: "Please enter Roll Number",
-          };
-        }
+      // studentInformation.forEach((stu) => {
+      //   if (!stu.roll_no) {
+      //     newErrors[stu.student_id] = {
+      //       ...(newErrors[stu.student_id] || {}),
+      //       roll_no: "Please enter Roll Number",
+      //     };
+      //   }
 
-        if (!stu.house) {
-          newErrors[stu.student_id] = {
-            ...(newErrors[stu.student_id] || {}),
-            house: "Please select House",
-          };
-        }
-      });
+      //   if (!stu.house) {
+      //     newErrors[stu.student_id] = {
+      //       ...(newErrors[stu.student_id] || {}),
+      //       house: "Please select House",
+      //     };
+      //   }
+      // });
 
       /* 🔹 Step 2: Frontend Duplicate Roll Number Check */
       const duplicateErrors = {};
@@ -697,7 +697,7 @@ const AllotRollNumberHouse = () => {
     <div>
       <ToastContainer />
 
-      <div className="md:mx-auto md:w-[70%] p-4 bg-white mt-4 ">
+      <div className="md:mx-auto md:w-[70%] px-4 py-2 bg-white mt-4 ">
         <div className=" w-full    flex justify-between items-center ">
           <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
             Allot Roll Number & House
@@ -761,9 +761,8 @@ const AllotRollNumberHouse = () => {
                   type="search"
                   onClick={handleSearch}
                   style={{ backgroundColor: "#2196F3" }}
-                  className={`my-1 md:my-4 btn h-10 w-18 md:w-auto btn-primary text-white font-bold py-1 border-1 border-blue-500 px-4 rounded ${
-                    loadingForSearch ? "opacity-50 cursor-not-allowed" : ""
-                  }`}
+                  className={`my-1 md:my-4 btn h-10 w-18 md:w-auto btn-primary text-white font-bold py-1 border-1 border-blue-500 px-4 rounded ${loadingForSearch ? "opacity-50 cursor-not-allowed" : ""
+                    }`}
                   disabled={loadingForSearch}
                 >
                   {loadingForSearch ? (
@@ -835,10 +834,12 @@ const AllotRollNumberHouse = () => {
                               Student Name
                             </th>
                             <th className="border w-full md:w-[20%] border-gray-950 p-2 text-center">
-                              <span className="text-red-500">*</span> Roll No
+                              {/* <span className="text-red-500">*</span> Roll No */}
+                              Roll No
                             </th>
                             <th className="border border-gray-950 p-2 text-center">
-                              <span className="text-red-500">*</span> House
+                              {/* <span className="text-red-500">*</span> House */}
+                              House
                             </th>
                           </tr>
                         </thead>
@@ -928,11 +929,10 @@ const AllotRollNumberHouse = () => {
                       type="submit"
                       onClick={handleSubmit}
                       disabled={submitTeacherNote}
-                      className={`text-white font-bold py-1 px-4 rounded ${
-                        submitTeacherNote
-                          ? "opacity-50 cursor-not-allowed bg-blue-400"
-                          : "bg-blue-600 hover:bg-blue-700"
-                      }`}
+                      className={`text-white font-bold py-1 px-4 rounded ${submitTeacherNote
+                        ? "opacity-50 cursor-not-allowed bg-blue-400"
+                        : "bg-blue-600 hover:bg-blue-700"
+                        }`}
                     >
                       {submitTeacherNote ? (
                         <span className="flex items-center">
