@@ -39,7 +39,7 @@ function ApplicationForMangement() {
 
   const [selectedClass, setSelectedClass] = useState(null);
   const [selectedClassId, setSelectedClassId] = useState(null);
-  const [formFee, setFormFee] = useState(null);
+  const [formFee, setFormFee] = useState("");
 
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
@@ -57,8 +57,38 @@ function ApplicationForMangement() {
   const [formFeeError, setFormFeeError] = useState("");
   const [showViewModal, setShowViewModal] = useState(false);
 
+  const [bankAccountNames, setBankAccountNames] = useState([]);
+  const [account, setAccount] = useState(null);
+  const [accountError, setAccountError] = useState("");
+
+  const [accountTypes, setAccountTypes] = useState([]);
+  const [accountType, setAccountType] = useState(null);
+  const [accountTypeError, setAccountTypeError] = useState("");
+
+  const MASTER_DROPDOWN_CODE = "ADMISSION_TYPE";
+
+  const accountTypeOptions = useMemo(
+    () =>
+      accountTypes.map((a) => ({
+        value: a.label,
+        label: `${a.label}`,
+      })),
+    [accountTypes],
+  );
+
+  const accountOptions = useMemo(
+    () =>
+      bankAccountNames.map((a) => ({
+        value: a.id,
+        label: `${a.account_name}`,
+      })),
+    [bankAccountNames],
+  );
+
   useEffect(() => {
     fetchExams();
+    fetchBankAccountNames();
+    fetchAccountTypes();
   }, []);
 
   const fetchExams = async () => {
@@ -71,19 +101,26 @@ function ApplicationForMangement() {
           headers: { Authorization: `Bearer ${token}` },
         },
       );
-      console.log("Class", response);
       setClassNameWithClassId(response?.data?.data || []);
     } catch (error) {
       toast.error("Error fetching Classes");
-      console.error("Error fetching Classes:", error);
     }
   };
 
   const handleClassSelect = (selectedOption) => {
     setClassError("");
     setSelectedClass(selectedOption);
-    console.log("selected class", selectedOption);
     setSelectedClassId(selectedOption?.value);
+  };
+
+  const handleAccountTypeSelect = (selectedOption) => {
+    setAccountTypeError("");
+    setAccountType(selectedOption || null);
+  };
+
+  const handleAccountSelect = (selectedOption) => {
+    setAccountError("");
+    setAccount(selectedOption);
   };
 
   const classOptions = useMemo(
@@ -117,9 +154,60 @@ function ApplicationForMangement() {
           withCredentials: true,
         },
       );
-      console.log("the data of ", response.data.data);
 
       setSections(response.data.data);
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchBankAccountNames = async () => {
+    try {
+      const token = localStorage.getItem("authToken");
+
+      if (!token) {
+        throw new Error("No authentication token found");
+      }
+
+      const response = await axios.get(
+        `${API_URL}/api/admin/admission/bank-accounts`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          withCredentials: true,
+        },
+      );
+
+      setBankAccountNames(response.data.data);
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchAccountTypes = async () => {
+    try {
+      const token = localStorage.getItem("authToken");
+
+      if (!token) {
+        throw new Error("No authentication token found");
+      }
+
+      const response = await axios.get(
+        `${API_URL}/api/master/dropdowns/code/${MASTER_DROPDOWN_CODE}/options`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          withCredentials: true,
+        },
+      );
+
+      setAccountTypes(response.data.data);
     } catch (error) {
       setError(error.message);
     } finally {
@@ -147,7 +235,6 @@ function ApplicationForMangement() {
   }, [searchTerm]);
 
   const searchLower = searchTerm.trim().toLowerCase();
-  console.log("sections before filtered sections:", sections);
 
   const formatDate = (dateStr) =>
     dateStr && dateStr !== "0000-00-00"
@@ -204,6 +291,19 @@ function ApplicationForMangement() {
     setAgeStartDate(section.age_start_date);
     setAgeEndDate(section.age_end_date);
 
+    setAccount({
+      value: section.account_id ?? "",
+      label: section.account_name ?? "Select",
+    });
+    setAccountType(
+      section.type
+        ? {
+            value: section.type,
+            label: section.type,
+          }
+        : null,
+    );
+
     // FORM FEE
     setFormFee(section.application_form_fee);
 
@@ -215,6 +315,8 @@ function ApplicationForMangement() {
     setStartDateError("");
     setEndDateError("");
     setFormFeeError("");
+    setAccountTypeError("");
+    setAccountError("");
 
     // OPEN MODAL
     setShowEditModal(true);
@@ -227,6 +329,13 @@ function ApplicationForMangement() {
       label: section.class_name,
       value: section.class_id,
     });
+
+    setAccount({
+      label: section.account_name,
+      value: section.account_id,
+    });
+
+    setAccountType(section.type);
 
     setStartDate(section.start_date);
     setEndDate(section.end_date);
@@ -261,6 +370,8 @@ function ApplicationForMangement() {
     setFormFee("");
     setAgeEndDate("");
     setAgeStartDate("");
+    setAccountType(null);
+    setAccount(null);
   };
 
   const handleSubmitAdd = async (e) => {
@@ -268,6 +379,8 @@ function ApplicationForMangement() {
 
     // Clear previous errors
     setClassError("");
+    setAccountError("");
+    setAccountTypeError("");
     setStartDateError("");
     setEndDateError("");
     setFormFeeError("");
@@ -276,6 +389,11 @@ function ApplicationForMangement() {
 
     if (!selectedClass) {
       setClassError("Please select class");
+      hasError = true;
+    }
+
+    if (account.value == "") {
+      setAccountError("Please select account");
       hasError = true;
     }
 
@@ -289,10 +407,6 @@ function ApplicationForMangement() {
       hasError = true;
     }
 
-    // if (!formFee) {
-    //   setFormFeeError("Please enter form fee");
-    //   hasError = true;
-    // }
     if (!formFee) {
       setFormFeeError("Please enter form fee");
       hasError = true;
@@ -319,6 +433,8 @@ function ApplicationForMangement() {
       publish: requiresAppointment === "Y" ? "Y" : "N",
       age_start_date: ageStartDate,
       age_end_date: ageEndDate,
+      account_id: account.value,
+      type: accountType?.value ?? "",
     };
 
     try {
@@ -337,7 +453,6 @@ function ApplicationForMangement() {
       fetchSections();
       handleCloseModal();
     } catch (error) {
-      console.error("Create admission error:", error);
       toast.error(
         error?.response?.data?.message ||
           "Something went wrong. Please try again.",
@@ -347,7 +462,8 @@ function ApplicationForMangement() {
 
   const handleSubmitEdit = async (e) => {
     e.preventDefault();
-
+    setAccountError("");
+    setAccountTypeError("");
     setStartDateError("");
     setEndDateError("");
     setFormFeeError("");
@@ -361,6 +477,11 @@ function ApplicationForMangement() {
 
     if (!endDate) {
       setEndDateError("Please select end date");
+      hasError = true;
+    }
+
+    if (!account) {
+      setAccountError("Please select account");
       hasError = true;
     }
 
@@ -395,6 +516,8 @@ function ApplicationForMangement() {
       publish: requiresAppointment === "Y" ? "Y" : "N",
       age_start_date: ageStartDate === "0000-00-00" ? "" : ageStartDate,
       age_end_date: ageEndDate === "0000-00-00" ? "" : ageEndDate,
+      account_id: account.value,
+      type: accountType?.value ?? "",
     };
 
     try {
@@ -414,8 +537,6 @@ function ApplicationForMangement() {
       fetchSections(); // refresh list
       handleCloseModal(); // close modal
     } catch (error) {
-      console.error("Update admission error:", error);
-
       toast.error(
         error?.response?.data?.message ||
           "Something went wrong. Please try again.",
@@ -424,9 +545,7 @@ function ApplicationForMangement() {
   };
 
   const handleDelete = (id) => {
-    console.log("the deleted admission form id", id);
     const sectionToDelete = sections.find((sec) => sec.nac_id === id);
-    console.log("the deleted ", sectionToDelete);
     setCurrentSection(sectionToDelete);
     setShowDeleteModal(true);
   };
@@ -502,8 +621,6 @@ function ApplicationForMangement() {
         );
       }
     } catch (error) {
-      console.error("Error deleting admission class:", error);
-
       if (error.response?.status === 409) {
         toast.error(
           error.response.data?.message ||
@@ -567,6 +684,12 @@ function ApplicationForMangement() {
                         Class
                       </th>
                       <th className="px-2 md:px-3 py-2 border border-gray-900 text-xs md:text-sm font-semibold text-center">
+                        Account
+                      </th>
+                      <th className="px-2 md:px-3 py-2 border border-gray-900 text-xs md:text-sm font-semibold text-center">
+                        Type
+                      </th>
+                      <th className="px-2 md:px-3 py-2 border border-gray-900 text-xs md:text-sm font-semibold text-center">
                         Start Date
                       </th>
                       <th className="px-2 md:px-3 py-2 border border-gray-900 text-xs md:text-sm font-semibold text-center">
@@ -609,7 +732,7 @@ function ApplicationForMangement() {
                     ) : displayedSections.length ? (
                       displayedSections.map((section, index) => (
                         <tr
-                          key={section.section_id}
+                          key={index}
                           className={
                             index % 2 === 0 ? "bg-white" : "bg-gray-100"
                           }
@@ -620,6 +743,14 @@ function ApplicationForMangement() {
 
                           <td className="text-center px-2 md:px-3 py-2 border border-gray-900 text-xs md:text-sm">
                             {section?.class_name}
+                          </td>
+
+                          <td className="text-center px-2 md:px-3 py-2 border border-gray-900 text-xs md:text-sm">
+                            {section?.account_name}
+                          </td>
+
+                          <td className="text-center px-2 md:px-3 py-2 border border-gray-900 text-xs md:text-sm">
+                            {section?.type}
                           </td>
 
                           <td className="text-center px-2 md:px-3 py-2 border border-gray-900 text-xs md:text-sm">
@@ -737,7 +868,7 @@ function ApplicationForMangement() {
                 <div className="modal-content">
                   <div className="flex justify-between p-3">
                     <h5 className="modal-title">
-                      Create Application From Management
+                      Create Application Form Management
                     </h5>
                     <RxCross1
                       className="float-end relative top-2 right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
@@ -778,6 +909,66 @@ function ApplicationForMangement() {
                         {classError && (
                           <div className="mt-1 text-red-500 text-xs">
                             {classError}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Account Name */}
+                    <div className="relative mb-3 flex items-center mx-4">
+                      <label htmlFor="accoutSelect" className="w-1/2 mt-2">
+                        Account <span className="text-red-500">*</span>
+                      </label>
+                      <div className="w-full md:w-[60%]">
+                        <Select
+                          id="accountSelect"
+                          options={accountOptions}
+                          value={account}
+                          onChange={handleAccountSelect}
+                          placeholder="Select"
+                          isSearchable
+                          isClearable
+                          className="text-sm"
+                          menuPortalTarget={document.body}
+                          menuPosition="fixed"
+                          styles={{
+                            menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+                          }}
+                        />
+
+                        {accountError && (
+                          <div className="mt-1 text-red-500 text-xs">
+                            {accountError}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Account Type */}
+                    <div className="relative mb-3 flex items-center mx-4">
+                      <label htmlFor="accountTypeSelect" className="w-1/2 mt-2">
+                        Type
+                      </label>
+                      <div className="w-full md:w-[60%]">
+                        <Select
+                          id="accountTypeSelect"
+                          options={accountTypeOptions}
+                          value={accountType}
+                          onChange={handleAccountTypeSelect}
+                          placeholder="Select"
+                          isSearchable
+                          isClearable
+                          className="text-sm"
+                          menuPortalTarget={document.body}
+                          menuPosition="fixed"
+                          styles={{
+                            menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+                          }}
+                        />
+
+                        {accountTypeError && (
+                          <div className="mt-1 text-red-500 text-xs">
+                            {accountTypeError}
                           </div>
                         )}
                       </div>
@@ -835,6 +1026,7 @@ function ApplicationForMangement() {
                         )}
                       </div>
                     </div>
+
                     <div className="relative mb-3 flex items-center mx-4">
                       <label htmlFor="agestartDate" className="w-1/2 mt-2">
                         Age Start Date
@@ -996,6 +1188,66 @@ function ApplicationForMangement() {
                       {classError && (
                         <div className="mt-1 text-red-500 text-xs">
                           {classError}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Account Name */}
+                  <div className="relative mb-3 flex items-center mx-4">
+                    <label htmlFor="accoutSelect" className="w-1/2 mt-2">
+                      Account <span className="text-red-500">*</span>
+                    </label>
+                    <div className="w-full md:w-[60%]">
+                      <Select
+                        id="accountSelect"
+                        options={accountOptions}
+                        value={account}
+                        onChange={handleAccountSelect}
+                        placeholder="Select"
+                        isSearchable
+                        isClearable
+                        className="text-sm"
+                        menuPortalTarget={document.body}
+                        menuPosition="fixed"
+                        styles={{
+                          menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+                        }}
+                      />
+
+                      {accountError && (
+                        <div className="mt-1 text-red-500 text-xs">
+                          {accountError}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Account Type */}
+                  <div className="relative mb-3 flex items-center mx-4">
+                    <label htmlFor="accountTypeSelect" className="w-1/2 mt-2">
+                      Type
+                    </label>
+                    <div className="w-full md:w-[60%]">
+                      <Select
+                        id="accountTypeSelect"
+                        options={accountTypeOptions}
+                        value={accountType}
+                        onChange={handleAccountTypeSelect}
+                        placeholder="Select"
+                        isSearchable
+                        isClearable
+                        className="text-sm"
+                        menuPortalTarget={document.body}
+                        menuPosition="fixed"
+                        styles={{
+                          menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+                        }}
+                      />
+
+                      {accountTypeError && (
+                        <div className="mt-1 text-red-500 text-xs">
+                          {accountTypeError}
                         </div>
                       )}
                     </div>
@@ -1248,6 +1500,36 @@ function ApplicationForMangement() {
                       <input
                         type="text"
                         value={selectedClass?.label || ""}
+                        readOnly
+                        disabled
+                        className="w-full bg-gray-100 border border-gray-300 rounded px-3 py-2 text-sm text-gray-700 cursor-not-allowed"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Account */}
+                  <div className="relative mb-3 flex items-center mx-4">
+                    <label className="w-1/2 mt-2">Account</label>
+
+                    <div className="w-full md:w-[60%]">
+                      <input
+                        type="text"
+                        value={account?.label || ""}
+                        readOnly
+                        disabled
+                        className="w-full bg-gray-100 border border-gray-300 rounded px-3 py-2 text-sm text-gray-700 cursor-not-allowed"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Account */}
+                  <div className="relative mb-3 flex items-center mx-4">
+                    <label className="w-1/2 mt-2">Type</label>
+
+                    <div className="w-full md:w-[60%]">
+                      <input
+                        type="text"
+                        value={accountType || ""}
                         readOnly
                         disabled
                         className="w-full bg-gray-100 border border-gray-300 rounded px-3 py-2 text-sm text-gray-700 cursor-not-allowed"
