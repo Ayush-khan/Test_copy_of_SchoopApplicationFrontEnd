@@ -319,6 +319,7 @@ function ApplicationForMangement() {
   };
 
   const handleView = (section) => {
+    console.log(section);
     setCurrentSection(section);
 
     setSelectedClass({
@@ -335,6 +336,9 @@ function ApplicationForMangement() {
 
     setStartDate(section.start_date);
     setEndDate(section.end_date);
+
+    setAgeStartDate(section.age_start_date);
+    setAgeEndDate(section.age_end_date);
 
     setFormFee(section.application_form_fee);
 
@@ -1564,6 +1568,38 @@ function ApplicationForMangement() {
                       <input
                         type="text"
                         value={endDate || ""}
+                        readOnly
+                        disabled
+                        className="w-full bg-gray-100 border border-gray-300 rounded px-3 py-2 text-sm text-gray-700 cursor-not-allowed"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="relative mb-3 flex items-center mx-4">
+                    <label htmlFor="startDate" className="w-1/2 mt-2">
+                      Age Start Date
+                    </label>
+
+                    <div className="w-full md:w-[60%]">
+                      <input
+                        type="text"
+                        value={ageStartDate || ""}
+                        readOnly
+                        disabled
+                        className="w-full bg-gray-100 border border-gray-300 rounded px-3 py-2 text-sm text-gray-700 cursor-not-allowed"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="relative mb-3 flex items-center mx-4">
+                    <label htmlFor="startDate" className="w-1/2 mt-2">
+                      Age End Date
+                    </label>
+
+                    <div className="w-full md:w-[60%]">
+                      <input
+                        type="text"
+                        value={ageEndDate || ""}
                         readOnly
                         disabled
                         className="w-full bg-gray-100 border border-gray-300 rounded px-3 py-2 text-sm text-gray-700 cursor-not-allowed"
