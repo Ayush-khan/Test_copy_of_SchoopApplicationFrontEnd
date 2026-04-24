@@ -55,7 +55,6 @@ const PromotedStudent = () => {
   useEffect(() => {
     // Fetch both classes and student names on component mount
     fetchInitialDataAndStudents();
-    fetchInitialDataAndStudentsForStudent();
   }, []);
 
   const fetchInitialDataAndStudents = async () => {
@@ -83,27 +82,50 @@ const PromotedStudent = () => {
       setLoadingStudents(false);
     }
   };
-  const fetchInitialDataAndStudentsForStudent = async () => {
+  // const fetchNextclasses = async () => {
+  //   try {
+  //     setLoadingClasses(true);
+  //     setLoadingStudents(true);
+
+  //     const token = localStorage.getItem("authToken");
+
+  //     // Fetch classes and students concurrently
+  //     const [classResponse] = await Promise.all([
+  //       axios.get(`${API_URL}/api/nextclassacademicyear`, {
+  //         headers: { Authorization: `Bearer ${token}` },
+  //       }),
+  //     ]);
+
+  //     // Set the fetched data
+  //     setClassesforFormForStudent(classResponse.data.data || []);
+  //     //   setStudentNameWithClassId(studentResponse?.data?.data || []);
+  //   } catch (error) {
+  //     toast.error("Error fetching Class data.");
+  //   } finally {
+  //     // Stop loading for both dropdowns
+  //     setLoadingClasses(false);
+  //     setLoadingStudents(false);
+  //   }
+  // };
+  const fetchNextclasses = async (classId) => {
     try {
       setLoadingClasses(true);
       setLoadingStudents(true);
 
       const token = localStorage.getItem("authToken");
 
-      // Fetch classes and students concurrently
-      const [classResponse] = await Promise.all([
-        axios.get(`${API_URL}/api/nextclassacademicyear`, {
+      const response = await axios.get(
+        `${API_URL}/api/nextclassacademicyear/${classId}`,
+        {
+          // params: { classId: classId }, // 👈 yaha pass karo
           headers: { Authorization: `Bearer ${token}` },
-        }),
-      ]);
+        }
+      );
 
-      // Set the fetched data
-      setClassesforFormForStudent(classResponse.data.data || []);
-      //   setStudentNameWithClassId(studentResponse?.data?.data || []);
+      setClassesforFormForStudent(response.data.data || []);
     } catch (error) {
       toast.error("Error fetching Class data.");
     } finally {
-      // Stop loading for both dropdowns
       setLoadingClasses(false);
       setLoadingStudents(false);
     }
@@ -167,8 +189,17 @@ const PromotedStudent = () => {
     setSelectedClass(selectedOption);
     setSelectedStudent(null);
     setSelectedStudentId(null);
-    setClassIdForSearch(selectedOption?.value);
-    fetchStudentNameWithClassId(selectedOption?.value);
+    // setClassIdForSearch(selectedOption?.value);
+    // fetchStudentNameWithClassId(selectedOption?.value);
+
+
+    const classId = selectedOption?.value;
+    setClassIdForSearch(classId);
+
+    // 👇 dono APIs call kar sakte ho
+    fetchStudentNameWithClassId(classId);
+    fetchNextclasses(classId); // 👈 yaha call ka
+
   };
   const handleClassSelectForStudent = (selectedOption) => {
     setNameErrorForClassForStudent("");
@@ -404,25 +435,24 @@ const PromotedStudent = () => {
 
   const filteredParents = parentInformation
     ? parentInformation.filter((student) => {
-        const searchLower = searchTerm.toLowerCase();
+      const searchLower = searchTerm.toLowerCase();
 
-        return (
-          (student.roll_no !== null &&
-            student.roll_no.toString().toLowerCase().includes(searchLower)) || // Filter by roll number
-          `${student.first_name || ""} ${student.mid_name || ""} ${
-            student.last_name || ""
+      return (
+        (student.roll_no !== null &&
+          student.roll_no.toString().toLowerCase().includes(searchLower)) || // Filter by roll number
+        `${student.first_name || ""} ${student.mid_name || ""} ${student.last_name || ""
           }`
-            .toLowerCase()
-            .includes(searchLower) // Filter by full name
-        );
-      })
+          .toLowerCase()
+          .includes(searchLower) // Filter by full name
+      );
+    })
     : [];
 
   return (
     <div>
       <ToastContainer />
 
-      <div className="md:mx-auto md:w-3/4 p-4 bg-white mt-4 ">
+      <div className="md:mx-auto md:w-3/4 px-3 py-2 bg-white mt-4 rounded-md ">
         <div className=" card-header  flex justify-between items-center  ">
           <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
             Promote Students
@@ -524,9 +554,8 @@ const PromotedStudent = () => {
                   type="search"
                   onClick={handleSearch}
                   style={{ backgroundColor: "#2196F3" }}
-                  className={`my-1 md:my-4 btn h-10 w-18 md:w-auto btn-primary text-white font-bold py-1 border-1 border-blue-500 px-4 rounded ${
-                    loadingForSearch ? "opacity-50 cursor-not-allowed" : ""
-                  }`}
+                  className={`my-1 md:my-4 btn h-10 w-18 md:w-auto btn-primary text-white font-bold py-1 border-1 border-blue-500 px-4 rounded ${loadingForSearch ? "opacity-50 cursor-not-allowed" : ""
+                    }`}
                   disabled={loadingForSearch}
                 >
                   {loadingForSearch ? (
@@ -630,7 +659,7 @@ const PromotedStudent = () => {
                                 zIndex: 1050, // Set your desired z-index value
                               }),
                             }}
-                            // isDisabled={loadingStudents}
+                          // isDisabled={loadingStudents}
                           />
                           {nameErrorForStudent && (
                             <div className="h-8 relative ml-1 text-danger text-xs">
@@ -697,11 +726,10 @@ const PromotedStudent = () => {
                                 filteredParents.map((student, index) => (
                                   <tr
                                     key={student.student_id}
-                                    className={`${
-                                      index % 2 === 0
-                                        ? "bg-white"
-                                        : "bg-gray-100"
-                                    } hover:bg-gray-50`}
+                                    className={`${index % 2 === 0
+                                      ? "bg-white"
+                                      : "bg-gray-100"
+                                      } hover:bg-gray-50`}
                                   >
                                     <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
                                       <p className="text-gray-900 whitespace-no-wrap relative top-2">
@@ -731,12 +759,25 @@ const PromotedStudent = () => {
                                           : student.roll_no || ""}
                                       </p>
                                     </td>
-                                    <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                                    {/* <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
                                       <p className="text-gray-900 whitespace-no-wrap relative top-2">
                                         {student.first_name || ""}{" "}
                                         {student.mid_name || ""}{" "}
                                         {student.last_name || ""}{" "}
                                       </p>
+                                    </td> */}
+                                    <td className="text-center px-2 lg:px-3 border border-gray-950 text-sm">
+                                      <p className="text-gray-900 whitespace-no-wrap relative top-2">
+                                        {student.first_name || ""}{" "}
+                                        {student.mid_name || ""}{" "}
+                                        {student.last_name || ""}
+                                      </p>
+
+                                      {student.confirm_status == "Y" && (
+                                        <p className="text-green-600 text-xs mt-1">
+                                          (Readmission confirmed)
+                                        </p>
+                                      )}
                                     </td>
                                   </tr>
                                 ))
@@ -764,9 +805,8 @@ const PromotedStudent = () => {
                           type="submit"
                           onClick={handleSubmit}
                           style={{ backgroundColor: "#2196F3" }}
-                          className={`text-white font-bold py-1 border-1 border-blue-500 px-4 rounded ${
-                            loading ? "opacity-50 cursor-not-allowed" : ""
-                          }`}
+                          className={`text-white font-bold py-1 border-1 border-blue-500 px-4 rounded ${loading ? "opacity-50 cursor-not-allowed" : ""
+                            }`}
                           disabled={loading}
                         >
                           {loading ? (
