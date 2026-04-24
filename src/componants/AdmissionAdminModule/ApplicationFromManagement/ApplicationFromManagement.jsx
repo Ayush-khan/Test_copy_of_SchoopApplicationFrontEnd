@@ -57,15 +57,15 @@ function ApplicationForMangement() {
   const [formFeeError, setFormFeeError] = useState("");
   const [showViewModal, setShowViewModal] = useState(false);
 
-  const [bankAccountNames, setBankAccountNames] = useState([]);
-  const [account, setAccount] = useState(null);
-  const [accountError, setAccountError] = useState("");
+  const [bankAccountNames , setBankAccountNames] = useState([]);
+  const [account , setAccount] = useState(null);
+  const [accountError , setAccountError] = useState("");
 
-  const [accountTypes, setAccountTypes] = useState([]);
-  const [accountType, setAccountType] = useState(null);
-  const [accountTypeError, setAccountTypeError] = useState("");
+  const [accountTypes , setAccountTypes] = useState([]);
+  const [accountType , setAccountType] = useState(null);
+  const [accountTypeError , setAccountTypeError] = useState("");
 
-  const MASTER_DROPDOWN_CODE = "ADMISSION_TYPE";
+  const MASTER_DROPDOWN_CODE = "ADMISSION_TYPE"; 
 
   const accountTypeOptions = useMemo(
     () =>
@@ -292,17 +292,13 @@ function ApplicationForMangement() {
     setAgeEndDate(section.age_end_date);
 
     setAccount({
-      value: section.account_id ?? "",
+      value: section.account_id ?? '',
       label: section.account_name ?? "Select",
     });
-    setAccountType(
-      section.type
-        ? {
-            value: section.type,
-            label: section.type,
-          }
-        : null,
-    );
+    setAccountType(section.type ? {
+      value: section.type,
+      label: section.type,
+    } : null);
 
     // FORM FEE
     setFormFee(section.application_form_fee);
@@ -392,7 +388,7 @@ function ApplicationForMangement() {
       hasError = true;
     }
 
-    if (account.value == "") {
+    if (!account || account.value == "") {
       setAccountError("Please select account");
       hasError = true;
     }
@@ -537,6 +533,7 @@ function ApplicationForMangement() {
       fetchSections(); // refresh list
       handleCloseModal(); // close modal
     } catch (error) {
+
       toast.error(
         error?.response?.data?.message ||
           "Something went wrong. Please try again.",
@@ -621,6 +618,7 @@ function ApplicationForMangement() {
         );
       }
     } catch (error) {
+
       if (error.response?.status === 409) {
         toast.error(
           error.response.data?.message ||
@@ -1509,7 +1507,9 @@ function ApplicationForMangement() {
 
                   {/* Account */}
                   <div className="relative mb-3 flex items-center mx-4">
-                    <label className="w-1/2 mt-2">Account</label>
+                    <label  className="w-1/2 mt-2">
+                      Account
+                    </label>
 
                     <div className="w-full md:w-[60%]">
                       <input
@@ -1524,7 +1524,9 @@ function ApplicationForMangement() {
 
                   {/* Account */}
                   <div className="relative mb-3 flex items-center mx-4">
-                    <label className="w-1/2 mt-2">Type</label>
+                    <label  className="w-1/2 mt-2">
+                      Type
+                    </label>
 
                     <div className="w-full md:w-[60%]">
                       <input
