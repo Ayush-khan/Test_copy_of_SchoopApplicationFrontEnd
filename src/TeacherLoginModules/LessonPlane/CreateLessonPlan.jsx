@@ -648,6 +648,16 @@ const CreateLessonPlan = () => {
         return;
       }
 
+      const hasInvalidStartDate = rows.some(
+        (row) => !row.startDate || row.startDate.trim() === "",
+      );
+
+      if (hasInvalidStartDate) {
+        toast.error("Start date is mandatory for all periods.");
+        setIsSubmitting(false);
+        return;
+      }
+
       const hasTeachingPoints = rows.some((_, rowIndex) =>
         (dailyHeading || []).some((item) => {
           const val =
