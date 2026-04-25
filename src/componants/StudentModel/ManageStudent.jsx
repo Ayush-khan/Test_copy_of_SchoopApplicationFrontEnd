@@ -81,6 +81,7 @@ function ManageSubjectList() {
   const [academicYr, setAcademicYr] = useState("");
 
   const location = useLocation();
+  const class_id = location.state?.class_id || null;
   const section_id = location.state?.section_id || null;
   // console.log("manage section id", section_id);
 
@@ -96,9 +97,20 @@ function ManageSubjectList() {
     fetchClassTeacherData(roleIdValue);
   }, [roleIdValue]);
 
+  const getClassAndSectionIds = (selection = null) => {
+    if (!selection) {
+      return { classId: null, sectionId: null };
+    }
+
+    return {
+      classId: selection.class_id || selection.classId || null,
+      sectionId: selection.section_id || selection.sectionId || null,
+    };
+  };
+
   useEffect(() => {
-    fetchStudentNameWithClassId(section_id);
-  }, [section_id]);
+    fetchStudentNameWithClassId(class_id, section_id);
+  }, [class_id, section_id]);
 
   const classOptions = useMemo(() => {
     return classes.map((cls) => {
@@ -111,8 +123,8 @@ function ManageSubjectList() {
         };
       } else {
         return {
-          value: cls.section_id,
-          label: `${cls?.get_class?.name} ${cls.name} (${cls.students_count})`,
+          value: `${cls.class_id} ${cls.section_id}`,
+          label: `${cls?.classname} ${cls?.sectionname} (${cls?.students_count})`,
           class_id: cls.class_id,
           section_id: cls.section_id,
         };
@@ -123,20 +135,22 @@ function ManageSubjectList() {
   useEffect(() => {
     if (location.state?.section_id) {
       const matchingOption = classOptions.find(
-        (opt) => opt.value === location.state.section_id,
+        (opt) =>
+          String(opt.section_id) === String(location.state.section_id) &&
+          (!class_id || String(opt.class_id) === String(class_id)),
       );
 
       if (matchingOption) {
         handleClassSelect(matchingOption); // Simulates user selecting from dropdown
 
         // Trigger the search only for programmatic selection
-        handleSearch(matchingOption.value);
+        handleSearch(matchingOption);
       }
 
       // Clear location state to avoid re-triggering on reload
       window.history.replaceState({}, document.title);
     }
-  }, [location.state, classOptions]);
+  }, [location.state, classOptions, class_id]);
 
   const studentOptions = useMemo(
     () =>
@@ -226,8 +240,11 @@ function ManageSubjectList() {
   //   }
   // };
 
-  const fetchStudentNameWithClassId = async (section_id = null) => {
-    if (roleId === "T" && !section_id) {
+  const fetchStudentNameWithClassId = async (
+    selectedClassId = null,
+    selectedSectionId = null,
+  ) => {
+    if (roleId === "T" && !selectedClassId && !selectedSectionId) {
       setStudentNameWithClassId([]); // clear dropdown
       return;
     }
@@ -236,10 +253,14 @@ function ManageSubjectList() {
     try {
       const token = localStorage.getItem("authToken");
       const response = await axios.get(
-        `${API_URL}/api/getStudentListBySectionData`,
+        // `${API_URL}/api/getStudentListBySectionData`,
+        `${API_URL}/api/getStudentListByClassSectionData`,
         {
           headers: { Authorization: `Bearer ${token}` },
-          params: section_id ? { section_id } : {},
+          params: {
+            ...(selectedClassId ? { class_id: selectedClassId } : {}),
+            ...(selectedSectionId ? { section_id: selectedSectionId } : {}),
+          },
         },
       );
       setStudentNameWithClassId(response?.data?.data || []);
@@ -257,10 +278,10 @@ function ManageSubjectList() {
     setSelectedStudent(null);
     setSelectedStudentId(null);
 
-    const sectionId = selectedOption ? selectedOption.value : null;
+    const { classId, sectionId } = getClassAndSectionIds(selectedOption);
     setclassIdForManage(sectionId);
     setSectionIdForStudentList(sectionId);
-    fetchStudentNameWithClassId(sectionId);
+    fetchStudentNameWithClassId(classId, sectionId);
   };
 
   // Correct working before add bunch downloading
@@ -308,13 +329,13 @@ function ManageSubjectList() {
       const classApiUrl =
         roleId === "T"
           ? `${API_URL}/api/get_teacherclasseswithclassteacher?teacher_id=${roleIdValue}`
-          : `${API_URL}/api/getallClassWithStudentCount`;
+          : `${API_URL}/api/getallClassWithDummyStudentCount`;
 
       const [classResponse, studentResponse] = await Promise.all([
         axios.get(classApiUrl, {
           headers: { Authorization: `Bearer ${token}` },
         }),
-        axios.get(`${API_URL}/api/getStudentListBySectionData`, {
+        axios.get(`${API_URL}/api/getStudentListByClassSectionData`, {
           headers: { Authorization: `Bearer ${token}` },
         }),
       ]);
@@ -340,13 +361,10 @@ function ManageSubjectList() {
     setSubjects([]);
     setNameError("");
 
-    const selectedclassid = selectedClass
-      ? selectedClass.class_id || selectedClass.id || selectedClass.value
-      : null;
-
-    const selectedsectionid = selectedClass
-      ? selectedClass.section_id || null
-      : null;
+    const {
+      classId: selectedclassid,
+      sectionId: selectedsectionid,
+    } = getClassAndSectionIds(selectedClass);
 
     setSelectedClassIdHPC(selectedclassid);
     setSelectedSectionIdHPC(selectedsectionid);
@@ -354,9 +372,17 @@ function ManageSubjectList() {
     console.log("Selected class_id:", selectedclassid);
     console.log("Selected section_id:", selectedsectionid);
 
+    const normalizedIncomingSelection =
+      incomingSectionId && typeof incomingSectionId === "object"
+        ? incomingSectionId
+        : null;
+    const incomingIds = getClassAndSectionIds(normalizedIncomingSelection);
+    const finalClassId =
+      selectedclassid || incomingIds.classId || class_id || null;
     const finalSectionId =
+      selectedsectionid ||
+      incomingIds.sectionId ||
       classIdForManage ||
-      incomingSectionId ||
       location?.state?.section_id ||
       null;
 
@@ -382,12 +408,8 @@ function ManageSubjectList() {
       const queryParams = {};
 
       if (selectedStudentId) queryParams.student_id = selectedStudentId;
-      if (finalSectionId) {
-        queryParams.section_id =
-          typeof finalSectionId === "object"
-            ? finalSectionId.id || finalSectionId.value || ""
-            : finalSectionId;
-      }
+      if (finalClassId) queryParams.class_id = finalClassId;
+      if (finalSectionId) queryParams.section_id = finalSectionId;
       if (grNumber) queryParams.reg_no = grNumber;
 
       const response = await axios.get(`${API_URL}/api/get_students`, {
@@ -416,11 +438,7 @@ function ManageSubjectList() {
       setPageCount(Math.ceil(studentList.length / pageSize));
 
       // HPC class check
-      const selectedClassId =
-        (typeof finalSectionId === "object"
-          ? finalSectionId.class_id
-          : selectedClass?.class_id) || null;
-      setIsHpcClass(selectedClassId && hpcClassIds.includes(selectedClassId));
+      setIsHpcClass(finalClassId && hpcClassIds.includes(finalClassId));
 
       setHasSearched(true);
     } catch (error) {
