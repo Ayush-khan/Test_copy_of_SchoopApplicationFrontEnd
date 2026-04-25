@@ -64,7 +64,7 @@ const IciciFeePaymentReport = () => {
         `${API_URL}/api/get_allstudentwithclass`,
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
 
       console.log("API Response:", response.data);
@@ -111,7 +111,7 @@ const IciciFeePaymentReport = () => {
         value: account.value,
         label: account.label,
       })),
-    []
+    [],
   );
 
   const handleAccountSelect = (selectedOption) => {
@@ -119,7 +119,7 @@ const IciciFeePaymentReport = () => {
 
     // Store only the value separately, ensuring "School" is stored as an empty string
     setSelectedAccountId(
-      selectedOption.value === "" ? "" : selectedOption.value
+      selectedOption.value === "" ? "" : selectedOption.value,
     );
 
     // Clear error if a valid option is selected
@@ -217,7 +217,7 @@ const IciciFeePaymentReport = () => {
           paramsSerializer: (params) => {
             return new URLSearchParams(params).toString();
           },
-        }
+        },
       );
 
       console.log("API Response:", response?.data);
@@ -298,9 +298,9 @@ const IciciFeePaymentReport = () => {
                             .split("'")
                             .map(
                               (part) =>
-                                part.charAt(0).toUpperCase() + part.slice(1)
+                                part.charAt(0).toUpperCase() + part.slice(1),
                             )
-                            .join("'")
+                            .join("'"),
                         )
                         .join(" ")
                     : " "
@@ -323,7 +323,7 @@ const IciciFeePaymentReport = () => {
                  <td class="px-2 text-center py-2 border border-black">${
                    subject?.Amount || " "
                  }</td>
-              </tr>`
+              </tr>`,
             )
             .join("")}
         </tbody>
@@ -455,7 +455,7 @@ const IciciFeePaymentReport = () => {
                 word
                   .split("'")
                   .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-                  .join("'")
+                  .join("'"),
               )
               .join(" ")
           : " "
@@ -479,7 +479,7 @@ const IciciFeePaymentReport = () => {
     XLSX.utils.book_append_sheet(
       workbook,
       worksheet,
-      "ICICI Fee Payement Report"
+      "ICICI Fee Payement Report",
     );
 
     // Generate and download the Excel file
@@ -546,7 +546,7 @@ const IciciFeePaymentReport = () => {
         <div className="card rounded-md ">
           <div className=" card-header mb-4 flex justify-between items-center ">
             <h5 className="text-gray-700 mt-1 text-md lg:text-lg">
-              ICICI Fee Payment Report
+              ICICI PG Fee Payment Report
             </h5>
             <RxCross1
               className=" relative right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
@@ -607,8 +607,8 @@ const IciciFeePaymentReport = () => {
                     value={fromDate}
                     onChange={(e) => handleChangeDate(e, "fromDate")}
                     className="text-sm border border-gray-300 rounded px-2 py-2 w-full"
-                    min={academicYrFrom}
-                    max={academicYrTo}
+                    // min={academicYrFrom}
+                    max={fromDate}
                   />
                   <div className="text-xs text-red-500">
                     {formDateError && <span>{formDateError}</span>}
@@ -624,8 +624,8 @@ const IciciFeePaymentReport = () => {
                     value={toDate}
                     onChange={(e) => handleChangeDate(e, "toDate")}
                     className="text-sm border border-gray-300 rounded px-2 py-2 w-full"
-                    min={fromDate || academicYrFrom}
-                    max={academicYrTo}
+                    // min={fromDate || academicYrFrom}
+                    max={new Date().toISOString().split("T")[0]}
                   />
                   <div className="text-xs text-red-500">
                     {toDateError && <span>{toDateError}</span>}
@@ -782,9 +782,9 @@ const IciciFeePaymentReport = () => {
                                               .map(
                                                 (part) =>
                                                   part.charAt(0).toUpperCase() +
-                                                  part.slice(1)
+                                                  part.slice(1),
                                               )
-                                              .join("'")
+                                              .join("'"),
                                           )
                                           .join(" ")
                                       : " "}

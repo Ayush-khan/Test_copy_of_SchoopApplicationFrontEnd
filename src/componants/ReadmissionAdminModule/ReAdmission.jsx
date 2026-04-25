@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, useMemo } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 import axios from "axios";
 import ReactPaginate from "react-paginate";
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -14,7 +14,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { RxCross1 } from "react-icons/rx";
 import Select from "react-select";
 
-function ReadmissionAdmin() {
+function ReAdmission() {
     const API_URL = import.meta.env.VITE_API_URL; // URL for host
     const [sections, setSections] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -23,80 +23,33 @@ function ReadmissionAdmin() {
     const [showEditModal, setShowEditModal] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [currentSection, setCurrentSection] = useState(null);
-    const [newSectionName, setNewSectionName] = useState("");
     const [searchTerm, setSearchTerm] = useState("");
-    const [className, setClassName] = useState("");
     const [currentPage, setCurrentPage] = useState(0);
     const [pageCount, setPageCount] = useState(0);
-    const [newDepartmentId, setNewDepartmentId] = useState("");
-    const [fieldErrors, setFieldErrors] = useState({}); // For field-specific errors
-    const [nameError, setNameError] = useState("");
-
-    const [description, setnewDescription] = useState("");
     const [requiresAppointment, setRequiresAppointment] = useState("N");
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [classNameWithClassId, setClassNameWithClassId] = useState([]);
-
     const [selectedClass, setSelectedClass] = useState(null);
     const [selectedClassId, setSelectedClassId] = useState(null);
-    const [formFee, setFormFee] = useState("");
-
     const [startDate, setStartDate] = useState("");
     const [endDate, setEndDate] = useState("");
 
-    const [ageStartDate, setAgeStartDate] = useState("");
-    const [ageEndDate, setAgeEndDate] = useState("");
 
     const [startDateError, setStartDateError] = useState("");
     const [endDateError, setEndDateError] = useState("");
-
-    const [ageStartDateError, setAgeStartDateError] = useState("");
-    const [ageEndDateError, setAgeEndDateError] = useState("");
-
     const [classError, setClassError] = useState("");
-    const [formFeeError, setFormFeeError] = useState("");
     const [showViewModal, setShowViewModal] = useState(false);
 
-    const [bankAccountNames, setBankAccountNames] = useState([]);
-    const [account, setAccount] = useState(null);
-    const [accountError, setAccountError] = useState("");
-
-    const [accountTypes, setAccountTypes] = useState([]);
-    const [accountType, setAccountType] = useState(null);
-    const [accountTypeError, setAccountTypeError] = useState("");
-
-    const MASTER_DROPDOWN_CODE = "ADMISSION_TYPE";
-
-    const accountTypeOptions = useMemo(
-        () =>
-            accountTypes.map((a) => ({
-                value: a.label,
-                label: `${a.label}`,
-            })),
-        [accountTypes],
-    );
-
-    const accountOptions = useMemo(
-        () =>
-            bankAccountNames.map((a) => ({
-                value: a.id,
-                label: `${a.account_name}`,
-            })),
-        [bankAccountNames],
-    );
-
     useEffect(() => {
-        fetchExams();
-        fetchBankAccountNames();
-        fetchAccountTypes();
+        fetchReadmissionClasses();
     }, []);
 
-    const fetchExams = async () => {
+    const fetchReadmissionClasses = async () => {
         try {
             const token = localStorage.getItem("authToken");
 
             const response = await axios.get(
-                `${API_URL}/api/admin/admission/classes/not-created`,
+                `${API_URL}/api/admin/readmission/classes/not-created`,
                 {
                     headers: { Authorization: `Bearer ${token}` },
                 },
@@ -113,15 +66,6 @@ function ReadmissionAdmin() {
         setSelectedClassId(selectedOption?.value);
     };
 
-    const handleAccountTypeSelect = (selectedOption) => {
-        setAccountTypeError("");
-        setAccountType(selectedOption || null);
-    };
-
-    const handleAccountSelect = (selectedOption) => {
-        setAccountError("");
-        setAccount(selectedOption);
-    };
 
     const classOptions = useMemo(
         () =>
@@ -146,7 +90,7 @@ function ReadmissionAdmin() {
             }
 
             const response = await axios.get(
-                `${API_URL}/api/admin/admission-management`,
+                `${API_URL}/api/admin/readmission-management`,
                 {
                     headers: {
                         Authorization: `Bearer ${token}`,
@@ -156,58 +100,6 @@ function ReadmissionAdmin() {
             );
 
             setSections(response.data.data);
-        } catch (error) {
-            setError(error.message);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const fetchBankAccountNames = async () => {
-        try {
-            const token = localStorage.getItem("authToken");
-
-            if (!token) {
-                throw new Error("No authentication token found");
-            }
-
-            const response = await axios.get(
-                `${API_URL}/api/admin/admission/bank-accounts`,
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                    withCredentials: true,
-                },
-            );
-
-            setBankAccountNames(response.data.data);
-        } catch (error) {
-            setError(error.message);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const fetchAccountTypes = async () => {
-        try {
-            const token = localStorage.getItem("authToken");
-
-            if (!token) {
-                throw new Error("No authentication token found");
-            }
-
-            const response = await axios.get(
-                `${API_URL}/api/master/dropdowns/code/${MASTER_DROPDOWN_CODE}/options`,
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                    withCredentials: true,
-                },
-            );
-
-            setAccountTypes(response.data.data);
         } catch (error) {
             setError(error.message);
         } finally {
@@ -288,25 +180,6 @@ function ReadmissionAdmin() {
         setStartDate(section.start_date);
         setEndDate(section.end_date);
 
-        setAgeStartDate(section.age_start_date);
-        setAgeEndDate(section.age_end_date);
-
-        setAccount({
-            value: section.account_id ?? "",
-            label: section.account_name ?? "Select",
-        });
-        setAccountType(
-            section.type
-                ? {
-                    value: section.type,
-                    label: section.type,
-                }
-                : null,
-        );
-
-        // FORM FEE
-        setFormFee(section.application_form_fee);
-
         // PUBLISH
         setRequiresAppointment(section.publish === "Y" ? "Y" : "N");
 
@@ -314,9 +187,7 @@ function ReadmissionAdmin() {
         setClassError("");
         setStartDateError("");
         setEndDateError("");
-        setFormFeeError("");
-        setAccountTypeError("");
-        setAccountError("");
+
 
         // OPEN MODAL
         setShowEditModal(true);
@@ -330,25 +201,14 @@ function ReadmissionAdmin() {
             value: section.class_id,
         });
 
-        setAccount({
-            label: section.account_name,
-            value: section.account_id,
-        });
-
-        setAccountType(section.type);
-
         setStartDate(section.start_date);
         setEndDate(section.end_date);
-
-        setFormFee(section.application_form_fee);
 
         setRequiresAppointment(section.publish === "Y" ? "Y" : "N");
 
         setClassError("");
         setStartDateError("");
         setEndDateError("");
-        setFormFeeError("");
-
         // OPEN MODAL
         setShowViewModal(true);
     };
@@ -367,11 +227,7 @@ function ReadmissionAdmin() {
         setSelectedClass(null);
         setStartDate("");
         setEndDate("");
-        setFormFee("");
-        setAgeEndDate("");
-        setAgeStartDate("");
-        setAccountType(null);
-        setAccount(null);
+
     };
 
     const handleSubmitAdd = async (e) => {
@@ -379,11 +235,8 @@ function ReadmissionAdmin() {
 
         // Clear previous errors
         setClassError("");
-        setAccountError("");
-        setAccountTypeError("");
         setStartDateError("");
         setEndDateError("");
-        setFormFeeError("");
 
         let hasError = false;
 
@@ -392,10 +245,7 @@ function ReadmissionAdmin() {
             hasError = true;
         }
 
-        if (account.value == "") {
-            setAccountError("Please select account");
-            hasError = true;
-        }
+
 
         if (!startDate) {
             setStartDateError("Please select start date");
@@ -407,15 +257,7 @@ function ReadmissionAdmin() {
             hasError = true;
         }
 
-        if (!formFee) {
-            setFormFeeError("Please enter form fee");
-            hasError = true;
-        } else if (!/^\d+(\.\d+)?$/.test(formFee)) {
-            setFormFeeError("Please enter only numbers");
-            hasError = true;
-        } else {
-            setFormFeeError("");
-        }
+
 
         if (hasError) return;
 
@@ -429,17 +271,12 @@ function ReadmissionAdmin() {
             class_id: selectedClass.value,
             start_date: startDate,
             end_date: endDate,
-            form_fee: formFee.toString(),
             publish: requiresAppointment === "Y" ? "Y" : "N",
-            age_start_date: ageStartDate,
-            age_end_date: ageEndDate,
-            account_id: account.value,
-            type: accountType?.value ?? "",
         };
 
         try {
             await axios.post(
-                `${API_URL}/api/admin/adminssion-management/create`,
+                `${API_URL}/api/admin/readminssion-management/create`,
                 payload,
                 {
                     headers: {
@@ -449,7 +286,7 @@ function ReadmissionAdmin() {
                 },
             );
 
-            toast.success("Admission created successfully");
+            toast.success("Re-admission created successfully");
             fetchSections();
             handleCloseModal();
         } catch (error) {
@@ -462,11 +299,9 @@ function ReadmissionAdmin() {
 
     const handleSubmitEdit = async (e) => {
         e.preventDefault();
-        setAccountError("");
-        setAccountTypeError("");
         setStartDateError("");
         setEndDateError("");
-        setFormFeeError("");
+
 
         let hasError = false;
 
@@ -478,26 +313,6 @@ function ReadmissionAdmin() {
         if (!endDate) {
             setEndDateError("Please select end date");
             hasError = true;
-        }
-
-        if (!account) {
-            setAccountError("Please select account");
-            hasError = true;
-        }
-
-        // if (!formFee) {
-        //   setFormFeeError("Please enter form fee");
-        //   hasError = true;
-        // }
-
-        if (!formFee) {
-            setFormFeeError("Please enter form fee");
-            hasError = true;
-        } else if (!/^\d+(\.\d+)?$/.test(formFee)) {
-            setFormFeeError("Please enter only numbers");
-            hasError = true;
-        } else {
-            setFormFeeError("");
         }
 
         if (hasError) return;
@@ -512,17 +327,13 @@ function ReadmissionAdmin() {
             class_id: currentSection.class_id,
             start_date: startDate,
             end_date: endDate,
-            form_fee: formFee.toString(),
             publish: requiresAppointment === "Y" ? "Y" : "N",
-            age_start_date: ageStartDate === "0000-00-00" ? "" : ageStartDate,
-            age_end_date: ageEndDate === "0000-00-00" ? "" : ageEndDate,
-            account_id: account.value,
-            type: accountType?.value ?? "",
+
         };
 
         try {
             await axios.patch(
-                `${API_URL}/api/admin/admission-management/${currentSection.nac_id}`,
+                `${API_URL}/api/admin/readmission-management/${currentSection.rc_id}`,
                 payload,
                 {
                     headers: {
@@ -532,7 +343,7 @@ function ReadmissionAdmin() {
                 },
             );
 
-            toast.success("Admission updated successfully");
+            toast.success("Re-admission updated successfully");
 
             fetchSections(); // refresh list
             handleCloseModal(); // close modal
@@ -545,66 +356,24 @@ function ReadmissionAdmin() {
     };
 
     const handleDelete = (id) => {
-        const sectionToDelete = sections.find((sec) => sec.nac_id === id);
+        const sectionToDelete = sections.find((sec) => sec.rc_id === id);
         setCurrentSection(sectionToDelete);
         setShowDeleteModal(true);
     };
 
-    // const handleSubmitDelete = async () => {
-    //   if (isSubmitting) return;
-    //   setIsSubmitting(true);
-    //   try {
-    //     const token = localStorage.getItem("authToken");
-
-    //     if (!token || !currentSection || !currentSection.nac_id) {
-    //       throw new Error("New Admission ID is missing");
-    //     }
-    //     console.log("delete this nac_id", currentSection.nac_id);
-    //     const response = await axios.delete(
-    //       `${API_URL}/api/admin/admission-management/${currentSection.nac_id}`,
-    //       {
-    //         headers: {
-    //           Authorization: `Bearer ${token}`,
-    //         },
-    //         withCredentials: true,
-    //       },
-    //     );
-    //     console.log("The response of the delete api ", response.data);
-    //     if (response.data.success) {
-    //       fetchSections();
-    //       setShowDeleteModal(false);
-    //       setCurrentSection(null);
-    //       toast.success("Admission class deleted successfully.");
-    //     } else {
-    //       toast.error(
-    //         response.data.message || "Failed to delete admission class!",
-    //       );
-    //     }
-    //   } catch (error) {
-    //     console.error("Error deleting admission class:", error);
-    //     if (error.response && error.response.data && error.response.data.error) {
-    //       toast.error(error.response.data.error);
-    //     } else {
-    //       toast.error("Server error. Please try again later.");
-    //     }
-    //   } finally {
-    //     setIsSubmitting(false); // Re-enable the button after the operation
-    //     setShowDeleteModal(false);
-    //   }
-    // };
     const handleSubmitDelete = async () => {
         if (isSubmitting) return;
         setIsSubmitting(true);
 
         try {
             const token = localStorage.getItem("authToken");
-
-            if (!token || !currentSection?.nac_id) {
-                throw new Error("New Admission ID is missing");
+            console.log("Deleting re-admission with ID:", currentSection?.rc_id);
+            if (!token || !currentSection?.rc_id) {
+                throw new Error("Re-admission ID is missing");
             }
 
             const response = await axios.delete(
-                `${API_URL}/api/admin/admission-management/${currentSection.nac_id}`,
+                `${API_URL}/api/admin/readmission-management/${currentSection.rc_id}`,
                 {
                     headers: {
                         Authorization: `Bearer ${token}`,
@@ -614,17 +383,17 @@ function ReadmissionAdmin() {
 
             if (response.data.success) {
                 fetchSections();
-                toast.success("Admission class deleted successfully.");
+                toast.success("Re-Admission class deleted successfully.");
             } else {
                 toast.error(
-                    response.data.message || "Failed to delete admission class!",
+                    response.data.message || "Failed to delete re-admission class!",
                 );
             }
         } catch (error) {
             if (error.response?.status === 409) {
                 toast.error(
                     error.response.data?.message ||
-                    "Cannot delete this admission. It is linked with other records.",
+                    "Cannot delete this re-admission. It is linked with other records.",
                 );
             } else {
                 toast.error("Server error. Please try again later.");
@@ -643,7 +412,7 @@ function ReadmissionAdmin() {
                 <div className="card mx-auto shadow-lg">
                     <div className="p-2 px-3 bg-gray-100 flex justify-between items-center">
                         <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
-                            Application Form Management
+                            Re-Admission Form Management
                         </h3>{" "}
                         <div className="box-border flex md:gap-x-2 justify-end md:h-10">
                             <div className=" w-1/2 md:w-fit mr-1">
@@ -665,7 +434,7 @@ function ReadmissionAdmin() {
                         </div>
                     </div>
                     <div
-                        className=" relative w-[97%]   mb-3 h-1  mx-auto bg-red-700"
+                        className=" relative w-[97%] h-1  mx-auto bg-red-700"
                         style={{
                             backgroundColor: "#C03078",
                         }}
@@ -684,25 +453,10 @@ function ReadmissionAdmin() {
                                                 Class
                                             </th>
                                             <th className="px-2 md:px-3 py-2 border border-gray-900 text-xs md:text-sm font-semibold text-center">
-                                                Account
-                                            </th>
-                                            <th className="px-2 md:px-3 py-2 border border-gray-900 text-xs md:text-sm font-semibold text-center">
-                                                Type
-                                            </th>
-                                            <th className="px-2 md:px-3 py-2 border border-gray-900 text-xs md:text-sm font-semibold text-center">
                                                 Start Date
                                             </th>
                                             <th className="px-2 md:px-3 py-2 border border-gray-900 text-xs md:text-sm font-semibold text-center">
                                                 End Date
-                                            </th>
-                                            <th className="px-2 md:px-3 py-2 border border-gray-900 text-xs md:text-sm font-semibold text-center">
-                                                Age Start Date
-                                            </th>
-                                            <th className="px-2 md:px-3 py-2 border border-gray-900 text-xs md:text-sm font-semibold text-center">
-                                                Age End Date
-                                            </th>
-                                            <th className="px-2 md:px-3 py-2 border border-gray-900 text-xs md:text-sm font-semibold text-center">
-                                                Form Fee
                                             </th>
                                             <th className="px-2 md:px-3 py-2 border border-gray-900 text-xs md:text-sm font-semibold text-center">
                                                 Status
@@ -746,38 +500,17 @@ function ReadmissionAdmin() {
                                                     </td>
 
                                                     <td className="text-center px-2 md:px-3 py-2 border border-gray-900 text-xs md:text-sm">
-                                                        {section?.account_name}
-                                                    </td>
-
-                                                    <td className="text-center px-2 md:px-3 py-2 border border-gray-900 text-xs md:text-sm">
-                                                        {section?.type}
-                                                    </td>
-
-                                                    <td className="text-center px-2 md:px-3 py-2 border border-gray-900 text-xs md:text-sm">
                                                         {formatDate(section?.start_date)}
                                                     </td>
 
                                                     <td className="text-center px-2 md:px-3 py-2 border border-gray-900 text-xs md:text-sm">
                                                         {formatDate(section?.end_date)}
                                                     </td>
-
-                                                    <td className="text-center px-2 md:px-3 py-2 border border-gray-900 text-xs md:text-sm">
-                                                        {formatDate(section?.age_start_date)}
-                                                    </td>
-
-                                                    <td className="text-center px-2 md:px-3 py-2 border border-gray-900 text-xs md:text-sm">
-                                                        {formatDate(section?.age_end_date)}
-                                                    </td>
-
-                                                    <td className="text-center px-2 md:px-3 py-2 border border-gray-900 text-xs md:text-sm">
-                                                        {section?.application_form_fee}
-                                                    </td>
-
                                                     <td className="text-center px-2 md:px-3 py-2 border border-gray-900 text-xs md:text-sm">
                                                         <span
                                                             className={`font-semibold ${section?.publish === "N"
-                                                                    ? "text-red-500"
-                                                                    : "text-green-500"
+                                                                ? "text-red-500"
+                                                                : "text-green-500"
                                                                 }`}
                                                         >
                                                             {section?.publish === "N"
@@ -798,7 +531,7 @@ function ReadmissionAdmin() {
                                                     <td className="text-center px-2 md:px-3 py-2 border border-gray-900">
                                                         <button
                                                             className="text-red-600 hover:text-red-800 text-sm"
-                                                            onClick={() => handleDelete(section.nac_id)}
+                                                            onClick={() => handleDelete(section.rc_id)}
                                                         >
                                                             <FontAwesomeIcon icon={faTrash} />
                                                         </button>
@@ -867,7 +600,7 @@ function ReadmissionAdmin() {
                                 <div className="modal-content">
                                     <div className="flex justify-between p-3">
                                         <h5 className="modal-title">
-                                            Create Application Form Management
+                                            Create Re-Admission Form Management
                                         </h5>
                                         <RxCross1
                                             className="float-end relative top-2 right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
@@ -908,66 +641,6 @@ function ReadmissionAdmin() {
                                                 {classError && (
                                                     <div className="mt-1 text-red-500 text-xs">
                                                         {classError}
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </div>
-
-                                        {/* Account Name */}
-                                        <div className="relative mb-3 flex items-center mx-4">
-                                            <label htmlFor="accoutSelect" className="w-1/2 mt-2">
-                                                Account <span className="text-red-500">*</span>
-                                            </label>
-                                            <div className="w-full md:w-[60%]">
-                                                <Select
-                                                    id="accountSelect"
-                                                    options={accountOptions}
-                                                    value={account}
-                                                    onChange={handleAccountSelect}
-                                                    placeholder="Select"
-                                                    isSearchable
-                                                    isClearable
-                                                    className="text-sm"
-                                                    menuPortalTarget={document.body}
-                                                    menuPosition="fixed"
-                                                    styles={{
-                                                        menuPortal: (base) => ({ ...base, zIndex: 9999 }),
-                                                    }}
-                                                />
-
-                                                {accountError && (
-                                                    <div className="mt-1 text-red-500 text-xs">
-                                                        {accountError}
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </div>
-
-                                        {/* Account Type */}
-                                        <div className="relative mb-3 flex items-center mx-4">
-                                            <label htmlFor="accountTypeSelect" className="w-1/2 mt-2">
-                                                Type
-                                            </label>
-                                            <div className="w-full md:w-[60%]">
-                                                <Select
-                                                    id="accountTypeSelect"
-                                                    options={accountTypeOptions}
-                                                    value={accountType}
-                                                    onChange={handleAccountTypeSelect}
-                                                    placeholder="Select"
-                                                    isSearchable
-                                                    isClearable
-                                                    className="text-sm"
-                                                    menuPortalTarget={document.body}
-                                                    menuPosition="fixed"
-                                                    styles={{
-                                                        menuPortal: (base) => ({ ...base, zIndex: 9999 }),
-                                                    }}
-                                                />
-
-                                                {accountTypeError && (
-                                                    <div className="mt-1 text-red-500 text-xs">
-                                                        {accountTypeError}
                                                     </div>
                                                 )}
                                             </div>
@@ -1026,87 +699,6 @@ function ReadmissionAdmin() {
                                             </div>
                                         </div>
 
-                                        <div className="relative mb-3 flex items-center mx-4">
-                                            <label htmlFor="agestartDate" className="w-1/2 mt-2">
-                                                Age Start Date
-                                            </label>
-
-                                            <div className="w-full md:w-[60%]">
-                                                <input
-                                                    type="date"
-                                                    id="agestartDate"
-                                                    value={ageStartDate}
-                                                    //   onChange={(e) => setStartDate(e.target.value)}
-                                                    onChange={(e) => {
-                                                        setAgeStartDate(e.target.value);
-                                                        setAgeStartDateError("");
-                                                    }}
-                                                    className="w-full border rounded px-3 py-2 text-sm"
-                                                />
-
-                                                {ageStartDateError && (
-                                                    <div className="mt-1 text-red-500 text-xs">
-                                                        {ageStartDateError}
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </div>
-
-                                        <div className="relative mb-3 flex items-center mx-4">
-                                            <label htmlFor="ageendDate" className="w-1/2 mt-2">
-                                                Age End Date
-                                            </label>
-
-                                            <div className="w-full md:w-[60%]">
-                                                <input
-                                                    type="date"
-                                                    id="ageendDate"
-                                                    value={ageEndDate}
-                                                    //   onChange={(e) => setEndDate(e.target.value)}
-                                                    onChange={(e) => {
-                                                        setAgeEndDate(e.target.value);
-                                                        setAgeEndDateError("");
-                                                    }}
-                                                    min={ageStartDate}
-                                                    className="w-full border rounded px-3 py-2 text-sm"
-                                                />
-
-                                                {ageEndDateError && (
-                                                    <div className="mt-1 text-red-500 text-xs">
-                                                        {ageEndDateError}
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </div>
-
-                                        {/* Form Fee */}
-                                        <div className="relative mb-3 flex items-center mx-4">
-                                            <label htmlFor="formFee" className="w-1/2 mt-2">
-                                                Form Fee <span className="text-red-500">*</span>
-                                            </label>
-
-                                            <div className="w-full md:w-[60%]">
-                                                <input
-                                                    type="text"
-                                                    id="formFee"
-                                                    value={formFee}
-                                                    //   onChange={(e) => setFormFee(e.target.value)}
-                                                    onChange={(e) => {
-                                                        setFormFee(e.target.value);
-                                                        setFormFeeError(""); // ✅ clear error
-                                                    }}
-                                                    className="w-full border rounded px-3 py-2 text-sm"
-                                                    placeholder="Enter amount"
-                                                    maxLength={4}
-                                                />
-
-                                                {formFeeError && (
-                                                    <div className="mt-1 text-red-500 text-xs">
-                                                        {formFeeError}
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </div>
 
                                         {/* Publish */}
                                         <div className="relative mb-4 mx-4 flex items-center">
@@ -1153,7 +745,7 @@ function ReadmissionAdmin() {
                             <div className="modal-content">
                                 <div className="flex justify-between p-3">
                                     <h5 className="modal-title">
-                                        Edit Application Form Management
+                                        Edit Re-Admission Form Management
                                     </h5>
                                     <RxCross1
                                         className="float-end relative  mt-2 right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
@@ -1192,65 +784,7 @@ function ReadmissionAdmin() {
                                         </div>
                                     </div>
 
-                                    {/* Account Name */}
-                                    <div className="relative mb-3 flex items-center mx-4">
-                                        <label htmlFor="accoutSelect" className="w-1/2 mt-2">
-                                            Account <span className="text-red-500">*</span>
-                                        </label>
-                                        <div className="w-full md:w-[60%]">
-                                            <Select
-                                                id="accountSelect"
-                                                options={accountOptions}
-                                                value={account}
-                                                onChange={handleAccountSelect}
-                                                placeholder="Select"
-                                                isSearchable
-                                                isClearable
-                                                className="text-sm"
-                                                menuPortalTarget={document.body}
-                                                menuPosition="fixed"
-                                                styles={{
-                                                    menuPortal: (base) => ({ ...base, zIndex: 9999 }),
-                                                }}
-                                            />
 
-                                            {accountError && (
-                                                <div className="mt-1 text-red-500 text-xs">
-                                                    {accountError}
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-
-                                    {/* Account Type */}
-                                    <div className="relative mb-3 flex items-center mx-4">
-                                        <label htmlFor="accountTypeSelect" className="w-1/2 mt-2">
-                                            Type
-                                        </label>
-                                        <div className="w-full md:w-[60%]">
-                                            <Select
-                                                id="accountTypeSelect"
-                                                options={accountTypeOptions}
-                                                value={accountType}
-                                                onChange={handleAccountTypeSelect}
-                                                placeholder="Select"
-                                                isSearchable
-                                                isClearable
-                                                className="text-sm"
-                                                menuPortalTarget={document.body}
-                                                menuPosition="fixed"
-                                                styles={{
-                                                    menuPortal: (base) => ({ ...base, zIndex: 9999 }),
-                                                }}
-                                            />
-
-                                            {accountTypeError && (
-                                                <div className="mt-1 text-red-500 text-xs">
-                                                    {accountTypeError}
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
 
                                     <div className="relative mb-3 flex items-center mx-4">
                                         <label htmlFor="startDate" className="w-1/2 mt-2">
@@ -1300,88 +834,6 @@ function ReadmissionAdmin() {
                                             {endDateError && (
                                                 <div className="mt-1 text-red-500 text-xs">
                                                     {endDateError}
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-
-                                    <div className="relative mb-3 flex items-center mx-4">
-                                        <label htmlFor="agestartDate" className="w-1/2 mt-2">
-                                            Age Start Date
-                                        </label>
-
-                                        <div className="w-full md:w-[60%]">
-                                            <input
-                                                type="date"
-                                                id="agestartDate"
-                                                value={ageStartDate}
-                                                //   onChange={(e) => setStartDate(e.target.value)}
-                                                onChange={(e) => {
-                                                    setAgeStartDate(e.target.value);
-                                                    setAgeStartDateError("");
-                                                }}
-                                                className="w-full border rounded px-3 py-2 text-sm"
-                                            />
-
-                                            {ageStartDateError && (
-                                                <div className="mt-1 text-red-500 text-xs">
-                                                    {ageStartDateError}
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-
-                                    <div className="relative mb-3 flex items-center mx-4">
-                                        <label htmlFor="ageendDate" className="w-1/2 mt-2">
-                                            Age End Date
-                                        </label>
-
-                                        <div className="w-full md:w-[60%]">
-                                            <input
-                                                type="date"
-                                                id="ageendDate"
-                                                value={ageEndDate}
-                                                //   onChange={(e) => setEndDate(e.target.value)}
-                                                onChange={(e) => {
-                                                    setAgeEndDate(e.target.value);
-                                                    setAgeEndDateError("");
-                                                }}
-                                                min={ageStartDate}
-                                                className="w-full border rounded px-3 py-2 text-sm"
-                                            />
-
-                                            {ageEndDateError && (
-                                                <div className="mt-1 text-red-500 text-xs">
-                                                    {ageEndDateError}
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-
-                                    {/* Form Fee */}
-                                    <div className="relative mb-3 flex items-center mx-4">
-                                        <label htmlFor="formFee" className="w-1/2 mt-2">
-                                            Form Fee <span className="text-red-500">*</span>
-                                        </label>
-
-                                        <div className="w-full md:w-[60%]">
-                                            <input
-                                                type="text"
-                                                id="formFee"
-                                                value={formFee}
-                                                //   onChange={(e) => setFormFee(e.target.value)}
-                                                onChange={(e) => {
-                                                    setFormFee(e.target.value);
-                                                    setFormFeeError(""); // ✅ clear error
-                                                }}
-                                                className="w-full border rounded px-3 py-2 text-sm"
-                                                placeholder="Enter amount"
-                                                maxLength={4}
-                                            />
-
-                                            {formFeeError && (
-                                                <div className="mt-1 text-red-500 text-xs">
-                                                    {formFeeError}
                                                 </div>
                                             )}
                                         </div>
@@ -1474,7 +926,7 @@ function ReadmissionAdmin() {
                             <div className="modal-content">
                                 <div className="flex justify-between p-3">
                                     <h5 className="modal-title">
-                                        View Application Form Management
+                                        View Re-Admission Form Management
                                     </h5>
                                     <RxCross1
                                         className="float-end relative  mt-2 right-2 text-xl text-red-600 hover:cursor-pointer hover:bg-red-100"
@@ -1506,35 +958,9 @@ function ReadmissionAdmin() {
                                         </div>
                                     </div>
 
-                                    {/* Account */}
-                                    <div className="relative mb-3 flex items-center mx-4">
-                                        <label className="w-1/2 mt-2">Account</label>
 
-                                        <div className="w-full md:w-[60%]">
-                                            <input
-                                                type="text"
-                                                value={account?.label || ""}
-                                                readOnly
-                                                disabled
-                                                className="w-full bg-gray-100 border border-gray-300 rounded px-3 py-2 text-sm text-gray-700 cursor-not-allowed"
-                                            />
-                                        </div>
-                                    </div>
 
-                                    {/* Account */}
-                                    <div className="relative mb-3 flex items-center mx-4">
-                                        <label className="w-1/2 mt-2">Type</label>
 
-                                        <div className="w-full md:w-[60%]">
-                                            <input
-                                                type="text"
-                                                value={accountType || ""}
-                                                readOnly
-                                                disabled
-                                                className="w-full bg-gray-100 border border-gray-300 rounded px-3 py-2 text-sm text-gray-700 cursor-not-allowed"
-                                            />
-                                        </div>
-                                    </div>
 
                                     <div className="relative mb-3 flex items-center mx-4">
                                         <label htmlFor="startDate" className="w-1/2 mt-2">
@@ -1568,22 +994,7 @@ function ReadmissionAdmin() {
                                         </div>
                                     </div>
 
-                                    {/* Form Fee */}
-                                    <div className="relative mb-3 flex items-center mx-4">
-                                        <label htmlFor="formFee" className="w-1/2 mt-2">
-                                            Form Fee
-                                        </label>
 
-                                        <div className="w-full md:w-[60%]">
-                                            <input
-                                                type="text"
-                                                value={formFee || ""}
-                                                readOnly
-                                                disabled
-                                                className="w-full bg-gray-100 border border-gray-300 rounded px-3 py-2 text-sm text-gray-700 cursor-not-allowed"
-                                            />
-                                        </div>
-                                    </div>
 
                                     {/* Publish */}
                                     <div className="relative mb-3 flex items-center mx-4">
@@ -1613,4 +1024,4 @@ function ReadmissionAdmin() {
     );
 }
 
-export default ReadmissionAdmin;
+export default ReAdmission;

@@ -212,7 +212,7 @@ const MonthlyAttendenceReport = () => {
         value: month.value,
         label: month.label,
       })),
-    []
+    [],
   );
 
   const handleMonthSelect = (selectedOption) => {
@@ -253,7 +253,7 @@ const MonthlyAttendenceReport = () => {
         {
           headers: { Authorization: `Bearer ${token}` },
           params,
-        }
+        },
       );
       if (
         !response?.data?.data?.students ||
@@ -268,7 +268,7 @@ const MonthlyAttendenceReport = () => {
     } catch (error) {
       console.error("Error fetching Monthly Attendence Report:", error);
       toast.error(
-        "Error fetching Monthly Attendence Report. Please try again."
+        "Error fetching Monthly Attendence Report. Please try again.",
       );
     } finally {
       setIsSubmitting(false); // Re-enable the button after the operation
@@ -319,12 +319,12 @@ const MonthlyAttendenceReport = () => {
                    }
                   </td>
                   <td>${"'"}${subject?.present_count || " "} ${"/"} ${
-                  subject?.working_days || " "
-                }${"'"}</td>
+                    subject?.working_days || " "
+                  }${"'"}</td>
                   <td>${"'"}${subject?.total_attendance || " "} ${"/"} ${
-                  subject?.total_attendance_till_a_month || " "
-                }${"'"}</td>
-                </tr>`
+                    subject?.total_attendance_till_a_month || " "
+                  }${"'"}</td>
+                </tr>`,
               )
               .join("")}
              <tr class="border border-gray-300 font-semibold">
@@ -333,13 +333,13 @@ const MonthlyAttendenceReport = () => {
                 </td>
                 <td colspan="1" class="text-center">
                 ${"'"}${displayedSections?.total_present_count || " "} ${"/"} ${
-      displayedSections?.total_working_days || " "
-    }${"'"}
+                  displayedSections?.total_working_days || " "
+                }${"'"}
                 </td>
                 <td colspan="1" class="text-center">
                 ${"'"}${displayedSections?.total_attendance || " "} ${"/"} ${
-      displayedSections?.grand_total_working_days || " "
-    }${"'"}
+                  displayedSections?.grand_total_working_days || " "
+                }${"'"}
                 </td>
               </tr>
           </tbody>
@@ -471,7 +471,7 @@ const MonthlyAttendenceReport = () => {
         index + 1,
         student?.roll_no,
         `${capitalize(student?.first_name || " ")} ${capitalize(
-          student?.mid_name || " "
+          student?.mid_name || " ",
         )} ${capitalize(student?.last_name || " ")}`,
         `${"'"} ${student?.present_count || " "} ${"/"} ${
           student?.working_days || " "
@@ -506,7 +506,7 @@ const MonthlyAttendenceReport = () => {
     XLSX.utils.book_append_sheet(workbook, worksheet, "Admission Form Data");
 
     // Generate and download the Excel file
-    const fileName = ` Monthly_Attendance_Report_${
+    const fileName = `Monthly_Attendance_Report_${
       selectedClass?.label || " "
     } for ${selectedMonth || " "}.xlsx`;
     XLSX.writeFile(workbook, fileName);
@@ -897,7 +897,7 @@ const MonthlyAttendenceReport = () => {
                                           .map(
                                             (word) =>
                                               word.charAt(0).toUpperCase() +
-                                              word.slice(1).toLowerCase()
+                                              word.slice(1).toLowerCase(),
                                           ) // Capitalizes each word properly
                                           .join(" ")}
                                       </td>
@@ -921,7 +921,7 @@ const MonthlyAttendenceReport = () => {
                                         {"'"}
                                       </td>
                                     </tr>
-                                  )
+                                  ),
                                 )}
 
                                 <tr className="border border-gray-300 font-semibold">

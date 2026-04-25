@@ -50,11 +50,11 @@ const LessonPlanStatusReport = () => {
       setLoadingExams(true);
       const token = localStorage.getItem("authToken");
 
-      const response = await axios.get(`${API_URL}/api/get_allstaff`, {
+      const response = await axios.get(`${API_URL}/api/staff_list`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       console.log("Class", response);
-      setStudentNameWithClassId(response?.data?.data || []);
+      setStudentNameWithClassId(response?.data || []);
     } catch (error) {
       toast.error("Error fetching Classes");
       console.error("Error fetching Classes:", error);
@@ -100,7 +100,7 @@ const LessonPlanStatusReport = () => {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       console.log("Teacher Timetable:", response?.data);
@@ -140,7 +140,7 @@ const LessonPlanStatusReport = () => {
         value: cls?.teacher_id,
         label: `${cls.name}`,
       })),
-    [studentNameWithClassId]
+    [studentNameWithClassId],
   );
 
   const classOptions = useMemo(() => {
@@ -216,7 +216,7 @@ const LessonPlanStatusReport = () => {
             Authorization: `Bearer ${token}`,
           },
           params,
-        }
+        },
       );
 
       console.log("Lesson Plan Status Report Response:", response);
@@ -235,7 +235,7 @@ const LessonPlanStatusReport = () => {
       console.error("Error fetching Lesson Plan Status Report:", error);
       toast.error(
         error?.response?.data?.message ||
-          "Error fetching Lesson Plan Status Report. Please try again."
+          "Error fetching Lesson Plan Status Report. Please try again.",
       );
     } finally {
       setIsSubmitting(false);
@@ -288,11 +288,11 @@ const LessonPlanStatusReport = () => {
                   <td class="px-2 text-center py-2 border border-black">
                   ${
                     statusOptions.find(
-                      (option) => option.value === subject?.status
+                      (option) => option.value === subject?.status,
                     )?.label
                   }
                   </td>
-              </tr>`
+              </tr>`,
             )
             .join("")}
         </tbody>
@@ -420,7 +420,7 @@ const LessonPlanStatusReport = () => {
     XLSX.utils.book_append_sheet(
       workbook,
       worksheet,
-      "Lesson Plan Status Report"
+      "Lesson Plan Status Report",
     );
 
     // Generate file name and trigger download
@@ -819,7 +819,7 @@ const LessonPlanStatusReport = () => {
                                     {
                                       statusOptions.find(
                                         (option) =>
-                                          option.value === student?.status
+                                          option.value === student?.status,
                                       )?.label
                                     }
                                   </td>

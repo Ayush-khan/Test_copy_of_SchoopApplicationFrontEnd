@@ -555,6 +555,16 @@ const EditLessonPlan = () => {
         return;
       }
 
+      const hasInvalidStartDate = rows.some(
+        (row) => !row.startDate || row.startDate.trim() === "",
+      );
+
+      if (hasInvalidStartDate) {
+        toast.error("Start date is mandatory for all periods.");
+        setIsSubmitting(false);
+        return;
+      }
+
       // Daily
 
       rows.forEach((row, rowIndex) => {
