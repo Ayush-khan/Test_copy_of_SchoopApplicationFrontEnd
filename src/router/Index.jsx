@@ -335,6 +335,12 @@ import BulkCaretackerUpload from "../componants/CareTacker/BulkCaretackerUpload.
 import House from "../componants/MastersModule/House/House.jsx";
 import SpecialUserAllotment from "../componants/AdmissionAdminModule/SpecialUserAllotment/SpecialUserAllotment.jsx";
 
+import HelathActivityRecordUpload from "../TeacherLoginModules/HealthActivityRecordUpload.jsx/HelathActivityRecordUpload.jsx";
+import EditHeathActivityRecordUpload from "../TeacherLoginModules/HealthActivityRecordUpload.jsx/EditHeathActivityRecordUpload.jsx";
+import PublishHealthActivityRecord from "../TeacherLoginModules/HealthActivityRecordUpload.jsx/PublishHealthActivityRecord.jsx";
+import HealthActivityParameter from "../TeacherLoginModules/HealthActivityRecordUpload.jsx/HealthActivityParameter.jsx";
+import HealthActivityGroup from "../TeacherLoginModules/HealthActivityRecordUpload.jsx/HealthActivityGroup.jsx";
+
 function Index() {
   return (
     <Routes>
@@ -1807,6 +1813,29 @@ function Index() {
         <Route
           path="/specialUserAdmissionAllotment"
           element={<PrivateRoute element={<SpecialUserAllotment />} />}
+        />
+        {/* Health and Activity Record */}
+        <Route
+          path="/healthActivityRecordUpload"
+          element={<PrivateRoute element={<HelathActivityRecordUpload />} />}
+        />
+        <Route
+          path="/editHealthActivityRecord/:id"
+          element={<PrivateRoute element={<EditHeathActivityRecordUpload />} />}
+        />
+        <Route
+          path="/publishHealthActivityRecord"
+          element={<PrivateRoute element={<PublishHealthActivityRecord />} />}
+        />
+        {/* Master Publish Health and Activity */}
+        <Route
+          path="/healthActivityParameter"
+          element={<PrivateRoute element={<HealthActivityParameter />} />}
+        />
+        {/* Health activity group */}
+        <Route
+          path="/healthActivityGroup"
+          element={<PrivateRoute element={<HealthActivityGroup />} />}
         />
       </Route>
 
