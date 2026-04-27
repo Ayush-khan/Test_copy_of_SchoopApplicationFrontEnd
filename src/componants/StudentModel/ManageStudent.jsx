@@ -81,6 +81,7 @@ function ManageSubjectList() {
   const [academicYr, setAcademicYr] = useState("");
 
   const location = useLocation();
+  const class_id = location.state?.class_id || null;
   const section_id = location.state?.section_id || null;
   // console.log("manage section id", section_id);
 
@@ -96,9 +97,20 @@ function ManageSubjectList() {
     fetchClassTeacherData(roleIdValue);
   }, [roleIdValue]);
 
+  const getClassAndSectionIds = (selection = null) => {
+    if (!selection) {
+      return { classId: null, sectionId: null };
+    }
+
+    return {
+      classId: selection.class_id || selection.classId || null,
+      sectionId: selection.section_id || selection.sectionId || null,
+    };
+  };
+
   useEffect(() => {
-    fetchStudentNameWithClassId(section_id);
-  }, [section_id]);
+    fetchStudentNameWithClassId(class_id, section_id);
+  }, [class_id, section_id]);
 
   const classOptions = useMemo(() => {
     return classes.map((cls) => {
@@ -111,8 +123,8 @@ function ManageSubjectList() {
         };
       } else {
         return {
-          value: cls.section_id,
-          label: `${cls?.get_class?.name} ${cls.name} (${cls.students_count})`,
+          value: `${cls.class_id} ${cls.section_id}`,
+          label: `${cls?.classname} ${cls?.sectionname} (${cls?.students_count})`,
           class_id: cls.class_id,
           section_id: cls.section_id,
         };
@@ -123,20 +135,22 @@ function ManageSubjectList() {
   useEffect(() => {
     if (location.state?.section_id) {
       const matchingOption = classOptions.find(
-        (opt) => opt.value === location.state.section_id,
+        (opt) =>
+          String(opt.section_id) === String(location.state.section_id) &&
+          (!class_id || String(opt.class_id) === String(class_id)),
       );
 
       if (matchingOption) {
         handleClassSelect(matchingOption); // Simulates user selecting from dropdown
 
         // Trigger the search only for programmatic selection
-        handleSearch(matchingOption.value);
+        handleSearch(matchingOption);
       }
 
       // Clear location state to avoid re-triggering on reload
       window.history.replaceState({}, document.title);
     }
-  }, [location.state, classOptions]);
+  }, [location.state, classOptions, class_id]);
 
   const studentOptions = useMemo(
     () =>
@@ -226,8 +240,11 @@ function ManageSubjectList() {
   //   }
   // };
 
-  const fetchStudentNameWithClassId = async (section_id = null) => {
-    if (roleId === "T" && !section_id) {
+  const fetchStudentNameWithClassId = async (
+    selectedClassId = null,
+    selectedSectionId = null,
+  ) => {
+    if (roleId === "T" && !selectedClassId && !selectedSectionId) {
       setStudentNameWithClassId([]); // clear dropdown
       return;
     }
@@ -236,10 +253,14 @@ function ManageSubjectList() {
     try {
       const token = localStorage.getItem("authToken");
       const response = await axios.get(
-        `${API_URL}/api/getStudentListBySectionData`,
+        // `${API_URL}/api/getStudentListBySectionData`,
+        `${API_URL}/api/getStudentListByClassSectionData`,
         {
           headers: { Authorization: `Bearer ${token}` },
-          params: section_id ? { section_id } : {},
+          params: {
+            ...(selectedClassId ? { class_id: selectedClassId } : {}),
+            ...(selectedSectionId ? { section_id: selectedSectionId } : {}),
+          },
         },
       );
       setStudentNameWithClassId(response?.data?.data || []);
@@ -257,10 +278,10 @@ function ManageSubjectList() {
     setSelectedStudent(null);
     setSelectedStudentId(null);
 
-    const sectionId = selectedOption ? selectedOption.value : null;
+    const { classId, sectionId } = getClassAndSectionIds(selectedOption);
     setclassIdForManage(sectionId);
     setSectionIdForStudentList(sectionId);
-    fetchStudentNameWithClassId(sectionId);
+    fetchStudentNameWithClassId(classId, sectionId);
   };
 
   // Correct working before add bunch downloading
@@ -308,13 +329,13 @@ function ManageSubjectList() {
       const classApiUrl =
         roleId === "T"
           ? `${API_URL}/api/get_teacherclasseswithclassteacher?teacher_id=${roleIdValue}`
-          : `${API_URL}/api/getallClassWithStudentCount`;
+          : `${API_URL}/api/getallClassWithDummyStudentCount`;
 
       const [classResponse, studentResponse] = await Promise.all([
         axios.get(classApiUrl, {
           headers: { Authorization: `Bearer ${token}` },
         }),
-        axios.get(`${API_URL}/api/getStudentListBySectionData`, {
+        axios.get(`${API_URL}/api/getStudentListByClassSectionData`, {
           headers: { Authorization: `Bearer ${token}` },
         }),
       ]);
@@ -340,13 +361,10 @@ function ManageSubjectList() {
     setSubjects([]);
     setNameError("");
 
-    const selectedclassid = selectedClass
-      ? selectedClass.class_id || selectedClass.id || selectedClass.value
-      : null;
-
-    const selectedsectionid = selectedClass
-      ? selectedClass.section_id || null
-      : null;
+    const {
+      classId: selectedclassid,
+      sectionId: selectedsectionid,
+    } = getClassAndSectionIds(selectedClass);
 
     setSelectedClassIdHPC(selectedclassid);
     setSelectedSectionIdHPC(selectedsectionid);
@@ -354,9 +372,17 @@ function ManageSubjectList() {
     console.log("Selected class_id:", selectedclassid);
     console.log("Selected section_id:", selectedsectionid);
 
+    const normalizedIncomingSelection =
+      incomingSectionId && typeof incomingSectionId === "object"
+        ? incomingSectionId
+        : null;
+    const incomingIds = getClassAndSectionIds(normalizedIncomingSelection);
+    const finalClassId =
+      selectedclassid || incomingIds.classId || class_id || null;
     const finalSectionId =
+      selectedsectionid ||
+      incomingIds.sectionId ||
       classIdForManage ||
-      incomingSectionId ||
       location?.state?.section_id ||
       null;
 
@@ -382,12 +408,8 @@ function ManageSubjectList() {
       const queryParams = {};
 
       if (selectedStudentId) queryParams.student_id = selectedStudentId;
-      if (finalSectionId) {
-        queryParams.section_id =
-          typeof finalSectionId === "object"
-            ? finalSectionId.id || finalSectionId.value || ""
-            : finalSectionId;
-      }
+      if (finalClassId) queryParams.class_id = finalClassId;
+      if (finalSectionId) queryParams.section_id = finalSectionId;
       if (grNumber) queryParams.reg_no = grNumber;
 
       const response = await axios.get(`${API_URL}/api/get_students`, {
@@ -416,11 +438,7 @@ function ManageSubjectList() {
       setPageCount(Math.ceil(studentList.length / pageSize));
 
       // HPC class check
-      const selectedClassId =
-        (typeof finalSectionId === "object"
-          ? finalSectionId.class_id
-          : selectedClass?.class_id) || null;
-      setIsHpcClass(selectedClassId && hpcClassIds.includes(selectedClassId));
+      setIsHpcClass(finalClassId && hpcClassIds.includes(finalClassId));
 
       setHasSearched(true);
     } catch (error) {
@@ -1232,8 +1250,7 @@ function ManageSubjectList() {
     } catch (error) {
       if (error.response && error.response.data) {
         toast.error(
-          `Error in Downloading Report Card: ${
-            error.response.data.error || error.message
+          `Error in Downloading Report Card: ${error.response.data.error || error.message
           }`,
         );
       } else {
@@ -1250,7 +1267,7 @@ function ManageSubjectList() {
     <>
       {/* <ToastContainer /> */}
       {/* <div className="md:mx-auto md:w-3/4 p-4 bg-white mt-4 "> */}
-      <div className="md:mx-auto md:w-[95%] p-4 bg-white mt-4 ">
+      <div className="md:mx-auto md:w-[95%] px-3 py-2 bg-white mt-4 rounded-md ">
         <div className=" card-header  flex justify-between items-center  ">
           <h3 className="text-gray-700 mt-1 text-[1.2em] lg:text-xl text-nowrap">
             Manage Student
@@ -1314,7 +1331,7 @@ function ManageSubjectList() {
                     </label>
                     <div className="w-[60%] md:w-[85%] ">
                       {roleId !== "T" ||
-                      (roleId === "T" && classIdForManage) ? (
+                        (roleId === "T" && classIdForManage) ? (
                         <Select
                           value={selectedStudent}
                           onChange={handleStudentSelect}
@@ -1505,18 +1522,18 @@ function ManageSubjectList() {
                             {(roleId === "A" ||
                               roleId === "M" ||
                               roleId === "U") && (
-                              <>
-                                <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                                  Edit
-                                </th>
-                                <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                                  Delete
-                                </th>
-                                <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                                  Inactive
-                                </th>
-                              </>
-                            )}
+                                <>
+                                  <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                                    Edit
+                                  </th>
+                                  <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                                    Delete
+                                  </th>
+                                  <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                                    Inactive
+                                  </th>
+                                </>
+                              )}
 
                             <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
                               View
@@ -1579,10 +1596,10 @@ function ManageSubjectList() {
                             {(roleId === "A" ||
                               roleId === "M" ||
                               roleId === "U") && (
-                              <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
-                                Reset Password
-                              </th>
-                            )}
+                                <th className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm font-semibold text-gray-900 tracking-wider">
+                                  Reset Password
+                                </th>
+                              )}
                           </tr>
                         </thead>
                         <tbody>
@@ -1603,7 +1620,7 @@ function ManageSubjectList() {
                                     src={
                                       subject?.image_name
                                         ? // ? `https://sms.evolvu.in/storage/app/public/student_images/${subject?.image_name}`
-                                          `${subject?.image_name}`
+                                        `${subject?.image_name}`
                                         : "https://via.placeholder.com/50"
                                     }
                                     // alt={subject?.name}
@@ -1611,17 +1628,15 @@ function ManageSubjectList() {
                                   />
                                 </td>
                                 <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                  {`${subject?.first_name ?? ""} ${
-                                    subject?.mid_name
-                                      ? subject.mid_name + " "
-                                      : ""
-                                  }${subject?.last_name ?? ""}`.trim()}
+                                  {`${subject?.first_name ?? ""} ${subject?.mid_name
+                                    ? subject.mid_name + " "
+                                    : ""
+                                    }${subject?.last_name ?? ""}`.trim()}
                                 </td>
 
                                 <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm text-nowrap">
-                                  {`${subject?.get_class?.name}${" "}${
-                                    subject?.get_division?.name
-                                  }`}
+                                  {`${subject?.get_class?.name}${" "}${subject?.get_division?.name
+                                    }`}
                                 </td>
                                 {/* <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                 {subject?.get_division?.name}
@@ -1632,57 +1647,56 @@ function ManageSubjectList() {
                                 {(roleId === "A" ||
                                   roleId === "M" ||
                                   roleId === "U") && (
-                                  <>
-                                    <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                      <button
-                                        onClick={() => handleEdit(subject)}
-                                        className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
-                                      >
-                                        <FontAwesomeIcon icon={faEdit} />
-                                      </button>
-                                    </td>
-                                    {subject.isPromoted !== "Y" ? (
+                                    <>
                                       <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                         <button
-                                          onClick={() => handleDelete(subject)}
-                                          className="text-red-600 hover:text-red-800 hover:bg-transparent "
+                                          onClick={() => handleEdit(subject)}
+                                          className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
                                         >
-                                          <FontAwesomeIcon icon={faTrash} />
+                                          <FontAwesomeIcon icon={faEdit} />
                                         </button>
                                       </td>
-                                    ) : (
-                                      <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                      {subject.isPromoted !== "Y" ? (
+                                        <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                          <button
+                                            onClick={() => handleDelete(subject)}
+                                            className="text-red-600 hover:text-red-800 hover:bg-transparent "
+                                          >
+                                            <FontAwesomeIcon icon={faTrash} />
+                                          </button>
+                                        </td>
+                                      ) : (
+                                        <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                          <button
+                                            // onClick={() => ()}
+                                            className="text-green-500-600 hover:text-green-800 hover:bg-transparent "
+                                          >
+                                            {/* <FontAwesomeIcon icon={faTrash} /> */}
+                                          </button>
+                                        </td>
+                                      )}
+                                      <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm hover:bg-none">
                                         <button
-                                          // onClick={() => ()}
-                                          className="text-green-500-600 hover:text-green-800 hover:bg-transparent "
-                                        >
-                                          {/* <FontAwesomeIcon icon={faTrash} /> */}
-                                        </button>
-                                      </td>
-                                    )}
-                                    <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm hover:bg-none">
-                                      <button
-                                        onClick={() =>
-                                          handleActiveAndInactive(subject)
-                                        }
-                                        className={`  font-bold hover:bg-none ${
-                                          subject.isActive === "Y"
+                                          onClick={() =>
+                                            handleActiveAndInactive(subject)
+                                          }
+                                          className={`  font-bold hover:bg-none ${subject.isActive === "Y"
                                             ? "text-green-600 hover:text-green-800 hover:bg-transparent"
                                             : "text-red-700 hover:text-red-900  hover:bg-transparent"
-                                        }`}
-                                      >
-                                        {subject.isActive === "Y" ? (
-                                          <FaCheck className="text-xl" />
-                                        ) : (
-                                          <FontAwesomeIcon
-                                            icon={faXmark}
-                                            className="text-xl"
-                                          />
-                                        )}
-                                      </button>
-                                    </td>
-                                  </>
-                                )}
+                                            }`}
+                                        >
+                                          {subject.isActive === "Y" ? (
+                                            <FaCheck className="text-xl" />
+                                          ) : (
+                                            <FontAwesomeIcon
+                                              icon={faXmark}
+                                              className="text-xl"
+                                            />
+                                          )}
+                                        </button>
+                                      </td>
+                                    </>
+                                  )}
 
                                 <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
                                   <button
@@ -1727,7 +1741,7 @@ function ManageSubjectList() {
                                         cls.is_class_teacher === 1 &&
                                         cls.class_id === selectedClassIdHPC &&
                                         cls.section_id ===
-                                          selectedSectionIdHPC &&
+                                        selectedSectionIdHPC &&
                                         hpcClassIds.includes(cls.class_id),
                                     )) ||
                                     (["A", "M", "U"].includes(roleId) &&
@@ -1779,17 +1793,17 @@ function ManageSubjectList() {
                                 {(roleId === "A" ||
                                   roleId === "M" ||
                                   roleId === "U") && (
-                                  <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
-                                    <button
-                                      onClick={() =>
-                                        handleResetPassword(subject)
-                                      }
-                                      className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
-                                    >
-                                      <MdLockReset className="font-bold text-xl" />
-                                    </button>
-                                  </td>
-                                )}
+                                    <td className="px-2 text-center lg:px-3 py-2 border border-gray-950 text-sm">
+                                      <button
+                                        onClick={() =>
+                                          handleResetPassword(subject)
+                                        }
+                                        className="text-blue-600 hover:text-blue-800 hover:bg-transparent "
+                                      >
+                                        <MdLockReset className="font-bold text-xl" />
+                                      </button>
+                                    </td>
+                                  )}
                               </tr>
                             ))
                           ) : (
@@ -1989,25 +2003,25 @@ function ManageSubjectList() {
                   {currentStudentDataForActivate?.studentToActiveOrDeactive
                     ?.isActive === "Y"
                     ? `Are you sure you want to deactivate this student ${[
-                        currentStudentDataForActivate?.studentToActiveOrDeactive
-                          ?.first_name,
-                        currentStudentDataForActivate?.studentToActiveOrDeactive
-                          ?.mid_name,
-                        currentStudentDataForActivate?.studentToActiveOrDeactive
-                          ?.last_name,
-                      ]
-                        .filter(Boolean) // removes undefined/null/empty strings
-                        .join(" ")}?`
+                      currentStudentDataForActivate?.studentToActiveOrDeactive
+                        ?.first_name,
+                      currentStudentDataForActivate?.studentToActiveOrDeactive
+                        ?.mid_name,
+                      currentStudentDataForActivate?.studentToActiveOrDeactive
+                        ?.last_name,
+                    ]
+                      .filter(Boolean) // removes undefined/null/empty strings
+                      .join(" ")}?`
                     : `Are you sure you want to activate this student ${[
-                        currentStudentDataForActivate?.studentToActiveOrDeactive
-                          ?.first_name,
-                        currentStudentDataForActivate?.studentToActiveOrDeactive
-                          ?.mid_name,
-                        currentStudentDataForActivate?.studentToActiveOrDeactive
-                          ?.last_name,
-                      ]
-                        .filter(Boolean) // removes undefined/null/empty strings
-                        .join(" ")}?`}
+                      currentStudentDataForActivate?.studentToActiveOrDeactive
+                        ?.first_name,
+                      currentStudentDataForActivate?.studentToActiveOrDeactive
+                        ?.mid_name,
+                      currentStudentDataForActivate?.studentToActiveOrDeactive
+                        ?.last_name,
+                    ]
+                      .filter(Boolean) // removes undefined/null/empty strings
+                      .join(" ")}?`}
                 </div>
 
                 <div className=" flex justify-end p-3">
@@ -2019,11 +2033,11 @@ function ManageSubjectList() {
                   >
                     {isSubmitting
                       ? currentStudentDataForActivate?.studentToActiveOrDeactive
-                          ?.isActive === "Y"
+                        ?.isActive === "Y"
                         ? "Deactivating..."
                         : "Activating..."
                       : currentStudentDataForActivate?.studentToActiveOrDeactive
-                            ?.isActive === "Y"
+                        ?.isActive === "Y"
                         ? "Deactivate"
                         : "Activate"}
                     {/* {isSubmitting ? "Activating..." : "Active"} */}

@@ -334,6 +334,7 @@ import BulkCaretackerUpload from "../componants/CareTacker/BulkCaretackerUpload.
 
 import House from "../componants/MastersModule/House/House.jsx";
 import SpecialUserAllotment from "../componants/AdmissionAdminModule/SpecialUserAllotment/SpecialUserAllotment.jsx";
+import ReAdmission from "../componants/ReadmissionAdminModule/ReAdmission.jsx";
 
 import HelathActivityRecordUpload from "../TeacherLoginModules/HealthActivityRecordUpload.jsx/HelathActivityRecordUpload.jsx";
 import EditHeathActivityRecordUpload from "../TeacherLoginModules/HealthActivityRecordUpload.jsx/EditHeathActivityRecordUpload.jsx";
@@ -1727,6 +1728,10 @@ function Index() {
         <Route
           path="/admissionManagement"
           element={<PrivateRoute element={<ApplicationFromManagement />} />}
+        />
+        <Route
+          path="/reAdmission"
+          element={<PrivateRoute element={<ReAdmission />} />}
         />
         <Route
           path="/dynamicMailer"

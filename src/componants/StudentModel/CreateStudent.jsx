@@ -94,7 +94,7 @@ function Form() {
     try {
       const token = localStorage.getItem("authToken");
       const response = await axios.get(
-        `${API_URL}/api/get_divisions/${selectedClassId}`,
+        `${API_URL}/api/get_divisionswithdummydivision/${selectedClassId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         },
@@ -316,7 +316,7 @@ function Form() {
         try {
           const token = localStorage.getItem("authToken");
           const response = await axios.get(
-            `${API_URL}/api/get_divisions/${selectedClass}`,
+            `${API_URL}/api/get_divisionswithdummydivision/${selectedClass}`,
             {
               headers: { Authorization: `Bearer ${token}` },
             },
@@ -1361,10 +1361,10 @@ function Form() {
   // Fetch class names when component loads
 
   return (
-    <div className=" w-[95%] mx-auto p-4">
+    <div className=" w-[95%] mx-auto px-4 py-2">
       <ToastContainer />
-      <div className="card p-3  rounded-md">
-        <div className="card-header mb-4 flex justify-between items-center">
+      <div className="card px-3 py-1 rounded-md">
+        <div className="card-header flex justify-between items-center">
           <h5 className="text-gray-700 mt-1 text-md lg:text-lg">
             Edit Student Information
           </h5>
@@ -1380,10 +1380,10 @@ function Form() {
           />
         </div>
         <div
-          className="relative w-full -top-6 h-1 mx-auto bg-red-700"
+          className="relative w-full  h-1 mx-auto bg-red-700"
           style={{ backgroundColor: "#C03078" }}
         ></div>
-        <p className=" md:absolute md:right-8 md:top-[5%] text-gray-500">
+        <p className=" md:absolute md:right-8 md:top-[4%] text-gray-500">
           <span className="text-red-500">*</span> indicates mandatory
           information
         </p>
@@ -1446,7 +1446,7 @@ function Form() {
                   value={formData.mid_name}
                   className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
                   onChange={handleChange}
-                  // onBlur={handleBlur}
+                // onBlur={handleBlur}
                 />
               </div>
               <div className="mt-2">
@@ -1464,7 +1464,7 @@ function Form() {
                   value={formData.last_name}
                   className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
                   onChange={handleChange}
-                  // onBlur={handleBlur}
+                // onBlur={handleBlur}
                 />
               </div>
               <div className="mt-2">
@@ -1481,7 +1481,7 @@ function Form() {
                   value={formData.dob}
                   className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
                   onChange={handleChange}
-                  // onBlur={handleBlur}
+                // onBlur={handleBlur}
                 />
                 {errors.dateOfBirth && (
                   <p className="text-[12px] text-red-500 mb-1">
@@ -1502,7 +1502,7 @@ function Form() {
                   value={formData.gender}
                   className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
                   onChange={handleChange}
-                  // onBlur={handleBlur}
+                // onBlur={handleBlur}
                 >
                   <option>Select</option>
                   <option value="M">Male</option>
@@ -1528,7 +1528,7 @@ function Form() {
                   value={formData.blood_group}
                   className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
                   onChange={handleChange}
-                  // onBlur={handleBlur}
+                // onBlur={handleBlur}
                 >
                   <option>Select</option>
                   <option value="AB+">AB+</option>
@@ -1554,7 +1554,7 @@ function Form() {
                   value={formData.religion}
                   className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
                   onChange={handleChange}
-                  // onBlur={handleBlur}
+                // onBlur={handleBlur}
                 >
                   <option>Select</option>
                   <option value="Hindu">Hindu</option>
@@ -1585,7 +1585,7 @@ function Form() {
                   value={formData.caste}
                   className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
                   onChange={handleChange}
-                  // onBlur={handleBlur}
+                // onBlur={handleBlur}
                 />
               </div>
               <div className="mt-2">
@@ -1601,7 +1601,7 @@ function Form() {
                   value={formData.category}
                   className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
                   onChange={handleChange}
-                  // onBlur={handleBlur}
+                // onBlur={handleBlur}
                 >
                   <option>Select</option>
                   <option value="General">General</option>
@@ -1634,7 +1634,7 @@ function Form() {
                   value={formData.birth_place}
                   className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
                   onChange={handleChange}
-                  // onBlur={handleBlur}
+                // onBlur={handleBlur}
                 />
               </div>
               <div className="mt-2">
@@ -1652,7 +1652,7 @@ function Form() {
                   value={formData.nationality}
                   className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
                   onChange={handleChange}
-                  // onBlur={handleBlur}
+                // onBlur={handleBlur}
                 />
                 {errors.nationality && (
                   <p className="text-[12px] text-red-500 mb-1">
@@ -1675,7 +1675,7 @@ function Form() {
                   value={formData.mother_tongue}
                   className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
                   onChange={handleChange}
-                  // onBlur={handleBlur}
+                // onBlur={handleBlur}
                 />
                 {errors.mother_tongue && (
                   <p className="text-[12px] text-red-500 mb-1">
@@ -1704,7 +1704,7 @@ function Form() {
                   value={formData.student_name}
                   className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
                   onChange={handleChange}
-                  // onBlur={handleBlur}
+                // onBlur={handleBlur}
                 />
                 {errors.student_name && (
                   <p className="text-[12px] text-red-500 mb-1">
@@ -1783,7 +1783,7 @@ function Form() {
                   value={formData.roll_no}
                   className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
                   onChange={handleChange}
-                  // onBlur={handleBlur}
+                // onBlur={handleBlur}
                 />
               </div>
               <div className="mt-2">
@@ -1801,7 +1801,7 @@ function Form() {
                   value={formData.reg_no}
                   className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
                   onChange={handleChange}
-                  // onBlur={handleBlur}
+                // onBlur={handleBlur}
                 />
                 {backendErrors.reg_no && (
                   <p className="text-[12px] text-red-500 mb-1">
@@ -1871,7 +1871,7 @@ function Form() {
                   value={formData.admission_class}
                   className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
                   onChange={handleChange}
-                  // onBlur={handleBlur}
+                // onBlur={handleBlur}
                 >
                   <option>Select</option>
                   <option value="Nursery">Nursery</option>
@@ -1910,7 +1910,7 @@ function Form() {
                   value={formData.admission_date}
                   className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
                   onChange={handleChange}
-                  // onBlur={handleBlur}
+                // onBlur={handleBlur}
                 />
                 {errors.admission_date && (
                   <p className="text-[12px] text-red-500 mb-1">
@@ -1933,7 +1933,7 @@ function Form() {
                   value={formData.stud_id_no}
                   className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
                   onChange={handleChange}
-                  // onBlur={handleBlur}
+                // onBlur={handleBlur}
                 />
                 {backendErrors.stud_id_no && (
                   <p className="text-[12px] text-red-500 mb-1">
@@ -1956,7 +1956,7 @@ function Form() {
                   value={formData.stu_aadhaar_no}
                   className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
                   onChange={handleChange}
-                  // onBlur={handleBlur}
+                // onBlur={handleBlur}
                 />
                 {backendErrors.stu_aadhaar_no && (
                   <p className="text-[12px] text-red-500 mb-1">
@@ -1984,7 +1984,7 @@ function Form() {
                   value={formData.udise_pen_no}
                   className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
                   onChange={handleChange}
-                  // onBlur={handleBlur}
+                // onBlur={handleBlur}
                 />
                 {backendErrors.udise_pen_no && (
                   <p className="text-[12px] text-red-500 mb-1">
@@ -2010,7 +2010,7 @@ function Form() {
                     const value = e.target.value.replace(/[^a-zA-Z0-9]/g, "");
                     handleChange({ target: { name: "apaar_id", value } });
                   }}
-                  // onBlur={handleBlur}
+                // onBlur={handleBlur}
                 />
               </div>
               {/* Address Information */}
@@ -2033,7 +2033,7 @@ function Form() {
                   value={formData.permant_add}
                   className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
                   onChange={handleChange}
-                  // onBlur={handleBlur}
+                // onBlur={handleBlur}
                 />
                 {errors.permant_add && (
                   <p className="text-[12px] text-red-500 mb-1">
@@ -2056,7 +2056,7 @@ function Form() {
                   value={formData.city}
                   className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
                   onChange={handleChange}
-                  // onBlur={handleBlur}
+                // onBlur={handleBlur}
                 />
                 {errors.city && (
                   <p className="text-[12px] text-red-500 mb-1">{errors.city}</p>
@@ -2077,7 +2077,7 @@ function Form() {
                   value={formData.state}
                   className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
                   onChange={handleChange}
-                  // onBlur={handleBlur}
+                // onBlur={handleBlur}
                 />
                 {errors.state && (
                   <p className="text-[12px] text-red-500 mb-1">
@@ -2100,7 +2100,7 @@ function Form() {
                   value={formData.pincode}
                   className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
                   onChange={handleChange}
-                  // onBlur={handleBlur}
+                // onBlur={handleBlur}
                 />
               </div>
               {/* </div> */}
@@ -2126,7 +2126,7 @@ function Form() {
                   value={formData.emergency_name}
                   className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
                   onChange={handleChange}
-                  // onBlur={handleBlur}
+                // onBlur={handleBlur}
                 />
               </div>
               {/* <div className="mt-2">
@@ -2277,7 +2277,7 @@ function Form() {
                   value={formData.transport_mode}
                   className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
                   onChange={handleChange}
-                  // onBlur={handleBlur}
+                // onBlur={handleBlur}
                 >
                   <option>Select</option>
                   <option value="School Bus">School Bus</option>
@@ -2293,7 +2293,7 @@ function Form() {
                   value={formData.vehicle_no}
                   className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
                   onChange={handleChange}
-                  // onBlur={handleBlur}
+                // onBlur={handleBlur}
                 />
               </div>
               {/* Health Information */}
@@ -2316,7 +2316,7 @@ function Form() {
                   value={formData.allergies}
                   className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
                   onChange={handleChange}
-                  // onBlur={handleBlur}
+                // onBlur={handleBlur}
                 />
               </div>
               <div className="mt-2">
@@ -2341,7 +2341,7 @@ function Form() {
                       handleChange(e);
                     }
                   }}
-                  // onBlur={handleBlur}
+                // onBlur={handleBlur}
                 />
               </div>
               <div className="mt-2">
@@ -2366,7 +2366,7 @@ function Form() {
                       handleChange(e);
                     }
                   }}
-                  // onBlur={handleBlur}
+                // onBlur={handleBlur}
                 />
               </div>
               <div className="  flex gap-4 pt-[7px]">
@@ -2385,7 +2385,7 @@ function Form() {
                       checked={formData.has_specs == "Y"}
                       value="Y"
                       onChange={handleChange}
-                      // onBlur={handleBlur}
+                    // onBlur={handleBlur}
                     />
                     <label htmlFor="yes" className="ml-1">
                       Yes
@@ -2399,7 +2399,7 @@ function Form() {
                       checked={formData.has_specs == "N"}
                       value="N"
                       onChange={handleChange}
-                      // onBlur={handleBlur}
+                    // onBlur={handleBlur}
                     />
                     <label htmlFor="no" className="ml-1">
                       No
@@ -2475,7 +2475,7 @@ function Form() {
                   value={formData.f_blood_group}
                   className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
                   onChange={handleChange}
-                  // onBlur={handleBlur}
+                // onBlur={handleBlur}
                 >
                   <option>Select</option>
                   <option value="AB+">AB+</option>
@@ -2573,7 +2573,7 @@ function Form() {
                     value={formData.f_mobile}
                     onChange={handleChange}
                     className="input-field block w-full border-1 border-gray-400 outline-none rounded-r-md py-1 px-3 bg-white shadow-inner"
-                    // required
+                  // required
                   />
                 </div>
                 {backendErrors.phone && (
@@ -2701,7 +2701,7 @@ function Form() {
                   value={formData.f_dob}
                   className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
                   onChange={handleChange}
-                  // onBlur={handleBlur}
+                // onBlur={handleBlur}
                 />
               </div>
               {/* Mother information */}
@@ -2761,7 +2761,7 @@ function Form() {
                   value={formData.m_blood_group}
                   className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
                   onChange={handleChange}
-                  // onBlur={handleBlur}
+                // onBlur={handleBlur}
                 >
                   <option>Select</option>
                   <option value="AB+">AB+</option>
@@ -2873,7 +2873,7 @@ function Form() {
                     value={formData.m_mobile}
                     onChange={handleChange}
                     className="input-field block w-full border-1 border-gray-400 outline-none rounded-r-md py-1 px-3 bg-white shadow-inner"
-                    // required
+                  // required
                   />
                 </div>
                 {backendErrors.phone && (
@@ -2989,7 +2989,7 @@ function Form() {
                   value={formData.m_dob}
                   className="input-field block w-full border-1 border-gray-400 rounded-md py-1 px-3 bg-white shadow-inner"
                   onChange={handleChange}
-                  // onBlur={handleBlur}
+                // onBlur={handleBlur}
                 />
               </div>
               {/*  */}
